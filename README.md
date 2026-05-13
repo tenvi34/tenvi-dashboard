@@ -27,9 +27,9 @@ TENVI는 개인용 AI 어시스턴트 대시보드를 목표로 하는 React + V
 
 ### Dashboard
 
-- Tasks 요약 표시
-- Notes 요약 표시
-- 최근 노트 목록 표시
+- localStorage에 저장된 Tasks 요약 표시
+- localStorage에 저장된 Notes 요약 표시
+- 최근 노트 3개 표시
 - 현재 언어 설정에 맞춘 한글/영어 텍스트 표시
 
 ### Tasks
@@ -61,15 +61,16 @@ TENVI는 개인용 AI 어시스턴트 대시보드를 목표로 하는 React + V
 
 ### Timer
 
-- 집중 타이머
-- 휴식 타이머
+- Focus 모드 집중 타이머
+- Break 모드 휴식 타이머
 - 시작 / 일시정지 / 초기화
 - Focus / Break 모드 전환
+- Focus / Break 시간 설정
 - 남은 시간 표시
 - 세션 완료 횟수 저장
 - 스톱워치 탭
 - 스톱워치 밀리초 표시
-- 스톱워치 기록 저장 기능
+- 스톱워치 랩 기록 추가 및 초기화
 
 ### Settings
 
@@ -78,7 +79,8 @@ TENVI는 개인용 AI 어시스턴트 대시보드를 목표로 하는 React + V
 - HUD 효과 강도 설정
 - Tasks 데이터 개수 표시
 - Notes 데이터 개수 표시
-- 확인 절차가 포함된 데이터 초기화
+- 확인 절차가 포함된 Tasks / Notes 데이터 초기화
+- 데이터 초기화 후 저장소 개수 표시 갱신
 
 ## 모듈 구성
 
@@ -122,8 +124,15 @@ npm run preview
 ```text
 tenvi-dashboard/
 ├─ public/
+│  ├─ favicon.svg
+│  └─ icons.svg
 ├─ src/
+│  ├─ assets/
+│  │  ├─ hero.png
+│  │  ├─ react.svg
+│  │  └─ vite.svg
 │  ├─ components/
+│  │  ├─ ModulePlaceholder.jsx
 │  │  └─ Sidebar.jsx
 │  ├─ i18n/
 │  │  └─ translations.js
@@ -138,8 +147,13 @@ tenvi-dashboard/
 │  ├─ App.jsx
 │  ├─ index.css
 │  └─ main.jsx
+├─ dist/
 ├─ AGENTS.md
+├─ eslint.config.js
+├─ index.html
 ├─ package.json
+├─ package-lock.json
+├─ vite.config.js
 └─ README.md
 ```
 
@@ -147,14 +161,16 @@ tenvi-dashboard/
 
 - `src/App.jsx`: 전체 앱 상태, 언어 설정, 현재 활성 모듈, 레이아웃을 관리합니다.
 - `src/App.css`: TENVI HUD 스타일과 전체 UI 스타일을 관리합니다.
+- `src/assets/`: 앱에서 사용할 수 있는 이미지와 기본 에셋을 보관합니다.
 - `src/components/Sidebar.jsx`: 왼쪽 사이드바와 모듈 전환 메뉴를 담당합니다.
+- `src/components/ModulePlaceholder.jsx`: 향후 모듈 추가 시 사용할 수 있는 빈 상태용 공통 컴포넌트입니다.
 - `src/i18n/translations.js`: 한글/영어 UI 텍스트를 관리합니다.
-- `src/modules/Dashboard.jsx`: Tasks와 Notes 요약 정보를 표시합니다.
+- `src/modules/Dashboard.jsx`: 저장된 Tasks와 Notes 요약, 최근 노트 목록을 표시합니다.
 - `src/modules/Tasks.jsx`: 할 일 관리 기능을 담당합니다.
 - `src/modules/Notes.jsx`: 노트 관리 기능을 담당합니다.
 - `src/modules/Command.jsx`: 규칙 기반 명령어 분석 기능을 담당합니다.
-- `src/modules/Timer.jsx`: 집중 타이머와 스톱워치 기능을 담당합니다.
-- `src/modules/Settings.jsx`: 언어, 시작 모듈, HUD 효과, 데이터 상태 설정을 담당합니다.
+- `src/modules/Timer.jsx`: Focus / Break 타이머, 스톱워치, 랩 기록 기능을 담당합니다.
+- `src/modules/Settings.jsx`: 언어, 시작 모듈, HUD 효과, 데이터 상태 확인, Tasks / Notes 초기화를 담당합니다.
 - `AGENTS.md`: TENVI 프로젝트 작업 규칙을 정리한 문서입니다.
 
 ## 사용 방법

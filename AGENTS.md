@@ -63,6 +63,22 @@
 - Preserve the `translations` structure when adding UI text.
 - Avoid touching Tasks or Notes copy unless the task explicitly asks for it.
 
+## Commenting Guidelines
+
+- 새 코드를 작성하거나 기존 핵심 로직을 수정할 때는 유지보수에 필요한 한글 주석을 함께 추가한다.
+- 모든 줄에 주석을 달지 않는다. 나중에 혼자 코드를 다시 읽을 때 이해 비용이 큰 핵심 로직 위주로만 간결하게 작성한다.
+- 주석은 단순히 "무엇을 하는지"를 반복하지 말고, "왜 필요한지", "주의할 점", "기존 데이터나 동작과 어떤 관계가 있는지"를 설명한다.
+- 특히 다음 영역에는 주석을 우선적으로 고려한다:
+  - localStorage key와 저장/복원 흐름
+  - `App.jsx`의 전역 상태 관리
+  - `activeModule` 기반 모듈 전환 흐름
+  - Command Console 명령 분석 및 결과 생성 로직
+  - Timer의 interval과 `useEffect` 처리
+  - Settings의 설정 저장, 데이터 개수 표시, 초기화 로직
+  - `translations` 객체 구조와 언어 key 유지 규칙
+- 단순 JSX, 명확한 UI 마크업, 변수명만으로 의미가 분명한 코드에는 불필요한 주석을 달지 않는다.
+- localStorage 키 보존, 기존 사용자 데이터, 모듈 간 공유 상태처럼 기존 동작을 깨뜨릴 위험이 있는 부분은 해당 상수나 상태 변경 로직 가까이에 주석을 둔다.
+
 ## Workflow
 
 - Before modifying files, present a modification plan first.
