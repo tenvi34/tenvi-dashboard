@@ -1,115 +1,63 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import Sidebar from './components/Sidebar.jsx'
+import Dashboard from './modules/Dashboard.jsx'
+import Notes from './modules/Notes.jsx'
+import Settings from './modules/Settings.jsx'
+import Tasks from './modules/Tasks.jsx'
+import Timer from './modules/Timer.jsx'
 import './App.css'
 
-const STORAGE_KEY = 'todo-manager-lite.todos'
+const MODULES = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'tasks', label: 'Tasks' },
+  { id: 'notes', label: 'Notes' },
+  { id: 'timer', label: 'Timer' },
+  { id: 'settings', label: 'Settings' },
+]
+
+const MODULE_COMPONENTS = {
+  dashboard: <Dashboard />,
+  tasks: <Tasks />,
+  notes: <Notes />,
+  timer: <Timer />,
+  settings: <Settings />,
+}
 
 function App() {
-  const [todos, setTodos] = useState(() => {
-    const savedTodos = localStorage.getItem(STORAGE_KEY)
-
-    if (!savedTodos) {
-      return []
-    }
-
-    try {
-      return JSON.parse(savedTodos)
-    } catch {
-      return []
-    }
-  })
-  const [newTodo, setNewTodo] = useState('')
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-  }, [todos])
-
-  const handleAddTodo = (event) => {
-    event.preventDefault()
-
-    const title = newTodo.trim()
-
-    if (!title) {
-      return
-    }
-
-    setTodos((currentTodos) => [
-      {
-        id: crypto.randomUUID(),
-        title,
-        completed: false,
-      },
-      ...currentTodos,
-    ])
-    setNewTodo('')
-  }
-
-  const handleToggleTodo = (todoId) => {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo,
-      ),
-    )
-  }
-
-  const handleDeleteTodo = (todoId) => {
-    setTodos((currentTodos) =>
-      currentTodos.filter((todo) => todo.id !== todoId),
-    )
-  }
-
-  const completedCount = todos.filter((todo) => todo.completed).length
+  const [activeModule, setActiveModule] = useState('tasks')
+  const activeModuleLabel =
+    MODULES.find((module) => module.id === activeModule)?.label ?? 'Tasks'
 
   return (
-    <main className="todo-app">
-      <section className="todo-shell" aria-labelledby="todo-title">
-        <div className="todo-header">
-          <p className="eyebrow">Todo Manager Lite</p>
-          <h1 id="todo-title">오늘 할 일</h1>
-          <p className="todo-summary">
-            {todos.length === 0
-              ? '아직 등록된 할 일이 없습니다.'
-              : `${todos.length}개 중 ${completedCount}개 완료`}
-          </p>
-        </div>
+    <main className="tenvi-dashboard">
+      <div className="tenvi-grid" aria-hidden="true"></div>
 
-        <form className="todo-form" onSubmit={handleAddTodo}>
-          <label className="sr-only" htmlFor="todo-input">
-            할 일 입력
-          </label>
-          <input
-            id="todo-input"
-            type="text"
-            value={newTodo}
-            onChange={(event) => setNewTodo(event.target.value)}
-            placeholder="할 일을 입력하세요"
+      <section className="tenvi-shell" aria-labelledby="tenvi-title">
+        <header className="tenvi-header">
+          <div>
+            {/* <p className="tenvi-kicker">Personal AI Command Dashboard</p> */}
+            <h1 id="tenvi-title">TENVI</h1>
+          </div>
+          <div className="system-status" aria-label="System status">
+            <span className="status-dot"></span>
+            <span>ONLINE</span>
+          </div>
+        </header>
+
+        <section className="tenvi-workspace">
+          <Sidebar
+            activeModule={activeModule}
+            modules={MODULES}
+            onModuleChange={setActiveModule}
           />
-          <button type="submit">추가</button>
-        </form>
 
-        <ul className="todo-list" aria-label="할 일 목록">
-          {todos.map((todo) => (
-            <li
-              className={`todo-item ${todo.completed ? 'is-completed' : ''}`}
-              key={todo.id}
-            >
-              <label className="todo-check">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => handleToggleTodo(todo.id)}
-                />
-                <span>{todo.title}</span>
-              </label>
-              <button
-                type="button"
-                className="delete-button"
-                onClick={() => handleDeleteTodo(todo.id)}
-              >
-                삭제
-              </button>
-            </li>
-          ))}
-        </ul>
+          <section
+            className="module-stage"
+            aria-label={`${activeModuleLabel} module`}
+          >
+            {MODULE_COMPONENTS[activeModule]}
+          </section>
+        </section>
       </section>
     </main>
   )
