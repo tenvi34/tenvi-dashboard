@@ -10,6 +10,11 @@ import Timer from './modules/Timer.jsx'
 import './App.css'
 
 const LANGUAGE_STORAGE_KEY = 'tenvi.language'
+const START_MODULE_STORAGE_KEY = 'tenvi.startModule'
+const HUD_EFFECT_STORAGE_KEY = 'tenvi.hudEffect'
+
+const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
+const HUD_EFFECTS = ['normal', 'reduced']
 
 const MODULES = [
   { id: 'dashboard' },
@@ -21,7 +26,17 @@ const MODULES = [
 ]
 
 function App() {
-  const [activeModule, setActiveModule] = useState('tasks')
+  const [startModule, setStartModule] = useState(() => {
+    const savedStartModule = localStorage.getItem(START_MODULE_STORAGE_KEY)
+
+    return START_MODULES.includes(savedStartModule) ? savedStartModule : 'tasks'
+  })
+  const [activeModule, setActiveModule] = useState(startModule)
+  const [hudEffect, setHudEffect] = useState(() => {
+    const savedHudEffect = localStorage.getItem(HUD_EFFECT_STORAGE_KEY)
+
+    return HUD_EFFECTS.includes(savedHudEffect) ? savedHudEffect : 'normal'
+  })
   const [language, setLanguage] = useState(() => {
     const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY)
 
@@ -32,6 +47,14 @@ function App() {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
   }, [language])
 
+  useEffect(() => {
+    localStorage.setItem(START_MODULE_STORAGE_KEY, startModule)
+  }, [startModule])
+
+  useEffect(() => {
+    localStorage.setItem(HUD_EFFECT_STORAGE_KEY, hudEffect)
+  }, [hudEffect])
+
   const t = translations[language]
   const activeModuleLabel = t.modules[activeModule] ?? t.modules.tasks
   const moduleComponents = useMemo(
@@ -41,13 +64,23 @@ function App() {
       tasks: <Tasks t={t} />,
       notes: <Notes t={t} />,
       timer: <Timer t={t} />,
-      settings: <Settings t={t} />,
+      settings: (
+        <Settings
+          hudEffect={hudEffect}
+          language={language}
+          onHudEffectChange={setHudEffect}
+          onLanguageChange={setLanguage}
+          onStartModuleChange={setStartModule}
+          startModule={startModule}
+          t={t}
+        />
+      ),
     }),
-    [t],
+    [hudEffect, language, startModule, t],
   )
 
   return (
-    <main className="tenvi-dashboard">
+    <main className={`tenvi-dashboard hud-${hudEffect}`}>
       <div className="tenvi-grid" aria-hidden="true"></div>
 
       <section className="tenvi-shell" aria-labelledby="tenvi-title">
