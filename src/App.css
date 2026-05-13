@@ -295,6 +295,109 @@ body {
   line-height: 1;
 }
 
+.dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.summary-panel {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.42);
+}
+
+.summary-panel-header {
+  margin-bottom: 16px;
+}
+
+.summary-panel-header h3 {
+  margin: 5px 0 0;
+  color: #f4fdff;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-metric {
+  display: grid;
+  gap: 10px;
+  min-height: 96px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(90, 212, 255, 0.09), rgba(5, 16, 31, 0.72));
+}
+
+.summary-metric span {
+  color: #a8c7d6;
+  font-size: 14px;
+}
+
+.summary-metric strong {
+  align-self: end;
+  color: var(--neon-strong);
+  font-size: 34px;
+  line-height: 1;
+}
+
+.summary-metric-wide {
+  min-height: 86px;
+  margin-bottom: 14px;
+}
+
+.recent-notes-title {
+  color: var(--muted-cyan);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.recent-notes ul {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-note {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  background: rgba(5, 16, 31, 0.58);
+}
+
+.recent-note strong {
+  color: #f4fdff;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.recent-note span {
+  color: #b8dbe7;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-empty {
+  padding: 18px;
+}
+
 .todo-form {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -622,6 +725,8 @@ body {
   }
 
   .task-stats,
+  .dashboard-summary-grid,
+  .summary-metrics,
   .sidebar-nav {
     grid-template-columns: 1fr;
   }
