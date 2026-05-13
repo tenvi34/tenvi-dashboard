@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+// Command는 Tasks/Notes 모듈이 저장한 데이터를 직접 읽으므로 키가 반드시 일치해야 합니다.
 const TASKS_STORAGE_KEY = 'todo-manager-lite.todos'
 const NOTES_STORAGE_KEY = 'tenvi.notes'
 const HISTORY_LIMIT = 5
@@ -13,6 +14,7 @@ const readStoredList = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
+    // 명령 콘솔은 분석 도구이므로 저장소가 예상과 달라도 빈 목록으로 안전하게 진행합니다.
     return Array.isArray(parsedValue) ? parsedValue : []
   } catch {
     return []
@@ -50,6 +52,7 @@ const normalizeCommand = (command) => command.trim().toLowerCase()
 const parseCommand = (command) => {
   const normalizedCommand = normalizeCommand(command)
 
+  // 한글/영어 입력을 같은 내부 타입으로 정규화해 결과 생성 로직을 단순하게 유지합니다.
   if (normalizedCommand === '상태 분석' || normalizedCommand === 'analyze status') {
     return { type: 'analyzeStatus' }
   }
@@ -111,6 +114,7 @@ const createResult = ({ command, notes, parsedCommand, tasks, t }) => {
   const recentNotes = getRecentNotes(notes)
   const recommendation = getRecommendation(stats, notes.length, t)
 
+  // 각 명령은 UI가 공통으로 렌더링할 수 있는 metrics/items 구조를 반환합니다.
   if (parsedCommand.type === 'analyzeStatus') {
     return {
       items: [
@@ -252,6 +256,7 @@ function Command({ t }) {
       return
     }
 
+    // 실행 순간의 localStorage를 읽어 다른 모듈에서 방금 바뀐 데이터까지 반영합니다.
     const tasks = readStoredList(TASKS_STORAGE_KEY)
     const notes = readStoredList(NOTES_STORAGE_KEY)
     const parsedCommand = parseCommand(trimmedCommand)
@@ -266,6 +271,7 @@ function Command({ t }) {
     setResult(nextResult)
     setHistory((currentHistory) => {
       const normalizedCommand = normalizeCommand(trimmedCommand)
+      // 최근 명령은 현재 세션용이며, 같은 명령은 최신 위치로만 남깁니다.
       const uniqueHistory = currentHistory.filter(
         (historyItem) => normalizeCommand(historyItem) !== normalizedCommand,
       )

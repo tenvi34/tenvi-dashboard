@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
+// TENVI로 이름이 바뀌어도 기존 todo-manager-lite 사용자의 Tasks 데이터를 보존해야 합니다.
 const STORAGE_KEY = 'todo-manager-lite.todos'
 
 const FILTERS = ['all', 'active', 'completed']
@@ -13,6 +14,7 @@ function Tasks({ t }) {
     }
 
     try {
+      // 저장 데이터가 깨져도 앱 전체가 멈추지 않도록 빈 목록으로 복구합니다.
       return JSON.parse(savedTodos)
     } catch {
       return []
@@ -21,6 +23,7 @@ function Tasks({ t }) {
   const [newTodo, setNewTodo] = useState('')
   const [filter, setFilter] = useState('all')
 
+  // todos 상태가 Tasks 데이터의 단일 저장 원천입니다.
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
   }, [todos])
@@ -63,6 +66,7 @@ function Tasks({ t }) {
   const activeCount = todos.length - completedCount
 
   const filteredTodos = useMemo(() => {
+    // 원본 todos는 그대로 두고 화면에 보여줄 목록만 필터링합니다.
     if (filter === 'active') {
       return todos.filter((todo) => !todo.completed)
     }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 const DEFAULT_FOCUS_MINUTES = 25
 const DEFAULT_BREAK_MINUTES = 5
+// 현재 진행 중인 시간은 저장하지 않고 완료 세션 수만 영속화합니다.
 const TIMER_SESSIONS_STORAGE_KEY = 'tenvi.timer.completedSessions'
 
 const minutesToSeconds = (minutes) => Math.max(1, minutes) * 60
@@ -28,6 +29,7 @@ const readCompletedSessions = () => {
   const savedValue = localStorage.getItem(TIMER_SESSIONS_STORAGE_KEY)
   const parsedValue = Number.parseInt(savedValue, 10)
 
+  // 저장값이 비어 있거나 숫자가 아니면 세션 통계를 0부터 다시 시작합니다.
   return Number.isNaN(parsedValue) ? 0 : parsedValue
 }
 
@@ -38,6 +40,7 @@ const normalizeMinutes = (value, fallback) => {
     return fallback
   }
 
+  // 너무 작거나 큰 입력이 타이머 흐름을 깨지 않도록 UI 허용 범위에 맞춥니다.
   return Math.min(Math.max(parsedValue, 1), 240)
 }
 
@@ -74,6 +77,7 @@ function Timer({ t }) {
       return undefined
     }
 
+    // 실행 중일 때만 interval을 만들고 cleanup으로 중복 타이머를 방지합니다.
     const timerId = window.setInterval(() => {
       setSecondsLeft((currentSeconds) => {
         if (currentSeconds > 1) {
@@ -82,6 +86,7 @@ function Timer({ t }) {
 
         const nextMode = mode === 'focus' ? 'break' : 'focus'
 
+        // 완료 세션은 Focus가 끝나는 순간만 증가시키고 Break 종료는 카운트하지 않습니다.
         if (mode === 'focus') {
           setCompletedSessions((currentCount) => currentCount + 1)
         }
@@ -99,6 +104,7 @@ function Timer({ t }) {
       return undefined
     }
 
+    // 스톱워치는 화면 표시 정밀도를 위해 10ms 단위로 갱신하되 정지는 cleanup에 맡깁니다.
     const stopwatchId = window.setInterval(() => {
       setStopwatchMilliseconds((currentMilliseconds) => currentMilliseconds + 10)
     }, 10)
@@ -114,6 +120,7 @@ function Timer({ t }) {
 
     setFocusMinutes(nextFocusMinutes)
 
+    // 실행 중에는 현재 카운트다운 흐름을 유지하고, 멈춘 상태에서만 설정값을 즉시 반영합니다.
     if (mode === 'focus' && !isRunning) {
       setSecondsLeft(minutesToSeconds(nextFocusMinutes))
     }
@@ -127,6 +134,7 @@ function Timer({ t }) {
 
     setBreakMinutes(nextBreakMinutes)
 
+    // Break 모드도 실행 중 설정 변경이 남은 시간을 갑자기 덮어쓰지 않게 합니다.
     if (mode === 'break' && !isRunning) {
       setSecondsLeft(minutesToSeconds(nextBreakMinutes))
     }

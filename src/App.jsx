@@ -13,9 +13,11 @@ const LANGUAGE_STORAGE_KEY = 'tenvi.language'
 const START_MODULE_STORAGE_KEY = 'tenvi.startModule'
 const HUD_EFFECT_STORAGE_KEY = 'tenvi.hudEffect'
 
+// 저장 키는 기존 사용자 설정과 직접 연결되므로 이름을 바꾸면 이전 설정을 복원하지 못합니다.
 const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 const HUD_EFFECTS = ['normal', 'reduced']
 
+// 새 모듈을 추가할 때는 사이드바 목록과 아래 moduleComponents 매핑을 함께 맞춰야 합니다.
 const MODULES = [
   { id: 'dashboard' },
   { id: 'command' },
@@ -29,20 +31,24 @@ function App() {
   const [startModule, setStartModule] = useState(() => {
     const savedStartModule = localStorage.getItem(START_MODULE_STORAGE_KEY)
 
+    // localStorage 값이 예전 버전이거나 손상된 경우 안전한 기본 모듈로 시작합니다.
     return START_MODULES.includes(savedStartModule) ? savedStartModule : 'tasks'
   })
   const [activeModule, setActiveModule] = useState(startModule)
   const [hudEffect, setHudEffect] = useState(() => {
     const savedHudEffect = localStorage.getItem(HUD_EFFECT_STORAGE_KEY)
 
+    // 허용된 HUD 효과만 복원해 CSS 클래스가 예상 범위를 벗어나지 않게 합니다.
     return HUD_EFFECTS.includes(savedHudEffect) ? savedHudEffect : 'normal'
   })
   const [language, setLanguage] = useState(() => {
     const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY)
 
+    // 지원하지 않는 언어 코드는 translations 접근 오류를 막기 위해 기본 언어로 되돌립니다.
     return isSupportedLanguage(savedLanguage) ? savedLanguage : 'ko'
   })
 
+  // 설정 변경은 App 상태를 기준으로 즉시 저장되어 새로고침 후에도 유지됩니다.
   useEffect(() => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
   }, [language])
@@ -57,6 +63,7 @@ function App() {
 
   const t = translations[language]
   const activeModuleLabel = t.modules[activeModule] ?? t.modules.tasks
+  // activeModule 문자열을 실제 모듈 컴포넌트로 바꾸는 중앙 전환 지점입니다.
   const moduleComponents = useMemo(
     () => ({
       dashboard: <Dashboard t={t} />,
@@ -68,6 +75,7 @@ function App() {
         <Settings
           hudEffect={hudEffect}
           language={language}
+          // Settings는 App의 전역 설정 setter를 받아 저장 흐름을 한곳으로 유지합니다.
           onHudEffectChange={setHudEffect}
           onLanguageChange={setLanguage}
           onStartModuleChange={setStartModule}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+// Command와 Settings도 같은 키를 사용하므로 변경 시 연동 로직을 함께 확인해야 합니다.
 const STORAGE_KEY = 'tenvi.notes'
 
 function Notes({ t }) {
@@ -11,6 +12,7 @@ function Notes({ t }) {
     }
 
     try {
+      // 깨진 JSON은 사용자가 화면을 계속 열 수 있도록 빈 목록으로 취급합니다.
       return JSON.parse(savedNotes)
     } catch {
       return []
@@ -19,6 +21,7 @@ function Notes({ t }) {
   const [noteTitle, setNoteTitle] = useState('')
   const [noteContent, setNoteContent] = useState('')
 
+  // notes 배열이 바뀔 때마다 브라우저 저장소에 최신 상태를 반영합니다.
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(notes))
   }, [notes])
@@ -36,6 +39,7 @@ function Notes({ t }) {
     setNotes((currentNotes) => [
       {
         id: crypto.randomUUID(),
+        // 내용만 있는 메모도 잃지 않도록 현재 언어의 기본 제목을 사용합니다.
         title: title || t.notes.untitled,
         content,
         createdAt: new Date().toISOString(),

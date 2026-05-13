@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+// Settings는 데이터 개수 표시와 초기화를 담당하므로 실제 모듈의 저장 키와 같아야 합니다.
 const TASKS_STORAGE_KEY = 'todo-manager-lite.todos'
 const NOTES_STORAGE_KEY = 'tenvi.notes'
 
@@ -16,6 +17,7 @@ const readStoredCount = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
+    // 저장소 상태 표시용이므로 예상 밖 데이터는 삭제하지 않고 0개로만 보여줍니다.
     return Array.isArray(parsedValue) ? parsedValue.length : 0
   } catch {
     return 0
@@ -37,12 +39,14 @@ function Settings({
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
 
   const handleConfirmReset = () => {
+    // 초기화는 사용자 콘텐츠인 Tasks/Notes만 대상으로 하고 앱 설정은 유지합니다.
     localStorage.removeItem(TASKS_STORAGE_KEY)
     localStorage.removeItem(NOTES_STORAGE_KEY)
     setIsResetConfirmOpen(false)
     setDataVersion((currentVersion) => currentVersion + 1)
   }
 
+  // reset 직후 컴포넌트를 다시 렌더링해 저장소 개수 표시를 최신화하기 위한 상태입니다.
   void dataVersion
 
   return (
@@ -71,6 +75,7 @@ function Settings({
                 }`}
                 key={languageId}
                 type="button"
+                // 실제 저장은 App 상태 변경 후 App의 useEffect에서 처리됩니다.
                 onClick={() => onLanguageChange(languageId)}
               >
                 {t.languages[languageId]}
@@ -95,6 +100,7 @@ function Settings({
                 }`}
                 key={moduleId}
                 type="button"
+                // 시작 모듈 설정은 다음 앱 로드 시 초기 activeModule 값으로 사용됩니다.
                 onClick={() => onStartModuleChange(moduleId)}
               >
                 {t.modules[moduleId]}
@@ -116,6 +122,7 @@ function Settings({
                 }`}
                 key={effectId}
                 type="button"
+                // HUD 효과는 App의 최상위 CSS 클래스에 반영되어 전체 화면 톤을 바꿉니다.
                 onClick={() => onHudEffectChange(effectId)}
               >
                 {t.settings.effects[effectId]}
