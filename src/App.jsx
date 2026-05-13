@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import { isSupportedLanguage, translations } from './i18n/translations.js'
+import Command from './modules/Command.jsx'
 import Dashboard from './modules/Dashboard.jsx'
 import Notes from './modules/Notes.jsx'
 import Settings from './modules/Settings.jsx'
@@ -12,6 +13,7 @@ const LANGUAGE_STORAGE_KEY = 'tenvi.language'
 
 const MODULES = [
   { id: 'dashboard' },
+  { id: 'command' },
   { id: 'tasks' },
   { id: 'notes' },
   { id: 'timer' },
@@ -35,6 +37,7 @@ function App() {
   const moduleComponents = useMemo(
     () => ({
       dashboard: <Dashboard t={t} />,
+      command: <Command t={t} />,
       tasks: <Tasks t={t} />,
       notes: <Notes t={t} />,
       timer: <Timer t={t} />,
