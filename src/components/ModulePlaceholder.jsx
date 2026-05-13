@@ -1,4 +1,4 @@
-function ModulePlaceholder({ label, title, message }) {
+function ModulePlaceholder({ label, title, message, systemMessage }) {
   return (
     <section className="module-panel placeholder-module">
       <div className="module-header">
@@ -9,7 +9,7 @@ function ModulePlaceholder({ label, title, message }) {
       </div>
 
       <div className="empty-state" role="status">
-        <span>SYSTEM MESSAGE</span>
+        <span>{systemMessage}</span>
         <p>{message}</p>
       </div>
     </section>

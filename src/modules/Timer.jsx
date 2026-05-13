@@ -1,11 +1,12 @@
 import ModulePlaceholder from '../components/ModulePlaceholder.jsx'
 
-function Timer() {
+function Timer({ t }) {
   return (
     <ModulePlaceholder
-      label="TIMER MODULE"
-      title="Timer"
-      message="Timer module is standing by for focus and countdown routines."
+      label={t.timer.label}
+      title={t.timer.title}
+      message={t.timer.message}
+      systemMessage={t.common.systemMessage}
     />
   )
 }

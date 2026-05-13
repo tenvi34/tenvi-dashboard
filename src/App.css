@@ -100,6 +100,52 @@ body {
   white-space: nowrap;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.language-switch {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(2, 9, 18, 0.42);
+}
+
+.language-button {
+  min-height: 30px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #aacbd8;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.language-button:hover {
+  color: #f4fdff;
+  border-color: rgba(90, 212, 255, 0.32);
+}
+
+.language-button.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.16);
+  box-shadow: inset 0 0 14px rgba(90, 212, 255, 0.1);
+}
+
 .status-dot {
   width: 8px;
   height: 8px;
@@ -256,7 +302,9 @@ body {
   margin-bottom: 14px;
 }
 
-.todo-form input {
+.todo-form input,
+.notes-form input,
+.notes-form textarea {
   min-width: 0;
   color: #f4fdff;
   background: rgba(2, 9, 18, 0.82);
@@ -265,17 +313,26 @@ body {
   padding: 14px 16px;
   font: inherit;
   box-sizing: border-box;
+  font-family: inherit;
   transition:
     border-color 0.18s ease,
     box-shadow 0.18s ease,
     background 0.18s ease;
 }
 
-.todo-form input::placeholder {
+.notes-form textarea {
+  resize: vertical;
+}
+
+.todo-form input::placeholder,
+.notes-form input::placeholder,
+.notes-form textarea::placeholder {
   color: rgba(190, 229, 240, 0.48);
 }
 
-.todo-form input:focus {
+.todo-form input:focus,
+.notes-form input:focus,
+.notes-form textarea:focus {
   outline: none;
   border-color: var(--line-strong);
   box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
@@ -283,6 +340,7 @@ body {
 }
 
 .todo-form button,
+.notes-form button,
 .filter-button,
 .delete-button,
 .sidebar-button {
@@ -302,6 +360,19 @@ body {
   color: #00131c;
   background: linear-gradient(135deg, var(--neon-strong), var(--blue));
   padding: 0 24px;
+  font-weight: 800;
+}
+
+.notes-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.notes-form button {
+  min-height: 46px;
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
   font-weight: 800;
 }
 
@@ -335,6 +406,58 @@ body {
   margin: 0;
   display: grid;
   gap: 10px;
+}
+
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.note-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(90, 212, 255, 0.08), rgba(5, 16, 31, 0.72));
+}
+
+.note-body {
+  min-width: 0;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.note-header h3 {
+  margin: 0;
+  color: #f4fdff;
+  font-size: 18px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.note-header time {
+  flex: 0 0 auto;
+  color: var(--muted-cyan);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.note-body p {
+  color: #b8dbe7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .todo-item {
@@ -386,6 +509,7 @@ body {
 }
 
 .todo-form button:hover,
+.notes-form button:hover,
 .filter-button:hover,
 .delete-button:hover {
   transform: translateY(-1px);
@@ -398,6 +522,8 @@ body {
 }
 
 .todo-form button:focus-visible,
+.notes-form button:focus-visible,
+.language-button:focus-visible,
 .filter-button:focus-visible,
 .delete-button:focus-visible,
 .sidebar-button:focus-visible {
@@ -406,6 +532,7 @@ body {
 }
 
 .todo-form button:active,
+.notes-form button:active,
 .filter-button:active,
 .delete-button:active,
 .sidebar-button:active {
@@ -454,6 +581,10 @@ body {
     padding: 22px;
   }
 
+  .header-controls {
+    justify-content: flex-start;
+  }
+
   .tenvi-workspace {
     display: grid;
   }
@@ -481,8 +612,13 @@ body {
   }
 
   .todo-form,
-  .todo-item {
+  .todo-item,
+  .note-item {
     grid-template-columns: 1fr;
+  }
+
+  .note-header {
+    flex-direction: column;
   }
 
   .task-stats,

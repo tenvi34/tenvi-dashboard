@@ -1,11 +1,12 @@
 import ModulePlaceholder from '../components/ModulePlaceholder.jsx'
 
-function Dashboard() {
+function Dashboard({ t }) {
   return (
     <ModulePlaceholder
-      label="DASHBOARD"
-      title="Overview"
-      message="Dashboard module is ready for future system widgets."
+      label={t.dashboard.label}
+      title={t.dashboard.title}
+      message={t.dashboard.message}
+      systemMessage={t.common.systemMessage}
     />
   )
 }

@@ -1,11 +1,12 @@
 import ModulePlaceholder from '../components/ModulePlaceholder.jsx'
 
-function Settings() {
+function Settings({ t }) {
   return (
     <ModulePlaceholder
-      label="SETTINGS"
-      title="Settings"
-      message="Settings module is standing by for dashboard preferences."
+      label={t.settings.label}
+      title={t.settings.title}
+      message={t.settings.message}
+      systemMessage={t.common.systemMessage}
     />
   )
 }

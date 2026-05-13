@@ -2,13 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 
 const STORAGE_KEY = 'todo-manager-lite.todos'
 
-const FILTERS = [
-  { id: 'all', label: 'All' },
-  { id: 'active', label: 'Active' },
-  { id: 'completed', label: 'Completed' },
-]
+const FILTERS = ['all', 'active', 'completed']
 
-function Tasks() {
+function Tasks({ t }) {
   const [todos, setTodos] = useState(() => {
     const savedTodos = localStorage.getItem(STORAGE_KEY)
 
@@ -78,64 +74,64 @@ function Tasks() {
     return todos
   }, [filter, todos])
 
-  const currentFilterLabel = FILTERS.find((item) => item.id === filter)?.label
+  const currentFilterLabel = t.tasks[filter]
 
   return (
     <section className="module-panel todo-module" aria-labelledby="todo-title">
       <div className="module-header todo-module-header">
         <div>
-          <p className="module-label">TASK MODULE</p>
-          <h2 id="todo-title">Task Queue</h2>
+          <p className="module-label">{t.tasks.label}</p>
+          <h2 id="todo-title">{t.tasks.title}</h2>
         </div>
         <p className="module-meta">
-          FILTER: <span>{currentFilterLabel}</span>
+          {t.tasks.filter}: <span>{currentFilterLabel}</span>
         </p>
       </div>
 
-      <div className="status-stack task-stats" aria-label="Task summary">
+      <div className="status-stack task-stats" aria-label={t.tasks.summaryLabel}>
         <div className="status-card">
-          <span>Total</span>
+          <span>{t.tasks.total}</span>
           <strong>{todos.length}</strong>
         </div>
         <div className="status-card">
-          <span>Active</span>
+          <span>{t.tasks.active}</span>
           <strong>{activeCount}</strong>
         </div>
         <div className="status-card">
-          <span>Completed</span>
+          <span>{t.tasks.completed}</span>
           <strong>{completedCount}</strong>
         </div>
       </div>
 
       <form className="todo-form" onSubmit={handleAddTodo}>
         <label className="sr-only" htmlFor="todo-input">
-          Task input
+          {t.tasks.inputLabel}
         </label>
         <input
           id="todo-input"
           type="text"
           value={newTodo}
           onChange={(event) => setNewTodo(event.target.value)}
-          placeholder="Enter a new task"
+          placeholder={t.tasks.inputPlaceholder}
         />
-        <button type="submit">Add</button>
+        <button type="submit">{t.tasks.add}</button>
       </form>
 
-      <div className="todo-filters" aria-label="Task filters">
+      <div className="todo-filters" aria-label={t.tasks.filtersLabel}>
         {FILTERS.map((item) => (
           <button
-            className={`filter-button ${filter === item.id ? 'is-active' : ''}`}
-            key={item.id}
+            className={`filter-button ${filter === item ? 'is-active' : ''}`}
+            key={item}
             type="button"
-            onClick={() => setFilter(item.id)}
+            onClick={() => setFilter(item)}
           >
-            {item.label}
+            {t.tasks[item]}
           </button>
         ))}
       </div>
 
       {filteredTodos.length > 0 ? (
-        <ul className="todo-list" aria-label="Task list">
+        <ul className="todo-list" aria-label={t.tasks.listLabel}>
           {filteredTodos.map((todo) => (
             <li
               className={`todo-item ${todo.completed ? 'is-completed' : ''}`}
@@ -154,15 +150,15 @@ function Tasks() {
                 className="delete-button"
                 onClick={() => handleDeleteTodo(todo.id)}
               >
-                Delete
+                {t.common.delete}
               </button>
             </li>
           ))}
         </ul>
       ) : (
         <div className="empty-state" role="status">
-          <span>SYSTEM MESSAGE</span>
-          <p>No tasks match the {currentFilterLabel} filter.</p>
+          <span>{t.common.systemMessage}</span>
+          <p>{t.tasks.emptyMessage}</p>
         </div>
       )}
     </section>
