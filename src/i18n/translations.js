@@ -116,7 +116,7 @@ export const translations = {
       titleLabel: '메모 제목',
       contentLabel: '메모 내용',
       titlePlaceholder: '메모 제목',
-      contentPlaceholder: '메모 내용을 기록하세요',
+      contentPlaceholder: '메모 내용을 입력하세요',
       store: '메모 저장',
       listLabel: '저장된 메모',
       emptyMessage: '저장된 메모가 없습니다.',
