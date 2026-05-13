@@ -120,7 +120,7 @@ npm run preview
 ## 프로젝트 구조
 
 ```text
-todo-manager-lite/
+tenvi-dashboard/
 ├─ public/
 ├─ src/
 │  ├─ components/
