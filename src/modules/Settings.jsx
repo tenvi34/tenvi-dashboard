@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
 // Settings는 데이터 개수 표시와 초기화를 담당하므로 실제 모듈의 저장 키와 같아야 합니다.
@@ -8,6 +8,15 @@ const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 const HUD_EFFECTS = ['normal', 'reduced']
 const LANGUAGES = ['ko', 'en']
+const BACKUP_APP = 'TENVI'
+const BACKUP_TYPE = 'tenvi-dashboard-backup'
+const BACKUP_VERSION = 1
+
+const createBackupFileName = () => {
+  const today = new Date().toISOString().slice(0, 10)
+
+  return `tenvi-backup-${today}.json`
+}
 
 const readStoredCount = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -25,6 +34,78 @@ const readStoredCount = (storageKey) => {
   }
 }
 
+const readStoredList = (storageKey) => {
+  const savedValue = localStorage.getItem(storageKey)
+
+  if (!savedValue) {
+    return []
+  }
+
+  try {
+    const parsedValue = JSON.parse(savedValue)
+
+    return Array.isArray(parsedValue) ? parsedValue : []
+  } catch {
+    return []
+  }
+}
+
+const readStoredCompletedSessions = () => {
+  const savedValue = localStorage.getItem(STORAGE_KEYS.timerCompletedSessions)
+  const parsedValue = Number.parseInt(savedValue, 10)
+
+  return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
+}
+
+const isPlainObject = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
+
+const validateBackupPayload = (backupPayload) => {
+  if (!isPlainObject(backupPayload)) {
+    return null
+  }
+
+  if (
+    backupPayload.app !== BACKUP_APP ||
+    backupPayload.type !== BACKUP_TYPE ||
+    backupPayload.version !== BACKUP_VERSION ||
+    !isPlainObject(backupPayload.data)
+  ) {
+    return null
+  }
+
+  const {
+    hudEffect,
+    language,
+    notes,
+    startModule,
+    tasks,
+    timerCompletedSessions,
+  } = backupPayload.data
+  const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
+
+  if (
+    !Array.isArray(tasks) ||
+    !Array.isArray(notes) ||
+    Number.isNaN(normalizedTimerSessions) ||
+    normalizedTimerSessions < 0 ||
+    !LANGUAGES.includes(language) ||
+    !START_MODULES.includes(startModule) ||
+    !HUD_EFFECTS.includes(hudEffect)
+  ) {
+    return null
+  }
+
+  return {
+    hudEffect,
+    language,
+    notes,
+    startModule,
+    tasks,
+    timerCompletedSessions: normalizedTimerSessions,
+  }
+}
+
 function Settings({
   hudEffect,
   language,
@@ -36,6 +117,8 @@ function Settings({
 }) {
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
+  const [backupStatus, setBackupStatus] = useState(null)
+  const backupFileInputRef = useRef(null)
   const taskCount = readStoredCount(TASKS_STORAGE_KEY)
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
 
@@ -49,6 +132,85 @@ function Settings({
 
   // reset 직후 컴포넌트를 다시 렌더링해 저장소 개수 표시를 최신화하기 위한 상태입니다.
   void dataVersion
+
+  const handleExportBackup = () => {
+    const backupPayload = {
+      app: BACKUP_APP,
+      type: BACKUP_TYPE,
+      version: BACKUP_VERSION,
+      createdAt: new Date().toISOString(),
+      data: {
+        tasks: readStoredList(STORAGE_KEYS.tasks),
+        notes: readStoredList(STORAGE_KEYS.notes),
+        timerCompletedSessions: readStoredCompletedSessions(),
+        language,
+        startModule,
+        hudEffect,
+      },
+    }
+    const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
+      type: 'application/json',
+    })
+    const backupUrl = URL.createObjectURL(backupBlob)
+    const downloadLink = document.createElement('a')
+
+    downloadLink.href = backupUrl
+    downloadLink.download = createBackupFileName()
+    downloadLink.click()
+    URL.revokeObjectURL(backupUrl)
+    setBackupStatus({ type: 'success', message: t.settings.backupExported })
+  }
+
+  const handleRestoreBackup = async (event) => {
+    const backupFile = event.target.files?.[0]
+
+    if (!backupFile) {
+      return
+    }
+
+    try {
+      const backupPayload = JSON.parse(await backupFile.text())
+      // 백업 파일은 기존 localStorage key에 다시 쓰이므로, TENVI 형식과 값 범위를 먼저 검증합니다.
+      const validatedBackup = validateBackupPayload(backupPayload)
+
+      if (!validatedBackup) {
+        setBackupStatus({ type: 'error', message: t.settings.backupInvalid })
+        return
+      }
+
+      if (!window.confirm(t.settings.restoreConfirmMessage)) {
+        setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+        return
+      }
+
+      // 기존 key 문자열과 저장 구조를 유지해야 이전 데이터와 다른 모듈 동작이 깨지지 않습니다.
+      localStorage.setItem(
+        STORAGE_KEYS.tasks,
+        JSON.stringify(validatedBackup.tasks),
+      )
+      localStorage.setItem(
+        STORAGE_KEYS.notes,
+        JSON.stringify(validatedBackup.notes),
+      )
+      localStorage.setItem(
+        STORAGE_KEYS.timerCompletedSessions,
+        String(validatedBackup.timerCompletedSessions),
+      )
+      localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
+      localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
+      localStorage.setItem(STORAGE_KEYS.hudEffect, validatedBackup.hudEffect)
+
+      onLanguageChange(validatedBackup.language)
+      onStartModuleChange(validatedBackup.startModule)
+      onHudEffectChange(validatedBackup.hudEffect)
+      setDataVersion((currentVersion) => currentVersion + 1)
+      setBackupStatus({ type: 'success', message: t.settings.restoreComplete })
+    } catch {
+      setBackupStatus({ type: 'error', message: t.settings.backupReadError })
+    } finally {
+      event.target.value = ''
+    }
+  }
 
   return (
     <section
@@ -178,6 +340,43 @@ function Settings({
                 </button>
               </div>
             </div>
+          ) : null}
+        </section>
+
+        <section className="settings-panel">
+          <div className="settings-panel-header">
+            <p className="module-label">{t.settings.backupLabel}</p>
+            <h3>{t.settings.backupTitle}</h3>
+          </div>
+          <div className="backup-actions">
+            <button
+              className="settings-option"
+              type="button"
+              onClick={handleExportBackup}
+            >
+              {t.settings.exportBackup}
+            </button>
+            <button
+              className="settings-option"
+              type="button"
+              onClick={() => backupFileInputRef.current?.click()}
+            >
+              {t.settings.importBackup}
+            </button>
+          </div>
+          <input
+            ref={backupFileInputRef}
+            className="backup-file-input"
+            type="file"
+            accept="application/json,.json"
+            aria-label={t.settings.importBackup}
+            onChange={handleRestoreBackup}
+          />
+          <p className="settings-note">{t.settings.backupNote}</p>
+          {backupStatus ? (
+            <p className={`backup-status is-${backupStatus.type}`}>
+              {backupStatus.message}
+            </p>
           ) : null}
         </section>
       </div>

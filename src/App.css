@@ -1040,6 +1040,42 @@ body {
   background: rgba(255, 102, 134, 0.18);
 }
 
+.backup-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.backup-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.backup-status {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 8px;
+  color: #cceef8;
+  background: rgba(90, 212, 255, 0.08);
+}
+
+.backup-status.is-success {
+  border-color: rgba(101, 255, 188, 0.28);
+  color: #d7ffef;
+  background: rgba(101, 255, 188, 0.08);
+}
+
+.backup-status.is-error {
+  border-color: rgba(255, 102, 134, 0.34);
+  color: #ffd7df;
+  background: rgba(255, 102, 134, 0.08);
+}
+
 .notes-form {
   display: grid;
   gap: 10px;
@@ -1317,6 +1353,7 @@ body {
   .settings-options,
   .settings-options-grid,
   .data-metrics,
+  .backup-actions,
   .reset-actions {
     grid-template-columns: 1fr;
   }

@@ -184,6 +184,19 @@ export const translations = {
         '승인하면 저장된 Tasks와 Notes 데이터가 삭제됩니다. 언어, 시작 모듈, HUD 설정은 유지됩니다.',
       confirmReset: '초기화 승인',
       cancelReset: '취소',
+      backupLabel: '백업/복원',
+      backupTitle: '데이터 백업',
+      exportBackup: 'JSON 백업 내보내기',
+      importBackup: 'JSON 백업 복원',
+      backupNote:
+        'Tasks, Notes, Timer 세션, 언어, 시작 모듈, HUD 설정을 백업합니다. 복원 전에는 확인 절차가 표시됩니다.',
+      backupExported: '백업 파일을 생성했습니다.',
+      backupInvalid: '올바른 TENVI 백업 파일이 아닙니다.',
+      backupReadError: 'JSON 파일을 읽을 수 없습니다.',
+      restoreConfirmMessage:
+        '현재 TENVI 데이터가 백업 파일의 데이터로 덮어써질 수 있습니다. 복원할까요?',
+      restoreCancelled: '복원을 취소했습니다.',
+      restoreComplete: '백업 데이터를 복원했습니다.',
     },
   },
   en: {
@@ -369,6 +382,19 @@ export const translations = {
         'If approved, stored Tasks and Notes data will be deleted. Language, start module, and HUD settings will remain.',
       confirmReset: 'Confirm Reset',
       cancelReset: 'Cancel',
+      backupLabel: 'Backup/Restore',
+      backupTitle: 'Data Backup',
+      exportBackup: 'Export JSON Backup',
+      importBackup: 'Restore JSON Backup',
+      backupNote:
+        'Backs up Tasks, Notes, Timer sessions, language, start module, and HUD settings. A confirmation step appears before restore.',
+      backupExported: 'Backup file has been created.',
+      backupInvalid: 'This is not a valid TENVI backup file.',
+      backupReadError: 'Could not read the JSON file.',
+      restoreConfirmMessage:
+        'Current TENVI data may be overwritten with the backup file data. Restore now?',
+      restoreCancelled: 'Restore cancelled.',
+      restoreComplete: 'Backup data has been restored.',
     },
   },
 }
