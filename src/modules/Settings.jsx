@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
 // Settings는 데이터 개수 표시와 초기화를 담당하므로 실제 모듈의 저장 키와 같아야 합니다.
-const TASKS_STORAGE_KEY = 'todo-manager-lite.todos'
-const NOTES_STORAGE_KEY = 'tenvi.notes'
+const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
+const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 
 const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 const HUD_EFFECTS = ['normal', 'reduced']

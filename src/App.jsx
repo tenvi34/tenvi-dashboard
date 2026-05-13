@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
+import { STORAGE_KEYS } from './constants/storageKeys.js'
 import { isSupportedLanguage, translations } from './i18n/translations.js'
 import Command from './modules/Command.jsx'
 import Dashboard from './modules/Dashboard.jsx'
@@ -9,11 +10,6 @@ import Tasks from './modules/Tasks.jsx'
 import Timer from './modules/Timer.jsx'
 import './App.css'
 
-const LANGUAGE_STORAGE_KEY = 'tenvi.language'
-const START_MODULE_STORAGE_KEY = 'tenvi.startModule'
-const HUD_EFFECT_STORAGE_KEY = 'tenvi.hudEffect'
-
-// 저장 키는 기존 사용자 설정과 직접 연결되므로 이름을 바꾸면 이전 설정을 복원하지 못합니다.
 const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 const HUD_EFFECTS = ['normal', 'reduced']
 
@@ -29,20 +25,20 @@ const MODULES = [
 
 function App() {
   const [startModule, setStartModule] = useState(() => {
-    const savedStartModule = localStorage.getItem(START_MODULE_STORAGE_KEY)
+    const savedStartModule = localStorage.getItem(STORAGE_KEYS.startModule)
 
     // localStorage 값이 예전 버전이거나 손상된 경우 안전한 기본 모듈로 시작합니다.
     return START_MODULES.includes(savedStartModule) ? savedStartModule : 'tasks'
   })
   const [activeModule, setActiveModule] = useState(startModule)
   const [hudEffect, setHudEffect] = useState(() => {
-    const savedHudEffect = localStorage.getItem(HUD_EFFECT_STORAGE_KEY)
+    const savedHudEffect = localStorage.getItem(STORAGE_KEYS.hudEffect)
 
     // 허용된 HUD 효과만 복원해 CSS 클래스가 예상 범위를 벗어나지 않게 합니다.
     return HUD_EFFECTS.includes(savedHudEffect) ? savedHudEffect : 'normal'
   })
   const [language, setLanguage] = useState(() => {
-    const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY)
+    const savedLanguage = localStorage.getItem(STORAGE_KEYS.language)
 
     // 지원하지 않는 언어 코드는 translations 접근 오류를 막기 위해 기본 언어로 되돌립니다.
     return isSupportedLanguage(savedLanguage) ? savedLanguage : 'ko'
@@ -50,15 +46,15 @@ function App() {
 
   // 설정 변경은 App 상태를 기준으로 즉시 저장되어 새로고침 후에도 유지됩니다.
   useEffect(() => {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+    localStorage.setItem(STORAGE_KEYS.language, language)
   }, [language])
 
   useEffect(() => {
-    localStorage.setItem(START_MODULE_STORAGE_KEY, startModule)
+    localStorage.setItem(STORAGE_KEYS.startModule, startModule)
   }, [startModule])
 
   useEffect(() => {
-    localStorage.setItem(HUD_EFFECT_STORAGE_KEY, hudEffect)
+    localStorage.setItem(STORAGE_KEYS.hudEffect, hudEffect)
   }, [hudEffect])
 
   const t = translations[language]

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
 const DEFAULT_FOCUS_MINUTES = 25
 const DEFAULT_BREAK_MINUTES = 5
 // 현재 진행 중인 시간은 저장하지 않고 완료 세션 수만 영속화합니다.
-const TIMER_SESSIONS_STORAGE_KEY = 'tenvi.timer.completedSessions'
+const TIMER_SESSIONS_STORAGE_KEY = STORAGE_KEYS.timerCompletedSessions
 
 const minutesToSeconds = (minutes) => Math.max(1, minutes) * 60
 

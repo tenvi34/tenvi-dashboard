@@ -1,5 +1,4 @@
-const TASKS_STORAGE_KEY = 'todo-manager-lite.todos'
-const NOTES_STORAGE_KEY = 'tenvi.notes'
+import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -22,8 +21,8 @@ const getNoteTime = (note) => {
 }
 
 function Dashboard({ t }) {
-  const tasks = readStoredList(TASKS_STORAGE_KEY)
-  const notes = readStoredList(NOTES_STORAGE_KEY)
+  const tasks = readStoredList(STORAGE_KEYS.tasks)
+  const notes = readStoredList(STORAGE_KEYS.notes)
   const completedTasks = tasks.filter((task) => task.completed).length
   const activeTasks = tasks.length - completedTasks
   const recentNotes = [...notes]

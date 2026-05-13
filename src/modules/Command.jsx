@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
 // Command는 Tasks/Notes 모듈이 저장한 데이터를 직접 읽으므로 키가 반드시 일치해야 합니다.
-const TASKS_STORAGE_KEY = 'todo-manager-lite.todos'
-const NOTES_STORAGE_KEY = 'tenvi.notes'
+const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
+const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 const HISTORY_LIMIT = 5
 
 const readStoredList = (storageKey) => {

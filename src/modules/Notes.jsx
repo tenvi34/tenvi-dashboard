@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
+import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
 // Command와 Settings도 같은 키를 사용하므로 변경 시 연동 로직을 함께 확인해야 합니다.
-const STORAGE_KEY = 'tenvi.notes'
+const STORAGE_KEY = STORAGE_KEYS.notes
 
 function Notes({ t }) {
   const [notes, setNotes] = useState(() => {

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
 // TENVI로 이름이 바뀌어도 기존 todo-manager-lite 사용자의 Tasks 데이터를 보존해야 합니다.
-const STORAGE_KEY = 'todo-manager-lite.todos'
+const STORAGE_KEY = STORAGE_KEYS.tasks
 
 const FILTERS = ['all', 'active', 'completed']
 
