@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 
-// Command는 Tasks/Notes 모듈이 저장한 데이터를 직접 읽으므로 키가 반드시 일치해야 합니다.
+// Command는 다른 모듈의 저장 데이터를 읽기만 하므로 기존 localStorage key와 구조를 그대로 따라야 합니다.
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
+const TIMER_SESSIONS_STORAGE_KEY = STORAGE_KEYS.timerCompletedSessions
+const START_MODULE_STORAGE_KEY = STORAGE_KEYS.startModule
+const LANGUAGE_STORAGE_KEY = STORAGE_KEYS.language
 const HISTORY_LIMIT = 5
+const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
+const LANGUAGES = ['ko', 'en']
 
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -15,11 +20,24 @@ const readStoredList = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
-    // 명령 콘솔은 분석 도구이므로 저장소가 예상과 달라도 빈 목록으로 안전하게 진행합니다.
+    // 명령 콘솔은 분석 도구이므로 저장소가 손상되어도 빈 목록으로 안전하게 진행합니다.
     return Array.isArray(parsedValue) ? parsedValue : []
   } catch {
     return []
   }
+}
+
+const readStoredNumber = (storageKey) => {
+  const savedValue = localStorage.getItem(storageKey)
+  const parsedValue = Number.parseInt(savedValue, 10)
+
+  return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
+}
+
+const readStoredChoice = (storageKey, allowedValues, fallback) => {
+  const savedValue = localStorage.getItem(storageKey)
+
+  return allowedValues.includes(savedValue) ? savedValue : fallback
 }
 
 const getNoteTime = (note) => {
@@ -50,40 +68,84 @@ const getTaskStats = (tasks) => {
 
 const normalizeCommand = (command) => command.trim().toLowerCase()
 
+const matchesCommand = (normalizedCommand, aliases) =>
+  aliases.some((alias) => normalizedCommand === alias)
+
+const parseKeywordCommand = (command, normalizedCommand, aliases) => {
+  const matchedAlias = aliases.find((alias) => normalizedCommand.startsWith(alias))
+
+  if (!matchedAlias) {
+    return null
+  }
+
+  return command.slice(matchedAlias.length).trim()
+}
+
 const parseCommand = (command) => {
   const normalizedCommand = normalizeCommand(command)
 
-  // 한글/영어 입력을 같은 내부 타입으로 정규화해 결과 생성 로직을 단순하게 유지합니다.
-  if (normalizedCommand === '상태 분석' || normalizedCommand === 'analyze status') {
+  // 한글/영어 alias를 하나의 command type으로 정규화해 결과 생성 로직을 단순하게 유지합니다.
+  if (matchesCommand(normalizedCommand, ['도움말', 'help'])) {
+    return { type: 'help' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['상태 분석', 'analyze status'])) {
     return { type: 'analyzeStatus' }
   }
 
-  if (
-    normalizedCommand === '미완료 작업' ||
-    normalizedCommand === 'show active tasks'
-  ) {
+  if (matchesCommand(normalizedCommand, ['미완료 작업', 'show active tasks'])) {
     return { type: 'showActiveTasks' }
   }
 
-  if (normalizedCommand === '완료율' || normalizedCommand === 'completion rate') {
+  if (matchesCommand(normalizedCommand, ['완료율', 'completion rate'])) {
     return { type: 'completionRate' }
   }
 
-  if (normalizedCommand === '최근 노트' || normalizedCommand === 'recent notes') {
+  if (matchesCommand(normalizedCommand, ['최근 노트', 'recent notes'])) {
     return { type: 'recentNotes' }
   }
 
-  if (normalizedCommand.startsWith('노트 검색')) {
+  if (matchesCommand(normalizedCommand, ['오늘 추천', 'recommend task'])) {
+    return { type: 'recommendTask' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['데이터 상태', 'data status'])) {
+    return { type: 'dataStatus' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['타이머 열기', 'open timer'])) {
+    return { targetModule: 'timer', type: 'openModule' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['설정 열기', 'open settings'])) {
+    return { targetModule: 'settings', type: 'openModule' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['집중 모드', 'focus mode'])) {
+    return { targetModule: 'timer', type: 'focusMode' }
+  }
+
+  const noteKeyword = parseKeywordCommand(command, normalizedCommand, [
+    '노트 검색',
+    'search notes',
+  ])
+
+  if (noteKeyword !== null) {
     return {
-      keyword: command.replace(/^노트 검색/i, '').trim(),
+      keyword: noteKeyword,
       type: 'searchNotes',
     }
   }
 
-  if (normalizedCommand.startsWith('search notes')) {
+  const taskKeyword = parseKeywordCommand(command, normalizedCommand, [
+    '태스크 검색',
+    'search tasks',
+  ])
+
+  if (taskKeyword !== null) {
     return {
-      keyword: command.replace(/^search notes/i, '').trim(),
-      type: 'searchNotes',
+      keyword: taskKeyword,
+      type: 'searchTasks',
     }
   }
 
@@ -102,6 +164,8 @@ const getRecommendation = (stats, noteCount, t) => {
   return t.command.recommendations.allClear
 }
 
+const getRecommendedTask = (tasks) => tasks.find((task) => !task.completed)
+
 const createMetric = (label, value) => ({ label, value })
 
 const createCommandListItem = (t) => ({
@@ -116,6 +180,15 @@ const createResult = ({ command, notes, parsedCommand, tasks, t }) => {
   const recommendation = getRecommendation(stats, notes.length, t)
 
   // 각 명령은 UI가 공통으로 렌더링할 수 있는 metrics/items 구조를 반환합니다.
+  if (parsedCommand.type === 'help') {
+    return {
+      items: [createCommandListItem(t)],
+      metrics: [],
+      title: t.command.helpTitle,
+      type: 'help',
+    }
+  }
+
   if (parsedCommand.type === 'analyzeStatus') {
     return {
       items: [
@@ -204,6 +277,125 @@ const createResult = ({ command, notes, parsedCommand, tasks, t }) => {
     }
   }
 
+  if (parsedCommand.type === 'recommendTask') {
+    const recommendedTask = getRecommendedTask(tasks)
+
+    return {
+      items: [
+        {
+          label: t.command.recommendedTask,
+          values: recommendedTask
+            ? [recommendedTask.title]
+            : [t.command.noTaskRecommendation],
+        },
+      ],
+      metrics: [createMetric(t.command.activeTasks, stats.active)],
+      title: t.command.recommendTaskResult,
+      type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'searchTasks') {
+    if (!parsedCommand.keyword) {
+      return {
+        items: [createCommandListItem(t)],
+        metrics: [],
+        title: t.command.missingKeyword,
+        type: 'help',
+      }
+    }
+
+    const keyword = parsedCommand.keyword.toLowerCase()
+    const matchingTasks = tasks.filter((task) => {
+      const title = task.title?.toLowerCase() ?? ''
+      return title.includes(keyword)
+    })
+
+    return {
+      items: [
+        {
+          label: `${t.command.searchResults}: ${parsedCommand.keyword}`,
+          values:
+            matchingTasks.length > 0
+              ? matchingTasks.map((task) => task.title)
+              : [t.command.noMatchingTasks],
+        },
+      ],
+      metrics: [createMetric(t.command.matches, matchingTasks.length)],
+      title: t.command.searchTasksResult,
+      type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'dataStatus') {
+    const timerSessions = readStoredNumber(TIMER_SESSIONS_STORAGE_KEY)
+    const savedLanguage = readStoredChoice(LANGUAGE_STORAGE_KEY, LANGUAGES, 'ko')
+    const savedStartModule = readStoredChoice(
+      START_MODULE_STORAGE_KEY,
+      START_MODULES,
+      'tasks',
+    )
+
+    return {
+      items: [
+        {
+          label: t.command.dataStatusSummary,
+          values: [
+            `${t.command.currentLanguage}: ${t.languages[savedLanguage]}`,
+            `${t.command.defaultStartModule}: ${t.modules[savedStartModule]}`,
+          ],
+        },
+      ],
+      metrics: [
+        createMetric(t.command.totalTasks, stats.total),
+        createMetric(t.command.totalNotes, notes.length),
+        createMetric(t.command.timerSessions, timerSessions),
+      ],
+      title: t.command.dataStatusResult,
+      type: 'analysis',
+    }
+  }
+
+  if (parsedCommand.type === 'openModule') {
+    const moduleLabel = t.modules[parsedCommand.targetModule]
+
+    return {
+      navigateTo: parsedCommand.targetModule,
+      items: [
+        {
+          label: t.command.navigation,
+          values: [t.command.openModuleMessage(moduleLabel)],
+        },
+      ],
+      metrics: [],
+      title: t.command.openModuleResult,
+      type: 'action',
+    }
+  }
+
+  if (parsedCommand.type === 'focusMode') {
+    const recommendedTask = getRecommendedTask(tasks)
+
+    return {
+      navigateTo: 'timer',
+      items: [
+        {
+          label: t.command.recommendedTask,
+          values: recommendedTask
+            ? [recommendedTask.title]
+            : [t.command.noTaskRecommendation],
+        },
+        {
+          label: t.command.navigation,
+          values: [t.command.focusModeMessage],
+        },
+      ],
+      metrics: [createMetric(t.command.activeTasks, stats.active)],
+      title: t.command.focusModeResult,
+      type: 'action',
+    }
+  }
+
   if (parsedCommand.type === 'searchNotes') {
     if (!parsedCommand.keyword) {
       return {
@@ -245,7 +437,7 @@ const createResult = ({ command, notes, parsedCommand, tasks, t }) => {
   }
 }
 
-function Command({ t }) {
+function Command({ onModuleChange, t }) {
   const [command, setCommand] = useState('')
   const [history, setHistory] = useState([])
   const [result, setResult] = useState(null)
@@ -270,9 +462,15 @@ function Command({ t }) {
     })
 
     setResult(nextResult)
+
+    if (nextResult.navigateTo) {
+      // Command는 라우터를 쓰지 않고 App의 activeModule 상태 변경만 요청합니다.
+      onModuleChange(nextResult.navigateTo)
+    }
+
     setHistory((currentHistory) => {
       const normalizedCommand = normalizeCommand(trimmedCommand)
-      // 최근 명령은 현재 세션용이며, 같은 명령은 최신 위치로만 남깁니다.
+      // 최근 명령은 현재 세션용이며, 같은 명령은 최신 위치로만 유지합니다.
       const uniqueHistory = currentHistory.filter(
         (historyItem) => normalizeCommand(historyItem) !== normalizedCommand,
       )

@@ -63,7 +63,7 @@ function App() {
   const moduleComponents = useMemo(
     () => ({
       dashboard: <Dashboard t={t} />,
-      command: <Command t={t} />,
+      command: <Command onModuleChange={setActiveModule} t={t} />,
       tasks: <Tasks t={t} />,
       notes: <Notes t={t} />,
       timer: <Timer t={t} />,
