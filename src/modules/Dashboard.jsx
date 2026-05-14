@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import { getTodayEvents } from './calendarLogic.js'
 
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -23,8 +24,10 @@ const getNoteTime = (note) => {
 function Dashboard({ t }) {
   const tasks = readStoredList(STORAGE_KEYS.tasks)
   const notes = readStoredList(STORAGE_KEYS.notes)
+  const calendarEvents = readStoredList(STORAGE_KEYS.calendarEvents)
   const completedTasks = tasks.filter((task) => task.completed).length
   const activeTasks = tasks.length - completedTasks
+  const todayEvents = getTodayEvents(calendarEvents).slice(0, 3)
   const recentNotes = [...notes]
     .sort((firstNote, secondNote) => getNoteTime(secondNote) - getNoteTime(firstNote))
     .slice(0, 3)
@@ -88,6 +91,39 @@ function Dashboard({ t }) {
               <div className="empty-state compact-empty" role="status">
                 <span>{t.common.systemMessage}</span>
                 <p>{t.dashboard.noRecentNotes}</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section
+          className="summary-panel"
+          aria-labelledby="calendar-summary-title"
+        >
+          <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.calendarSummary}</p>
+            <h3 id="calendar-summary-title">{t.modules.calendar}</h3>
+          </div>
+          <div className="summary-metric summary-metric-wide">
+            <span>{t.dashboard.todayEvents}</span>
+            <strong>{getTodayEvents(calendarEvents).length}</strong>
+          </div>
+
+          <div className="recent-notes" aria-label={t.dashboard.todayEvents}>
+            <p className="recent-notes-title">{t.dashboard.todayEvents}</p>
+            {todayEvents.length > 0 ? (
+              <ul>
+                {todayEvents.map((calendarEvent) => (
+                  <li className="recent-note" key={calendarEvent.id}>
+                    <strong>{calendarEvent.title}</strong>
+                    {calendarEvent.memo ? <span>{calendarEvent.memo}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="empty-state compact-empty" role="status">
+                <span>{t.common.systemMessage}</span>
+                <p>{t.dashboard.noTodayEvents}</p>
               </div>
             )}
           </div>

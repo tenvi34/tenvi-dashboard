@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import { STORAGE_KEYS } from './constants/storageKeys.js'
 import { isSupportedLanguage, translations } from './i18n/translations.js'
+import Calendar from './modules/Calendar.jsx'
 import Command from './modules/Command.jsx'
 import Dashboard from './modules/Dashboard.jsx'
 import Notes from './modules/Notes.jsx'
@@ -19,6 +20,7 @@ const MODULES = [
   { id: 'command' },
   { id: 'tasks' },
   { id: 'notes' },
+  { id: 'calendar' },
   { id: 'timer' },
   { id: 'settings' },
 ]
@@ -66,6 +68,7 @@ function App() {
       command: <Command onModuleChange={setActiveModule} t={t} />,
       tasks: <Tasks t={t} />,
       notes: <Notes t={t} />,
+      calendar: <Calendar t={t} />,
       timer: <Timer t={t} />,
       settings: (
         <Settings
