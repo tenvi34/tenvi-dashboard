@@ -1,22 +1,19 @@
 import { useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import {
+  BACKUP_APP,
+  BACKUP_TYPE,
+  BACKUP_VERSION,
+  createBackupFileName,
+  HUD_EFFECTS,
+  LANGUAGES,
+  START_MODULES,
+  validateBackupPayload,
+} from './settingsBackup.js'
 
 // Settings는 데이터 개수 표시와 초기화를 담당하므로 실제 모듈의 저장 키와 같아야 합니다.
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
-
-const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
-const HUD_EFFECTS = ['normal', 'reduced']
-const LANGUAGES = ['ko', 'en']
-const BACKUP_APP = 'TENVI'
-const BACKUP_TYPE = 'tenvi-dashboard-backup'
-const BACKUP_VERSION = 1
-
-const createBackupFileName = () => {
-  const today = new Date().toISOString().slice(0, 10)
-
-  return `tenvi-backup-${today}.json`
-}
 
 const readStoredCount = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -55,55 +52,6 @@ const readStoredCompletedSessions = () => {
   const parsedValue = Number.parseInt(savedValue, 10)
 
   return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
-}
-
-const isPlainObject = (value) =>
-  value !== null && typeof value === 'object' && !Array.isArray(value)
-
-const validateBackupPayload = (backupPayload) => {
-  if (!isPlainObject(backupPayload)) {
-    return null
-  }
-
-  if (
-    backupPayload.app !== BACKUP_APP ||
-    backupPayload.type !== BACKUP_TYPE ||
-    backupPayload.version !== BACKUP_VERSION ||
-    !isPlainObject(backupPayload.data)
-  ) {
-    return null
-  }
-
-  const {
-    hudEffect,
-    language,
-    notes,
-    startModule,
-    tasks,
-    timerCompletedSessions,
-  } = backupPayload.data
-  const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
-
-  if (
-    !Array.isArray(tasks) ||
-    !Array.isArray(notes) ||
-    Number.isNaN(normalizedTimerSessions) ||
-    normalizedTimerSessions < 0 ||
-    !LANGUAGES.includes(language) ||
-    !START_MODULES.includes(startModule) ||
-    !HUD_EFFECTS.includes(hudEffect)
-  ) {
-    return null
-  }
-
-  return {
-    hudEffect,
-    language,
-    notes,
-    startModule,
-    tasks,
-    timerCompletedSessions: normalizedTimerSessions,
-  }
 }
 
 function Settings({

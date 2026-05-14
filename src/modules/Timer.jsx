@@ -1,30 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import {
+  formatStopwatchTime,
+  formatTime,
+  minutesToSeconds,
+  normalizeMinutes,
+} from './timerLogic.js'
 
 const DEFAULT_FOCUS_MINUTES = 25
 const DEFAULT_BREAK_MINUTES = 5
 // 현재 진행 중인 시간은 저장하지 않고 완료 세션 수만 영속화합니다.
 const TIMER_SESSIONS_STORAGE_KEY = STORAGE_KEYS.timerCompletedSessions
-
-const minutesToSeconds = (minutes) => Math.max(1, minutes) * 60
-
-const formatTime = (totalSeconds) => {
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-}
-
-const formatStopwatchTime = (totalMilliseconds) => {
-  const minutes = Math.floor(totalMilliseconds / 60000)
-  const seconds = Math.floor((totalMilliseconds % 60000) / 1000)
-  const milliseconds = totalMilliseconds % 1000
-
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(
-    2,
-    '0',
-  )}.${String(milliseconds).padStart(3, '0')}`
-}
 
 const readCompletedSessions = () => {
   const savedValue = localStorage.getItem(TIMER_SESSIONS_STORAGE_KEY)
@@ -32,17 +18,6 @@ const readCompletedSessions = () => {
 
   // 저장값이 비어 있거나 숫자가 아니면 세션 통계를 0부터 다시 시작합니다.
   return Number.isNaN(parsedValue) ? 0 : parsedValue
-}
-
-const normalizeMinutes = (value, fallback) => {
-  const parsedValue = Number.parseInt(value, 10)
-
-  if (Number.isNaN(parsedValue)) {
-    return fallback
-  }
-
-  // 너무 작거나 큰 입력이 타이머 흐름을 깨지 않도록 UI 허용 범위에 맞춥니다.
-  return Math.min(Math.max(parsedValue, 1), 240)
 }
 
 function Timer({ t }) {
@@ -61,10 +36,13 @@ function Timer({ t }) {
   const [isStopwatchRunning, setIsStopwatchRunning] = useState(false)
   const [laps, setLaps] = useState([])
 
-  const getModeSeconds = (timerMode) =>
-    timerMode === 'focus'
-      ? minutesToSeconds(focusMinutes)
-      : minutesToSeconds(breakMinutes)
+  const getModeSeconds = useCallback(
+    (timerMode) =>
+      timerMode === 'focus'
+        ? minutesToSeconds(focusMinutes)
+        : minutesToSeconds(breakMinutes),
+    [breakMinutes, focusMinutes],
+  )
 
   useEffect(() => {
     localStorage.setItem(
@@ -98,14 +76,14 @@ function Timer({ t }) {
     }, 1000)
 
     return () => window.clearInterval(timerId)
-  }, [breakMinutes, focusMinutes, isRunning, mode])
+  }, [getModeSeconds, isRunning, mode])
 
   useEffect(() => {
     if (!isStopwatchRunning) {
       return undefined
     }
 
-    // 스톱워치는 화면 표시 정밀도를 위해 10ms 단위로 갱신하되 정지는 cleanup에 맡깁니다.
+    // 스톱워치는 화면 표시 정확도를 위해 10ms 단위로 갱신하되 정지는 cleanup에 맡깁니다.
     const stopwatchId = window.setInterval(() => {
       setStopwatchMilliseconds((currentMilliseconds) => currentMilliseconds + 10)
     }, 10)
@@ -135,7 +113,7 @@ function Timer({ t }) {
 
     setBreakMinutes(nextBreakMinutes)
 
-    // Break 모드도 실행 중 설정 변경이 남은 시간을 갑자기 덮어쓰지 않게 합니다.
+    // Break 모드의 실행 중 설정 변경이 남은 시간을 갑자기 흔들지 않게 합니다.
     if (mode === 'break' && !isRunning) {
       setSecondsLeft(minutesToSeconds(nextBreakMinutes))
     }
