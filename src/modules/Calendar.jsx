@@ -116,6 +116,7 @@ function Calendar({ t }) {
       className="module-panel calendar-module"
       aria-labelledby="calendar-title"
     >
+      {/* Calendar 상단 제목과 현재 선택 날짜 표시 영역 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.calendar.label}</p>
@@ -124,11 +125,13 @@ function Calendar({ t }) {
         <p className="module-meta">{selectedDate}</p>
       </div>
 
+      {/* Calendar 본문: 좌측 일정 관리, 우측 월간 달력 */}
       <div className="calendar-layout">
         <section
           className="calendar-events-panel"
           aria-label={t.calendar.eventsForDate}
         >
+          {/* 선택된 날짜의 일정 목록 헤더 */}
           <div className="calendar-events-header">
             <div>
               <p className="module-label">{t.calendar.eventsForDate}</p>
@@ -137,6 +140,7 @@ function Calendar({ t }) {
             <strong>{selectedEvents.length}</strong>
           </div>
 
+          {/* 선택된 날짜의 일정 목록 또는 빈 상태 메시지 */}
           {selectedEvents.length > 0 ? (
             <ul className="calendar-event-list">
               {selectedEvents.map((calendarEvent) => (
@@ -162,6 +166,7 @@ function Calendar({ t }) {
             </div>
           )}
 
+          {/* 선택된 날짜에 새 일정을 추가하는 입력 폼 */}
           <form className="calendar-form" onSubmit={handleAddEvent}>
             <label className="sr-only" htmlFor="calendar-title-input">
               {t.calendar.titleLabel}
@@ -193,6 +198,7 @@ function Calendar({ t }) {
           className="calendar-month-panel"
           aria-label={t.calendar.monthlyCalendar}
         >
+          {/* 월 이동과 년/월 선택 컨트롤 */}
           <div className="calendar-month-toolbar">
             <button
               className="calendar-nav-button"
@@ -234,12 +240,14 @@ function Calendar({ t }) {
             </button>
           </div>
 
+          {/* 요일 헤더 */}
           <div className="calendar-weekdays" aria-hidden="true">
             {t.calendar.weekdays.map((weekday) => (
               <span key={weekday}>{weekday}</span>
             ))}
           </div>
 
+          {/* 월간 달력 셀: 선택일, 오늘, 일정 있음, 보름달 표시를 함께 렌더링합니다. */}
           <div className="calendar-month-grid">
             {calendarCells.map((cell, index) =>
               cell ? (

@@ -47,6 +47,7 @@ function Dashboard({ t }) {
       className="module-panel dashboard-module"
       aria-labelledby="dashboard-title"
     >
+      {/* Dashboard 상단 제목 영역 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.dashboard.label}</p>
@@ -54,7 +55,9 @@ function Dashboard({ t }) {
         </div>
       </div>
 
+      {/* Dashboard 요약 카드 영역: Tasks, Notes, Calendar 현황을 한 화면에서 확인합니다. */}
       <div className="dashboard-summary-grid">
+        {/* Tasks 요약 카드 */}
         <section className="summary-panel" aria-labelledby="task-summary-title">
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.tasksSummary}</p>
@@ -76,6 +79,7 @@ function Dashboard({ t }) {
           </div>
         </section>
 
+        {/* Notes 요약 카드 */}
         <section className="summary-panel" aria-labelledby="notes-summary-title">
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.notesSummary}</p>
@@ -110,6 +114,7 @@ function Dashboard({ t }) {
           className="summary-panel"
           aria-labelledby="calendar-summary-title"
         >
+          {/* Calendar 요약 카드 */}
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.calendarSummary}</p>
             <h3 id="calendar-summary-title">{t.modules.calendar}</h3>
@@ -129,6 +134,7 @@ function Dashboard({ t }) {
             </div>
           </div>
 
+          {/* 오늘 일정 일부 목록 */}
           <div className="recent-notes" aria-label={t.dashboard.todayEvents}>
             <p className="recent-notes-title">{t.dashboard.todayEvents}</p>
             {todayEvents.length > 0 ? (
@@ -148,6 +154,7 @@ function Dashboard({ t }) {
             )}
           </div>
 
+          {/* 다음 예정 일정 1개 */}
           <div className="recent-notes dashboard-calendar-next">
             <p className="recent-notes-title">{t.dashboard.nextEvent}</p>
             {nextEvent ? (

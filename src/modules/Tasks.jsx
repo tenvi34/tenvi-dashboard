@@ -83,6 +83,7 @@ function Tasks({ t }) {
 
   return (
     <section className="module-panel todo-module" aria-labelledby="todo-title">
+      {/* Tasks 상단 제목과 현재 필터 표시 영역 */}
       <div className="module-header todo-module-header">
         <div>
           <p className="module-label">{t.tasks.label}</p>
@@ -93,6 +94,7 @@ function Tasks({ t }) {
         </p>
       </div>
 
+      {/* Tasks 개수 요약 카드 */}
       <div className="status-stack task-stats" aria-label={t.tasks.summaryLabel}>
         <div className="status-card">
           <span>{t.tasks.total}</span>
@@ -108,6 +110,7 @@ function Tasks({ t }) {
         </div>
       </div>
 
+      {/* 새 Task 입력 영역 */}
       <form className="todo-form" onSubmit={handleAddTodo}>
         <label className="sr-only" htmlFor="todo-input">
           {t.tasks.inputLabel}
@@ -122,6 +125,7 @@ function Tasks({ t }) {
         <button type="submit">{t.tasks.add}</button>
       </form>
 
+      {/* Task 필터 버튼 영역 */}
       <div className="todo-filters" aria-label={t.tasks.filtersLabel}>
         {FILTERS.map((item) => (
           <button
@@ -135,6 +139,7 @@ function Tasks({ t }) {
         ))}
       </div>
 
+      {/* Task 목록 또는 빈 상태 메시지 */}
       {filteredTodos.length > 0 ? (
         <ul className="todo-list" aria-label={t.tasks.listLabel}>
           {filteredTodos.map((todo) => (

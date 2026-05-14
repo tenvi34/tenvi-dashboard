@@ -165,6 +165,7 @@ function Settings({
       className="module-panel settings-module"
       aria-labelledby="settings-title"
     >
+      {/* Settings 상단 제목 영역 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.settings.label}</p>
@@ -172,7 +173,9 @@ function Settings({
         </div>
       </div>
 
+      {/* Settings 설정 그룹 전체 그리드 */}
       <div className="settings-grid">
+        {/* 언어 선택 그룹 */}
         <section className="settings-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.language}</p>
@@ -195,6 +198,7 @@ function Settings({
           </div>
         </section>
 
+        {/* 기본 시작 모듈 선택 그룹 */}
         <section className="settings-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.defaultStartModule}</p>
@@ -220,6 +224,7 @@ function Settings({
           </div>
         </section>
 
+        {/* HUD 효과 강도 선택 그룹 */}
         <section className="settings-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.hudEffect}</p>
@@ -242,6 +247,7 @@ function Settings({
           </div>
         </section>
 
+        {/* 저장된 Tasks/Notes 데이터 현황과 초기화 그룹 */}
         <section className="settings-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.dataManagement}</p>
@@ -267,6 +273,7 @@ function Settings({
           <p className="settings-note">{t.settings.resetRequiresConfirmation}</p>
 
           {isResetConfirmOpen ? (
+            /* 데이터 초기화 확인 패널 */
             <div className="reset-confirm-panel" role="alert">
               <p className="module-label">{t.settings.resetWarningLabel}</p>
               <h4>{t.settings.resetWarningTitle}</h4>
@@ -291,6 +298,7 @@ function Settings({
           ) : null}
         </section>
 
+        {/* 데이터 백업/복원 그룹 */}
         <section className="settings-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.backupLabel}</p>

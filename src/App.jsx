@@ -90,7 +90,9 @@ function App() {
     <main className={`tenvi-dashboard hud-${hudEffect}`}>
       <div className="tenvi-grid" aria-hidden="true"></div>
 
+      {/* TENVI 전체 화면 프레임: 상단 헤더와 모듈 작업 영역을 감쌉니다. */}
       <section className="tenvi-shell" aria-labelledby="tenvi-title">
+        {/* 앱 상단 브랜드, 언어 전환, 시스템 상태 영역 */}
         <header className="tenvi-header">
           <div>
             {/* <p className="tenvi-kicker">Personal AI Command Dashboard</p> */}
@@ -118,6 +120,7 @@ function App() {
           </div>
         </header>
 
+        {/* 좌측 Sidebar와 우측 활성 모듈 화면 영역 */}
         <section className="tenvi-workspace">
           <Sidebar
             activeModule={activeModule}
@@ -126,6 +129,7 @@ function App() {
             t={t}
           />
 
+          {/* activeModule 값에 따라 실제 화면 컴포넌트가 교체되는 영역 */}
           <section
             className="module-stage"
             aria-label={`${activeModuleLabel} ${t.app.stageLabel}`}

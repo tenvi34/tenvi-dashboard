@@ -68,6 +68,7 @@ function Command({ onModuleChange, t }) {
       className="module-panel command-module"
       aria-labelledby="command-title"
     >
+      {/* Command Console 상단 제목 영역 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.command.label}</p>
@@ -76,6 +77,7 @@ function Command({ onModuleChange, t }) {
         <p className="module-meta">{t.command.mode}</p>
       </div>
 
+      {/* 명령어 입력 영역 */}
       <form className="command-form" onSubmit={handleExecute}>
         <label className="sr-only" htmlFor="command-input">
           {t.command.inputLabel}
@@ -90,6 +92,7 @@ function Command({ onModuleChange, t }) {
         <button type="submit">{t.command.execute}</button>
       </form>
 
+      {/* 명령 실행 결과 패널: metrics와 목록형 결과가 함께 표시됩니다. */}
       <section className="analysis-panel" aria-live="polite">
         <div className="analysis-header">
           <p className="module-label">{t.command.systemAnalysis}</p>
@@ -111,6 +114,7 @@ function Command({ onModuleChange, t }) {
 
             <div className="analysis-sections">
               {result.items.map((item) => (
+                /* 결과 세부 섹션 또는 도움말 명령 목록 */
                 <section className="analysis-section" key={item.label}>
                   <h4>{item.label}</h4>
                   <ul className={item.isCommandList ? 'command-list' : ''}>
@@ -142,6 +146,7 @@ function Command({ onModuleChange, t }) {
         )}
       </section>
 
+      {/* 현재 브라우저 세션에서만 유지되는 최근 명령 목록 */}
       <section className="command-history" aria-label={t.command.history}>
         <p className="recent-notes-title">{t.command.history}</p>
         {history.length > 0 ? (

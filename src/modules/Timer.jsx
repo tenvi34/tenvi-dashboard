@@ -146,11 +146,9 @@ function Timer({ t }) {
     setLaps((currentLaps) => [stopwatchMilliseconds, ...currentLaps])
   }
 
-  const currentModeLabel =
-    mode === 'focus' ? t.timer.modes.focus : t.timer.modes.break
-
   return (
     <section className="module-panel timer-module" aria-labelledby="timer-title">
+      {/* Timer 상단 제목 영역: 실제 모드는 아래 탭으로 구분합니다. */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.timer.label}</p>
@@ -158,13 +156,9 @@ function Timer({ t }) {
             {t.timer.label}
           </h2>
         </div>
-        <p className="module-meta">
-          {activeTab === 'timer' ? t.timer.currentMode : t.timer.stopwatch}
-          {activeTab === 'timer' ? ': ' : ''}
-          {activeTab === 'timer' ? <span>{currentModeLabel}</span> : null}
-        </p>
       </div>
 
+      {/* Timer / Stopwatch 전환 탭 */}
       <div className="timer-tabs" role="tablist" aria-label={t.timer.tabsLabel}>
         <button
           className={`timer-tab ${activeTab === 'timer' ? 'is-active' : ''}`}
@@ -188,6 +182,7 @@ function Timer({ t }) {
 
       {activeTab === 'timer' ? (
         <>
+          {/* Focus / Break 시간 설정 영역 */}
           <div className="timer-duration-settings">
             <label>
               <span>{t.timer.focusDuration}</span>
@@ -211,14 +206,15 @@ function Timer({ t }) {
             </label>
           </div>
 
+          {/* 남은 시간 표시 영역 */}
           <div className="timer-display-panel">
-            <p className="timer-mode">{currentModeLabel}</p>
             <p className="timer-time" aria-label={t.timer.timeRemaining}>
               {formatTime(secondsLeft)}
             </p>
             <p className="timer-caption">{t.timer.timeRemaining}</p>
           </div>
 
+          {/* Timer 조작 버튼 영역 */}
           <div className="timer-controls" aria-label={t.timer.controlsLabel}>
             <button className="timer-button" type="button" onClick={handleStart}>
               {t.timer.start}
@@ -235,6 +231,7 @@ function Timer({ t }) {
             </button>
           </div>
 
+          {/* Timer 설정값과 완료 세션 요약 */}
           <div className="timer-stats">
             <div className="timer-stat">
               <span>{t.timer.focusDuration}</span>
@@ -252,14 +249,15 @@ function Timer({ t }) {
         </>
       ) : (
         <>
+          {/* Stopwatch 경과 시간 표시 영역 */}
           <div className="timer-display-panel stopwatch-panel">
-            <p className="timer-mode">{t.timer.stopwatch}</p>
             <p className="timer-time" aria-label={t.timer.elapsedTime}>
               {formatStopwatchTime(stopwatchMilliseconds)}
             </p>
             <p className="timer-caption">{t.timer.elapsedTime}</p>
           </div>
 
+          {/* Stopwatch 조작 버튼 영역 */}
           <div className="timer-controls" aria-label={t.timer.stopwatchControls}>
             <button
               className="timer-button"
@@ -291,6 +289,7 @@ function Timer({ t }) {
             </button>
           </div>
 
+          {/* Stopwatch lap 기록 영역 */}
           <section className="lap-panel" aria-label={t.timer.lapRecords}>
             <p className="recent-notes-title">{t.timer.lapRecords}</p>
             {laps.length > 0 ? (

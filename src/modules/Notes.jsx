@@ -65,6 +65,7 @@ function Notes({ t }) {
 
   return (
     <section className="module-panel notes-module" aria-labelledby="notes-title">
+      {/* Notes 상단 제목과 저장된 노트 개수 표시 영역 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.notes.label}</p>
@@ -75,6 +76,7 @@ function Notes({ t }) {
         </p>
       </div>
 
+      {/* 새 Note 입력 영역 */}
       <form className="notes-form" onSubmit={handleAddNote}>
         <label className="sr-only" htmlFor="note-title">
           {t.notes.titleLabel}
@@ -101,6 +103,7 @@ function Notes({ t }) {
         <button type="submit">{t.notes.store}</button>
       </form>
 
+      {/* Note 목록 또는 빈 상태 메시지 */}
       {notes.length > 0 ? (
         <ul className="notes-list" aria-label={t.notes.listLabel}>
           {notes.map((note) => (
