@@ -5,6 +5,7 @@ import {
   parseCommand,
   readCommandDataStatus,
   readStoredList,
+  CALENDAR_STORAGE_KEY,
   TASKS_STORAGE_KEY,
   NOTES_STORAGE_KEY,
 } from './commandLogic.js'
@@ -26,8 +27,10 @@ function Command({ onModuleChange, t }) {
     // 실행 순간의 localStorage를 읽어 다른 모듈에서 방금 바뀐 데이터까지 반영합니다.
     const tasks = readStoredList(TASKS_STORAGE_KEY)
     const notes = readStoredList(NOTES_STORAGE_KEY)
+    const calendarEvents = readStoredList(CALENDAR_STORAGE_KEY)
     const parsedCommand = parseCommand(trimmedCommand)
     const nextResult = createResult({
+      calendarEvents,
       command: trimmedCommand,
       dataStatus: readCommandDataStatus(),
       notes,

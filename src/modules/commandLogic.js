@@ -1,7 +1,9 @@
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import { countEventsByDate, getDateKey, parseDateKey } from './calendarLogic.js'
 
 export const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 export const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
+export const CALENDAR_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 export const TIMER_SESSIONS_STORAGE_KEY = STORAGE_KEYS.timerCompletedSessions
 export const START_MODULE_STORAGE_KEY = STORAGE_KEYS.startModule
 export const LANGUAGE_STORAGE_KEY = STORAGE_KEYS.language
@@ -129,6 +131,22 @@ export const parseCommand = (command) => {
     return { targetModule: 'timer', type: 'focusMode' }
   }
 
+  if (matchesCommand(normalizedCommand, ['오늘 일정', 'today schedules'])) {
+    return { type: 'todaySchedules' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['이번 달 일정', 'this month schedules'])) {
+    return { type: 'thisMonthSchedules' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['다음 일정', 'next schedule'])) {
+    return { type: 'nextSchedule' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['일정 상태', 'schedule status'])) {
+    return { type: 'scheduleStatus' }
+  }
+
   const noteKeyword = parseKeywordCommand(command, normalizedCommand, [
     '노트 검색',
     'search notes',
@@ -153,6 +171,18 @@ export const parseCommand = (command) => {
     }
   }
 
+  const scheduleKeyword = parseKeywordCommand(command, normalizedCommand, [
+    '일정 검색',
+    'search schedules',
+  ])
+
+  if (scheduleKeyword !== null) {
+    return {
+      keyword: scheduleKeyword,
+      type: 'searchSchedules',
+    }
+  }
+
   return { type: 'unknown' }
 }
 
@@ -173,6 +203,35 @@ export const getRecommendedTask = (tasks) =>
 
 const createMetric = (label, value) => ({ label, value })
 
+const formatScheduleItem = (event) =>
+  event.memo
+    ? `${event.date} - ${event.title}: ${event.memo}`
+    : `${event.date} - ${event.title}`
+
+const getMonthEvents = (events, currentDate) => {
+  const { month, year } = parseDateKey(getDateKey(currentDate))
+
+  return events.filter((event) => {
+    const eventDate = parseDateKey(event.date)
+
+    return eventDate.year === year && eventDate.month === month
+  })
+}
+
+const getNextSchedule = (events, currentDate) => {
+  const todayKey = getDateKey(currentDate)
+
+  return [...events]
+    .filter((event) => event.date > todayKey)
+    .sort((firstEvent, secondEvent) => {
+      if (firstEvent.date !== secondEvent.date) {
+        return firstEvent.date.localeCompare(secondEvent.date)
+      }
+
+      return firstEvent.createdAt.localeCompare(secondEvent.createdAt)
+    })[0]
+}
+
 const createCommandListItem = (t) => ({
   isCommandList: true,
   label: t.command.availableCommands,
@@ -180,7 +239,9 @@ const createCommandListItem = (t) => ({
 })
 
 export const createResult = ({
+  calendarEvents = [],
   command,
+  currentDate = new Date(),
   dataStatus,
   notes,
   parsedCommand,
@@ -190,6 +251,9 @@ export const createResult = ({
   const stats = getTaskStats(tasks)
   const recentNotes = getRecentNotes(notes)
   const recommendation = getRecommendation(stats, notes.length, t)
+  const todayKey = getDateKey(currentDate)
+  const todaySchedules = calendarEvents.filter((event) => event.date === todayKey)
+  const thisMonthSchedules = getMonthEvents(calendarEvents, currentDate)
 
   // 각 명령은 UI가 공통으로 렌더링할 수 있는 metrics/items 구조를 반환합니다.
   if (parsedCommand.type === 'help') {
@@ -336,6 +400,110 @@ export const createResult = ({
       metrics: [createMetric(t.command.matches, matchingTasks.length)],
       title: t.command.searchTasksResult,
       type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'todaySchedules') {
+    return {
+      items: [
+        {
+          label: t.command.todaySchedules,
+          values:
+            todaySchedules.length > 0
+              ? todaySchedules.map(formatScheduleItem)
+              : [t.command.noTodaySchedules],
+        },
+      ],
+      metrics: [createMetric(t.command.todaySchedules, todaySchedules.length)],
+      title: t.command.todaySchedulesResult,
+      type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'thisMonthSchedules') {
+    const eventCounts = countEventsByDate(thisMonthSchedules)
+    const dateSummaries = Object.keys(eventCounts)
+      .sort()
+      .map((dateKey) => `${dateKey}: ${t.command.scheduleCount(eventCounts[dateKey])}`)
+
+    return {
+      items: [
+        {
+          label: t.command.scheduleDateSummary,
+          values: dateSummaries.length > 0 ? dateSummaries : [t.command.noMonthSchedules],
+        },
+      ],
+      metrics: [createMetric(t.command.thisMonthSchedules, thisMonthSchedules.length)],
+      title: t.command.thisMonthSchedulesResult,
+      type: 'analysis',
+    }
+  }
+
+  if (parsedCommand.type === 'searchSchedules') {
+    if (!parsedCommand.keyword) {
+      return {
+        items: [createCommandListItem(t)],
+        metrics: [],
+        title: t.command.missingKeyword,
+        type: 'help',
+      }
+    }
+
+    const keyword = parsedCommand.keyword.toLowerCase()
+    const matchingSchedules = calendarEvents.filter((event) => {
+      const title = event.title?.toLowerCase() ?? ''
+      const memo = event.memo?.toLowerCase() ?? ''
+
+      return title.includes(keyword) || memo.includes(keyword)
+    })
+
+    return {
+      items: [
+        {
+          label: `${t.command.scheduleSearchResults}: ${parsedCommand.keyword}`,
+          values:
+            matchingSchedules.length > 0
+              ? matchingSchedules.map(formatScheduleItem)
+              : [t.command.noMatchingSchedules],
+        },
+      ],
+      metrics: [createMetric(t.command.matches, matchingSchedules.length)],
+      title: t.command.searchSchedulesResult,
+      type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'nextSchedule') {
+    const nextSchedule = getNextSchedule(calendarEvents, currentDate)
+
+    return {
+      items: [
+        {
+          label: t.command.nextSchedule,
+          values: nextSchedule ? [formatScheduleItem(nextSchedule)] : [t.command.noNextSchedule],
+        },
+      ],
+      metrics: [],
+      title: t.command.nextScheduleResult,
+      type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'scheduleStatus') {
+    return {
+      items: [
+        {
+          label: t.command.scheduleStatusSummary,
+          values: [t.command.scheduleStatusMessage],
+        },
+      ],
+      metrics: [
+        createMetric(t.command.totalSchedules, calendarEvents.length),
+        createMetric(t.command.todaySchedules, todaySchedules.length),
+        createMetric(t.command.thisMonthSchedules, thisMonthSchedules.length),
+      ],
+      title: t.command.scheduleStatusResult,
+      type: 'analysis',
     }
   }
 

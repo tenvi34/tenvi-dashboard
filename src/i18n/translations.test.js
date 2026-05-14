@@ -23,6 +23,11 @@ const requiredCommandKeys = [
   'dataStatusResult',
   'openModuleResult',
   'focusModeResult',
+  'todaySchedulesResult',
+  'thisMonthSchedulesResult',
+  'searchSchedulesResult',
+  'nextScheduleResult',
+  'scheduleStatusResult',
   'examples',
 ]
 
