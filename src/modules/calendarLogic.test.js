@@ -53,9 +53,18 @@ describe('calendarLogic', () => {
     )
   })
 
+  it('ignores non-array calendar payloads from storage', () => {
+    expect(readCalendarEvents(JSON.stringify({ events }))).toEqual([])
+    expect(readCalendarEvents(JSON.stringify(null))).toEqual([])
+  })
+
   it('filters events by selected date and today', () => {
     expect(getEventsForDate(events, '2026-05-14')).toEqual([events[0]])
     expect(getTodayEvents(events, new Date(2026, 4, 15))).toEqual([events[1]])
+  })
+
+  it('uses the provided date when filtering today events', () => {
+    expect(getTodayEvents(events, new Date(2026, 4, 14))).toEqual([events[0]])
   })
 
   it('creates trimmed events and rejects empty titles', () => {
@@ -76,6 +85,9 @@ describe('calendarLogic', () => {
     expect(
       createCalendarEvent({ date: '2026-05-14', title: '   ', memo: '' }),
     ).toBe(null)
+    expect(
+      createCalendarEvent({ date: '', title: 'Deep work', memo: '' }),
+    ).toBe(null)
 
     vi.restoreAllMocks()
   })
@@ -93,6 +105,15 @@ describe('calendarLogic', () => {
     expect(cells[5]).toMatchObject({ dateKey: '2026-05-01', day: 1 })
     expect(cells[35]).toMatchObject({ dateKey: '2026-05-31', day: 31 })
     expect(cells.slice(36)).toEqual([null, null, null, null, null, null])
+  })
+
+  it('includes February 29 in leap-year month cells', () => {
+    const dateKeys = getMonthCalendarCells(2024, 1)
+      .filter(Boolean)
+      .map((cell) => cell.dateKey)
+
+    expect(dateKeys).toHaveLength(29)
+    expect(dateKeys).toContain('2024-02-29')
   })
 
   it('calculates adjacent months across year boundaries', () => {
@@ -123,6 +144,13 @@ describe('calendarLogic', () => {
           memo: '',
           createdAt: '2026-06-01T00:00:00.000Z',
         },
+        {
+          id: 'd',
+          date: '2025-05-14',
+          title: 'Previous year',
+          memo: '',
+          createdAt: '2025-05-14T00:00:00.000Z',
+        },
       ],
       new Date(2026, 4, 14),
     )
@@ -136,6 +164,13 @@ describe('calendarLogic', () => {
       getNextEvent(
         [
           ...events,
+          {
+            id: 'today',
+            date: '2026-05-14',
+            title: 'Today should be ignored',
+            memo: '',
+            createdAt: '2026-05-13T00:00:00.000Z',
+          },
           {
             id: 'c',
             date: '2026-05-15',

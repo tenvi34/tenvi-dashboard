@@ -3,6 +3,7 @@ import {
   BACKUP_APP,
   BACKUP_TYPE,
   BACKUP_VERSION,
+  START_MODULES,
   validateBackupPayload,
 } from './settingsBackup.js'
 
@@ -34,7 +35,37 @@ describe('settingsBackup validateBackupPayload', () => {
     })
   })
 
+  it('normalizes numeric timer session strings from backup data', () => {
+    expect(
+      validateBackupPayload(
+        createValidBackup({ timerCompletedSessions: '5' }),
+      ).timerCompletedSessions,
+    ).toBe(5)
+  })
+
+  it('ignores fields that are not part of the current restore format', () => {
+    const restoredData = validateBackupPayload(
+      createValidBackup({
+        calendarEvents: [
+          {
+            id: 'calendar-1',
+            date: '2026-05-14',
+            title: 'Calendar event',
+            memo: '',
+            createdAt: '2026-05-14T00:00:00.000Z',
+          },
+        ],
+      }),
+    )
+
+    expect(restoredData).not.toHaveProperty('calendarEvents')
+  })
+
   it('rejects payloads without TENVI backup metadata', () => {
+    expect(validateBackupPayload(null)).toBe(null)
+    expect(validateBackupPayload([])).toBe(null)
+    expect(validateBackupPayload('not-json')).toBe(null)
+    expect(validateBackupPayload({ ...createValidBackup(), data: null })).toBe(null)
     expect(validateBackupPayload({ ...createValidBackup(), app: 'OTHER' })).toBe(
       null,
     )
@@ -50,6 +81,9 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(validateBackupPayload(createValidBackup({ tasks: {} }))).toBe(null)
     expect(validateBackupPayload(createValidBackup({ notes: {} }))).toBe(null)
     expect(
+      validateBackupPayload(createValidBackup({ timerCompletedSessions: 'abc' })),
+    ).toBe(null)
+    expect(
       validateBackupPayload(createValidBackup({ timerCompletedSessions: -1 })),
     ).toBe(null)
   })
@@ -62,5 +96,10 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(validateBackupPayload(createValidBackup({ hudEffect: 'max' }))).toBe(
       null,
     )
+  })
+
+  it('keeps the supported default start modules explicit', () => {
+    expect(START_MODULES).toEqual(['dashboard', 'tasks', 'notes', 'command'])
+    expect(START_MODULES).not.toContain('calendar')
   })
 })

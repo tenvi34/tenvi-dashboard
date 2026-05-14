@@ -179,6 +179,22 @@ describe('commandLogic createResult', () => {
     expect(result.metrics[0].value).toBe(1)
   })
 
+  it('returns an empty-state message when today has no schedules', () => {
+    const result = createResult({
+      calendarEvents,
+      command: 'today schedules',
+      currentDate: new Date(2026, 4, 16),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('today schedules'),
+      tasks,
+      t,
+    })
+
+    expect(result.items[0].values).toEqual([t.command.noTodaySchedules])
+    expect(result.metrics[0].value).toBe(0)
+  })
+
   it('summarizes this month schedules by date', () => {
     const result = createResult({
       calendarEvents,
@@ -199,6 +215,22 @@ describe('commandLogic createResult', () => {
     ])
   })
 
+  it('returns an empty-state message when this month has no schedules', () => {
+    const result = createResult({
+      calendarEvents,
+      command: 'this month schedules',
+      currentDate: new Date(2026, 6, 1),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('this month schedules'),
+      tasks,
+      t,
+    })
+
+    expect(result.items[0].values).toEqual([t.command.noMonthSchedules])
+    expect(result.metrics[0].value).toBe(0)
+  })
+
   it('searches schedules by title and memo', () => {
     const result = createResult({
       calendarEvents,
@@ -215,6 +247,47 @@ describe('commandLogic createResult', () => {
     expect(result.items[0].values).toEqual([
       '2026-05-14 - Planning sync: Review roadmap',
     ])
+  })
+
+  it('handles schedule search by title, missing keyword, and no matches', () => {
+    const titleResult = createResult({
+      calendarEvents,
+      command: 'search schedules Launch',
+      currentDate: new Date(2026, 4, 14),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('search schedules Launch'),
+      tasks,
+      t,
+    })
+    const missingKeywordResult = createResult({
+      calendarEvents,
+      command: 'search schedules',
+      currentDate: new Date(2026, 4, 14),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('search schedules'),
+      tasks,
+      t,
+    })
+    const noMatchResult = createResult({
+      calendarEvents,
+      command: 'search schedules missing',
+      currentDate: new Date(2026, 4, 14),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('search schedules missing'),
+      tasks,
+      t,
+    })
+
+    expect(titleResult.items[0].values).toEqual([
+      '2026-05-20 - Launch check: TENVI calendar',
+    ])
+    expect(missingKeywordResult.title).toBe(t.command.missingKeyword)
+    expect(missingKeywordResult.type).toBe('help')
+    expect(noMatchResult.items[0].values).toEqual([t.command.noMatchingSchedules])
+    expect(noMatchResult.metrics[0].value).toBe(0)
   })
 
   it('finds the nearest schedule after today', () => {
@@ -235,6 +308,21 @@ describe('commandLogic createResult', () => {
     ])
   })
 
+  it('returns an empty-state message when no future schedule exists', () => {
+    const result = createResult({
+      calendarEvents,
+      command: 'next schedule',
+      currentDate: new Date(2026, 6, 1),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('next schedule'),
+      tasks,
+      t,
+    })
+
+    expect(result.items[0].values).toEqual([t.command.noNextSchedule])
+  })
+
   it('reports schedule status metrics', () => {
     const result = createResult({
       calendarEvents,
@@ -249,5 +337,20 @@ describe('commandLogic createResult', () => {
 
     expect(result.title).toBe(t.command.scheduleStatusResult)
     expect(result.metrics.map((metric) => metric.value)).toEqual([3, 1, 2])
+  })
+
+  it('reports zero schedule status metrics when calendar data is empty', () => {
+    const result = createResult({
+      calendarEvents: [],
+      command: 'schedule status',
+      currentDate: new Date(2026, 4, 14),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('schedule status'),
+      tasks,
+      t,
+    })
+
+    expect(result.metrics.map((metric) => metric.value)).toEqual([0, 0, 0])
   })
 })
