@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import { createTask, normalizeDueDate } from './tasksLogic.js'
 
 // TENVI로 이름이 바뀌어도 기존 todo-manager-lite 사용자의 Tasks 데이터를 보존해야 합니다.
 const STORAGE_KEY = STORAGE_KEYS.tasks
@@ -22,6 +23,7 @@ function Tasks({ t }) {
     }
   })
   const [newTodo, setNewTodo] = useState('')
+  const [dueDate, setDueDate] = useState('')
   const [filter, setFilter] = useState('all')
 
   // todos 상태가 Tasks 데이터의 단일 저장 원천입니다.
@@ -38,15 +40,15 @@ function Tasks({ t }) {
       return
     }
 
-    setTodos((currentTodos) => [
-      {
-        id: crypto.randomUUID(),
-        title,
-        completed: false,
-      },
-      ...currentTodos,
-    ])
+    const nextTask = createTask({ dueDate, title })
+
+    if (!nextTask) {
+      return
+    }
+
+    setTodos((currentTodos) => [nextTask, ...currentTodos])
     setNewTodo('')
+    setDueDate('')
   }
 
   const handleToggleTodo = (todoId) => {
@@ -122,6 +124,16 @@ function Tasks({ t }) {
           onChange={(event) => setNewTodo(event.target.value)}
           placeholder={t.tasks.inputPlaceholder}
         />
+        <label className="sr-only" htmlFor="todo-due-date">
+          {t.tasks.dueDateLabel}
+        </label>
+        <input
+          id="todo-due-date"
+          type="date"
+          value={dueDate}
+          onChange={(event) => setDueDate(event.target.value)}
+          aria-label={t.tasks.dueDateLabel}
+        />
         <button type="submit">{t.tasks.add}</button>
       </form>
 
@@ -153,7 +165,12 @@ function Tasks({ t }) {
                   checked={todo.completed}
                   onChange={() => handleToggleTodo(todo.id)}
                 />
-                <span>{todo.title}</span>
+                <span>
+                  {todo.title}
+                  {normalizeDueDate(todo.dueDate) ? (
+                    <small>{t.tasks.dueDateValue(todo.dueDate)}</small>
+                  ) : null}
+                </span>
               </label>
               <button
                 type="button"

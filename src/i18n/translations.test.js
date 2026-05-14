@@ -28,6 +28,9 @@ const requiredCommandKeys = [
   'searchSchedulesResult',
   'nextScheduleResult',
   'scheduleStatusResult',
+  'todayTasksResult',
+  'todayDueTasks',
+  'noTodayDueTasks',
   'examples',
 ]
 
@@ -39,6 +42,7 @@ const requiredCalendarKeys = [
   'memoLabel',
   'addEvent',
   'eventsForDate',
+  'dueTasksForDate',
   'monthlyCalendar',
   'previousMonth',
   'nextMonth',
@@ -49,6 +53,7 @@ const requiredCalendarKeys = [
   'eventCount',
   'fullMoon',
   'noEvents',
+  'noDueTasks',
   'deleteEvent',
 ]
 
@@ -57,8 +62,15 @@ const requiredDashboardKeys = [
   'nextEvent',
   'monthEvents',
   'scheduledDays',
+  'todayDueTasks',
   'noTodayEvents',
+  'noTodayDueTasks',
   'noNextEvent',
+]
+
+const requiredTasksKeys = [
+  'dueDateLabel',
+  'dueDateValue',
 ]
 
 describe('translations', () => {
@@ -87,6 +99,12 @@ describe('translations', () => {
   it.each(['ko', 'en'])('has required dashboard calendar keys for %s', (language) => {
     requiredDashboardKeys.forEach((key) => {
       expect(translations[language].dashboard).toHaveProperty(key)
+    })
+  })
+
+  it.each(['ko', 'en'])('has required task due date keys for %s', (language) => {
+    requiredTasksKeys.forEach((key) => {
+      expect(translations[language].tasks).toHaveProperty(key)
     })
   })
 })

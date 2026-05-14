@@ -5,6 +5,7 @@ import {
   getScheduledDateCount,
   getTodayEvents,
 } from './calendarLogic.js'
+import { getTodayDueTasks } from './tasksLogic.js'
 
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -35,6 +36,8 @@ function Dashboard({ t }) {
   // Dashboard는 Calendar 데이터를 읽기만 하며, 저장 key와 이벤트 구조는 Calendar 모듈과 동일하게 유지합니다.
   const allTodayEvents = getTodayEvents(calendarEvents)
   const todayEvents = getTodayEvents(calendarEvents).slice(0, 3)
+  const allTodayDueTasks = getTodayDueTasks(tasks)
+  const todayDueTasks = allTodayDueTasks.slice(0, 3)
   const monthEvents = getMonthEvents(calendarEvents)
   const scheduledDateCount = getScheduledDateCount(monthEvents)
   const nextEvent = getNextEvent(calendarEvents)
@@ -125,6 +128,10 @@ function Dashboard({ t }) {
               <strong>{allTodayEvents.length}</strong>
             </div>
             <div className="summary-metric">
+              <span>{t.dashboard.todayDueTasks}</span>
+              <strong>{allTodayDueTasks.length}</strong>
+            </div>
+            <div className="summary-metric">
               <span>{t.dashboard.monthEvents}</span>
               <strong>{monthEvents.length}</strong>
             </div>
@@ -150,6 +157,25 @@ function Dashboard({ t }) {
               <div className="empty-state compact-empty" role="status">
                 <span>{t.common.systemMessage}</span>
                 <p>{t.dashboard.noTodayEvents}</p>
+              </div>
+            )}
+          </div>
+
+          {/* 오늘 마감 Task 일부 목록 */}
+          <div className="recent-notes dashboard-due-tasks">
+            <p className="recent-notes-title">{t.dashboard.todayDueTasks}</p>
+            {todayDueTasks.length > 0 ? (
+              <ul>
+                {todayDueTasks.map((task) => (
+                  <li className="recent-note" key={task.id}>
+                    <strong>{task.title}</strong>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="empty-state compact-empty" role="status">
+                <span>{t.common.systemMessage}</span>
+                <p>{t.dashboard.noTodayDueTasks}</p>
               </div>
             )}
           </div>

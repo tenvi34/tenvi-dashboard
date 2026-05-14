@@ -4,9 +4,10 @@ import { createResult, parseCommand } from './commandLogic.js'
 
 const t = translations.en
 const tasks = [
-  { id: 1, title: 'Write project plan', completed: false },
+  { id: 1, title: 'Write project plan', completed: false, dueDate: '2026-05-14' },
   { id: 2, title: 'Review backup flow', completed: true },
   { id: 3, title: 'Prepare focus session', completed: false },
+  { id: 4, title: 'Completed due task', completed: true, dueDate: '2026-05-14' },
 ]
 const notes = [
   { id: 1, title: 'Project note', content: 'TENVI command ideas' },
@@ -98,6 +99,8 @@ describe('commandLogic parseCommand', () => {
     expect(parseCommand('다음 일정')).toEqual({ type: 'nextSchedule' })
     expect(parseCommand('schedule status')).toEqual({ type: 'scheduleStatus' })
     expect(parseCommand('일정 상태')).toEqual({ type: 'scheduleStatus' })
+    expect(parseCommand('today tasks')).toEqual({ type: 'todayTasks' })
+    expect(parseCommand('오늘 할 일')).toEqual({ type: 'todayTasks' })
   })
 })
 
@@ -143,7 +146,7 @@ describe('commandLogic createResult', () => {
     })
 
     expect(result.title).toBe(t.command.dataStatusResult)
-    expect(result.metrics.map((metric) => metric.value)).toEqual([3, 1, 7])
+    expect(result.metrics.map((metric) => metric.value)).toEqual([4, 1, 7])
   })
 
   it('returns navigation target for open timer', () => {
@@ -352,5 +355,25 @@ describe('commandLogic createResult', () => {
     })
 
     expect(result.metrics.map((metric) => metric.value)).toEqual([0, 0, 0])
+  })
+
+  it('lists today due tasks and today schedules together', () => {
+    const result = createResult({
+      calendarEvents,
+      command: 'today tasks',
+      currentDate: new Date(2026, 4, 14),
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('today tasks'),
+      tasks,
+      t,
+    })
+
+    expect(result.title).toBe(t.command.todayTasksResult)
+    expect(result.items[0].values).toEqual(['Write project plan'])
+    expect(result.items[1].values).toEqual([
+      '2026-05-14 - Planning sync: Review roadmap',
+    ])
+    expect(result.metrics.map((metric) => metric.value)).toEqual([1, 1])
   })
 })

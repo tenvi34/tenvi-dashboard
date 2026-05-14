@@ -13,11 +13,29 @@ import {
   readCalendarEvents,
   removeCalendarEvent,
 } from './calendarLogic.js'
+import { countDueTasksByDate, getTasksDueOnDate } from './tasksLogic.js'
 
 const CALENDAR_STORAGE_KEY = STORAGE_KEYS.calendarEvents
+const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 
 const readStoredCalendarEvents = () =>
   readCalendarEvents(localStorage.getItem(CALENDAR_STORAGE_KEY))
+
+const readStoredTasks = () => {
+  const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY)
+
+  if (!savedTasks) {
+    return []
+  }
+
+  try {
+    const parsedTasks = JSON.parse(savedTasks)
+
+    return Array.isArray(parsedTasks) ? parsedTasks : []
+  } catch {
+    return []
+  }
+}
 
 const YEAR_RANGE = Array.from({ length: 11 }, (_, index) => 2021 + index)
 const MONTHS = Array.from({ length: 12 }, (_, index) => index)
@@ -29,10 +47,24 @@ function Calendar({ t }) {
   const [visibleYear, setVisibleYear] = useState(initialVisibleDate.year)
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleDate.month)
   const [events, setEvents] = useState(readStoredCalendarEvents)
+  const [tasks] = useState(readStoredTasks)
   const [title, setTitle] = useState('')
   const [memo, setMemo] = useState('')
   const selectedEvents = getEventsForDate(events, selectedDate)
-  const eventCounts = useMemo(() => countEventsByDate(events), [events])
+  const selectedDueTasks = getTasksDueOnDate(tasks, selectedDate)
+  const eventCounts = useMemo(() => {
+    const calendarEventCounts = countEventsByDate(events)
+    const dueTaskCounts = countDueTasksByDate(tasks)
+
+    // Calendar 배지는 기존 일정 수와 Tasks dueDate 수를 합산해서 날짜별 활동 여부를 보여줍니다.
+    return Object.keys(dueTaskCounts).reduce(
+      (combinedCounts, dateKey) => ({
+        ...combinedCounts,
+        [dateKey]: (combinedCounts[dateKey] ?? 0) + dueTaskCounts[dateKey],
+      }),
+      { ...calendarEventCounts },
+    )
+  }, [events, tasks])
   const calendarCells = useMemo(
     () => getMonthCalendarCells(visibleYear, visibleMonth),
     [visibleMonth, visibleYear],
@@ -137,7 +169,7 @@ function Calendar({ t }) {
               <p className="module-label">{t.calendar.eventsForDate}</p>
               <h3>{selectedDate}</h3>
             </div>
-            <strong>{selectedEvents.length}</strong>
+            <strong>{selectedEvents.length + selectedDueTasks.length}</strong>
           </div>
 
           {/* 선택된 날짜의 일정 목록 또는 빈 상태 메시지 */}
@@ -165,6 +197,33 @@ function Calendar({ t }) {
               <p>{t.calendar.noEvents}</p>
             </div>
           )}
+
+          {/* 선택된 날짜가 마감일인 Task 목록 */}
+          <div className="calendar-due-task-section">
+            <p className="recent-notes-title">{t.calendar.dueTasksForDate}</p>
+            {selectedDueTasks.length > 0 ? (
+              <ul className="calendar-event-list">
+                {selectedDueTasks.map((task) => (
+                  <li
+                    className={`calendar-event-item calendar-task-item ${
+                      task.completed ? 'is-completed' : ''
+                    }`}
+                    key={task.id}
+                  >
+                    <div>
+                      <h3>{task.title}</h3>
+                      <p>{task.completed ? t.tasks.completed : t.tasks.active}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="empty-state compact-empty" role="status">
+                <span>{t.common.systemMessage}</span>
+                <p>{t.calendar.noDueTasks}</p>
+              </div>
+            )}
+          </div>
 
           {/* 선택된 날짜에 새 일정을 추가하는 입력 폼 */}
           <form className="calendar-form" onSubmit={handleAddEvent}>

@@ -471,7 +471,7 @@ body {
 
 .todo-form {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, auto) auto;
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -1202,6 +1202,12 @@ body {
   font-weight: 800;
 }
 
+.calendar-due-task-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(90, 212, 255, 0.16);
+}
+
 .calendar-events-header {
   display: flex;
   align-items: center;
@@ -1258,6 +1264,15 @@ body {
   color: #b8dbe7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.calendar-task-item {
+  border-left-color: rgba(101, 255, 188, 0.5);
+  background: linear-gradient(90deg, rgba(101, 255, 188, 0.08), rgba(5, 16, 31, 0.72));
+}
+
+.calendar-task-item.is-completed {
+  opacity: 0.68;
 }
 
 .calendar-month-toolbar {
@@ -1544,7 +1559,15 @@ body {
 }
 
 .todo-check span {
+  display: grid;
+  gap: 4px;
   overflow-wrap: anywhere;
+}
+
+.todo-check small {
+  color: var(--muted-cyan);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .todo-item.is-completed {

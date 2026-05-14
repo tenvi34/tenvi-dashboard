@@ -1,5 +1,6 @@
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import { countEventsByDate, getDateKey, parseDateKey } from './calendarLogic.js'
+import { getTodayDueTasks } from './tasksLogic.js'
 
 export const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 export const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
@@ -147,6 +148,10 @@ export const parseCommand = (command) => {
     return { type: 'scheduleStatus' }
   }
 
+  if (matchesCommand(normalizedCommand, ['오늘 할 일', 'today tasks'])) {
+    return { type: 'todayTasks' }
+  }
+
   const noteKeyword = parseKeywordCommand(command, normalizedCommand, [
     '노트 검색',
     'search notes',
@@ -253,6 +258,7 @@ export const createResult = ({
   const recommendation = getRecommendation(stats, notes.length, t)
   const todayKey = getDateKey(currentDate)
   const todaySchedules = calendarEvents.filter((event) => event.date === todayKey)
+  const todayDueTasks = getTodayDueTasks(tasks, currentDate)
   const thisMonthSchedules = getMonthEvents(calendarEvents, currentDate)
 
   // 각 명령은 UI가 공통으로 렌더링할 수 있는 metrics/items 구조를 반환합니다.
@@ -416,6 +422,33 @@ export const createResult = ({
       ],
       metrics: [createMetric(t.command.todaySchedules, todaySchedules.length)],
       title: t.command.todaySchedulesResult,
+      type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'todayTasks') {
+    return {
+      items: [
+        {
+          label: t.command.todayDueTasks,
+          values:
+            todayDueTasks.length > 0
+              ? todayDueTasks.map((task) => task.title)
+              : [t.command.noTodayDueTasks],
+        },
+        {
+          label: t.command.todaySchedules,
+          values:
+            todaySchedules.length > 0
+              ? todaySchedules.map(formatScheduleItem)
+              : [t.command.noTodaySchedules],
+        },
+      ],
+      metrics: [
+        createMetric(t.command.todayDueTasks, todayDueTasks.length),
+        createMetric(t.command.todaySchedules, todaySchedules.length),
+      ],
+      title: t.command.todayTasksResult,
       type: 'list',
     }
   }
