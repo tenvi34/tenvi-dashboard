@@ -30,6 +30,25 @@ export const getAdjacentMonth = (year, month, offset) => {
   }
 }
 
+const SYNODIC_MONTH_DAYS = 29.530588853
+const FULL_MOON_REFERENCE_UTC = Date.UTC(2000, 0, 21, 4, 40)
+const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
+
+export const isFullMoonDate = (dateKey) => {
+  const { day, month, year } = parseDateKey(dateKey)
+  const targetDateUtcNoon = Date.UTC(year, month, day, 12)
+  const daysSinceReference =
+    (targetDateUtcNoon - FULL_MOON_REFERENCE_UTC) / DAY_IN_MILLISECONDS
+  const cyclePosition =
+    ((daysSinceReference % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) %
+    SYNODIC_MONTH_DAYS
+
+  // 실제 천문 시각은 지역과 시간대에 따라 달라지므로, 날짜 셀 표시는 평균 삭망월 기반 근사값으로 처리합니다.
+  return (
+    cyclePosition <= 0.5 || cyclePosition >= SYNODIC_MONTH_DAYS - 0.5
+  )
+}
+
 export const getMonthCalendarCells = (year, month) => {
   const firstWeekday = new Date(year, month, 1).getDay()
   const dayCount = getDaysInMonth(year, month)

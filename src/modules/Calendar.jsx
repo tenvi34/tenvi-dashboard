@@ -8,6 +8,7 @@ import {
   getDateKey,
   getEventsForDate,
   getMonthCalendarCells,
+  isFullMoonDate,
   parseDateKey,
   readCalendarEvents,
   removeCalendarEvent,
@@ -247,6 +248,7 @@ function Calendar({ t }) {
                     cell.dateKey === selectedDate ? 'is-selected' : ''
                   } ${cell.dateKey === todayDate ? 'is-today' : ''} ${
                     eventCounts[cell.dateKey] ? 'has-events' : ''
+                  } ${isFullMoonDate(cell.dateKey) ? 'is-full-moon' : ''
                   }`}
                   key={cell.dateKey}
                   type="button"
@@ -260,6 +262,15 @@ function Calendar({ t }) {
                   <span>{cell.day}</span>
                   {eventCounts[cell.dateKey] ? (
                     <strong>{eventCounts[cell.dateKey]}</strong>
+                  ) : null}
+                  {isFullMoonDate(cell.dateKey) ? (
+                    <span
+                      className="calendar-moon"
+                      aria-label={t.calendar.fullMoon}
+                      title={t.calendar.fullMoon}
+                    >
+                      🌕
+                    </span>
                   ) : null}
                 </button>
               ) : (

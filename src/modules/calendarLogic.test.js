@@ -8,6 +8,7 @@ import {
   getDaysInMonth,
   getEventsForDate,
   getMonthCalendarCells,
+  isFullMoonDate,
   parseDateKey,
   getTodayEvents,
   readCalendarEvents,
@@ -106,5 +107,10 @@ describe('calendarLogic', () => {
       '2026-05-14': 2,
       '2026-05-15': 1,
     })
+  })
+
+  it('marks approximate full moon dates from the lunar cycle reference', () => {
+    expect(isFullMoonDate('2000-01-21')).toBe(true)
+    expect(isFullMoonDate('2000-01-28')).toBe(false)
   })
 })

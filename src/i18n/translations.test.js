@@ -47,6 +47,7 @@ const requiredCalendarKeys = [
   'monthValue',
   'weekdays',
   'eventCount',
+  'fullMoon',
   'noEvents',
   'deleteEvent',
 ]

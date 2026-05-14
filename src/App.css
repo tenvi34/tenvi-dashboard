@@ -1309,6 +1309,23 @@ body {
   box-shadow: 0 0 10px var(--neon);
 }
 
+.calendar-day.is-full-moon {
+  border-color: rgba(244, 253, 255, 0.34);
+}
+
+.calendar-moon {
+  position: absolute;
+  left: 7px;
+  bottom: 5px;
+  font-size: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(244, 253, 255, 0.5));
+}
+
+.calendar-day.has-events .calendar-moon {
+  left: 16px;
+}
+
 .calendar-day strong {
   position: absolute;
   top: 6px;
