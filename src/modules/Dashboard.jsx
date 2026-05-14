@@ -1,5 +1,10 @@
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
-import { getTodayEvents } from './calendarLogic.js'
+import {
+  getMonthEvents,
+  getNextEvent,
+  getScheduledDateCount,
+  getTodayEvents,
+} from './calendarLogic.js'
 
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -27,7 +32,12 @@ function Dashboard({ t }) {
   const calendarEvents = readStoredList(STORAGE_KEYS.calendarEvents)
   const completedTasks = tasks.filter((task) => task.completed).length
   const activeTasks = tasks.length - completedTasks
+  // Dashboard는 Calendar 데이터를 읽기만 하며, 저장 key와 이벤트 구조는 Calendar 모듈과 동일하게 유지합니다.
+  const allTodayEvents = getTodayEvents(calendarEvents)
   const todayEvents = getTodayEvents(calendarEvents).slice(0, 3)
+  const monthEvents = getMonthEvents(calendarEvents)
+  const scheduledDateCount = getScheduledDateCount(monthEvents)
+  const nextEvent = getNextEvent(calendarEvents)
   const recentNotes = [...notes]
     .sort((firstNote, secondNote) => getNoteTime(secondNote) - getNoteTime(firstNote))
     .slice(0, 3)
@@ -104,9 +114,19 @@ function Dashboard({ t }) {
             <p className="module-label">{t.dashboard.calendarSummary}</p>
             <h3 id="calendar-summary-title">{t.modules.calendar}</h3>
           </div>
-          <div className="summary-metric summary-metric-wide">
-            <span>{t.dashboard.todayEvents}</span>
-            <strong>{getTodayEvents(calendarEvents).length}</strong>
+          <div className="summary-metrics">
+            <div className="summary-metric">
+              <span>{t.dashboard.todayEvents}</span>
+              <strong>{allTodayEvents.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.monthEvents}</span>
+              <strong>{monthEvents.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.scheduledDays}</span>
+              <strong>{scheduledDateCount}</strong>
+            </div>
           </div>
 
           <div className="recent-notes" aria-label={t.dashboard.todayEvents}>
@@ -124,6 +144,25 @@ function Dashboard({ t }) {
               <div className="empty-state compact-empty" role="status">
                 <span>{t.common.systemMessage}</span>
                 <p>{t.dashboard.noTodayEvents}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="recent-notes dashboard-calendar-next">
+            <p className="recent-notes-title">{t.dashboard.nextEvent}</p>
+            {nextEvent ? (
+              <ul>
+                <li className="recent-note">
+                  <strong>
+                    {nextEvent.date} - {nextEvent.title}
+                  </strong>
+                  {nextEvent.memo ? <span>{nextEvent.memo}</span> : null}
+                </li>
+              </ul>
+            ) : (
+              <div className="empty-state compact-empty" role="status">
+                <span>{t.common.systemMessage}</span>
+                <p>{t.dashboard.noNextEvent}</p>
               </div>
             )}
           </div>

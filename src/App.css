@@ -413,6 +413,10 @@ body {
   white-space: nowrap;
 }
 
+.dashboard-calendar-next {
+  margin-top: 14px;
+}
+
 .compact-empty {
   padding: 18px;
 }

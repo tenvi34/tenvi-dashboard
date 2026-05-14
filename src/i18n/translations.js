@@ -156,7 +156,11 @@ export const translations = {
       recentNotes: '최근 노트',
       noRecentNotes: '최근 노트가 없습니다.',
       todayEvents: '오늘 일정',
+      nextEvent: '다음 예정 일정',
+      monthEvents: '이번 달 일정',
+      scheduledDays: '일정 등록 날짜',
       noTodayEvents: '오늘 등록된 일정이 없습니다.',
+      noNextEvent: '오늘 이후 예정된 일정이 없습니다.',
     },
     calendar: {
       label: '캘린더 모듈',
@@ -442,7 +446,11 @@ export const translations = {
       recentNotes: 'Recent Notes',
       noRecentNotes: 'No recent notes stored in memory.',
       todayEvents: "Today's Events",
+      nextEvent: 'Next Event',
+      monthEvents: 'This Month',
+      scheduledDays: 'Scheduled Days',
       noTodayEvents: 'No events are scheduled for today.',
+      noNextEvent: 'No upcoming events after today.',
     },
     calendar: {
       label: 'Calendar Module',

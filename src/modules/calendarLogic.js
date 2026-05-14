@@ -104,6 +104,33 @@ export const getEventsForDate = (events, dateKey) =>
 export const getTodayEvents = (events, today = new Date()) =>
   getEventsForDate(events, getDateKey(today))
 
+export const getMonthEvents = (events, currentDate = new Date()) => {
+  const { month, year } = parseDateKey(getDateKey(currentDate))
+
+  return events.filter((event) => {
+    const eventDate = parseDateKey(event.date)
+
+    return eventDate.year === year && eventDate.month === month
+  })
+}
+
+export const getScheduledDateCount = (events) =>
+  new Set(events.map((event) => event.date)).size
+
+export const getNextEvent = (events, currentDate = new Date()) => {
+  const todayKey = getDateKey(currentDate)
+
+  return [...events]
+    .filter((event) => event.date > todayKey)
+    .sort((firstEvent, secondEvent) => {
+      if (firstEvent.date !== secondEvent.date) {
+        return firstEvent.date.localeCompare(secondEvent.date)
+      }
+
+      return firstEvent.createdAt.localeCompare(secondEvent.createdAt)
+    })[0]
+}
+
 export const countEventsByDate = (events) =>
   events.reduce((eventCounts, event) => {
     eventCounts[event.date] = (eventCounts[event.date] ?? 0) + 1

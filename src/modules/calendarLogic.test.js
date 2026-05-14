@@ -8,6 +8,9 @@ import {
   getDaysInMonth,
   getEventsForDate,
   getMonthCalendarCells,
+  getMonthEvents,
+  getNextEvent,
+  getScheduledDateCount,
   isFullMoonDate,
   parseDateKey,
   getTodayEvents,
@@ -107,6 +110,50 @@ describe('calendarLogic', () => {
       '2026-05-14': 2,
       '2026-05-15': 1,
     })
+  })
+
+  it('filters current month events and counts scheduled dates', () => {
+    const monthEvents = getMonthEvents(
+      [
+        ...events,
+        {
+          id: 'c',
+          date: '2026-06-01',
+          title: 'Next month',
+          memo: '',
+          createdAt: '2026-06-01T00:00:00.000Z',
+        },
+      ],
+      new Date(2026, 4, 14),
+    )
+
+    expect(monthEvents).toEqual(events)
+    expect(getScheduledDateCount(monthEvents)).toBe(2)
+  })
+
+  it('finds the nearest event after today using date and createdAt order', () => {
+    expect(
+      getNextEvent(
+        [
+          ...events,
+          {
+            id: 'c',
+            date: '2026-05-15',
+            title: 'Earlier created event',
+            memo: '',
+            createdAt: '2026-05-14T23:00:00.000Z',
+          },
+        ],
+        new Date(2026, 4, 14),
+      ),
+    ).toMatchObject({
+      id: 'c',
+      date: '2026-05-15',
+    })
+  })
+
+  it('returns undefined when no future event exists', () => {
+    expect(getNextEvent(events, new Date(2026, 4, 15))).toBeUndefined()
   })
 
   it('marks approximate full moon dates from the lunar cycle reference', () => {

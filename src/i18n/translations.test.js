@@ -52,6 +52,15 @@ const requiredCalendarKeys = [
   'deleteEvent',
 ]
 
+const requiredDashboardKeys = [
+  'todayEvents',
+  'nextEvent',
+  'monthEvents',
+  'scheduledDays',
+  'noTodayEvents',
+  'noNextEvent',
+]
+
 describe('translations', () => {
   it('keeps ko and en language entries available', () => {
     expect(Object.keys(translations).sort()).toEqual(['en', 'ko'])
@@ -72,6 +81,12 @@ describe('translations', () => {
   it.each(['ko', 'en'])('has required calendar keys for %s', (language) => {
     requiredCalendarKeys.forEach((key) => {
       expect(translations[language].calendar).toHaveProperty(key)
+    })
+  })
+
+  it.each(['ko', 'en'])('has required dashboard calendar keys for %s', (language) => {
+    requiredDashboardKeys.forEach((key) => {
+      expect(translations[language].dashboard).toHaveProperty(key)
     })
   })
 })
