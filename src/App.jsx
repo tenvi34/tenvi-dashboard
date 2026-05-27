@@ -25,6 +25,7 @@ const MODULES = [
   { id: 'settings' },
 ]
 
+// 앱 전역 설정과 현재 모듈 화면을 관리하는 최상위 컴포넌트입니다.
 function App() {
   const [startModule, setStartModule] = useState(() => {
     const savedStartModule = localStorage.getItem(STORAGE_KEYS.startModule)

@@ -7,6 +7,7 @@ const STORAGE_KEY = STORAGE_KEYS.tasks
 
 const FILTERS = ['all', 'active', 'completed']
 
+// 사용자의 Task 추가, 완료, 삭제, 필터링을 관리하는 컴포넌트입니다.
 function Tasks({ t }) {
   const [todos, setTodos] = useState(() => {
     const savedTodos = localStorage.getItem(STORAGE_KEY)
@@ -31,6 +32,7 @@ function Tasks({ t }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
   }, [todos])
 
+  // 입력 폼의 제목과 마감일로 새 Task를 생성해 목록 앞에 추가합니다.
   const handleAddTodo = (event) => {
     event.preventDefault()
 
@@ -51,6 +53,7 @@ function Tasks({ t }) {
     setDueDate('')
   }
 
+  // 지정한 Task의 완료 상태를 반대로 전환합니다.
   const handleToggleTodo = (todoId) => {
     setTodos((currentTodos) =>
       currentTodos.map((todo) =>
@@ -59,6 +62,7 @@ function Tasks({ t }) {
     )
   }
 
+  // 지정한 Task를 현재 목록에서 제거합니다.
   const handleDeleteTodo = (todoId) => {
     setTodos((currentTodos) =>
       currentTodos.filter((todo) => todo.id !== todoId),

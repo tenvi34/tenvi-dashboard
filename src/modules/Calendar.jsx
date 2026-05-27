@@ -18,9 +18,11 @@ import { countDueTasksByDate, getTasksDueOnDate } from './tasksLogic.js'
 const CALENDAR_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 
+// Calendar 전용 localStorage 값에서 유효한 일정 목록을 복원합니다.
 const readStoredCalendarEvents = () =>
   readCalendarEvents(localStorage.getItem(CALENDAR_STORAGE_KEY))
 
+// Calendar 배지와 날짜별 마감 표시를 위해 저장된 Tasks 목록을 읽습니다.
 const readStoredTasks = () => {
   const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY)
 
@@ -40,6 +42,7 @@ const readStoredTasks = () => {
 const YEAR_RANGE = Array.from({ length: 11 }, (_, index) => 2021 + index)
 const MONTHS = Array.from({ length: 12 }, (_, index) => index)
 
+// 월간 달력과 날짜별 일정/마감 Task 관리를 제공하는 컴포넌트입니다.
 function Calendar({ t }) {
   const initialDate = getDateKey()
   const initialVisibleDate = parseDateKey(initialDate)
@@ -71,12 +74,14 @@ function Calendar({ t }) {
   )
   const todayDate = getDateKey()
 
+  // 변경된 일정 목록을 localStorage와 화면 상태에 함께 반영합니다.
   const persistEvents = (nextEvents) => {
     // Calendar는 독립 key에만 저장해 기존 Tasks/Notes/Timer 데이터 구조와 충돌하지 않게 합니다.
     localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(nextEvents))
     setEvents(nextEvents)
   }
 
+  // 선택 날짜에 맞춰 화면에 보이는 연도와 월을 동기화합니다.
   const syncVisibleMonth = (nextDateKey) => {
     const nextDate = parseDateKey(nextDateKey)
 
@@ -84,11 +89,13 @@ function Calendar({ t }) {
     setVisibleMonth(nextDate.month)
   }
 
+  // 사용자가 선택한 날짜를 저장하고 해당 월로 달력을 이동합니다.
   const selectDate = (dateKey) => {
     setSelectedDate(dateKey)
     syncVisibleMonth(dateKey)
   }
 
+  // 이전/다음 월로 이동하면서 선택 날짜를 유효한 날짜로 보정합니다.
   const moveVisibleMonth = (offset) => {
     const selected = parseDateKey(selectedDate)
     const nextMonth = getAdjacentMonth(visibleYear, visibleMonth, offset)
@@ -103,6 +110,7 @@ function Calendar({ t }) {
     setSelectedDate(nextDateKey)
   }
 
+  // 연도 선택값이 바뀌면 선택 날짜와 보이는 연도를 함께 갱신합니다.
   const handleYearChange = (event) => {
     const nextYear = Number(event.target.value)
     const selected = parseDateKey(selectedDate)
@@ -112,6 +120,7 @@ function Calendar({ t }) {
     setSelectedDate(nextDateKey)
   }
 
+  // 월 선택값이 바뀌면 선택 날짜와 보이는 월을 함께 갱신합니다.
   const handleMonthChange = (event) => {
     const nextMonth = Number(event.target.value)
     const selected = parseDateKey(selectedDate)
@@ -121,6 +130,7 @@ function Calendar({ t }) {
     setSelectedDate(nextDateKey)
   }
 
+  // 현재 선택 날짜에 새 Calendar 이벤트를 추가합니다.
   const handleAddEvent = (event) => {
     event.preventDefault()
 
@@ -139,6 +149,7 @@ function Calendar({ t }) {
     setMemo('')
   }
 
+  // 지정한 Calendar 이벤트를 삭제하고 저장소에 반영합니다.
   const handleDeleteEvent = (eventId) => {
     persistEvents(removeCalendarEvent(events, eventId))
   }

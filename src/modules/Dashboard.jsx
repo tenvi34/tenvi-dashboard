@@ -7,6 +7,7 @@ import {
 } from './calendarLogic.js'
 import { getTodayDueTasks } from './tasksLogic.js'
 
+// Dashboard 요약에 사용할 저장 목록을 localStorage에서 안전하게 읽습니다.
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -22,11 +23,13 @@ const readStoredList = (storageKey) => {
   }
 }
 
+// 최근 Notes 정렬에 사용할 작성 시각을 숫자로 변환합니다.
 const getNoteTime = (note) => {
   const time = new Date(note.createdAt).getTime()
   return Number.isNaN(time) ? 0 : time
 }
 
+// Tasks, Notes, Calendar의 핵심 현황을 한 화면에 요약하는 컴포넌트입니다.
 function Dashboard({ t }) {
   const tasks = readStoredList(STORAGE_KEYS.tasks)
   const notes = readStoredList(STORAGE_KEYS.notes)

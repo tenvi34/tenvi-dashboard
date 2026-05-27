@@ -4,6 +4,7 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js'
 // Command와 Settings도 같은 키를 사용하므로 변경 시 연동 로직을 함께 확인해야 합니다.
 const STORAGE_KEY = STORAGE_KEYS.notes
 
+// 사용자의 Note 추가, 삭제, 저장을 관리하는 컴포넌트입니다.
 function Notes({ t }) {
   const [notes, setNotes] = useState(() => {
     const savedNotes = localStorage.getItem(STORAGE_KEY)
@@ -27,6 +28,7 @@ function Notes({ t }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(notes))
   }, [notes])
 
+  // 입력된 제목과 내용을 정리해 새 Note로 저장합니다.
   const handleAddNote = (event) => {
     event.preventDefault()
 
@@ -51,12 +53,14 @@ function Notes({ t }) {
     setNoteContent('')
   }
 
+  // 지정한 Note를 현재 목록에서 제거합니다.
   const handleDeleteNote = (noteId) => {
     setNotes((currentNotes) =>
       currentNotes.filter((note) => note.id !== noteId),
     )
   }
 
+  // Note 작성 시각을 현재 언어권에 맞는 날짜/시간 문자열로 변환합니다.
   const formatCreatedAt = (value) =>
     new Intl.DateTimeFormat(t.notes.locale, {
       dateStyle: 'medium',

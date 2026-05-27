@@ -12,6 +12,7 @@ const DEFAULT_BREAK_MINUTES = 5
 // 현재 진행 중인 시간은 저장하지 않고 완료 세션 수만 영속화합니다.
 const TIMER_SESSIONS_STORAGE_KEY = STORAGE_KEYS.timerCompletedSessions
 
+// 저장된 완료 Focus 세션 수를 안전한 숫자로 복원합니다.
 const readCompletedSessions = () => {
   const savedValue = localStorage.getItem(TIMER_SESSIONS_STORAGE_KEY)
   const parsedValue = Number.parseInt(savedValue, 10)
@@ -20,6 +21,7 @@ const readCompletedSessions = () => {
   return Number.isNaN(parsedValue) ? 0 : parsedValue
 }
 
+// Focus/Break 타이머와 스톱워치를 관리하는 컴포넌트입니다.
 function Timer({ t }) {
   const [activeTab, setActiveTab] = useState('timer')
   const [mode, setMode] = useState('focus')
@@ -36,6 +38,7 @@ function Timer({ t }) {
   const [isStopwatchRunning, setIsStopwatchRunning] = useState(false)
   const [laps, setLaps] = useState([])
 
+  // 현재 모드 설정에 맞는 카운트다운 초 값을 계산합니다.
   const getModeSeconds = useCallback(
     (timerMode) =>
       timerMode === 'focus'
@@ -91,6 +94,7 @@ function Timer({ t }) {
     return () => window.clearInterval(stopwatchId)
   }, [isStopwatchRunning])
 
+  // Focus 시간 입력값을 정규화하고 멈춤 상태일 때 남은 시간을 갱신합니다.
   const handleFocusMinutesChange = (event) => {
     const nextFocusMinutes = normalizeMinutes(
       event.target.value,
@@ -105,6 +109,7 @@ function Timer({ t }) {
     }
   }
 
+  // Break 시간 입력값을 정규화하고 멈춤 상태일 때 남은 시간을 갱신합니다.
   const handleBreakMinutesChange = (event) => {
     const nextBreakMinutes = normalizeMinutes(
       event.target.value,
@@ -119,25 +124,30 @@ function Timer({ t }) {
     }
   }
 
+  // 현재 타이머 카운트다운을 시작합니다.
   const handleStart = () => {
     setIsRunning(true)
   }
 
+  // 현재 타이머 카운트다운을 일시정지합니다.
   const handlePause = () => {
     setIsRunning(false)
   }
 
+  // 현재 모드의 설정 시간으로 타이머를 초기화합니다.
   const handleReset = () => {
     setIsRunning(false)
     setSecondsLeft(getModeSeconds(mode))
   }
 
+  // 스톱워치 시간과 lap 기록을 모두 초기화합니다.
   const handleStopwatchReset = () => {
     setIsStopwatchRunning(false)
     setStopwatchMilliseconds(0)
     setLaps([])
   }
 
+  // 현재 스톱워치 시간을 lap 목록의 맨 앞에 기록합니다.
   const handleAddLap = () => {
     if (stopwatchMilliseconds === 0) {
       return

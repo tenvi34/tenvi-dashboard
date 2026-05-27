@@ -12,11 +12,13 @@ import {
 
 const HISTORY_LIMIT = 5
 
+// 저장된 Tasks/Notes/Calendar 데이터를 분석하고 rule 기반 명령을 실행하는 컴포넌트입니다.
 function Command({ onModuleChange, t }) {
   const [command, setCommand] = useState('')
   const [history, setHistory] = useState([])
   const [result, setResult] = useState(null)
 
+  // 입력된 명령을 파싱해 결과를 만들고 필요한 경우 모듈 이동을 요청합니다.
   const executeCommand = (commandText) => {
     const trimmedCommand = commandText.trim()
 
@@ -58,6 +60,7 @@ function Command({ onModuleChange, t }) {
     setCommand('')
   }
 
+  // 명령 입력 폼 제출을 가로채 현재 입력값을 실행합니다.
   const handleExecute = (event) => {
     event.preventDefault()
     executeCommand(command)

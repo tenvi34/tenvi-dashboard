@@ -606,5 +606,6 @@ export const translations = {
 }
 
 // localStorage에서 복원한 언어 코드가 translations에 실제로 있는지 확인합니다.
+// 전달된 언어 코드가 translations에 실제로 존재하는지 확인합니다.
 export const isSupportedLanguage = (language) =>
   Object.prototype.hasOwnProperty.call(translations, language)

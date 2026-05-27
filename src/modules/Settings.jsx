@@ -15,6 +15,7 @@ import {
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 
+// Settings 화면의 데이터 현황 표시를 위해 저장 목록의 개수를 안전하게 읽습니다.
 const readStoredCount = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -31,6 +32,7 @@ const readStoredCount = (storageKey) => {
   }
 }
 
+// 백업 생성을 위해 지정한 localStorage 목록 데이터를 안전하게 복원합니다.
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -47,6 +49,7 @@ const readStoredList = (storageKey) => {
   }
 }
 
+// 백업에 포함할 완료 타이머 세션 수를 안전한 숫자로 복원합니다.
 const readStoredCompletedSessions = () => {
   const savedValue = localStorage.getItem(STORAGE_KEYS.timerCompletedSessions)
   const parsedValue = Number.parseInt(savedValue, 10)
@@ -54,6 +57,7 @@ const readStoredCompletedSessions = () => {
   return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
 }
 
+// 언어, 시작 모듈, HUD 효과, 데이터 초기화와 백업/복원을 관리하는 컴포넌트입니다.
 function Settings({
   hudEffect,
   language,
@@ -70,6 +74,7 @@ function Settings({
   const taskCount = readStoredCount(TASKS_STORAGE_KEY)
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
 
+  // 사용자가 확인한 뒤 Tasks와 Notes 저장 데이터만 초기화합니다.
   const handleConfirmReset = () => {
     // 초기화는 사용자 콘텐츠인 Tasks/Notes만 대상으로 하고 앱 설정은 유지합니다.
     localStorage.removeItem(TASKS_STORAGE_KEY)
@@ -81,6 +86,7 @@ function Settings({
   // reset 직후 컴포넌트를 다시 렌더링해 저장소 개수 표시를 최신화하기 위한 상태입니다.
   void dataVersion
 
+  // 현재 TENVI 데이터를 JSON 백업 파일로 내보냅니다.
   const handleExportBackup = () => {
     const backupPayload = {
       app: BACKUP_APP,
@@ -109,6 +115,7 @@ function Settings({
     setBackupStatus({ type: 'success', message: t.settings.backupExported })
   }
 
+  // 선택한 JSON 백업 파일을 검증한 뒤 기존 localStorage 데이터로 복원합니다.
   const handleRestoreBackup = async (event) => {
     const backupFile = event.target.files?.[0]
 
