@@ -13,6 +13,7 @@ import './App.css'
 
 const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 const HUD_EFFECTS = ['normal', 'reduced']
+const THEMES = ['hud', 'standard']
 
 // 새 모듈을 추가할 때는 사이드바 목록과 아래 moduleComponents 매핑을 함께 맞춰야 합니다.
 const MODULES = [
@@ -40,6 +41,12 @@ function App() {
     // 허용된 HUD 효과만 복원해 CSS 클래스가 예상 범위를 벗어나지 않게 합니다.
     return HUD_EFFECTS.includes(savedHudEffect) ? savedHudEffect : 'normal'
   })
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem(STORAGE_KEYS.theme)
+
+    // 테마 값은 최상위 CSS 클래스에 직접 연결되므로 허용된 값만 복원합니다.
+    return THEMES.includes(savedTheme) ? savedTheme : 'hud'
+  })
   const [language, setLanguage] = useState(() => {
     const savedLanguage = localStorage.getItem(STORAGE_KEYS.language)
 
@@ -60,6 +67,10 @@ function App() {
     localStorage.setItem(STORAGE_KEYS.hudEffect, hudEffect)
   }, [hudEffect])
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.theme, theme)
+  }, [theme])
+
   const t = translations[language]
   const activeModuleLabel = t.modules[activeModule] ?? t.modules.tasks
   // activeModule 문자열을 실제 모듈 컴포넌트로 바꾸는 중앙 전환 지점입니다.
@@ -79,16 +90,18 @@ function App() {
           onHudEffectChange={setHudEffect}
           onLanguageChange={setLanguage}
           onStartModuleChange={setStartModule}
+          onThemeChange={setTheme}
           startModule={startModule}
           t={t}
+          theme={theme}
         />
       ),
     }),
-    [hudEffect, language, startModule, t],
+    [hudEffect, language, startModule, t, theme],
   )
 
   return (
-    <main className={`tenvi-dashboard hud-${hudEffect}`}>
+    <main className={`tenvi-dashboard theme-${theme} hud-${hudEffect}`}>
       <div className="tenvi-grid" aria-hidden="true"></div>
 
       {/* TENVI 전체 화면 프레임: 상단 헤더와 모듈 작업 영역을 감쌉니다. */}

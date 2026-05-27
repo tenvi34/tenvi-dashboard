@@ -19,6 +19,7 @@ const createValidBackup = (overrides = {}) => ({
     language: 'ko',
     startModule: 'tasks',
     hudEffect: 'normal',
+    theme: 'hud',
     ...overrides,
   },
 })
@@ -32,6 +33,7 @@ describe('settingsBackup validateBackupPayload', () => {
       language: 'ko',
       startModule: 'tasks',
       hudEffect: 'normal',
+      theme: 'hud',
     })
   })
 
@@ -94,6 +96,9 @@ describe('settingsBackup validateBackupPayload', () => {
       null,
     )
     expect(validateBackupPayload(createValidBackup({ hudEffect: 'max' }))).toBe(
+      null,
+    )
+    expect(validateBackupPayload(createValidBackup({ theme: 'retro' }))).toBe(
       null,
     )
   })

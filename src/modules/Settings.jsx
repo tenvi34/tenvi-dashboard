@@ -8,6 +8,7 @@ import {
   HUD_EFFECTS,
   LANGUAGES,
   START_MODULES,
+  THEMES,
   validateBackupPayload,
 } from './settingsBackup.js'
 
@@ -64,8 +65,10 @@ function Settings({
   onHudEffectChange,
   onLanguageChange,
   onStartModuleChange,
+  onThemeChange,
   startModule,
   t,
+  theme,
 }) {
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
@@ -100,6 +103,7 @@ function Settings({
         language,
         startModule,
         hudEffect,
+        theme,
       },
     }
     const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
@@ -154,10 +158,12 @@ function Settings({
       localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
       localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
       localStorage.setItem(STORAGE_KEYS.hudEffect, validatedBackup.hudEffect)
+      localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
 
       onLanguageChange(validatedBackup.language)
       onStartModuleChange(validatedBackup.startModule)
       onHudEffectChange(validatedBackup.hudEffect)
+      onThemeChange(validatedBackup.theme)
       setDataVersion((currentVersion) => currentVersion + 1)
       setBackupStatus({ type: 'success', message: t.settings.restoreComplete })
     } catch {
@@ -231,7 +237,29 @@ function Settings({
           </div>
         </section>
 
-        {/* HUD 효과 강도 선택 그룹 */}
+        {/* 디자인 테마는 App 최상위 클래스에 반영되어 전체 모듈의 시각 톤을 전환합니다. */}
+        <section className="settings-panel">
+          <div className="settings-panel-header">
+            <p className="module-label">{t.settings.theme}</p>
+            <h3>{t.settings.design}</h3>
+          </div>
+          <div className="settings-options" aria-label={t.settings.theme}>
+            {THEMES.map((themeId) => (
+              <button
+                className={`settings-option ${
+                  theme === themeId ? 'is-active' : ''
+                }`}
+                key={themeId}
+                type="button"
+                onClick={() => onThemeChange(themeId)}
+              >
+                {t.settings.themes[themeId]}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* HUD 효과 강도는 선택한 디자인 테마 안에서 광원과 장식 밀도만 조절합니다. */}
         <section className="settings-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.hudEffect}</p>

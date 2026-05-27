@@ -6,5 +6,6 @@ export const STORAGE_KEYS = {
   notes: 'tenvi.notes',
   startModule: 'tenvi.startModule',
   tasks: 'todo-manager-lite.todos',
+  theme: 'tenvi.theme',
   timerCompletedSessions: 'tenvi.timer.completedSessions',
 }

@@ -266,6 +266,12 @@ export const translations = {
       language: '언어',
       startup: '시작 설정',
       defaultStartModule: '기본 시작 모듈',
+      design: '디자인',
+      theme: '디자인 테마',
+      themes: {
+        hud: 'HUD',
+        standard: '일반',
+      },
       visuals: '시각 효과',
       hudEffect: 'HUD 효과 강도',
       effects: {
@@ -569,6 +575,12 @@ export const translations = {
       language: 'Language',
       startup: 'Startup',
       defaultStartModule: 'Default Start Module',
+      design: 'Design',
+      theme: 'Design Theme',
+      themes: {
+        hud: 'HUD',
+        standard: 'Standard',
+      },
       visuals: 'Visuals',
       hudEffect: 'HUD Effect',
       effects: {

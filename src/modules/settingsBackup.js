@@ -1,5 +1,6 @@
 export const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 export const HUD_EFFECTS = ['normal', 'reduced']
+export const THEMES = ['hud', 'standard']
 export const LANGUAGES = ['ko', 'en']
 export const BACKUP_APP = 'TENVI'
 export const BACKUP_TYPE = 'tenvi-dashboard-backup'
@@ -38,6 +39,7 @@ export const validateBackupPayload = (backupPayload) => {
     notes,
     startModule,
     tasks,
+    theme = 'hud',
     timerCompletedSessions,
   } = backupPayload.data
   const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
@@ -49,7 +51,8 @@ export const validateBackupPayload = (backupPayload) => {
     normalizedTimerSessions < 0 ||
     !LANGUAGES.includes(language) ||
     !START_MODULES.includes(startModule) ||
-    !HUD_EFFECTS.includes(hudEffect)
+    !HUD_EFFECTS.includes(hudEffect) ||
+    !THEMES.includes(theme)
   ) {
     return null
   }
@@ -60,6 +63,7 @@ export const validateBackupPayload = (backupPayload) => {
     notes,
     startModule,
     tasks,
+    theme,
     timerCompletedSessions: normalizedTimerSessions,
   }
 }
