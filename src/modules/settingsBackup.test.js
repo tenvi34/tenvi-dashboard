@@ -29,6 +29,8 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(validateBackupPayload(createValidBackup())).toEqual({
       tasks: [{ id: 1, title: 'Task', completed: false }],
       notes: [{ id: 1, title: 'Note', content: 'Memo' }],
+      hasMapPhotoRecords: false,
+      mapPhotoRecords: undefined,
       timerCompletedSessions: 3,
       language: 'ko',
       startModule: 'tasks',
@@ -63,6 +65,36 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(restoredData).not.toHaveProperty('calendarEvents')
   })
 
+  it('distinguishes missing Map backup data from an explicit empty Map backup', () => {
+    const legacyBackup = validateBackupPayload(createValidBackup())
+    const emptyMapBackup = validateBackupPayload(
+      createValidBackup({ mapPhotoRecords: [] }),
+    )
+
+    expect(legacyBackup.hasMapPhotoRecords).toBe(false)
+    expect(legacyBackup.mapPhotoRecords).toBeUndefined()
+    expect(emptyMapBackup.hasMapPhotoRecords).toBe(true)
+    expect(emptyMapBackup.mapPhotoRecords).toEqual([])
+  })
+
+  it('accepts Map backup records as an optional v1 backup field', () => {
+    const restoredData = validateBackupPayload(
+      createValidBackup({
+        mapPhotoRecords: [
+          {
+            id: 'photo-1',
+            previewImageDataUrl: 'data:image/jpeg;base64,cHJldmlldw==',
+            latitude: 33.5903,
+            longitude: 130.4208,
+          },
+        ],
+      }),
+    )
+
+    expect(restoredData.hasMapPhotoRecords).toBe(true)
+    expect(restoredData.mapPhotoRecords).toHaveLength(1)
+  })
+
   it('rejects payloads without TENVI backup metadata', () => {
     expect(validateBackupPayload(null)).toBe(null)
     expect(validateBackupPayload([])).toBe(null)
@@ -82,6 +114,9 @@ describe('settingsBackup validateBackupPayload', () => {
   it('rejects payloads with invalid data shapes', () => {
     expect(validateBackupPayload(createValidBackup({ tasks: {} }))).toBe(null)
     expect(validateBackupPayload(createValidBackup({ notes: {} }))).toBe(null)
+    expect(validateBackupPayload(createValidBackup({ mapPhotoRecords: {} }))).toBe(
+      null,
+    )
     expect(
       validateBackupPayload(createValidBackup({ timerCompletedSessions: 'abc' })),
     ).toBe(null)

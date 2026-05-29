@@ -1,5 +1,14 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import {
+  getPhotoRecordCount,
+  getPhotoRecords,
+  replacePhotoRecords,
+} from '../services/photoArchiveRepository.js'
+import {
+  preparePhotoRecordsForRestore,
+  serializePhotoRecordsForBackup,
+} from '../services/photoArchiveBackupService.js'
 import {
   BACKUP_APP,
   BACKUP_TYPE,
@@ -73,9 +82,31 @@ function Settings({
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
+  const [mapPhotoCount, setMapPhotoCount] = useState(0)
   const backupFileInputRef = useRef(null)
   const taskCount = readStoredCount(TASKS_STORAGE_KEY)
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
+
+  useEffect(() => {
+    let isMounted = true
+
+    // Settings 저장소 현황에 Map IndexedDB 기록 개수 반영
+    getPhotoRecordCount()
+      .then((count) => {
+        if (isMounted) {
+          setMapPhotoCount(count)
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setMapPhotoCount(0)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [dataVersion])
 
   // 사용자가 확인한 뒤 Tasks와 Notes 저장 데이터만 초기화합니다.
   const handleConfirmReset = () => {
@@ -90,36 +121,58 @@ function Settings({
   void dataVersion
 
   // 현재 TENVI 데이터를 JSON 백업 파일로 내보냅니다.
-  const handleExportBackup = () => {
-    const backupPayload = {
-      app: BACKUP_APP,
-      type: BACKUP_TYPE,
-      version: BACKUP_VERSION,
-      createdAt: new Date().toISOString(),
-      data: {
-        tasks: readStoredList(STORAGE_KEYS.tasks),
-        notes: readStoredList(STORAGE_KEYS.notes),
-        timerCompletedSessions: readStoredCompletedSessions(),
-        language,
-        startModule,
-        hudEffect,
-        theme,
-      },
-    }
-    const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
-      type: 'application/json',
-    })
-    const backupUrl = URL.createObjectURL(backupBlob)
-    const downloadLink = document.createElement('a')
+  const handleExportBackup = async () => {
+    try {
+      const mapPhotoRecords = await serializePhotoRecordsForBackup(
+        await getPhotoRecords(),
+      )
+      const backupPayload = {
+        app: BACKUP_APP,
+        type: BACKUP_TYPE,
+        version: BACKUP_VERSION,
+        createdAt: new Date().toISOString(),
+        data: {
+          tasks: readStoredList(STORAGE_KEYS.tasks),
+          notes: readStoredList(STORAGE_KEYS.notes),
+          timerCompletedSessions: readStoredCompletedSessions(),
+          language,
+          startModule,
+          hudEffect,
+          theme,
+          mapPhotoRecords,
+        },
+      }
+      const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
+        type: 'application/json',
+      })
+      const backupUrl = URL.createObjectURL(backupBlob)
+      const downloadLink = document.createElement('a')
 
-    downloadLink.href = backupUrl
-    downloadLink.download = createBackupFileName()
-    downloadLink.click()
-    URL.revokeObjectURL(backupUrl)
-    setBackupStatus({ type: 'success', message: t.settings.backupExported })
+      downloadLink.href = backupUrl
+      downloadLink.download = createBackupFileName()
+      downloadLink.click()
+      URL.revokeObjectURL(backupUrl)
+      setBackupStatus({ type: 'success', message: t.settings.backupExported })
+    } catch {
+      setBackupStatus({ type: 'error', message: t.settings.backupReadError })
+    }
   }
 
   // 선택한 JSON 백업 파일을 검증한 뒤 기존 localStorage 데이터로 복원합니다.
+  const restoreLocalStorageData = (validatedBackup) => {
+    // 기존 key 문자열과 저장 구조를 유지해야 이전 데이터와 다른 모듈 동작이 깨지지 않습니다.
+    localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(validatedBackup.tasks))
+    localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(validatedBackup.notes))
+    localStorage.setItem(
+      STORAGE_KEYS.timerCompletedSessions,
+      String(validatedBackup.timerCompletedSessions),
+    )
+    localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
+    localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
+    localStorage.setItem(STORAGE_KEYS.hudEffect, validatedBackup.hudEffect)
+    localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
+  }
+
   const handleRestoreBackup = async (event) => {
     const backupFile = event.target.files?.[0]
 
@@ -137,35 +190,114 @@ function Settings({
         return
       }
 
+      // 검증과 Blob 복원 준비가 끝나기 전에는 기존 저장소를 변경하지 않습니다.
+      const mapRestorePlan = validatedBackup.hasMapPhotoRecords
+        ? await preparePhotoRecordsForRestore(validatedBackup.mapPhotoRecords)
+        : null
+
       if (!window.confirm(t.settings.restoreConfirmMessage)) {
         setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
         return
       }
 
-      // 기존 key 문자열과 저장 구조를 유지해야 이전 데이터와 다른 모듈 동작이 깨지지 않습니다.
-      localStorage.setItem(
-        STORAGE_KEYS.tasks,
-        JSON.stringify(validatedBackup.tasks),
-      )
-      localStorage.setItem(
-        STORAGE_KEYS.notes,
-        JSON.stringify(validatedBackup.notes),
-      )
-      localStorage.setItem(
-        STORAGE_KEYS.timerCompletedSessions,
-        String(validatedBackup.timerCompletedSessions),
-      )
-      localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
-      localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
-      localStorage.setItem(STORAGE_KEYS.hudEffect, validatedBackup.hudEffect)
-      localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
+      if (mapRestorePlan?.damagedCount > 0) {
+        const shouldContinueWithValidMapRecords = window.confirm(
+          t.settings.restoreDamagedMapConfirm(
+            mapRestorePlan.totalCount,
+            mapRestorePlan.validCount,
+            mapRestorePlan.damagedCount,
+          ),
+        )
+
+        if (!shouldContinueWithValidMapRecords) {
+          setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+          return
+        }
+      } else if (
+        validatedBackup.hasMapPhotoRecords &&
+        !window.confirm(
+          t.settings.restoreMapReplaceConfirm(
+            mapRestorePlan.totalCount,
+            mapRestorePlan.validCount,
+            mapRestorePlan.damagedCount,
+          ),
+        )
+      ) {
+        setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+        return
+      }
+
+      const previousLocalStorageData = {
+        tasks: localStorage.getItem(STORAGE_KEYS.tasks),
+        notes: localStorage.getItem(STORAGE_KEYS.notes),
+        timerCompletedSessions: localStorage.getItem(
+          STORAGE_KEYS.timerCompletedSessions,
+        ),
+        language: localStorage.getItem(STORAGE_KEYS.language),
+        startModule: localStorage.getItem(STORAGE_KEYS.startModule),
+        hudEffect: localStorage.getItem(STORAGE_KEYS.hudEffect),
+        theme: localStorage.getItem(STORAGE_KEYS.theme),
+      }
+      const previousMapRecords = validatedBackup.hasMapPhotoRecords
+        ? await getPhotoRecords()
+        : null
+
+      try {
+        // Map 필드가 없는 이전 백업은 현재 IndexedDB 기록을 유지
+        if (validatedBackup.hasMapPhotoRecords) {
+          await replacePhotoRecords(mapRestorePlan.restoredRecords)
+        }
+
+        restoreLocalStorageData(validatedBackup)
+      } catch {
+        // localStorage와 IndexedDB를 함께 묶을 수 없으므로 가능한 범위에서 복원 전 데이터로 롤백
+        if (previousMapRecords) {
+          await replacePhotoRecords(previousMapRecords)
+        }
+
+        Object.entries(previousLocalStorageData).forEach(([key, value]) => {
+          const storageKey = STORAGE_KEYS[key]
+
+          if (value === null) {
+            localStorage.removeItem(storageKey)
+            return
+          }
+
+          localStorage.setItem(storageKey, value)
+        })
+
+        setBackupStatus({
+          type: 'error',
+          message: t.settings.restoreRollbackError,
+        })
+        return
+      }
 
       onLanguageChange(validatedBackup.language)
       onStartModuleChange(validatedBackup.startModule)
       onHudEffectChange(validatedBackup.hudEffect)
       onThemeChange(validatedBackup.theme)
       setDataVersion((currentVersion) => currentVersion + 1)
-      setBackupStatus({ type: 'success', message: t.settings.restoreComplete })
+
+      if (!validatedBackup.hasMapPhotoRecords) {
+        setBackupStatus({
+          type: 'success',
+          message: `${t.settings.restoreComplete} ${t.settings.restoreMapKept}`,
+        })
+      } else if (mapRestorePlan.damagedCount > 0) {
+        setBackupStatus({
+          type: 'success',
+          message: t.settings.restoreCompleteWithDamagedMap(
+            mapRestorePlan.validCount,
+            mapRestorePlan.damagedCount,
+          ),
+        })
+      } else {
+        setBackupStatus({
+          type: 'success',
+          message: t.settings.restoreCompleteWithMap(mapRestorePlan.validCount),
+        })
+      }
     } catch {
       setBackupStatus({ type: 'error', message: t.settings.backupReadError })
     } finally {
@@ -297,6 +429,10 @@ function Settings({
               <span>{t.settings.notesData}</span>
               <strong>{noteCount}</strong>
             </div>
+            <div className="data-metric">
+              <span>{t.settings.mapData}</span>
+              <strong>{mapPhotoCount}</strong>
+            </div>
           </div>
           <button
             className="reset-button"
@@ -364,6 +500,7 @@ function Settings({
             onChange={handleRestoreBackup}
           />
           <p className="settings-note">{t.settings.backupNote}</p>
+          <p className="settings-note">{t.settings.mapBackupNote}</p>
           {backupStatus ? (
             <p className={`backup-status is-${backupStatus.type}`}>
               {backupStatus.message}

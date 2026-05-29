@@ -362,15 +362,30 @@ export const translations = {
       backupTitle: '데이터 백업',
       exportBackup: 'JSON 백업 내보내기',
       importBackup: 'JSON 백업 복원',
+      mapData: 'Map 사진 기록',
       backupNote:
-        'Tasks, Notes, Timer 세션, 언어, 시작 모듈, HUD 설정을 백업합니다. 복원 전에는 확인 절차가 표시됩니다.',
+        'Tasks, Notes, Timer 세션, 언어, 시작 모듈, HUD 설정, Map 사진 기록을 백업합니다. 복원 전에는 확인 절차가 표시됩니다.',
+      mapBackupNote:
+        'Map 백업에는 미리보기 이미지와 위치 기록이 포함됩니다. 사진 수가 많으면 JSON 파일 용량이 커질 수 있습니다.',
       backupExported: '백업 파일을 생성했습니다.',
       backupInvalid: '올바른 TENVI 백업 파일이 아닙니다.',
       backupReadError: 'JSON 파일을 읽을 수 없습니다.',
       restoreConfirmMessage:
         '현재 TENVI 데이터가 백업 파일의 데이터로 덮어써질 수 있습니다. 복원할까요?',
+      restoreMapReplaceConfirm: (total, valid, damaged) =>
+        `백업 파일에는 Map 사진 기록 ${total}개가 포함되어 있습니다. ${valid}개는 복원 가능하고 ${damaged}개는 손상되어 복원할 수 없습니다. 이 백업의 Map 사진 기록으로 현재 Map 기록이 교체될 수 있습니다. 계속 복원할까요?`,
+      restoreDamagedMapConfirm: (total, valid, damaged) =>
+        `백업 파일에는 Map 사진 기록 ${total}개가 포함되어 있습니다. ${valid}개는 복원 가능하고 ${damaged}개는 손상되어 복원할 수 없습니다. 정상 기록만 복원하면 기존 Map 기록이 교체됩니다. 계속 진행하시겠습니까?`,
       restoreCancelled: '복원을 취소했습니다.',
       restoreComplete: '백업 데이터를 복원했습니다.',
+      restoreCompleteWithMap: (count) =>
+        `백업 데이터와 Map 사진 기록 ${count}개를 복원했습니다.`,
+      restoreCompleteWithDamagedMap: (valid, damaged) =>
+        `백업 데이터와 Map 사진 기록 ${valid}개를 복원했습니다. 손상된 Map 기록 ${damaged}개는 제외했습니다.`,
+      restoreMapKept:
+        '이 백업 파일에는 Map 사진 기록이 포함되어 있지 않아 현재 Map 기록은 유지되었습니다.',
+      restoreRollbackError:
+        '복원 중 오류가 발생해 가능한 범위에서 이전 데이터를 복구했습니다.',
     },
   },
   en: {
@@ -740,15 +755,30 @@ export const translations = {
       backupTitle: 'Data Backup',
       exportBackup: 'Export JSON Backup',
       importBackup: 'Restore JSON Backup',
+      mapData: 'Map photo records',
       backupNote:
-        'Backs up Tasks, Notes, Timer sessions, language, start module, and HUD settings. A confirmation step appears before restore.',
+        'Backs up Tasks, Notes, Timer sessions, language, start module, HUD settings, and Map photo records. A confirmation step appears before restore.',
+      mapBackupNote:
+        'Map backups include preview images and location records. The JSON file can become large when many photos are stored.',
       backupExported: 'Backup file has been created.',
       backupInvalid: 'This is not a valid TENVI backup file.',
       backupReadError: 'Could not read the JSON file.',
       restoreConfirmMessage:
         'Current TENVI data may be overwritten with the backup file data. Restore now?',
+      restoreMapReplaceConfirm: (total, valid, damaged) =>
+        `This backup contains ${total} Map photo records. ${valid} can be restored and ${damaged} are damaged. Current Map records may be replaced with the Map records in this backup. Continue restore?`,
+      restoreDamagedMapConfirm: (total, valid, damaged) =>
+        `This backup contains ${total} Map photo records. ${valid} can be restored and ${damaged} are damaged. Restoring only valid records will replace current Map records. Continue?`,
       restoreCancelled: 'Restore cancelled.',
       restoreComplete: 'Backup data has been restored.',
+      restoreCompleteWithMap: (count) =>
+        `Backup data and ${count} Map photo records have been restored.`,
+      restoreCompleteWithDamagedMap: (valid, damaged) =>
+        `Backup data and ${valid} Map photo records have been restored. ${damaged} damaged Map records were skipped.`,
+      restoreMapKept:
+        'This backup file does not include Map photo records, so current Map records were kept.',
+      restoreRollbackError:
+        'Restore failed. Previous data was restored where possible.',
     },
   },
 }

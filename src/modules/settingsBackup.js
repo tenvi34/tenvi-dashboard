@@ -42,6 +42,10 @@ export const validateBackupPayload = (backupPayload) => {
     theme = 'hud',
     timerCompletedSessions,
   } = backupPayload.data
+  const hasMapPhotoRecords = Object.prototype.hasOwnProperty.call(
+    backupPayload.data,
+    'mapPhotoRecords',
+  )
   const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
 
   if (
@@ -57,9 +61,17 @@ export const validateBackupPayload = (backupPayload) => {
     return null
   }
 
+  if (hasMapPhotoRecords && !Array.isArray(backupPayload.data.mapPhotoRecords)) {
+    return null
+  }
+
   return {
     hudEffect,
     language,
+    mapPhotoRecords: hasMapPhotoRecords
+      ? backupPayload.data.mapPhotoRecords
+      : undefined,
+    hasMapPhotoRecords,
     notes,
     startModule,
     tasks,

@@ -68,6 +68,13 @@ export const getPhotoRecords = async () => {
   return [...records].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
+// Settings 데이터 현황과 백업 안내에 사용할 Map 기록 개수 조회
+export const getPhotoRecordCount = async () => {
+  const count = await runStoreTransaction('readonly', (store) => store.count())
+
+  return count
+}
+
 // 리사이즈된 미리보기 Blob과 메타데이터 저장
 export const createPhotoRecord = async (recordInput) => {
   const now = new Date().toISOString()
@@ -110,4 +117,34 @@ export const deletePhotoRecord = async (id) => {
   await runStoreTransaction('readwrite', (store) => store.delete(id))
 
   return id
+}
+
+// 백업 복원용 전체 교체: clear와 add를 하나의 IndexedDB 트랜잭션 안에서 처리
+export const replacePhotoRecords = async (records) => {
+  const database = await openPhotoArchiveDatabase()
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(STORE_NAME)
+
+    store.clear()
+    records.forEach((record) => {
+      store.add(record)
+    })
+
+    transaction.oncomplete = () => {
+      database.close()
+      resolve(records)
+    }
+
+    transaction.onerror = () => {
+      database.close()
+      reject(transaction.error)
+    }
+
+    transaction.onabort = () => {
+      database.close()
+      reject(transaction.error)
+    }
+  })
 }
