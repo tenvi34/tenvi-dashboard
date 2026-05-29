@@ -127,19 +127,19 @@ function MapViewportController({
       return
     }
 
-    if (request?.type === 'fit-all' && shouldFitBounds && records.length > 1) {
-      // 선택/등록/편집 중이 아닐 때만 전체 저장 마커 범위 표시
-      const bounds = L.latLngBounds(
-        records.map((record) => [record.latitude, record.longitude]),
-      )
+    const isFitAllAuto = request?.type === 'fit-all' && shouldFitBounds
+    // fit-all-forced: 선택·편집 상태에서도 강제로 전체 마커 범위 표시
+    const isFitAllForced = request?.type === 'fit-all-forced'
 
-      map.fitBounds(bounds, { maxZoom: FIT_BOUNDS_MAX_ZOOM, padding: [36, 36] })
-    } else if (
-      request?.type === 'fit-all' &&
-      shouldFitBounds &&
-      records.length === 1
-    ) {
-      map.setView([records[0].latitude, records[0].longitude], RECORD_FOCUS_ZOOM)
+    if (isFitAllAuto || isFitAllForced) {
+      if (records.length > 1) {
+        const bounds = L.latLngBounds(
+          records.map((record) => [record.latitude, record.longitude]),
+        )
+        map.fitBounds(bounds, { maxZoom: FIT_BOUNDS_MAX_ZOOM, padding: [36, 36] })
+      } else if (records.length === 1) {
+        map.setView([records[0].latitude, records[0].longitude], RECORD_FOCUS_ZOOM)
+      }
     }
   }, [map, records, request, shouldFitBounds, target])
 
@@ -365,18 +365,16 @@ function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records
   )
 }
 
-// 컬렉션 필터와 생성/수정/삭제 흐름 관리 패널
+// 컬렉션 생성/수정 폼과 카드 목록 — 컬렉션 관리 패널이 열렸을 때만 렌더
 function PhotoCollectionPanel({
   collectionDraft,
   collections,
   editingCollectionId,
-  filterValue,
   getCollectionRecordCount,
   onCancelCollectionEdit,
   onChangeCollectionDraft,
   onDeleteCollection,
   onSaveCollection,
-  onSelectFilter,
   onStartCollectionEdit,
   t,
 }) {
@@ -384,44 +382,6 @@ function PhotoCollectionPanel({
 
   return (
     <section className="map-collection-panel" aria-label={t.map.collectionsLabel}>
-      <div className="map-section-header">
-        <p className="module-label">{t.map.collectionsLabel}</p>
-        <strong>{collections.length}</strong>
-      </div>
-
-      <div className="map-filter-options" aria-label={t.map.collectionFilter}>
-        <button
-          className={`map-filter-button ${
-            filterValue === COLLECTION_FILTER_ALL ? 'is-active' : ''
-          }`}
-          type="button"
-          onClick={() => onSelectFilter(COLLECTION_FILTER_ALL)}
-        >
-          {t.map.allCollections}
-        </button>
-        <button
-          className={`map-filter-button ${
-            filterValue === COLLECTION_FILTER_UNASSIGNED ? 'is-active' : ''
-          }`}
-          type="button"
-          onClick={() => onSelectFilter(COLLECTION_FILTER_UNASSIGNED)}
-        >
-          {t.map.unassignedCollection}
-        </button>
-        {collections.map((collection) => (
-          <button
-            className={`map-filter-button ${
-              filterValue === collection.id ? 'is-active' : ''
-            }`}
-            key={collection.id}
-            type="button"
-            onClick={() => onSelectFilter(collection.id)}
-          >
-            {collection.name}
-          </button>
-        ))}
-      </div>
-
       <div className="map-collection-form">
         <label className="map-field">
           <span>{t.map.collectionName}</span>
@@ -830,6 +790,10 @@ function Map({ t }) {
   const [draft, setDraft] = useState(null)
   const [editDraft, setEditDraft] = useState(null)
   const [activeRecordId, setActiveRecordId] = useState('')
+  // 사진 등록 폼 표시 여부 — 기본 접힘
+  const [isAddingPhoto, setIsAddingPhoto] = useState(false)
+  // 컬렉션 생성/수정 폼 표시 여부 — 기본 접힘
+  const [isCollectionFormOpen, setIsCollectionFormOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isReading, setIsReading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -952,6 +916,7 @@ function Map({ t }) {
       setDraft(createPhotoDraft(file, location, previewImage))
       setEditDraft(null)
       setActiveRecordId('')
+      setIsAddingPhoto(true)
       setViewportRequest(
         createViewportRequest(
           location.status === 'located' ? 'exif-detect' : 'fit-all',
@@ -1023,6 +988,7 @@ function Map({ t }) {
   const handleStartCollectionEdit = (collection) => {
     setCollectionDraft(normalizePhotoCollectionInput(collection))
     setEditingCollectionId(collection.id)
+    setIsCollectionFormOpen(true)
   }
 
   const handleSaveCollection = async () => {
@@ -1121,6 +1087,7 @@ function Map({ t }) {
 
       setRecords((currentRecords) => [savedRecord, ...currentRecords])
       setDraft(null)
+      setIsAddingPhoto(false)
       setActiveRecordId(savedRecord.id)
       setViewportRequest(createViewportRequest('record-select', savedRecord))
       setStatusMessage(t.map.saveComplete)
@@ -1133,6 +1100,7 @@ function Map({ t }) {
 
   const handleStartEdit = () => {
     setDraft(null)
+    setIsAddingPhoto(false)
     setEditDraft(createEditDraft(activeRecord))
     setViewportRequest(createViewportRequest('record-select', activeRecord))
     setStatusMessage('')
@@ -1184,6 +1152,7 @@ function Map({ t }) {
 
     setDraft(null)
     setEditDraft(null)
+    setIsAddingPhoto(false)
     setActiveRecordId(recordId)
     // 같은 기록 재클릭도 지도 이동을 다시 실행하기 위한 요청 객체
     setViewportRequest(createViewportRequest(requestType, selectedRecord))
@@ -1217,6 +1186,32 @@ function Map({ t }) {
     }
   }
 
+  // 사진 등록 폼 펼치기/접기 — 닫을 때 미저장 draft만 초기화, 저장 기록에는 영향 없음
+  const handleToggleAddPhoto = () => {
+    if (isAddingPhoto) {
+      setIsAddingPhoto(false)
+      setDraft(null)
+      setError('')
+    } else {
+      setIsAddingPhoto(true)
+    }
+  }
+
+  // 컬렉션 생성/수정 폼 펼치기/접기 — 닫을 때 입력 draft만 초기화, 기존 컬렉션 데이터에는 영향 없음
+  const handleToggleCollectionForm = () => {
+    if (isCollectionFormOpen) {
+      setIsCollectionFormOpen(false)
+      resetCollectionDraft()
+    } else {
+      setIsCollectionFormOpen(true)
+    }
+  }
+
+  // 현재 필터의 전체 마커가 보이도록 지도 범위 조정 — 선택 상태는 유지
+  const handleFitAllMarkers = () => {
+    setViewportRequest(createViewportRequest('fit-all-forced'))
+  }
+
   return (
     <section className="module-panel map-module" aria-labelledby="map-title">
       <div className="module-header">
@@ -1229,83 +1224,163 @@ function Map({ t }) {
 
       <div className="map-archive-layout">
         <aside className="map-control-panel">
-          <label className="map-upload-box" htmlFor="map-photo-input">
-            <span>{t.map.uploadTitle}</span>
-            <strong>{t.map.uploadAction}</strong>
+          {/* 고정 영역: 추가 버튼·상태·컬렉션 필터 */}
+          <div className="map-left-fixed">
+            <button
+              className={`map-add-toggle-button${isAddingPhoto ? ' is-open' : ''}`}
+              type="button"
+              onClick={handleToggleAddPhoto}
+            >
+              {isAddingPhoto ? t.map.cancelAddPhoto : t.map.addPhotoRecord}
+            </button>
             <input
               id="map-photo-input"
               type="file"
               accept="image/*"
+              className="sr-only"
               onChange={handlePhotoChange}
             />
-          </label>
 
-          {isLoading ? (
-            <div className="map-status" role="status">
-              {t.map.loadingRecords}
+            {isLoading ? (
+              <div className="map-status" role="status">
+                {t.map.loadingRecords}
+              </div>
+            ) : null}
+
+            {isReading ? (
+              <div className="map-status" role="status">
+                {t.map.reading}
+              </div>
+            ) : null}
+
+            {statusMessage ? (
+              <div className="map-status" role="status">
+                {statusMessage}
+              </div>
+            ) : null}
+
+            {error ? (
+              <div className="map-status is-error" role="alert">
+                {error}
+              </div>
+            ) : null}
+
+            {/* 사진 등록 draft 패널 — 추가 모드일 때만 표시 */}
+            {isAddingPhoto ? (
+              <>
+                {draft ? (
+                  <div className="map-status" role="status">
+                    {t.map.clickToSetLocation}
+                  </div>
+                ) : null}
+                <PhotoDraftPanel
+                  collections={collections}
+                  draft={draft}
+                  isSaving={isSaving}
+                  language={t.map.searchLanguage}
+                  onChangeDraft={handleChangeDraft}
+                  onSaveDraft={handleSaveDraft}
+                  onSelectPlace={handleSelectPlace}
+                  t={t}
+                />
+              </>
+            ) : null}
+
+            {/* 컬렉션 필터 헤더 + 관리 토글 버튼 */}
+            <div className="map-collection-header">
+              <div className="map-section-header">
+                <p className="module-label">{t.map.collectionsLabel}</p>
+                <strong>{collections.length}</strong>
+              </div>
+              <button
+                className="map-collection-toggle"
+                type="button"
+                onClick={handleToggleCollectionForm}
+              >
+                {isCollectionFormOpen
+                  ? t.map.closeCollectionForm
+                  : t.map.newCollection}
+              </button>
             </div>
-          ) : null}
 
-          {isReading ? (
-            <div className="map-status" role="status">
-              {t.map.reading}
+            {/* 컬렉션 필터 버튼 — 항상 표시 */}
+            <div className="map-filter-options" aria-label={t.map.collectionFilter}>
+              <button
+                className={`map-filter-button ${
+                  selectedCollectionFilter === COLLECTION_FILTER_ALL ? 'is-active' : ''
+                }`}
+                type="button"
+                onClick={() => setSelectedCollectionFilter(COLLECTION_FILTER_ALL)}
+              >
+                {t.map.allCollections}
+              </button>
+              <button
+                className={`map-filter-button ${
+                  selectedCollectionFilter === COLLECTION_FILTER_UNASSIGNED
+                    ? 'is-active'
+                    : ''
+                }`}
+                type="button"
+                onClick={() =>
+                  setSelectedCollectionFilter(COLLECTION_FILTER_UNASSIGNED)
+                }
+              >
+                {t.map.unassignedCollection}
+              </button>
+              {collections.map((collection) => (
+                <button
+                  className={`map-filter-button ${
+                    selectedCollectionFilter === collection.id ? 'is-active' : ''
+                  }`}
+                  key={collection.id}
+                  type="button"
+                  onClick={() => setSelectedCollectionFilter(collection.id)}
+                >
+                  {collection.name}
+                </button>
+              ))}
             </div>
-          ) : null}
 
-          {statusMessage ? (
-            <div className="map-status" role="status">
-              {statusMessage}
-            </div>
-          ) : null}
+            {/* 컬렉션 관리 폼 + 카드 목록 — 관리 모드일 때만 표시 */}
+            {isCollectionFormOpen ? (
+              <PhotoCollectionPanel
+                collectionDraft={collectionDraft}
+                collections={collections}
+                editingCollectionId={editingCollectionId}
+                getCollectionRecordCount={getCollectionRecordCount}
+                onCancelCollectionEdit={resetCollectionDraft}
+                onChangeCollectionDraft={handleChangeCollectionDraft}
+                onDeleteCollection={handleDeleteCollection}
+                onSaveCollection={handleSaveCollection}
+                onStartCollectionEdit={handleStartCollectionEdit}
+                t={t}
+              />
+            ) : null}
+          </div>
 
-          {error ? (
-            <div className="map-status is-error" role="alert">
-              {error}
-            </div>
-          ) : null}
-
-          {draft || editDraft ? (
-            <div className="map-status" role="status">
-              {t.map.clickToSetLocation}
-            </div>
-          ) : null}
-
-          <PhotoDraftPanel
-            collections={collections}
-            draft={draft}
-            isSaving={isSaving}
-            language={t.map.searchLanguage}
-            onChangeDraft={handleChangeDraft}
-            onSaveDraft={handleSaveDraft}
-            onSelectPlace={handleSelectPlace}
-            t={t}
-          />
-
-          <PhotoCollectionPanel
-            collectionDraft={collectionDraft}
-            collections={collections}
-            editingCollectionId={editingCollectionId}
-            filterValue={selectedCollectionFilter}
-            getCollectionRecordCount={getCollectionRecordCount}
-            onCancelCollectionEdit={resetCollectionDraft}
-            onChangeCollectionDraft={handleChangeCollectionDraft}
-            onDeleteCollection={handleDeleteCollection}
-            onSaveCollection={handleSaveCollection}
-            onSelectFilter={setSelectedCollectionFilter}
-            onStartCollectionEdit={handleStartCollectionEdit}
-            t={t}
-          />
-
-          <PhotoRecordList
-            activeRecordId={activeRecordId}
-            emptyMessage={filteredEmptyMessage}
-            onSelectRecord={handleSelectRecord}
-            records={filteredRecords}
-            t={t}
-          />
+          {/* 스크롤 영역: 사진 기록 목록 */}
+          <div className="map-left-scroll">
+            <PhotoRecordList
+              activeRecordId={activeRecordId}
+              emptyMessage={filteredEmptyMessage}
+              onSelectRecord={handleSelectRecord}
+              records={filteredRecords}
+              t={t}
+            />
+          </div>
         </aside>
 
         <section className="map-view-panel" aria-label={t.map.mapLabel}>
+          {/* 전체 위치 보기: 등록·편집 중이 아닐 때, 마커가 하나 이상일 때 표시 */}
+          {filteredRecords.length > 0 && !draft && !editDraft ? (
+            <button
+              className="map-fit-all-button"
+              type="button"
+              onClick={handleFitAllMarkers}
+            >
+              {t.map.fitAllMarkers}
+            </button>
+          ) : null}
           <MapContainer
             center={DEFAULT_CENTER}
             className="photo-map"
@@ -1379,6 +1454,11 @@ function Map({ t }) {
         </section>
 
         <aside className="map-detail-column">
+          {editDraft ? (
+            <div className="map-status" role="status">
+              {t.map.clickToSetLocation}
+            </div>
+          ) : null}
           {editDraft && activeRecord ? (
             <PhotoEditPanel
               collections={collections}

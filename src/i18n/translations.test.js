@@ -162,6 +162,11 @@ const requiredMapKeys = [
   'sourceExif',
   'sourceManual',
   'sourceSearch',
+  'addPhotoRecord',
+  'cancelAddPhoto',
+  'newCollection',
+  'closeCollectionForm',
+  'fitAllMarkers',
 ]
 
 describe('translations', () => {

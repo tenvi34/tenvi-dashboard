@@ -892,7 +892,9 @@ body {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr) minmax(260px, 340px);
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
+  height: calc(100svh - 340px);
+  min-height: 600px;
   min-width: 0;
 }
 
@@ -902,9 +904,27 @@ body {
 }
 
 .map-control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* 왼쪽 패널 상단 고정 영역: 버튼·상태·필터 */
+.map-left-fixed {
+  flex: 0 0 auto;
   display: grid;
+  gap: 10px;
   align-content: start;
-  gap: 14px;
+  padding-bottom: 6px;
+}
+
+/* 왼쪽 패널 사진 목록 스크롤 영역: 남은 높이 차지 */
+.map-left-scroll {
+  flex: 1 1 0;
+  min-height: 120px;
+  overflow-y: auto;
+  min-width: 0;
 }
 
 .map-upload-box {
@@ -991,8 +1011,6 @@ body {
 }
 
 .map-detail-panel {
-  max-height: min(720px, calc(100svh - 220px));
-  overflow: auto;
   padding-right: 2px;
 }
 
@@ -1290,8 +1308,8 @@ body {
 }
 
 .map-view-panel {
+  position: relative;
   overflow: hidden;
-  min-height: 640px;
   border: 1px solid rgba(90, 212, 255, 0.22);
   border-radius: 10px;
   background: rgba(2, 9, 18, 0.46);
@@ -1300,7 +1318,6 @@ body {
 .photo-map {
   width: 100%;
   height: 100%;
-  min-height: 640px;
   background: #06101d;
 }
 
@@ -1405,6 +1422,8 @@ body {
 .map-detail-column {
   min-width: 0;
   max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .map-detail-copy {
@@ -1430,6 +1449,108 @@ body {
 .map-delete-button {
   width: 100%;
   min-height: 44px;
+}
+
+/* 사진 기록 추가 토글 버튼 */
+.map-add-toggle-button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(90, 212, 255, 0.28);
+  border-radius: 8px;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.6);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.map-add-toggle-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.1);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.map-add-toggle-button.is-open {
+  color: #aacbd8;
+  border-color: rgba(90, 212, 255, 0.22);
+  background: rgba(2, 9, 18, 0.42);
+}
+
+/* 컬렉션 필터 헤더 행: 라벨 + 관리 버튼 */
+.map-collection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* 컬렉션 관리 토글 버튼 (작은 보조 버튼) */
+.map-collection-toggle {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 8px;
+  color: #aacbd8;
+  background: rgba(5, 16, 31, 0.5);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.map-collection-toggle:hover {
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.1);
+  color: #f4fdff;
+}
+
+/* 지도 위 전체 위치 보기 플로팅 버튼 */
+.map-fit-all-button {
+  position: absolute;
+  bottom: 20px;
+  right: 12px;
+  z-index: 1000;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(90, 212, 255, 0.42);
+  border-radius: 8px;
+  color: #dff8ff;
+  background: rgba(8, 18, 32, 0.88);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.map-fit-all-button:hover {
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.14);
+  box-shadow: 0 0 14px rgba(90, 212, 255, 0.2);
+}
+
+.map-fit-all-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
 }
 
 .map-edit-actions {
@@ -2253,10 +2374,34 @@ body {
 
   .map-archive-layout {
     grid-template-columns: 1fr;
+    height: auto;
   }
 
-  .map-detail-panel {
-    max-height: none;
+  .map-control-panel {
+    overflow: visible;
+  }
+
+  .map-left-fixed {
+    flex: none;
+  }
+
+  .map-left-scroll {
+    flex: none;
+    min-height: 0;
+    overflow-y: visible;
+  }
+
+  .map-view-panel {
+    min-height: 480px;
+  }
+
+  .photo-map {
+    min-height: 480px;
+  }
+
+  .map-detail-column {
+    overflow-y: visible;
+    overflow-x: visible;
   }
 }
 
@@ -2352,6 +2497,7 @@ body {
   .command-form button,
   .calendar-form button,
   .map-primary-button,
+  .map-add-toggle-button,
   .delete-button {
     width: 100%;
     min-height: 44px;
@@ -2771,4 +2917,39 @@ body {
 
 .tenvi-dashboard.theme-standard .todo-item.is-completed .todo-check span {
   color: #98a2b3;
+}
+
+.tenvi-dashboard.theme-standard .map-add-toggle-button,
+.tenvi-dashboard.theme-standard .map-collection-toggle {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .map-add-toggle-button:hover,
+.tenvi-dashboard.theme-standard .map-collection-toggle:hover {
+  color: #172033;
+  border-color: #9db5ff;
+  background: #f4f7ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .map-add-toggle-button.is-open {
+  color: #667085;
+  border-color: #d9e2ec;
+  background: #f8fafc;
+}
+
+.tenvi-dashboard.theme-standard .map-fit-all-button {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: none;
+}
+
+.tenvi-dashboard.theme-standard .map-fit-all-button:hover {
+  border-color: #9db5ff;
+  background: #f4f7ff;
+  box-shadow: none;
 }
