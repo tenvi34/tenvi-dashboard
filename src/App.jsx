@@ -5,6 +5,7 @@ import { isSupportedLanguage, translations } from './i18n/translations.js'
 import Calendar from './modules/Calendar.jsx'
 import Command from './modules/Command.jsx'
 import Dashboard from './modules/Dashboard.jsx'
+import Map from './modules/Map.jsx'
 import Notes from './modules/Notes.jsx'
 import Settings from './modules/Settings.jsx'
 import Tasks from './modules/Tasks.jsx'
@@ -22,6 +23,7 @@ const MODULES = [
   { id: 'tasks' },
   { id: 'notes' },
   { id: 'calendar' },
+  { id: 'map' },
   { id: 'timer' },
   { id: 'settings' },
 ]
@@ -81,6 +83,7 @@ function App() {
       tasks: <Tasks t={t} />,
       notes: <Notes t={t} />,
       calendar: <Calendar t={t} />,
+      map: <Map t={t} />,
       timer: <Timer t={t} />,
       settings: (
         <Settings

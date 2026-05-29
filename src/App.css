@@ -881,6 +881,176 @@ body {
   gap: 10px;
 }
 
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.38fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.map-control-panel,
+.map-view-panel {
+  min-width: 0;
+}
+
+.map-control-panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.map-upload-box {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  min-height: 156px;
+  padding: 18px;
+  border: 1px dashed rgba(90, 212, 255, 0.34);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(90, 212, 255, 0.09), rgba(5, 16, 31, 0.7)),
+    rgba(2, 9, 18, 0.46);
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.map-upload-box:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.map-upload-box span {
+  color: #a8c7d6;
+  font-size: 14px;
+}
+
+.map-upload-box strong {
+  align-self: end;
+  color: #00131c;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  text-align: center;
+}
+
+.map-upload-box input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.map-status {
+  padding: 12px 14px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 8px;
+  color: var(--neon-strong);
+  background: rgba(90, 212, 255, 0.08);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.map-status.is-error {
+  color: #ffd7df;
+  border-color: rgba(255, 102, 134, 0.3);
+  background: rgba(255, 102, 134, 0.1);
+}
+
+.map-coordinate-panel {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.map-coordinate-panel div {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  background: rgba(5, 16, 31, 0.5);
+}
+
+.map-coordinate-panel dt {
+  color: var(--muted-cyan);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.map-coordinate-panel dd {
+  min-width: 0;
+  margin: 0;
+  color: #f4fdff;
+  overflow-wrap: anywhere;
+}
+
+.map-coordinate-panel div:first-child dd {
+  color: var(--neon-strong);
+  font-weight: 800;
+}
+
+.map-view-panel {
+  overflow: hidden;
+  min-height: 520px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 10px;
+  background: rgba(2, 9, 18, 0.46);
+}
+
+.photo-map {
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  background: #06101d;
+}
+
+.map-marker-icon {
+  display: grid;
+  place-items: center;
+}
+
+.map-marker-icon span {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #f4fdff;
+  border-radius: 999px;
+  background: var(--neon);
+  box-shadow:
+    0 0 0 6px rgba(90, 212, 255, 0.18),
+    0 0 20px rgba(90, 212, 255, 0.5);
+}
+
+.map-popup {
+  display: grid;
+  gap: 5px;
+}
+
+.map-popup strong,
+.map-popup span {
+  overflow-wrap: anywhere;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  color: #dff8ff;
+  border: 1px solid rgba(90, 212, 255, 0.32);
+  background: rgba(8, 18, 32, 0.95);
+  box-shadow: 0 0 24px rgba(45, 125, 255, 0.18);
+}
+
+.leaflet-container a {
+  color: #2d7dff;
+}
+
 .timer-stat {
   display: grid;
   gap: 10px;
@@ -1667,6 +1837,10 @@ body {
   .calendar-layout {
     grid-template-columns: 1fr;
   }
+
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 860px) {
@@ -1720,6 +1894,7 @@ body {
   .todo-form,
   .command-form,
   .calendar-layout,
+  .map-layout,
   .todo-item,
   .calendar-event-item,
   .note-item {
@@ -1905,6 +2080,9 @@ body {
 .tenvi-dashboard.theme-standard .calendar-events-panel,
 .tenvi-dashboard.theme-standard .calendar-month-panel,
 .tenvi-dashboard.theme-standard .calendar-day,
+.tenvi-dashboard.theme-standard .map-view-panel,
+.tenvi-dashboard.theme-standard .map-upload-box,
+.tenvi-dashboard.theme-standard .map-coordinate-panel div,
 .tenvi-dashboard.theme-standard .todo-item,
 .tenvi-dashboard.theme-standard .note-item,
 .tenvi-dashboard.theme-standard .recent-note,
@@ -1921,6 +2099,7 @@ body {
 .tenvi-dashboard.theme-standard .note-item,
 .tenvi-dashboard.theme-standard .recent-note,
 .tenvi-dashboard.theme-standard .calendar-event-item,
+.tenvi-dashboard.theme-standard .map-coordinate-panel div,
 .tenvi-dashboard.theme-standard .analysis-section,
 .tenvi-dashboard.theme-standard .lap-panel li {
   border-left-color: #4f7cff;
@@ -1950,6 +2129,27 @@ body {
 .tenvi-dashboard.theme-standard .empty-state p,
 .tenvi-dashboard.theme-standard .calendar-event-item p {
   color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .map-coordinate-panel dd {
+  color: #172033;
+}
+
+.tenvi-dashboard.theme-standard .map-upload-box strong {
+  color: #ffffff;
+  background: #245bdb;
+}
+
+.tenvi-dashboard.theme-standard .photo-map {
+  background: #eef3f8;
+}
+
+.tenvi-dashboard.theme-standard .leaflet-popup-content-wrapper,
+.tenvi-dashboard.theme-standard .leaflet-popup-tip {
+  color: #172033;
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: 0 14px 28px rgba(28, 39, 62, 0.14);
 }
 
 .tenvi-dashboard.theme-standard .status-card strong,

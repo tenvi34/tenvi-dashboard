@@ -12,6 +12,7 @@ const requiredTopLevelKeys = [
   'tasks',
   'notes',
   'calendar',
+  'map',
   'timer',
   'settings',
 ]
@@ -73,6 +74,28 @@ const requiredTasksKeys = [
   'dueDateValue',
 ]
 
+const requiredMapKeys = [
+  'label',
+  'title',
+  'pocBadge',
+  'uploadLabel',
+  'uploadTitle',
+  'uploadAction',
+  'reading',
+  'readError',
+  'noLocation',
+  'manualPrompt',
+  'clickToSetLocation',
+  'mapLabel',
+  'fileName',
+  'latitude',
+  'longitude',
+  'takenAt',
+  'locationSource',
+  'sourceExif',
+  'sourceManual',
+]
+
 describe('translations', () => {
   it('keeps ko and en language entries available', () => {
     expect(Object.keys(translations).sort()).toEqual(['en', 'ko'])
@@ -105,6 +128,12 @@ describe('translations', () => {
   it.each(['ko', 'en'])('has required task due date keys for %s', (language) => {
     requiredTasksKeys.forEach((key) => {
       expect(translations[language].tasks).toHaveProperty(key)
+    })
+  })
+
+  it.each(['ko', 'en'])('has required map keys for %s', (language) => {
+    requiredMapKeys.forEach((key) => {
+      expect(translations[language].map).toHaveProperty(key)
     })
   })
 })
