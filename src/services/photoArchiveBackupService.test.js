@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  preparePhotoCollectionsForRestore,
   preparePhotoRecordsForRestore,
+  serializePhotoCollectionsForBackup,
   serializePhotoRecordsForBackup,
+  validateMapCollectionBackupRecordShape,
   validateMapBackupRecordShape,
 } from './photoArchiveBackupService.js'
 
@@ -17,6 +20,7 @@ const createMapBackupRecord = (overrides = {}) => ({
   latitude: 33.5903,
   longitude: 130.4208,
   locationSource: 'search',
+  collectionId: 'trip-1',
   title: 'Hakata',
   memo: 'memo',
   createdAt: '2026-05-29T00:00:00.000Z',
@@ -59,6 +63,7 @@ describe('photoArchiveBackupService', () => {
           latitude: 33.5903,
           longitude: 130.4208,
           locationSource: 'exif',
+          collectionId: 'trip-1',
           title: 'Hakata',
           memo: 'memo',
           createdAt: '2026-05-29T00:00:00.000Z',
@@ -70,6 +75,7 @@ describe('photoArchiveBackupService', () => {
         'data:image/jpeg;base64,cHJldmlldw==',
       )
       expect(serializedRecord.locationSource).toBe('exif')
+      expect(serializedRecord.collectionId).toBe('trip-1')
     } finally {
       globalThis.FileReader = OriginalFileReader
     }
@@ -107,6 +113,52 @@ describe('photoArchiveBackupService', () => {
         createMapBackupRecord({ locationSource: 'legacy' }),
       ).locationSource,
     ).toBe('manual')
+  })
+
+  it('restores missing collection links as null when collection backup is absent', () => {
+    expect(
+      validateMapBackupRecordShape(createMapBackupRecord(), null).collectionId,
+    ).toBeNull()
+  })
+
+  it('keeps collection links that exist in restored collections', () => {
+    expect(
+      validateMapBackupRecordShape(createMapBackupRecord(), [{ id: 'trip-1' }])
+        .collectionId,
+    ).toBe('trip-1')
+  })
+
+  it('serializes and validates Map collections', () => {
+    const [collection] = serializePhotoCollectionsForBackup([
+      {
+        id: 'trip-1',
+        name: 'Fukuoka 2026',
+        description: 'trip',
+        startDate: '2026-05-01',
+        endDate: '2026-05-05',
+        createdAt: '2026-05-29T00:00:00.000Z',
+        updatedAt: '2026-05-29T00:00:00.000Z',
+      },
+    ])
+
+    expect(collection).toMatchObject({
+      id: 'trip-1',
+      name: 'Fukuoka 2026',
+    })
+    expect(validateMapCollectionBackupRecordShape(collection)).toMatchObject({
+      id: 'trip-1',
+    })
+  })
+
+  it('summarizes damaged collection records before restore', () => {
+    const result = preparePhotoCollectionsForRestore([
+      { id: 'trip-1', name: 'Fukuoka 2026' },
+      { id: 'broken', name: '' },
+    ])
+
+    expect(result.totalCount).toBe(2)
+    expect(result.validCount).toBe(1)
+    expect(result.damagedCount).toBe(1)
   })
 
   it('summarizes valid and damaged records before restore', async () => {

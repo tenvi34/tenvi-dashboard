@@ -3,12 +3,16 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import {
   getPhotoRecordCount,
   getPhotoRecords,
+  replacePhotoArchiveData,
   replacePhotoRecords,
 } from '../services/photoArchiveRepository.js'
 import {
+  preparePhotoCollectionsForRestore,
   preparePhotoRecordsForRestore,
+  serializePhotoCollectionsForBackup,
   serializePhotoRecordsForBackup,
 } from '../services/photoArchiveBackupService.js'
+import { getPhotoCollections } from '../services/photoCollectionRepository.js'
 import {
   BACKUP_APP,
   BACKUP_TYPE,
@@ -126,6 +130,9 @@ function Settings({
       const mapPhotoRecords = await serializePhotoRecordsForBackup(
         await getPhotoRecords(),
       )
+      const mapPhotoCollections = serializePhotoCollectionsForBackup(
+        await getPhotoCollections(),
+      )
       const backupPayload = {
         app: BACKUP_APP,
         type: BACKUP_TYPE,
@@ -139,6 +146,7 @@ function Settings({
           startModule,
           hudEffect,
           theme,
+          mapPhotoCollections,
           mapPhotoRecords,
         },
       }
@@ -191,8 +199,14 @@ function Settings({
       }
 
       // 검증과 Blob 복원 준비가 끝나기 전에는 기존 저장소를 변경하지 않습니다.
+      const collectionRestorePlan = validatedBackup.hasMapPhotoCollections
+        ? preparePhotoCollectionsForRestore(validatedBackup.mapPhotoCollections)
+        : null
       const mapRestorePlan = validatedBackup.hasMapPhotoRecords
-        ? await preparePhotoRecordsForRestore(validatedBackup.mapPhotoRecords)
+        ? await preparePhotoRecordsForRestore(
+            validatedBackup.mapPhotoRecords,
+            collectionRestorePlan?.restoredCollections ?? null,
+          )
         : null
 
       if (!window.confirm(t.settings.restoreConfirmMessage)) {
@@ -213,13 +227,31 @@ function Settings({
           setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
           return
         }
-      } else if (
-        validatedBackup.hasMapPhotoRecords &&
+      }
+
+      if (collectionRestorePlan?.damagedCount > 0) {
+        const shouldContinueWithValidCollections = window.confirm(
+          t.settings.restoreDamagedMapCollectionsConfirm(
+            collectionRestorePlan.totalCount,
+            collectionRestorePlan.validCount,
+            collectionRestorePlan.damagedCount,
+          ),
+        )
+
+        if (!shouldContinueWithValidCollections) {
+          setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+          return
+        }
+      }
+
+      if (
+        (validatedBackup.hasMapPhotoRecords ||
+          validatedBackup.hasMapPhotoCollections) &&
         !window.confirm(
           t.settings.restoreMapReplaceConfirm(
-            mapRestorePlan.totalCount,
-            mapRestorePlan.validCount,
-            mapRestorePlan.damagedCount,
+            mapRestorePlan?.totalCount ?? 0,
+            mapRestorePlan?.validCount ?? 0,
+            mapRestorePlan?.damagedCount ?? 0,
           ),
         )
       ) {
@@ -238,21 +270,58 @@ function Settings({
         hudEffect: localStorage.getItem(STORAGE_KEYS.hudEffect),
         theme: localStorage.getItem(STORAGE_KEYS.theme),
       }
-      const previousMapRecords = validatedBackup.hasMapPhotoRecords
+      const shouldTouchMapArchive =
+        validatedBackup.hasMapPhotoRecords || validatedBackup.hasMapPhotoCollections
+      const previousMapRecords = shouldTouchMapArchive
         ? await getPhotoRecords()
+        : null
+      const previousCollections = shouldTouchMapArchive
+        ? await getPhotoCollections()
         : null
 
       try {
         // Map 필드가 없는 이전 백업은 현재 IndexedDB 기록을 유지
-        if (validatedBackup.hasMapPhotoRecords) {
+        if (
+          validatedBackup.hasMapPhotoRecords &&
+          validatedBackup.hasMapPhotoCollections
+        ) {
+          await replacePhotoArchiveData({
+            records: mapRestorePlan.restoredRecords,
+            collections: collectionRestorePlan.restoredCollections,
+          })
+        } else if (validatedBackup.hasMapPhotoRecords) {
           await replacePhotoRecords(mapRestorePlan.restoredRecords)
+        } else if (validatedBackup.hasMapPhotoCollections) {
+          const restoredCollectionIds = new Set(
+            collectionRestorePlan.restoredCollections.map(
+              (collection) => collection.id,
+            ),
+          )
+
+          await replacePhotoArchiveData({
+            records: (await getPhotoRecords()).map((record) => ({
+              ...record,
+              collectionId: restoredCollectionIds.has(record.collectionId)
+                ? record.collectionId
+                : null,
+            })),
+            collections: collectionRestorePlan.restoredCollections,
+          })
         }
 
         restoreLocalStorageData(validatedBackup)
       } catch {
         // localStorage와 IndexedDB를 함께 묶을 수 없으므로 가능한 범위에서 복원 전 데이터로 롤백
         if (previousMapRecords) {
-          await replacePhotoRecords(previousMapRecords)
+          await replacePhotoArchiveData({
+            records: previousMapRecords,
+            collections: previousCollections ?? undefined,
+          })
+        } else if (previousCollections) {
+          await replacePhotoArchiveData({
+            records: await getPhotoRecords(),
+            collections: previousCollections,
+          })
         }
 
         Object.entries(previousLocalStorageData).forEach(([key, value]) => {
@@ -291,6 +360,18 @@ function Settings({
             mapRestorePlan.validCount,
             mapRestorePlan.damagedCount,
           ),
+        })
+      } else if (collectionRestorePlan?.damagedCount > 0) {
+        setBackupStatus({
+          type: 'success',
+          message: `${
+            mapRestorePlan
+              ? t.settings.restoreCompleteWithMap(mapRestorePlan.validCount)
+              : t.settings.restoreComplete
+          } ${t.settings.restoreDamagedMapCollectionsSkipped(
+            collectionRestorePlan.validCount,
+            collectionRestorePlan.damagedCount,
+          )}`,
         })
       } else {
         setBackupStatus({

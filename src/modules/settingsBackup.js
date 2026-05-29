@@ -46,6 +46,10 @@ export const validateBackupPayload = (backupPayload) => {
     backupPayload.data,
     'mapPhotoRecords',
   )
+  const hasMapPhotoCollections = Object.prototype.hasOwnProperty.call(
+    backupPayload.data,
+    'mapPhotoCollections',
+  )
   const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
 
   if (
@@ -65,13 +69,24 @@ export const validateBackupPayload = (backupPayload) => {
     return null
   }
 
+  if (
+    hasMapPhotoCollections &&
+    !Array.isArray(backupPayload.data.mapPhotoCollections)
+  ) {
+    return null
+  }
+
   return {
     hudEffect,
+    hasMapPhotoCollections,
+    hasMapPhotoRecords,
     language,
+    mapPhotoCollections: hasMapPhotoCollections
+      ? backupPayload.data.mapPhotoCollections
+      : undefined,
     mapPhotoRecords: hasMapPhotoRecords
       ? backupPayload.data.mapPhotoRecords
       : undefined,
-    hasMapPhotoRecords,
     notes,
     startModule,
     tasks,

@@ -983,6 +983,7 @@ body {
 
 .map-draft-panel,
 .map-detail-panel,
+.map-collection-panel,
 .map-list-panel {
   display: grid;
   gap: 14px;
@@ -1009,6 +1010,7 @@ body {
 }
 
 .map-field input,
+.map-field select,
 .map-field textarea {
   min-width: 0;
   color: #f4fdff;
@@ -1029,11 +1031,81 @@ body {
 }
 
 .map-field input:focus,
+.map-field select:focus,
 .map-field textarea:focus {
   outline: none;
   border-color: var(--line-strong);
   box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
   background: rgba(4, 14, 28, 0.95);
+}
+
+.map-filter-options,
+.map-collection-form,
+.map-collection-list {
+  display: grid;
+  gap: 10px;
+}
+
+.map-filter-button,
+.map-collection-item {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+  font: inherit;
+  text-align: left;
+}
+
+.map-filter-button {
+  cursor: pointer;
+}
+
+.map-filter-button:hover,
+.map-filter-button.is-active {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.1);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.map-date-row,
+.map-collection-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.map-collection-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.map-collection-item {
+  display: grid;
+  gap: 8px;
+}
+
+.map-collection-item strong,
+.map-collection-item span,
+.map-collection-item p {
+  overflow-wrap: anywhere;
+}
+
+.map-collection-item span {
+  color: var(--neon-strong);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.map-collection-item p {
+  margin: 0;
+  color: #b8dbe7;
+  line-height: 1.45;
 }
 
 .map-primary-button {
@@ -2241,6 +2313,8 @@ body {
   .calendar-layout,
   .map-layout,
   .map-archive-layout,
+  .map-date-row,
+  .map-collection-actions,
   .map-search-form,
   .todo-item,
   .calendar-event-item,
@@ -2432,6 +2506,8 @@ body {
 .tenvi-dashboard.theme-standard .map-view-panel,
 .tenvi-dashboard.theme-standard .map-upload-box,
 .tenvi-dashboard.theme-standard .map-coordinate-panel div,
+.tenvi-dashboard.theme-standard .map-collection-item,
+.tenvi-dashboard.theme-standard .map-filter-button,
 .tenvi-dashboard.theme-standard .map-record-button,
 .tenvi-dashboard.theme-standard .map-search-results button,
 .tenvi-dashboard.theme-standard .todo-item,
@@ -2451,6 +2527,8 @@ body {
 .tenvi-dashboard.theme-standard .recent-note,
 .tenvi-dashboard.theme-standard .calendar-event-item,
 .tenvi-dashboard.theme-standard .map-coordinate-panel div,
+.tenvi-dashboard.theme-standard .map-collection-item,
+.tenvi-dashboard.theme-standard .map-filter-button,
 .tenvi-dashboard.theme-standard .map-record-button,
 .tenvi-dashboard.theme-standard .map-search-results button,
 .tenvi-dashboard.theme-standard .analysis-section,
@@ -2482,6 +2560,7 @@ body {
 .tenvi-dashboard.theme-standard .empty-state p,
 .tenvi-dashboard.theme-standard .calendar-event-item p,
 .tenvi-dashboard.theme-standard .map-record-button small,
+.tenvi-dashboard.theme-standard .map-collection-item p,
 .tenvi-dashboard.theme-standard .map-search-attribution,
 .tenvi-dashboard.theme-standard .map-search-results em,
 .tenvi-dashboard.theme-standard .map-search-results span,
@@ -2490,13 +2569,16 @@ body {
 }
 
 .tenvi-dashboard.theme-standard .map-coordinate-panel dd,
+.tenvi-dashboard.theme-standard .map-collection-item,
+.tenvi-dashboard.theme-standard .map-filter-button,
 .tenvi-dashboard.theme-standard .map-detail-copy h3,
 .tenvi-dashboard.theme-standard .map-record-button,
 .tenvi-dashboard.theme-standard .map-search-results button {
   color: #172033;
 }
 
-.tenvi-dashboard.theme-standard .map-search-results small {
+.tenvi-dashboard.theme-standard .map-search-results small,
+.tenvi-dashboard.theme-standard .map-collection-item span {
   color: #245bdb;
 }
 
@@ -2538,6 +2620,7 @@ body {
 .tenvi-dashboard.theme-standard .calendar-month-selectors select,
 .tenvi-dashboard.theme-standard .timer-duration-settings input,
 .tenvi-dashboard.theme-standard .map-field input,
+.tenvi-dashboard.theme-standard .map-field select,
 .tenvi-dashboard.theme-standard .map-field textarea,
 .tenvi-dashboard.theme-standard .map-search-form input,
 .tenvi-dashboard.theme-standard .map-search-form select {

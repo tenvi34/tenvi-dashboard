@@ -12,12 +12,18 @@ import 'leaflet/dist/leaflet.css'
 import {
   applyManualLocationToDraft,
   applySearchLocationToDraft,
+  COLLECTION_FILTER_ALL,
+  COLLECTION_FILTER_UNASSIGNED,
   createEditDraft,
   createPhotoDraft,
   createPhotoRecordInput,
   createPhotoRecordUpdatePatch,
+  filterPhotoRecordsByCollection,
+  isPhotoCollectionInputValid,
   isEditDraftReadyToSave,
   isPhotoDraftReadyToSave,
+  normalizePhotoCollectionInput,
+  normalizePhotoRecordCollectionId,
   normalizeLocationSource,
   readPhotoLocation,
 } from './mapLogic.js'
@@ -27,6 +33,12 @@ import {
   getPhotoRecords,
   updatePhotoRecord,
 } from '../services/photoArchiveRepository.js'
+import {
+  createPhotoCollection,
+  deletePhotoCollection,
+  getPhotoCollections,
+  updatePhotoCollection,
+} from '../services/photoCollectionRepository.js'
 import { searchPlaces } from '../services/placeSearchService.js'
 import { createPreviewImageBlob } from '../utils/imageUtils.js'
 
@@ -57,6 +69,12 @@ const getLocationSourceLabel = (source, t) => {
   }
 
   return normalizedSource === 'manual' ? t.map.sourceManual : t.map.sourceExif
+}
+
+const getCollectionName = (collectionId, collections, t) => {
+  const collection = collections.find((item) => item.id === collectionId)
+
+  return collection?.name ?? t.map.unassignedCollection
 }
 
 // 선택 기록, draft, 전체 기록 상태와 이동 요청을 기준으로 지도 화면 제어
@@ -303,7 +321,7 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
 }
 
 // 사진 기록 목록에서 선택 진입점을 제공하는 패널
-function PhotoRecordList({ activeRecordId, onSelectRecord, records, t }) {
+function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records, t }) {
   return (
     <section className="map-list-panel" aria-label={t.map.recordListLabel}>
       <div className="map-section-header">
@@ -340,15 +358,194 @@ function PhotoRecordList({ activeRecordId, onSelectRecord, records, t }) {
       ) : (
         <div className="empty-state compact-empty" role="status">
           <span>{t.common.systemMessage}</span>
-          <p>{t.map.noRecords}</p>
+          <p>{emptyMessage}</p>
         </div>
       )}
     </section>
   )
 }
 
+// 컬렉션 필터와 생성/수정/삭제 흐름 관리 패널
+function PhotoCollectionPanel({
+  collectionDraft,
+  collections,
+  editingCollectionId,
+  filterValue,
+  getCollectionRecordCount,
+  onCancelCollectionEdit,
+  onChangeCollectionDraft,
+  onDeleteCollection,
+  onSaveCollection,
+  onSelectFilter,
+  onStartCollectionEdit,
+  t,
+}) {
+  const isEditing = Boolean(editingCollectionId)
+
+  return (
+    <section className="map-collection-panel" aria-label={t.map.collectionsLabel}>
+      <div className="map-section-header">
+        <p className="module-label">{t.map.collectionsLabel}</p>
+        <strong>{collections.length}</strong>
+      </div>
+
+      <div className="map-filter-options" aria-label={t.map.collectionFilter}>
+        <button
+          className={`map-filter-button ${
+            filterValue === COLLECTION_FILTER_ALL ? 'is-active' : ''
+          }`}
+          type="button"
+          onClick={() => onSelectFilter(COLLECTION_FILTER_ALL)}
+        >
+          {t.map.allCollections}
+        </button>
+        <button
+          className={`map-filter-button ${
+            filterValue === COLLECTION_FILTER_UNASSIGNED ? 'is-active' : ''
+          }`}
+          type="button"
+          onClick={() => onSelectFilter(COLLECTION_FILTER_UNASSIGNED)}
+        >
+          {t.map.unassignedCollection}
+        </button>
+        {collections.map((collection) => (
+          <button
+            className={`map-filter-button ${
+              filterValue === collection.id ? 'is-active' : ''
+            }`}
+            key={collection.id}
+            type="button"
+            onClick={() => onSelectFilter(collection.id)}
+          >
+            {collection.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="map-collection-form">
+        <label className="map-field">
+          <span>{t.map.collectionName}</span>
+          <input
+            type="text"
+            value={collectionDraft.name}
+            onChange={(event) =>
+              onChangeCollectionDraft({ name: event.target.value })
+            }
+            placeholder={t.map.collectionNamePlaceholder}
+          />
+        </label>
+        <label className="map-field">
+          <span>{t.map.collectionDescription}</span>
+          <textarea
+            rows="3"
+            value={collectionDraft.description}
+            onChange={(event) =>
+              onChangeCollectionDraft({ description: event.target.value })
+            }
+            placeholder={t.map.collectionDescriptionPlaceholder}
+          />
+        </label>
+        <div className="map-date-row">
+          <label className="map-field">
+            <span>{t.map.collectionStartDate}</span>
+            <input
+              type="date"
+              value={collectionDraft.startDate}
+              onChange={(event) =>
+                onChangeCollectionDraft({ startDate: event.target.value })
+              }
+            />
+          </label>
+          <label className="map-field">
+            <span>{t.map.collectionEndDate}</span>
+            <input
+              type="date"
+              value={collectionDraft.endDate}
+              onChange={(event) =>
+                onChangeCollectionDraft({ endDate: event.target.value })
+              }
+            />
+          </label>
+        </div>
+        <div className="map-edit-actions">
+          <button
+            className="map-primary-button"
+            type="button"
+            onClick={onSaveCollection}
+          >
+            {isEditing ? t.map.saveCollection : t.map.createCollection}
+          </button>
+          {isEditing ? (
+            <button
+              className="map-secondary-button"
+              type="button"
+              onClick={onCancelCollectionEdit}
+            >
+              {t.map.cancelEdit}
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {collections.length > 0 ? (
+        <ul className="map-collection-list">
+          {collections.map((collection) => (
+            <li key={collection.id}>
+              <div className="map-collection-item">
+                <strong>{collection.name}</strong>
+                <span>
+                  {getCollectionRecordCount(collection.id)}{' '}
+                  {t.map.collectionRecordCount}
+                </span>
+                {collection.description ? <p>{collection.description}</p> : null}
+                <div className="map-collection-actions">
+                  <button
+                    className="map-secondary-button"
+                    type="button"
+                    onClick={() => onStartCollectionEdit(collection)}
+                  >
+                    {t.map.editCollection}
+                  </button>
+                  <button
+                    className="delete-button map-delete-button"
+                    type="button"
+                    onClick={() => onDeleteCollection(collection)}
+                  >
+                    {t.map.deleteCollection}
+                  </button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  )
+}
+
+// 사진 저장/편집 시 컬렉션 연결 선택
+function PhotoCollectionSelect({ collections, onChange, t, value }) {
+  return (
+    <label className="map-field">
+      <span>{t.map.collectionField}</span>
+      <select
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value || null)}
+      >
+        <option value="">{t.map.unassignedCollection}</option>
+        {collections.map((collection) => (
+          <option key={collection.id} value={collection.id}>
+            {collection.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 // 저장 전 사진 draft의 제목/메모와 좌표 상태 편집 패널
 function PhotoDraftPanel({
+  collections,
   draft,
   isSaving,
   language,
@@ -404,6 +601,13 @@ function PhotoDraftPanel({
         />
       </label>
 
+      <PhotoCollectionSelect
+        collections={collections}
+        onChange={(collectionId) => onChangeDraft({ collectionId })}
+        t={t}
+        value={draft.collectionId}
+      />
+
       <PlaceSearchPanel
         disabled={false}
         language={language}
@@ -442,6 +646,7 @@ function PhotoDraftPanel({
 
 // 저장 기록 편집용 제목/메모/위치 draft 패널
 function PhotoEditPanel({
+  collections,
   editDraft,
   isUpdating,
   language,
@@ -481,6 +686,13 @@ function PhotoEditPanel({
           placeholder={t.map.memoPlaceholder}
         />
       </label>
+
+      <PhotoCollectionSelect
+        collections={collections}
+        onChange={(collectionId) => onChangeEditDraft({ collectionId })}
+        t={t}
+        value={editDraft.collectionId}
+      />
 
       <PlaceSearchPanel
         disabled={false}
@@ -527,7 +739,13 @@ function PhotoEditPanel({
 }
 
 // 선택된 저장 기록의 미리보기, 메타데이터, 삭제 동작 상세 패널
-function PhotoRecordDetail({ onDeleteRecord, onStartEdit, record, t }) {
+function PhotoRecordDetail({
+  collections,
+  onDeleteRecord,
+  onStartEdit,
+  record,
+  t,
+}) {
   if (!record) {
     return (
       <div className="empty-state compact-empty" role="status">
@@ -550,6 +768,10 @@ function PhotoRecordDetail({ onDeleteRecord, onStartEdit, record, t }) {
       </div>
 
       <dl className="map-coordinate-panel">
+        <div>
+          <dt>{t.map.collectionField}</dt>
+          <dd>{getCollectionName(record.collectionId, collections, t)}</dd>
+        </div>
         <div>
           <dt>{t.map.fileName}</dt>
           <dd>{record.originalFileName}</dd>
@@ -597,6 +819,14 @@ function PhotoRecordDetail({ onDeleteRecord, onStartEdit, record, t }) {
 // TENVI Map 모듈의 로컬 사진 지도 아카이브 화면
 function Map({ t }) {
   const [records, setRecords] = useState([])
+  const [collections, setCollections] = useState([])
+  const [selectedCollectionFilter, setSelectedCollectionFilter] = useState(
+    COLLECTION_FILTER_ALL,
+  )
+  const [collectionDraft, setCollectionDraft] = useState(() =>
+    normalizePhotoCollectionInput(),
+  )
+  const [editingCollectionId, setEditingCollectionId] = useState('')
   const [draft, setDraft] = useState(null)
   const [editDraft, setEditDraft] = useState(null)
   const [activeRecordId, setActiveRecordId] = useState('')
@@ -609,13 +839,32 @@ function Map({ t }) {
   )
   const [statusMessage, setStatusMessage] = useState('')
   const [error, setError] = useState('')
-  const activeRecord = records.find((record) => record.id === activeRecordId)
+  const normalizedRecords = useMemo(
+    () =>
+      records.map((record) => ({
+        ...record,
+        collectionId: normalizePhotoRecordCollectionId(record, collections),
+      })),
+    [collections, records],
+  )
+  const filteredRecords = useMemo(
+    () =>
+      filterPhotoRecordsByCollection(
+        normalizedRecords,
+        collections,
+        selectedCollectionFilter,
+      ),
+    [collections, normalizedRecords, selectedCollectionFilter],
+  )
+  const activeRecord = normalizedRecords.find((record) => record.id === activeRecordId)
   const focusTarget =
     editDraft?.status === 'located'
       ? editDraft
       : activeRecord ?? (draft?.status === 'located' ? draft : null)
   const canPickLocation = Boolean(draft || editDraft)
   const shouldFitBounds = !activeRecordId && !draft && !editDraft && !isLoading
+  const getCollectionRecordCount = (collectionId) =>
+    normalizedRecords.filter((record) => record.collectionId === collectionId).length
   const markerIcon = useMemo(
     () =>
       L.divIcon({
@@ -627,6 +876,10 @@ function Map({ t }) {
       }),
     [],
   )
+  const filteredEmptyMessage =
+    selectedCollectionFilter === COLLECTION_FILTER_ALL
+      ? t.map.noRecords
+      : t.map.noFilteredRecords
   const draftMarkerIcon = useMemo(
     () =>
       L.divIcon({
@@ -642,11 +895,12 @@ function Map({ t }) {
   useEffect(() => {
     let isMounted = true
 
-    // 새로고침 후 IndexedDB 사진 기록 복원용 초기 조회
-    getPhotoRecords()
-      .then((savedRecords) => {
+    // 새로고침 후 IndexedDB 사진 기록과 컬렉션 복원용 초기 조회
+    Promise.all([getPhotoRecords(), getPhotoCollections()])
+      .then(([savedRecords, savedCollections]) => {
         if (isMounted) {
           setRecords(savedRecords)
+          setCollections(savedCollections)
           setViewportRequest(createViewportRequest('fit-all'))
         }
       })
@@ -665,6 +919,16 @@ function Map({ t }) {
       isMounted = false
     }
   }, [t.map.loadError])
+
+  useEffect(() => {
+    if (
+      activeRecordId &&
+      !filteredRecords.some((record) => record.id === activeRecordId)
+    ) {
+      // 필터 변경으로 선택 record가 화면 밖으로 나가면 상세/팝업 선택 해제
+      setActiveRecordId('')
+    }
+  }, [activeRecordId, filteredRecords])
 
   const handlePhotoChange = async (event) => {
     const [file] = event.target.files
@@ -747,6 +1011,100 @@ function Map({ t }) {
     setEditDraft((currentDraft) => ({ ...currentDraft, ...patch }))
   }
 
+  const handleChangeCollectionDraft = (patch) => {
+    setCollectionDraft((currentDraft) => ({ ...currentDraft, ...patch }))
+  }
+
+  const resetCollectionDraft = () => {
+    setCollectionDraft(normalizePhotoCollectionInput())
+    setEditingCollectionId('')
+  }
+
+  const handleStartCollectionEdit = (collection) => {
+    setCollectionDraft(normalizePhotoCollectionInput(collection))
+    setEditingCollectionId(collection.id)
+  }
+
+  const handleSaveCollection = async () => {
+    const normalizedInput = normalizePhotoCollectionInput(collectionDraft)
+
+    if (!isPhotoCollectionInputValid(normalizedInput)) {
+      setError(t.map.collectionNameRequired)
+      return
+    }
+
+    setError('')
+
+    try {
+      if (editingCollectionId) {
+        const updatedCollection = await updatePhotoCollection(
+          editingCollectionId,
+          normalizedInput,
+        )
+
+        if (!updatedCollection) {
+          throw new Error('Missing collection.')
+        }
+
+        setCollections((currentCollections) =>
+          currentCollections.map((collection) =>
+            collection.id === updatedCollection.id ? updatedCollection : collection,
+          ),
+        )
+        setStatusMessage(t.map.collectionUpdated)
+      } else {
+        const createdCollection = await createPhotoCollection(normalizedInput)
+
+        setCollections((currentCollections) => [
+          createdCollection,
+          ...currentCollections,
+        ])
+        setStatusMessage(t.map.collectionCreated)
+      }
+
+      resetCollectionDraft()
+    } catch {
+      setError(t.map.collectionSaveError)
+    }
+  }
+
+  const handleDeleteCollection = async (collection) => {
+    const affectedRecordCount = getCollectionRecordCount(collection.id)
+    const confirmed = window.confirm(
+      t.map.deleteCollectionConfirm(collection.name, affectedRecordCount),
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setError('')
+
+    try {
+      // 컬렉션 삭제와 사진 연결 해제는 repository의 단일 transaction에서 처리
+      await deletePhotoCollection(collection.id)
+      setCollections((currentCollections) =>
+        currentCollections.filter((item) => item.id !== collection.id),
+      )
+      setRecords((currentRecords) =>
+        currentRecords.map((record) =>
+          record.collectionId === collection.id
+            ? { ...record, collectionId: null }
+            : record,
+        ),
+      )
+      setSelectedCollectionFilter((currentFilter) =>
+        currentFilter === collection.id ? COLLECTION_FILTER_UNASSIGNED : currentFilter,
+      )
+      if (editingCollectionId === collection.id) {
+        resetCollectionDraft()
+      }
+      setStatusMessage(t.map.collectionDeleted)
+    } catch {
+      setError(t.map.collectionDeleteError)
+    }
+  }
+
   const handleSaveDraft = async () => {
     const recordInput = createPhotoRecordInput(draft)
 
@@ -822,7 +1180,7 @@ function Map({ t }) {
   }
 
   const handleSelectRecord = (recordId, requestType = 'record-select') => {
-    const selectedRecord = records.find((record) => record.id === recordId)
+    const selectedRecord = normalizedRecords.find((record) => record.id === recordId)
 
     setDraft(null)
     setEditDraft(null)
@@ -913,6 +1271,7 @@ function Map({ t }) {
           ) : null}
 
           <PhotoDraftPanel
+            collections={collections}
             draft={draft}
             isSaving={isSaving}
             language={t.map.searchLanguage}
@@ -922,10 +1281,26 @@ function Map({ t }) {
             t={t}
           />
 
+          <PhotoCollectionPanel
+            collectionDraft={collectionDraft}
+            collections={collections}
+            editingCollectionId={editingCollectionId}
+            filterValue={selectedCollectionFilter}
+            getCollectionRecordCount={getCollectionRecordCount}
+            onCancelCollectionEdit={resetCollectionDraft}
+            onChangeCollectionDraft={handleChangeCollectionDraft}
+            onDeleteCollection={handleDeleteCollection}
+            onSaveCollection={handleSaveCollection}
+            onSelectFilter={setSelectedCollectionFilter}
+            onStartCollectionEdit={handleStartCollectionEdit}
+            t={t}
+          />
+
           <PhotoRecordList
             activeRecordId={activeRecordId}
+            emptyMessage={filteredEmptyMessage}
             onSelectRecord={handleSelectRecord}
-            records={records}
+            records={filteredRecords}
             t={t}
           />
         </aside>
@@ -940,7 +1315,7 @@ function Map({ t }) {
             <TileLayer attribution={OSM_ATTRIBUTION} url={OSM_TILE_URL} />
             <MapViewportController
               request={viewportRequest}
-              records={records}
+              records={filteredRecords}
               shouldFitBounds={shouldFitBounds}
               target={focusTarget}
             />
@@ -949,7 +1324,7 @@ function Map({ t }) {
               onPickLocation={handlePickLocation}
             />
 
-            {records.map((record) => (
+            {filteredRecords.map((record) => (
               <PhotoRecordMarker
                 icon={markerIcon}
                 isActive={activeRecordId === record.id}
@@ -1006,6 +1381,7 @@ function Map({ t }) {
         <aside className="map-detail-column">
           {editDraft && activeRecord ? (
             <PhotoEditPanel
+              collections={collections}
               editDraft={editDraft}
               isUpdating={isUpdating}
               language={t.map.searchLanguage}
@@ -1018,6 +1394,7 @@ function Map({ t }) {
             />
           ) : (
             <PhotoRecordDetail
+              collections={collections}
               onDeleteRecord={handleDeleteRecord}
               onStartEdit={handleStartEdit}
               record={activeRecord}

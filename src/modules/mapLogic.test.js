@@ -2,11 +2,15 @@ import { describe, expect, it } from 'vitest'
 import {
   applyManualLocationToDraft,
   applySearchLocationToDraft,
+  COLLECTION_FILTER_ALL,
+  COLLECTION_FILTER_UNASSIGNED,
   createEditDraft,
   createPhotoDraft,
   createPhotoRecordInput,
   createPhotoRecordUpdatePatch,
+  filterPhotoRecordsByCollection,
   createManualLocation,
+  normalizePhotoRecordCollectionId,
   normalizeLocationSource,
   isPhotoDraftReadyToSave,
   normalizePhotoLocation,
@@ -79,6 +83,7 @@ describe('mapLogic', () => {
 
     expect(isPhotoDraftReadyToSave(draft)).toBe(true)
     expect(createPhotoRecordInput(draft)).toMatchObject({
+      collectionId: null,
       fileType: 'image/jpeg',
       latitude: 37.5,
       locationSource: 'exif',
@@ -143,6 +148,7 @@ describe('mapLogic', () => {
 
     expect(record.title).toBe('Busan')
     expect(createPhotoRecordUpdatePatch(editDraft)).toMatchObject({
+      collectionId: null,
       latitude: 35.1796,
       locationSource: 'manual',
       longitude: 129.0756,
@@ -155,5 +161,44 @@ describe('mapLogic', () => {
     expect(normalizeLocationSource()).toBe('manual')
     expect(normalizeLocationSource('legacy')).toBe('manual')
     expect(normalizeLocationSource('search')).toBe('search')
+  })
+
+  it('normalizes missing collectionId to null for legacy records', () => {
+    expect(normalizePhotoRecordCollectionId({}, [])).toBeNull()
+    expect(normalizePhotoRecordCollectionId({ collectionId: '' }, [])).toBeNull()
+  })
+
+  it('treats records with missing collections as unassigned', () => {
+    expect(
+      normalizePhotoRecordCollectionId(
+        { collectionId: 'missing-collection' },
+        [{ id: 'trip-1' }],
+      ),
+    ).toBeNull()
+  })
+
+  it('filters records by all, unassigned, and a specific collection', () => {
+    const collections = [{ id: 'trip-1' }]
+    const records = [
+      { id: 'photo-1', collectionId: 'trip-1' },
+      { id: 'photo-2', collectionId: null },
+      { id: 'photo-3', collectionId: 'deleted-collection' },
+    ]
+
+    expect(
+      filterPhotoRecordsByCollection(records, collections, COLLECTION_FILTER_ALL),
+    ).toHaveLength(3)
+    expect(
+      filterPhotoRecordsByCollection(
+        records,
+        collections,
+        COLLECTION_FILTER_UNASSIGNED,
+      ).map((record) => record.id),
+    ).toEqual(['photo-2', 'photo-3'])
+    expect(
+      filterPhotoRecordsByCollection(records, collections, 'trip-1').map(
+        (record) => record.id,
+      ),
+    ).toEqual(['photo-1'])
   })
 })

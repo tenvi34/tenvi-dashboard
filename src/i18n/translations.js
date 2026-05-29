@@ -257,6 +257,31 @@ export const translations = {
       searchScopeAll: '전체',
       searchScopeJapan: '일본',
       searchScopeKorea: '한국',
+      collectionsLabel: '컬렉션',
+      collectionFilter: '컬렉션 필터',
+      allCollections: '전체',
+      unassignedCollection: '미분류',
+      collectionField: '컬렉션',
+      collectionName: '컬렉션 이름',
+      collectionNamePlaceholder: '예: 후쿠오카 2026',
+      collectionDescription: '설명',
+      collectionDescriptionPlaceholder: '여행 또는 주제 메모',
+      collectionStartDate: '시작일',
+      collectionEndDate: '종료일',
+      createCollection: '컬렉션 생성',
+      saveCollection: '컬렉션 저장',
+      editCollection: '수정',
+      deleteCollection: '삭제',
+      collectionRecordCount: '장',
+      collectionNameRequired: '컬렉션 이름을 입력하세요.',
+      collectionCreated: '컬렉션을 생성했습니다.',
+      collectionUpdated: '컬렉션을 수정했습니다.',
+      collectionDeleted: '컬렉션을 삭제하고 연결된 사진을 미분류로 이동했습니다.',
+      collectionSaveError: '컬렉션을 저장할 수 없습니다.',
+      collectionDeleteError: '컬렉션을 삭제할 수 없습니다.',
+      deleteCollectionConfirm: (name, count) =>
+        `${name} 컬렉션을 삭제할까요? 연결된 사진 ${count}장은 삭제되지 않고 미분류로 이동합니다.`,
+      noFilteredRecords: '선택한 컬렉션에 사진 기록이 없습니다.',
       locationSource: '위치 지정 방식',
       sourceExif: '자동 감지',
       sourceManual: '직접 지정',
@@ -376,12 +401,16 @@ export const translations = {
         `백업 파일에는 Map 사진 기록 ${total}개가 포함되어 있습니다. ${valid}개는 복원 가능하고 ${damaged}개는 손상되어 복원할 수 없습니다. 이 백업의 Map 사진 기록으로 현재 Map 기록이 교체될 수 있습니다. 계속 복원할까요?`,
       restoreDamagedMapConfirm: (total, valid, damaged) =>
         `백업 파일에는 Map 사진 기록 ${total}개가 포함되어 있습니다. ${valid}개는 복원 가능하고 ${damaged}개는 손상되어 복원할 수 없습니다. 정상 기록만 복원하면 기존 Map 기록이 교체됩니다. 계속 진행하시겠습니까?`,
+      restoreDamagedMapCollectionsConfirm: (total, valid, damaged) =>
+        `백업 파일에는 Map 컬렉션 ${total}개가 포함되어 있습니다. ${valid}개는 복원 가능하고 ${damaged}개는 손상되어 복원할 수 없습니다. 정상 컬렉션만 복원하면 기존 Map 컬렉션이 교체됩니다. 계속 진행하시겠습니까?`,
       restoreCancelled: '복원을 취소했습니다.',
       restoreComplete: '백업 데이터를 복원했습니다.',
       restoreCompleteWithMap: (count) =>
         `백업 데이터와 Map 사진 기록 ${count}개를 복원했습니다.`,
       restoreCompleteWithDamagedMap: (valid, damaged) =>
         `백업 데이터와 Map 사진 기록 ${valid}개를 복원했습니다. 손상된 Map 기록 ${damaged}개는 제외했습니다.`,
+      restoreDamagedMapCollectionsSkipped: (valid, damaged) =>
+        `Map 컬렉션 ${valid}개를 복원했고 손상된 컬렉션 ${damaged}개는 제외했습니다.`,
       restoreMapKept:
         '이 백업 파일에는 Map 사진 기록이 포함되어 있지 않아 현재 Map 기록은 유지되었습니다.',
       restoreRollbackError:
@@ -650,6 +679,32 @@ export const translations = {
       searchScopeAll: 'All',
       searchScopeJapan: 'Japan',
       searchScopeKorea: 'Korea',
+      collectionsLabel: 'Collections',
+      collectionFilter: 'Collection filter',
+      allCollections: 'All',
+      unassignedCollection: 'Unassigned',
+      collectionField: 'Collection',
+      collectionName: 'Collection name',
+      collectionNamePlaceholder: 'Example: Korea 2026',
+      collectionDescription: 'Description',
+      collectionDescriptionPlaceholder: 'Travel or topic note',
+      collectionStartDate: 'Start date',
+      collectionEndDate: 'End date',
+      createCollection: 'Create collection',
+      saveCollection: 'Save collection',
+      editCollection: 'Edit',
+      deleteCollection: 'Delete',
+      collectionRecordCount: 'photos',
+      collectionNameRequired: 'Enter a collection name.',
+      collectionCreated: 'Collection created.',
+      collectionUpdated: 'Collection updated.',
+      collectionDeleted:
+        'Collection deleted. Linked photos were moved to Unassigned.',
+      collectionSaveError: 'Could not save the collection.',
+      collectionDeleteError: 'Could not delete the collection.',
+      deleteCollectionConfirm: (name, count) =>
+        `Delete the ${name} collection? ${count} linked photos will not be deleted and will move to Unassigned.`,
+      noFilteredRecords: 'No photo records in the selected collection.',
       locationSource: 'Location source',
       sourceExif: 'Auto detected',
       sourceManual: 'Manually set',
@@ -769,12 +824,16 @@ export const translations = {
         `This backup contains ${total} Map photo records. ${valid} can be restored and ${damaged} are damaged. Current Map records may be replaced with the Map records in this backup. Continue restore?`,
       restoreDamagedMapConfirm: (total, valid, damaged) =>
         `This backup contains ${total} Map photo records. ${valid} can be restored and ${damaged} are damaged. Restoring only valid records will replace current Map records. Continue?`,
+      restoreDamagedMapCollectionsConfirm: (total, valid, damaged) =>
+        `This backup contains ${total} Map collections. ${valid} can be restored and ${damaged} are damaged. Restoring only valid collections will replace current Map collections. Continue?`,
       restoreCancelled: 'Restore cancelled.',
       restoreComplete: 'Backup data has been restored.',
       restoreCompleteWithMap: (count) =>
         `Backup data and ${count} Map photo records have been restored.`,
       restoreCompleteWithDamagedMap: (valid, damaged) =>
         `Backup data and ${valid} Map photo records have been restored. ${damaged} damaged Map records were skipped.`,
+      restoreDamagedMapCollectionsSkipped: (valid, damaged) =>
+        `${valid} Map collections were restored and ${damaged} damaged collections were skipped.`,
       restoreMapKept:
         'This backup file does not include Map photo records, so current Map records were kept.',
       restoreRollbackError:
