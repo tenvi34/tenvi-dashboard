@@ -31,6 +31,9 @@
   - Downsides or maintenance cost
   - Alternatives
 - Add the library only after explicit approval.
+- Do not integrate paid, billable, or payment-account-based external APIs for the current project scope.
+  - Do not add Google Places, Google Maps Platform, or similar billable providers.
+  - If a new external service is needed, explain its free usage terms and limits first, then wait for explicit approval.
 
 ## Existing Behavior
 

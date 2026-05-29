@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   applyManualLocationToDraft,
+  applySearchLocationToDraft,
+  createEditDraft,
   createPhotoDraft,
   createPhotoRecordInput,
+  createPhotoRecordUpdatePatch,
   createManualLocation,
+  normalizeLocationSource,
   isPhotoDraftReadyToSave,
   normalizePhotoLocation,
 } from './mapLogic.js'
@@ -102,5 +106,54 @@ describe('mapLogic', () => {
       status: 'located',
       takenAt: '',
     })
+  })
+
+  it('applies search result coordinates to a draft', () => {
+    expect(
+      applySearchLocationToDraft(
+        {
+          originalFileName: 'search.jpg',
+          status: 'located',
+        },
+        {
+          latitude: '33.5903',
+          longitude: '130.4208',
+        },
+      ),
+    ).toMatchObject({
+      latitude: 33.5903,
+      locationSource: 'search',
+      longitude: 130.4208,
+      status: 'located',
+    })
+  })
+
+  it('creates an edit draft without mutating the original record', () => {
+    const record = {
+      id: 'record-1',
+      latitude: 35.1796,
+      longitude: 129.0756,
+      memo: 'before',
+      originalFileName: 'busan.jpg',
+      title: 'Busan',
+    }
+    const editDraft = createEditDraft(record)
+
+    editDraft.title = 'Changed'
+
+    expect(record.title).toBe('Busan')
+    expect(createPhotoRecordUpdatePatch(editDraft)).toMatchObject({
+      latitude: 35.1796,
+      locationSource: 'manual',
+      longitude: 129.0756,
+      memo: 'before',
+      title: 'Changed',
+    })
+  })
+
+  it('falls back unknown location sources for existing records', () => {
+    expect(normalizeLocationSource()).toBe('manual')
+    expect(normalizeLocationSource('legacy')).toBe('manual')
+    expect(normalizeLocationSource('search')).toBe('search')
   })
 })

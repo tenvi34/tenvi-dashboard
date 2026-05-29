@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   MapContainer,
   Marker,
@@ -11,43 +11,124 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
   applyManualLocationToDraft,
+  applySearchLocationToDraft,
+  createEditDraft,
   createPhotoDraft,
   createPhotoRecordInput,
+  createPhotoRecordUpdatePatch,
+  isEditDraftReadyToSave,
   isPhotoDraftReadyToSave,
+  normalizeLocationSource,
   readPhotoLocation,
 } from './mapLogic.js'
 import {
   createPhotoRecord,
   deletePhotoRecord,
   getPhotoRecords,
+  updatePhotoRecord,
 } from '../services/photoArchiveRepository.js'
+import { searchPlaces } from '../services/placeSearchService.js'
 import { createPreviewImageBlob } from '../utils/imageUtils.js'
 
 const DEFAULT_CENTER = [37.5665, 126.978]
 const DEFAULT_ZOOM = 2
-const MARKER_ZOOM = 15
+const FIT_BOUNDS_MAX_ZOOM = 15
+const RECORD_FOCUS_ZOOM = 17
+const MARKER_MIN_ZOOM = 17
+const EXIF_FOCUS_ZOOM = 16
+const SEARCH_FOCUS_ZOOM = 17
 const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 
-const getLocationSourceLabel = (source, t) =>
-  source === 'manual' ? t.map.sourceManual : t.map.sourceExif
+const createViewportRequest = (type, target) => ({
+  latitude: target?.latitude,
+  longitude: target?.longitude,
+  recordId: target?.id ?? '',
+  requestId: `${Date.now()}-${Math.random()}`,
+  type,
+})
 
-// 선택 기록이나 draft 위치로 지도 중심을 이동시키는 보조 컴포넌트
-function MapFocus({ target }) {
+const getLocationSourceLabel = (source, t) => {
+  const normalizedSource = normalizeLocationSource(source)
+
+  if (normalizedSource === 'search') {
+    return t.map.sourceSearch
+  }
+
+  return normalizedSource === 'manual' ? t.map.sourceManual : t.map.sourceExif
+}
+
+// 선택 기록, draft, 전체 기록 상태와 이동 요청을 기준으로 지도 화면 제어
+function MapViewportController({
+  records,
+  request,
+  shouldFitBounds,
+  target,
+}) {
   const map = useMap()
 
   useEffect(() => {
-    if (target?.status === 'located') {
-      // 목록/마커 선택과 수동 위치 지정 결과를 지도 중심에 즉시 반영
-      map.setView([target.latitude, target.longitude], MARKER_ZOOM)
+    const requestLatitude = Number(request?.latitude)
+    const requestLongitude = Number(request?.longitude)
+    const targetLatitude = Number(target?.latitude)
+    const targetLongitude = Number(target?.longitude)
+    const hasRequestLocation =
+      Number.isFinite(requestLatitude) && Number.isFinite(requestLongitude)
+    const hasTargetLocation =
+      Number.isFinite(targetLatitude) && Number.isFinite(targetLongitude)
+
+    if (hasRequestLocation || hasTargetLocation) {
+      // 저장 record에는 status가 없으므로 이동 요청 좌표를 우선 사용
+      const nextCenter = hasRequestLocation
+        ? [requestLatitude, requestLongitude]
+        : [targetLatitude, targetLongitude]
+      const requestType = request?.type
+
+      // intent별 zoom 정책: 선택/검색/EXIF는 확대, 수동 클릭은 현재 zoom 유지
+      if (requestType === 'manual-click') {
+        map.setView(nextCenter, map.getZoom())
+        return
+      }
+
+      if (requestType === 'marker-select') {
+        map.flyTo(nextCenter, Math.max(map.getZoom(), MARKER_MIN_ZOOM), {
+          duration: 0.65,
+        })
+        return
+      }
+
+      const focusZoom =
+        requestType === 'search-select'
+          ? SEARCH_FOCUS_ZOOM
+          : requestType === 'exif-detect'
+            ? EXIF_FOCUS_ZOOM
+            : RECORD_FOCUS_ZOOM
+
+      map.flyTo(nextCenter, focusZoom, { duration: 0.65 })
+      return
     }
-  }, [target, map])
+
+    if (request?.type === 'fit-all' && shouldFitBounds && records.length > 1) {
+      // 선택/등록/편집 중이 아닐 때만 전체 저장 마커 범위 표시
+      const bounds = L.latLngBounds(
+        records.map((record) => [record.latitude, record.longitude]),
+      )
+
+      map.fitBounds(bounds, { maxZoom: FIT_BOUNDS_MAX_ZOOM, padding: [36, 36] })
+    } else if (
+      request?.type === 'fit-all' &&
+      shouldFitBounds &&
+      records.length === 1
+    ) {
+      map.setView([records[0].latitude, records[0].longitude], RECORD_FOCUS_ZOOM)
+    }
+  }, [map, records, request, shouldFitBounds, target])
 
   return null
 }
 
-// 사진 등록 중 지도 클릭 좌표를 draft 위치로 전달하는 컴포넌트
+// 사진 등록 또는 편집 중 지도 클릭 좌표 전달
 function ManualLocationPicker({ disabled, onPickLocation }) {
   useMapEvents({
     click(event) {
@@ -83,6 +164,142 @@ function PhotoPreview({ alt, blob, className }) {
   }
 
   return <img alt={alt} className={className} src={src} />
+}
+
+// 저장 기록 마커와 선택 시 팝업 열기 제어
+function PhotoRecordMarker({ icon, isActive, onSelectRecord, record, t }) {
+  const markerRef = useRef(null)
+
+  useEffect(() => {
+    if (isActive) {
+      // 목록 선택과 마커 선택 상태를 같은 팝업 표시로 연결
+      markerRef.current?.openPopup()
+    }
+  }, [isActive])
+
+  return (
+    <Marker
+      eventHandlers={{ click: () => onSelectRecord(record.id) }}
+      icon={icon}
+      position={[record.latitude, record.longitude]}
+      ref={markerRef}
+    >
+      <Popup>
+        <div className="map-popup">
+          <strong>{record.title}</strong>
+          <span>
+            {t.map.locationSource}: {getLocationSourceLabel(record.locationSource, t)}
+          </span>
+          <span>
+            {record.latitude.toFixed(6)}, {record.longitude.toFixed(6)}
+          </span>
+        </div>
+      </Popup>
+    </Marker>
+  )
+}
+
+// 명시적 버튼/Enter 검색만 수행하는 장소 검색 패널
+function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [scope, setScope] = useState('all')
+  const [hasSearched, setHasSearched] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchError, setSearchError] = useState('')
+
+  const handleSearch = async () => {
+    const trimmedQuery = query.trim()
+
+    if (!trimmedQuery || disabled) {
+      return
+    }
+
+    setIsSearching(true)
+    setSearchError('')
+    setHasSearched(true)
+
+    try {
+      // 사용자가 입력한 장소명만 전송하는 명시적 검색 요청
+      setResults(await searchPlaces(trimmedQuery, { language, scope }))
+    } catch {
+      setResults([])
+      setSearchError(t.map.searchError)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    handleSearch()
+  }
+
+  return (
+    <section className="map-search-panel" aria-label={t.map.placeSearchLabel}>
+      <form className="map-search-form" onSubmit={handleSubmit}>
+        <label className="sr-only" htmlFor="map-place-search">
+          {t.map.placeSearchLabel}
+        </label>
+        <input
+          id="map-place-search"
+          type="search"
+          value={query}
+          disabled={disabled}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={t.map.placeSearchPlaceholder}
+        />
+        <select
+          aria-label={t.map.searchScopeLabel}
+          value={scope}
+          disabled={disabled}
+          onChange={(event) => setScope(event.target.value)}
+        >
+          <option value="all">{t.map.searchScopeAll}</option>
+          <option value="japan">{t.map.searchScopeJapan}</option>
+          <option value="korea">{t.map.searchScopeKorea}</option>
+        </select>
+        <button type="submit" disabled={disabled || isSearching}>
+          {isSearching ? t.map.searching : t.map.searchPlace}
+        </button>
+      </form>
+
+      <p className="map-search-attribution">{t.map.searchAttribution}</p>
+
+      {searchError ? (
+        <div className="map-status is-error" role="alert">
+          {searchError}
+        </div>
+      ) : null}
+
+      {results.length > 0 ? (
+        <ul className="map-search-results">
+          {results.map((result) => (
+            <li key={result.id}>
+              <button type="button" onClick={() => onSelectPlace(result)}>
+                <strong>{result.name}</strong>
+                {result.category || result.type ? (
+                  <small>
+                    {[result.category, result.type].filter(Boolean).join(' / ')}
+                  </small>
+                ) : null}
+                {result.addressSummary ? <em>{result.addressSummary}</em> : null}
+                <span>{result.displayName}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {hasSearched && !isSearching && !searchError && results.length === 0 ? (
+        <div className="empty-state compact-empty" role="status">
+          <span>{t.common.systemMessage}</span>
+          <p>{t.map.searchNoResults}</p>
+          <p>{t.map.searchRetryHint}</p>
+        </div>
+      ) : null}
+    </section>
+  )
 }
 
 // 사진 기록 목록에서 선택 진입점을 제공하는 패널
@@ -131,7 +348,15 @@ function PhotoRecordList({ activeRecordId, onSelectRecord, records, t }) {
 }
 
 // 저장 전 사진 draft의 제목/메모와 좌표 상태 편집 패널
-function PhotoDraftPanel({ draft, isSaving, onChangeDraft, onSaveDraft, t }) {
+function PhotoDraftPanel({
+  draft,
+  isSaving,
+  language,
+  onChangeDraft,
+  onSaveDraft,
+  onSelectPlace,
+  t,
+}) {
   if (!draft) {
     return (
       <div className="empty-state compact-empty" role="status">
@@ -179,6 +404,13 @@ function PhotoDraftPanel({ draft, isSaving, onChangeDraft, onSaveDraft, t }) {
         />
       </label>
 
+      <PlaceSearchPanel
+        disabled={false}
+        language={language}
+        onSelectPlace={onSelectPlace}
+        t={t}
+      />
+
       {draft.status === 'located' ? (
         <dl className="map-coordinate-panel">
           <div>
@@ -208,8 +440,94 @@ function PhotoDraftPanel({ draft, isSaving, onChangeDraft, onSaveDraft, t }) {
   )
 }
 
+// 저장 기록 편집용 제목/메모/위치 draft 패널
+function PhotoEditPanel({
+  editDraft,
+  isUpdating,
+  language,
+  onCancelEdit,
+  onChangeEditDraft,
+  onSaveEdit,
+  onSelectPlace,
+  record,
+  t,
+}) {
+  const isReadyToSave = isEditDraftReadyToSave(editDraft)
+
+  return (
+    <section className="map-detail-panel" aria-label={t.map.editLabel}>
+      <PhotoPreview
+        alt={record.title}
+        blob={record.previewImageBlob}
+        className="map-detail-preview"
+      />
+
+      <label className="map-field">
+        <span>{t.map.titleField}</span>
+        <input
+          type="text"
+          value={editDraft.title}
+          onChange={(event) => onChangeEditDraft({ title: event.target.value })}
+          placeholder={t.map.titlePlaceholder}
+        />
+      </label>
+
+      <label className="map-field">
+        <span>{t.map.memoField}</span>
+        <textarea
+          rows="5"
+          value={editDraft.memo}
+          onChange={(event) => onChangeEditDraft({ memo: event.target.value })}
+          placeholder={t.map.memoPlaceholder}
+        />
+      </label>
+
+      <PlaceSearchPanel
+        disabled={false}
+        language={language}
+        onSelectPlace={onSelectPlace}
+        t={t}
+      />
+
+      <dl className="map-coordinate-panel">
+        <div>
+          <dt>{t.map.locationSource}</dt>
+          <dd>{getLocationSourceLabel(editDraft.locationSource, t)}</dd>
+        </div>
+        <div>
+          <dt>{t.map.latitude}</dt>
+          <dd>{editDraft.latitude.toFixed(6)}</dd>
+        </div>
+        <div>
+          <dt>{t.map.longitude}</dt>
+          <dd>{editDraft.longitude.toFixed(6)}</dd>
+        </div>
+      </dl>
+
+      <div className="map-edit-actions">
+        <button
+          className="map-primary-button"
+          type="button"
+          disabled={!isReadyToSave || isUpdating}
+          onClick={onSaveEdit}
+        >
+          {isUpdating ? t.map.saving : t.map.saveChanges}
+        </button>
+        <button
+          className="map-secondary-button"
+          type="button"
+          disabled={isUpdating}
+          onClick={onCancelEdit}
+        >
+          {t.map.cancelEdit}
+        </button>
+      </div>
+    </section>
+  )
+}
+
 // 선택된 저장 기록의 미리보기, 메타데이터, 삭제 동작 상세 패널
-function PhotoRecordDetail({ onDeleteRecord, record, t }) {
+function PhotoRecordDetail({ onDeleteRecord, onStartEdit, record, t }) {
   if (!record) {
     return (
       <div className="empty-state compact-empty" role="status">
@@ -260,13 +578,18 @@ function PhotoRecordDetail({ onDeleteRecord, record, t }) {
         </div>
       </dl>
 
-      <button
-        className="delete-button map-delete-button"
-        type="button"
-        onClick={() => onDeleteRecord(record.id)}
-      >
-        {t.map.deleteRecord}
-      </button>
+      <div className="map-edit-actions">
+        <button className="map-primary-button" type="button" onClick={onStartEdit}>
+          {t.map.editRecord}
+        </button>
+        <button
+          className="delete-button map-delete-button"
+          type="button"
+          onClick={() => onDeleteRecord(record.id)}
+        >
+          {t.map.deleteRecord}
+        </button>
+      </div>
     </section>
   )
 }
@@ -275,15 +598,24 @@ function PhotoRecordDetail({ onDeleteRecord, record, t }) {
 function Map({ t }) {
   const [records, setRecords] = useState([])
   const [draft, setDraft] = useState(null)
+  const [editDraft, setEditDraft] = useState(null)
   const [activeRecordId, setActiveRecordId] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isReading, setIsReading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [viewportRequest, setViewportRequest] = useState(() =>
+    createViewportRequest('fit-all'),
+  )
   const [statusMessage, setStatusMessage] = useState('')
   const [error, setError] = useState('')
   const activeRecord = records.find((record) => record.id === activeRecordId)
-  const focusTarget = activeRecord ?? (draft?.status === 'located' ? draft : null)
-  const canPickLocation = Boolean(draft)
+  const focusTarget =
+    editDraft?.status === 'located'
+      ? editDraft
+      : activeRecord ?? (draft?.status === 'located' ? draft : null)
+  const canPickLocation = Boolean(draft || editDraft)
+  const shouldFitBounds = !activeRecordId && !draft && !editDraft && !isLoading
   const markerIcon = useMemo(
     () =>
       L.divIcon({
@@ -315,7 +647,7 @@ function Map({ t }) {
       .then((savedRecords) => {
         if (isMounted) {
           setRecords(savedRecords)
-          setActiveRecordId(savedRecords[0]?.id ?? '')
+          setViewportRequest(createViewportRequest('fit-all'))
         }
       })
       .catch(() => {
@@ -354,7 +686,14 @@ function Map({ t }) {
       ])
 
       setDraft(createPhotoDraft(file, location, previewImage))
+      setEditDraft(null)
       setActiveRecordId('')
+      setViewportRequest(
+        createViewportRequest(
+          location.status === 'located' ? 'exif-detect' : 'fit-all',
+          location,
+        ),
+      )
     } catch {
       setDraft(null)
       setError(t.map.readError)
@@ -365,12 +704,47 @@ function Map({ t }) {
   }
 
   const handlePickLocation = ({ lat, lng }) => {
+    if (editDraft) {
+      setEditDraft((currentDraft) =>
+        applyManualLocationToDraft(currentDraft, lat, lng),
+      )
+      setViewportRequest(
+        createViewportRequest('manual-click', {
+          latitude: lat,
+          longitude: lng,
+        }),
+      )
+      return
+    }
+
     setDraft((currentDraft) => applyManualLocationToDraft(currentDraft, lat, lng))
     setActiveRecordId('')
+    setViewportRequest(
+      createViewportRequest('manual-click', {
+        latitude: lat,
+        longitude: lng,
+      }),
+    )
+  }
+
+  const handleSelectPlace = (place) => {
+    if (editDraft) {
+      setEditDraft((currentDraft) => applySearchLocationToDraft(currentDraft, place))
+      setViewportRequest(createViewportRequest('search-select', place))
+      return
+    }
+
+    setDraft((currentDraft) => applySearchLocationToDraft(currentDraft, place))
+    setActiveRecordId('')
+    setViewportRequest(createViewportRequest('search-select', place))
   }
 
   const handleChangeDraft = (patch) => {
     setDraft((currentDraft) => ({ ...currentDraft, ...patch }))
+  }
+
+  const handleChangeEditDraft = (patch) => {
+    setEditDraft((currentDraft) => ({ ...currentDraft, ...patch }))
   }
 
   const handleSaveDraft = async () => {
@@ -390,6 +764,7 @@ function Map({ t }) {
       setRecords((currentRecords) => [savedRecord, ...currentRecords])
       setDraft(null)
       setActiveRecordId(savedRecord.id)
+      setViewportRequest(createViewportRequest('record-select', savedRecord))
       setStatusMessage(t.map.saveComplete)
     } catch {
       setError(t.map.saveError)
@@ -398,9 +773,66 @@ function Map({ t }) {
     }
   }
 
-  const handleSelectRecord = (recordId) => {
+  const handleStartEdit = () => {
     setDraft(null)
+    setEditDraft(createEditDraft(activeRecord))
+    setViewportRequest(createViewportRequest('record-select', activeRecord))
+    setStatusMessage('')
+    setError('')
+  }
+
+  const handleCancelEdit = () => {
+    setEditDraft(null)
+    setStatusMessage(t.map.editCancelled)
+  }
+
+  const handleSaveEdit = async () => {
+    const updatePatch = createPhotoRecordUpdatePatch(editDraft)
+
+    if (!updatePatch) {
+      setError(t.map.saveNeedsLocation)
+      return
+    }
+
+    setIsUpdating(true)
+    setError('')
+
+    try {
+      // 저장 버튼 이후에만 IndexedDB 기록 업데이트
+      const updatedRecord = await updatePhotoRecord(editDraft.id, updatePatch)
+
+      if (!updatedRecord) {
+        throw new Error('Missing photo record.')
+      }
+
+      setRecords((currentRecords) =>
+        currentRecords.map((record) =>
+          record.id === updatedRecord.id ? updatedRecord : record,
+        ),
+      )
+      setEditDraft(null)
+      setActiveRecordId(updatedRecord.id)
+      setViewportRequest(createViewportRequest('record-select', updatedRecord))
+      setStatusMessage(t.map.updateComplete)
+    } catch {
+      setError(t.map.updateError)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleSelectRecord = (recordId, requestType = 'record-select') => {
+    const selectedRecord = records.find((record) => record.id === recordId)
+
+    setDraft(null)
+    setEditDraft(null)
     setActiveRecordId(recordId)
+    // 같은 기록 재클릭도 지도 이동을 다시 실행하기 위한 요청 객체
+    setViewportRequest(createViewportRequest(requestType, selectedRecord))
+  }
+
+  const handleSelectMarker = (recordId) => {
+    handleSelectRecord(recordId, 'marker-select')
   }
 
   const handleDeleteRecord = async (recordId) => {
@@ -417,6 +849,10 @@ function Map({ t }) {
         currentRecords.filter((record) => record.id !== recordId),
       )
       setActiveRecordId((currentId) => (currentId === recordId ? '' : currentId))
+      setEditDraft((currentDraft) =>
+        currentDraft?.id === recordId ? null : currentDraft,
+      )
+      setViewportRequest(createViewportRequest('fit-all'))
       setStatusMessage(t.map.deleteComplete)
     } catch {
       setError(t.map.deleteError)
@@ -470,7 +906,7 @@ function Map({ t }) {
             </div>
           ) : null}
 
-          {draft ? (
+          {draft || editDraft ? (
             <div className="map-status" role="status">
               {t.map.clickToSetLocation}
             </div>
@@ -479,8 +915,10 @@ function Map({ t }) {
           <PhotoDraftPanel
             draft={draft}
             isSaving={isSaving}
+            language={t.map.searchLanguage}
             onChangeDraft={handleChangeDraft}
             onSaveDraft={handleSaveDraft}
+            onSelectPlace={handleSelectPlace}
             t={t}
           />
 
@@ -500,32 +938,26 @@ function Map({ t }) {
             zoom={DEFAULT_ZOOM}
           >
             <TileLayer attribution={OSM_ATTRIBUTION} url={OSM_TILE_URL} />
-            <MapFocus target={focusTarget} />
+            <MapViewportController
+              request={viewportRequest}
+              records={records}
+              shouldFitBounds={shouldFitBounds}
+              target={focusTarget}
+            />
             <ManualLocationPicker
               disabled={!canPickLocation}
               onPickLocation={handlePickLocation}
             />
 
             {records.map((record) => (
-              <Marker
-                eventHandlers={{ click: () => setActiveRecordId(record.id) }}
+              <PhotoRecordMarker
                 icon={markerIcon}
+                isActive={activeRecordId === record.id}
                 key={record.id}
-                position={[record.latitude, record.longitude]}
-              >
-                <Popup>
-                  <div className="map-popup">
-                    <strong>{record.title}</strong>
-                    <span>
-                      {t.map.locationSource}:{' '}
-                      {getLocationSourceLabel(record.locationSource, t)}
-                    </span>
-                    <span>
-                      {record.latitude.toFixed(6)}, {record.longitude.toFixed(6)}
-                    </span>
-                  </div>
-                </Popup>
-              </Marker>
+                onSelectRecord={handleSelectMarker}
+                record={record}
+                t={t}
+              />
             ))}
 
             {draft?.status === 'located' ? (
@@ -547,15 +979,51 @@ function Map({ t }) {
                 </Popup>
               </Marker>
             ) : null}
+
+            {editDraft?.status === 'located' ? (
+              <Marker
+                icon={draftMarkerIcon}
+                position={[editDraft.latitude, editDraft.longitude]}
+              >
+                <Popup>
+                  <div className="map-popup">
+                    <strong>{editDraft.title || editDraft.originalFileName}</strong>
+                    <span>
+                      {t.map.locationSource}:{' '}
+                      {getLocationSourceLabel(editDraft.locationSource, t)}
+                    </span>
+                    <span>
+                      {editDraft.latitude.toFixed(6)},{' '}
+                      {editDraft.longitude.toFixed(6)}
+                    </span>
+                  </div>
+                </Popup>
+              </Marker>
+            ) : null}
           </MapContainer>
         </section>
 
         <aside className="map-detail-column">
-          <PhotoRecordDetail
-            onDeleteRecord={handleDeleteRecord}
-            record={activeRecord}
-            t={t}
-          />
+          {editDraft && activeRecord ? (
+            <PhotoEditPanel
+              editDraft={editDraft}
+              isUpdating={isUpdating}
+              language={t.map.searchLanguage}
+              onCancelEdit={handleCancelEdit}
+              onChangeEditDraft={handleChangeEditDraft}
+              onSaveEdit={handleSaveEdit}
+              onSelectPlace={handleSelectPlace}
+              record={activeRecord}
+              t={t}
+            />
+          ) : (
+            <PhotoRecordDetail
+              onDeleteRecord={handleDeleteRecord}
+              onStartEdit={handleStartEdit}
+              record={activeRecord}
+              t={t}
+            />
+          )}
         </aside>
       </div>
     </section>

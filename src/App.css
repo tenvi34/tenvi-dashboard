@@ -890,9 +890,10 @@ body {
 
 .map-archive-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 0.34fr) minmax(420px, 1fr) minmax(260px, 0.32fr);
+  grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr) minmax(260px, 340px);
   gap: 16px;
-  align-items: stretch;
+  align-items: start;
+  min-width: 0;
 }
 
 .map-control-panel,
@@ -988,6 +989,12 @@ body {
   min-width: 0;
 }
 
+.map-detail-panel {
+  max-height: min(720px, calc(100svh - 220px));
+  overflow: auto;
+  padding-right: 2px;
+}
+
 .map-field {
   display: grid;
   gap: 8px;
@@ -1046,6 +1053,29 @@ body {
     color 0.18s ease;
 }
 
+.map-secondary-button {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.map-secondary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
 .map-primary-button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 0 18px rgba(90, 212, 255, 0.18);
@@ -1055,6 +1085,99 @@ body {
   color: rgba(223, 248, 255, 0.42);
   background: rgba(5, 16, 31, 0.56);
   cursor: not-allowed;
+}
+
+.map-search-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.map-search-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(86px, auto) auto;
+  gap: 8px;
+}
+
+.map-search-form input,
+.map-search-form select {
+  min-width: 0;
+  color: #f4fdff;
+  background: rgba(2, 9, 18, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.map-search-form button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.map-search-attribution {
+  margin: 0;
+  color: var(--muted-cyan);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.map-search-results {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.map-search-results button {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.map-search-results strong,
+.map-search-results small,
+.map-search-results em,
+.map-search-results span {
+  overflow-wrap: anywhere;
+}
+
+.map-search-results small {
+  color: var(--neon-strong);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.map-search-results em {
+  color: #c7e9f2;
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.map-search-results span {
+  color: #a8c7d6;
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .map-coordinate-panel {
@@ -1209,6 +1332,7 @@ body {
 
 .map-detail-column {
   min-width: 0;
+  max-width: 100%;
 }
 
 .map-detail-copy {
@@ -1220,6 +1344,7 @@ body {
   margin: 0;
   color: #f4fdff;
   font-size: 20px;
+  overflow-wrap: anywhere;
 }
 
 .map-detail-copy p {
@@ -1233,6 +1358,12 @@ body {
 .map-delete-button {
   width: 100%;
   min-height: 44px;
+}
+
+.map-edit-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .map-popup {
@@ -2051,6 +2182,10 @@ body {
   .map-archive-layout {
     grid-template-columns: 1fr;
   }
+
+  .map-detail-panel {
+    max-height: none;
+  }
 }
 
 @media (max-width: 860px) {
@@ -2106,6 +2241,7 @@ body {
   .calendar-layout,
   .map-layout,
   .map-archive-layout,
+  .map-search-form,
   .todo-item,
   .calendar-event-item,
   .note-item {
@@ -2231,7 +2367,8 @@ body {
 .tenvi-dashboard.theme-standard .settings-option,
 .tenvi-dashboard.theme-standard .calendar-nav-button,
 .tenvi-dashboard.theme-standard .command-link-button,
-.tenvi-dashboard.theme-standard .timer-button.secondary {
+.tenvi-dashboard.theme-standard .timer-button.secondary,
+.tenvi-dashboard.theme-standard .map-secondary-button {
   color: #344054;
   border-color: #d9e2ec;
   background: #ffffff;
@@ -2296,6 +2433,7 @@ body {
 .tenvi-dashboard.theme-standard .map-upload-box,
 .tenvi-dashboard.theme-standard .map-coordinate-panel div,
 .tenvi-dashboard.theme-standard .map-record-button,
+.tenvi-dashboard.theme-standard .map-search-results button,
 .tenvi-dashboard.theme-standard .todo-item,
 .tenvi-dashboard.theme-standard .note-item,
 .tenvi-dashboard.theme-standard .recent-note,
@@ -2314,6 +2452,7 @@ body {
 .tenvi-dashboard.theme-standard .calendar-event-item,
 .tenvi-dashboard.theme-standard .map-coordinate-panel div,
 .tenvi-dashboard.theme-standard .map-record-button,
+.tenvi-dashboard.theme-standard .map-search-results button,
 .tenvi-dashboard.theme-standard .analysis-section,
 .tenvi-dashboard.theme-standard .lap-panel li {
   border-left-color: #4f7cff;
@@ -2343,14 +2482,22 @@ body {
 .tenvi-dashboard.theme-standard .empty-state p,
 .tenvi-dashboard.theme-standard .calendar-event-item p,
 .tenvi-dashboard.theme-standard .map-record-button small,
+.tenvi-dashboard.theme-standard .map-search-attribution,
+.tenvi-dashboard.theme-standard .map-search-results em,
+.tenvi-dashboard.theme-standard .map-search-results span,
 .tenvi-dashboard.theme-standard .map-detail-copy p {
   color: #667085;
 }
 
 .tenvi-dashboard.theme-standard .map-coordinate-panel dd,
 .tenvi-dashboard.theme-standard .map-detail-copy h3,
-.tenvi-dashboard.theme-standard .map-record-button {
+.tenvi-dashboard.theme-standard .map-record-button,
+.tenvi-dashboard.theme-standard .map-search-results button {
   color: #172033;
+}
+
+.tenvi-dashboard.theme-standard .map-search-results small {
+  color: #245bdb;
 }
 
 .tenvi-dashboard.theme-standard .map-upload-box strong {
@@ -2391,7 +2538,9 @@ body {
 .tenvi-dashboard.theme-standard .calendar-month-selectors select,
 .tenvi-dashboard.theme-standard .timer-duration-settings input,
 .tenvi-dashboard.theme-standard .map-field input,
-.tenvi-dashboard.theme-standard .map-field textarea {
+.tenvi-dashboard.theme-standard .map-field textarea,
+.tenvi-dashboard.theme-standard .map-search-form input,
+.tenvi-dashboard.theme-standard .map-search-form select {
   color: #172033;
   border-color: #cfd8e3;
   background: #ffffff;
@@ -2404,7 +2553,8 @@ body {
 .tenvi-dashboard.theme-standard .calendar-form input::placeholder,
 .tenvi-dashboard.theme-standard .calendar-form textarea::placeholder,
 .tenvi-dashboard.theme-standard .map-field input::placeholder,
-.tenvi-dashboard.theme-standard .map-field textarea::placeholder {
+.tenvi-dashboard.theme-standard .map-field textarea::placeholder,
+.tenvi-dashboard.theme-standard .map-search-form input::placeholder {
   color: #98a2b3;
 }
 
@@ -2417,7 +2567,9 @@ body {
 .tenvi-dashboard.theme-standard .calendar-month-selectors select:focus,
 .tenvi-dashboard.theme-standard .timer-duration-settings input:focus,
 .tenvi-dashboard.theme-standard .map-field input:focus,
-.tenvi-dashboard.theme-standard .map-field textarea:focus {
+.tenvi-dashboard.theme-standard .map-field textarea:focus,
+.tenvi-dashboard.theme-standard .map-search-form input:focus,
+.tenvi-dashboard.theme-standard .map-search-form select:focus {
   border-color: #4f7cff;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.14);
@@ -2428,7 +2580,8 @@ body {
 .tenvi-dashboard.theme-standard .notes-form button,
 .tenvi-dashboard.theme-standard .calendar-form button,
 .tenvi-dashboard.theme-standard .timer-button,
-.tenvi-dashboard.theme-standard .map-primary-button {
+.tenvi-dashboard.theme-standard .map-primary-button,
+.tenvi-dashboard.theme-standard .map-search-form button {
   color: #ffffff;
   border-color: #245bdb;
   background: #245bdb;
@@ -2440,7 +2593,8 @@ body {
 .tenvi-dashboard.theme-standard .notes-form button:hover,
 .tenvi-dashboard.theme-standard .calendar-form button:hover,
 .tenvi-dashboard.theme-standard .timer-button:hover,
-.tenvi-dashboard.theme-standard .map-primary-button:hover:not(:disabled) {
+.tenvi-dashboard.theme-standard .map-primary-button:hover:not(:disabled),
+.tenvi-dashboard.theme-standard .map-search-form button:hover:not(:disabled) {
   background: #1d4ed8;
   box-shadow: none;
 }

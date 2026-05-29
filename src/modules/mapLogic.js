@@ -6,8 +6,13 @@ const DATE_CANDIDATE_KEYS = [
   'ModifyDate',
   'DateTime',
 ]
+const LOCATION_SOURCES = ['exif', 'manual', 'search']
 
 const isValidCoordinate = (value) => Number.isFinite(value)
+
+// 기존 기록의 누락되거나 알 수 없는 locationSource fallback
+export const normalizeLocationSource = (source) =>
+  LOCATION_SOURCES.includes(source) ? source : 'manual'
 
 // EXIF 날짜 값을 UI 저장용 문자열로 통일
 export const formatExifDate = (value) => {
@@ -41,7 +46,7 @@ export const normalizePhotoLocation = (fileName, metadata = {}) => {
     fileName,
     latitude,
     longitude,
-    locationSource: 'exif',
+    locationSource: normalizeLocationSource('exif'),
     status: 'located',
     takenAt,
   }
@@ -61,7 +66,7 @@ export const createManualLocation = (previousLocation, latitude, longitude) => {
     fileName: previousLocation?.fileName ?? '',
     latitude: nextLatitude,
     longitude: nextLongitude,
-    locationSource: 'manual',
+    locationSource: normalizeLocationSource('manual'),
     status: 'located',
     takenAt: previousLocation?.takenAt ?? '',
   }
@@ -83,6 +88,24 @@ export const createPhotoDraft = (file, location, previewImage) => ({
   takenAt: location.takenAt ?? '',
   title: file.name.replace(/\.[^.]+$/, ''),
 })
+
+// 검색 결과 좌표를 draft 위치로 반영
+export const applySearchLocationToDraft = (draft, place) => {
+  const latitude = Number(place?.latitude)
+  const longitude = Number(place?.longitude)
+
+  if (!draft || !isValidCoordinate(latitude) || !isValidCoordinate(longitude)) {
+    return draft
+  }
+
+  return {
+    ...draft,
+    latitude,
+    locationSource: 'search',
+    longitude,
+    status: 'located',
+  }
+}
 
 // 저장 전 draft에 지도 클릭 좌표 적용
 export const applyManualLocationToDraft = (draft, latitude, longitude) => {
@@ -108,7 +131,7 @@ export const applyManualLocationToDraft = (draft, latitude, longitude) => {
   }
 }
 
-// IndexedDB 저장 전 필수 좌표와 미리보기 Blob 검증
+// IndexedDB 신규 저장 전 필수 좌표와 미리보기 Blob 검증
 export const isPhotoDraftReadyToSave = (draft) =>
   Boolean(
     draft?.previewImageBlob &&
@@ -116,6 +139,48 @@ export const isPhotoDraftReadyToSave = (draft) =>
       isValidCoordinate(Number(draft.latitude)) &&
       isValidCoordinate(Number(draft.longitude)),
   )
+
+// 저장된 기록을 원본 변경 없이 편집용 draft로 복사
+export const createEditDraft = (record) => {
+  if (!record) {
+    return null
+  }
+
+  return {
+    id: record.id,
+    latitude: Number(record.latitude),
+    locationSource: normalizeLocationSource(record.locationSource),
+    longitude: Number(record.longitude),
+    memo: record.memo ?? '',
+    originalFileName: record.originalFileName ?? '',
+    status: 'located',
+    title: record.title ?? record.originalFileName ?? '',
+  }
+}
+
+// IndexedDB update 전 편집 draft 좌표와 제목 검증
+export const isEditDraftReadyToSave = (editDraft) =>
+  Boolean(
+    editDraft?.id &&
+      editDraft.status === 'located' &&
+      isValidCoordinate(Number(editDraft.latitude)) &&
+      isValidCoordinate(Number(editDraft.longitude)),
+  )
+
+// 편집 draft를 저장소 update patch 구조로 변환
+export const createPhotoRecordUpdatePatch = (editDraft) => {
+  if (!isEditDraftReadyToSave(editDraft)) {
+    return null
+  }
+
+  return {
+    latitude: Number(editDraft.latitude),
+    locationSource: normalizeLocationSource(editDraft.locationSource),
+    longitude: Number(editDraft.longitude),
+    memo: editDraft.memo.trim(),
+    title: editDraft.title.trim() || editDraft.originalFileName,
+  }
+}
 
 // 화면 draft를 저장소 입력 구조로 변환
 export const createPhotoRecordInput = (draft) => {
@@ -126,7 +191,7 @@ export const createPhotoRecordInput = (draft) => {
   return {
     fileType: draft.fileType,
     latitude: Number(draft.latitude),
-    locationSource: draft.locationSource,
+    locationSource: normalizeLocationSource(draft.locationSource),
     longitude: Number(draft.longitude),
     memo: draft.memo.trim(),
     originalFileName: draft.originalFileName,
