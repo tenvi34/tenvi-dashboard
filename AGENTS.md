@@ -68,6 +68,11 @@
 - When writing new code or modifying existing core logic, add concise Korean comments where they are useful for maintenance.
 - Do not comment every line. Focus on core logic that would be expensive to understand later when reading the code alone.
 - Comments should not merely repeat what the code does. Explain why the logic is needed, what to be careful about, or how it relates to existing data and behavior.
+- Write Korean comments in a concise noun-phrase style when possible.
+  - Prefer: `// URL로 바꾸는 이미지 컴포넌트`
+  - Avoid: `// URL로 바꾸는 이미지 컴포넌트입니다.`
+  - Prefer: `// IndexedDB 초기화와 저장소 준비`
+  - Avoid: `// IndexedDB를 초기화하고 저장소를 준비합니다.`
 - Prioritize comments in these areas:
   - localStorage keys and save/restore flows
   - Global state management in `App.jsx`

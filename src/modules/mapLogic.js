@@ -9,6 +9,7 @@ const DATE_CANDIDATE_KEYS = [
 
 const isValidCoordinate = (value) => Number.isFinite(value)
 
+// EXIF 날짜 값을 UI 저장용 문자열로 통일
 export const formatExifDate = (value) => {
   if (!value) {
     return ''
@@ -21,6 +22,7 @@ export const formatExifDate = (value) => {
   return String(value)
 }
 
+// EXIF GPS와 촬영일을 Map 위치 상태로 정규화
 export const normalizePhotoLocation = (fileName, metadata = {}) => {
   const latitude = Number(metadata.latitude)
   const longitude = Number(metadata.longitude)
@@ -39,12 +41,13 @@ export const normalizePhotoLocation = (fileName, metadata = {}) => {
     fileName,
     latitude,
     longitude,
-    source: 'exif',
+    locationSource: 'exif',
     status: 'located',
     takenAt,
   }
 }
 
+// 지도 클릭 좌표를 현재 선택 사진의 임시 위치로 반영
 export const createManualLocation = (previousLocation, latitude, longitude) => {
   const nextLatitude = Number(latitude)
   const nextLongitude = Number(longitude)
@@ -53,19 +56,91 @@ export const createManualLocation = (previousLocation, latitude, longitude) => {
     return previousLocation
   }
 
-  // 지도 클릭 좌표는 저장하지 않고 현재 사진의 임시 위치로만 덮어씁니다.
+  // 지도 클릭 좌표를 현재 사진의 임시 위치로만 반영
   return {
     fileName: previousLocation?.fileName ?? '',
     latitude: nextLatitude,
     longitude: nextLongitude,
-    source: 'manual',
+    locationSource: 'manual',
     status: 'located',
     takenAt: previousLocation?.takenAt ?? '',
   }
 }
 
+// 선택한 사진, 미리보기 Blob, EXIF 위치 기반 저장 전 draft 생성
+export const createPhotoDraft = (file, location, previewImage) => ({
+  fileType: file.type,
+  latitude: location.latitude,
+  locationSource: location.locationSource,
+  longitude: location.longitude,
+  memo: '',
+  originalFileName: file.name,
+  previewImageBlob: previewImage.blob,
+  previewImageHeight: previewImage.height,
+  previewImageMimeType: previewImage.mimeType,
+  previewImageWidth: previewImage.width,
+  status: location.status,
+  takenAt: location.takenAt ?? '',
+  title: file.name.replace(/\.[^.]+$/, ''),
+})
+
+// 저장 전 draft에 지도 클릭 좌표 적용
+export const applyManualLocationToDraft = (draft, latitude, longitude) => {
+  const manualLocation = createManualLocation(
+    {
+      fileName: draft?.originalFileName,
+      takenAt: draft?.takenAt,
+    },
+    latitude,
+    longitude,
+  )
+
+  if (!draft || manualLocation?.status !== 'located') {
+    return draft
+  }
+
+  return {
+    ...draft,
+    latitude: manualLocation.latitude,
+    locationSource: manualLocation.locationSource,
+    longitude: manualLocation.longitude,
+    status: 'located',
+  }
+}
+
+// IndexedDB 저장 전 필수 좌표와 미리보기 Blob 검증
+export const isPhotoDraftReadyToSave = (draft) =>
+  Boolean(
+    draft?.previewImageBlob &&
+      draft.status === 'located' &&
+      isValidCoordinate(Number(draft.latitude)) &&
+      isValidCoordinate(Number(draft.longitude)),
+  )
+
+// 화면 draft를 저장소 입력 구조로 변환
+export const createPhotoRecordInput = (draft) => {
+  if (!isPhotoDraftReadyToSave(draft)) {
+    return null
+  }
+
+  return {
+    fileType: draft.fileType,
+    latitude: Number(draft.latitude),
+    locationSource: draft.locationSource,
+    longitude: Number(draft.longitude),
+    memo: draft.memo.trim(),
+    originalFileName: draft.originalFileName,
+    previewImageBlob: draft.previewImageBlob,
+    previewImageHeight: draft.previewImageHeight,
+    previewImageMimeType: draft.previewImageMimeType,
+    previewImageWidth: draft.previewImageWidth,
+    takenAt: draft.takenAt,
+    title: draft.title.trim() || draft.originalFileName,
+  }
+}
+
 export const readPhotoLocation = async (file) => {
-  // PoC에서는 업로드된 사진을 저장하지 않고 브라우저 메모리에서 EXIF만 읽습니다.
+  // 업로드 사진 저장 없이 브라우저 메모리에서 EXIF만 읽기
   const gpsMetadata = await exifr.gps(file).catch(() => null)
   const metadata = await exifr
     .parse(file, {

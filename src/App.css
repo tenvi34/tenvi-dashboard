@@ -888,6 +888,13 @@ body {
   align-items: stretch;
 }
 
+.map-archive-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.34fr) minmax(420px, 1fr) minmax(260px, 0.32fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
 .map-control-panel,
 .map-view-panel {
   min-width: 0;
@@ -945,6 +952,18 @@ body {
   cursor: pointer;
 }
 
+.map-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.map-section-header strong {
+  color: var(--neon-strong);
+  font-size: 22px;
+}
+
 .map-status {
   padding: 12px 14px;
   border: 1px solid rgba(90, 212, 255, 0.22);
@@ -959,6 +978,83 @@ body {
   color: #ffd7df;
   border-color: rgba(255, 102, 134, 0.3);
   background: rgba(255, 102, 134, 0.1);
+}
+
+.map-draft-panel,
+.map-detail-panel,
+.map-list-panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.map-field {
+  display: grid;
+  gap: 8px;
+}
+
+.map-field span {
+  color: var(--muted-cyan);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.map-field input,
+.map-field textarea {
+  min-width: 0;
+  color: #f4fdff;
+  background: rgba(2, 9, 18, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font: inherit;
+  line-height: 1.4;
+  box-sizing: border-box;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.map-field input::placeholder,
+.map-field textarea::placeholder {
+  color: rgba(190, 229, 240, 0.48);
+}
+
+.map-field input:focus,
+.map-field textarea:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
+  background: rgba(4, 14, 28, 0.95);
+}
+
+.map-primary-button {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.map-primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.18);
+}
+
+.map-primary-button:disabled {
+  color: rgba(223, 248, 255, 0.42);
+  background: rgba(5, 16, 31, 0.56);
+  cursor: not-allowed;
 }
 
 .map-coordinate-panel {
@@ -1000,7 +1096,7 @@ body {
 
 .map-view-panel {
   overflow: hidden;
-  min-height: 520px;
+  min-height: 640px;
   border: 1px solid rgba(90, 212, 255, 0.22);
   border-radius: 10px;
   background: rgba(2, 9, 18, 0.46);
@@ -1009,7 +1105,7 @@ body {
 .photo-map {
   width: 100%;
   height: 100%;
-  min-height: 520px;
+  min-height: 640px;
   background: #06101d;
 }
 
@@ -1027,6 +1123,116 @@ body {
   box-shadow:
     0 0 0 6px rgba(90, 212, 255, 0.18),
     0 0 20px rgba(90, 212, 255, 0.5);
+}
+
+.map-marker-icon-draft span {
+  background: #65ffbc;
+  box-shadow:
+    0 0 0 6px rgba(101, 255, 188, 0.18),
+    0 0 20px rgba(101, 255, 188, 0.42);
+}
+
+.map-draft-preview,
+.map-detail-preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.46);
+}
+
+.map-record-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.map-record-button {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.map-record-button:hover,
+.map-record-button.is-active {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.1);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.map-record-thumb {
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 7px;
+  background: rgba(2, 9, 18, 0.46);
+}
+
+.map-record-button span {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.map-record-button strong,
+.map-record-button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-record-button small {
+  color: var(--muted-cyan);
+  font-size: 12px;
+}
+
+.map-detail-column {
+  min-width: 0;
+}
+
+.map-detail-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.map-detail-copy h3 {
+  margin: 0;
+  color: #f4fdff;
+  font-size: 20px;
+}
+
+.map-detail-copy p {
+  margin: 0;
+  color: #b8dbe7;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.map-delete-button {
+  width: 100%;
+  min-height: 44px;
 }
 
 .map-popup {
@@ -1841,6 +2047,10 @@ body {
   .map-layout {
     grid-template-columns: 1fr;
   }
+
+  .map-archive-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 860px) {
@@ -1895,6 +2105,7 @@ body {
   .command-form,
   .calendar-layout,
   .map-layout,
+  .map-archive-layout,
   .todo-item,
   .calendar-event-item,
   .note-item {
@@ -1930,6 +2141,7 @@ body {
   .todo-form button,
   .command-form button,
   .calendar-form button,
+  .map-primary-button,
   .delete-button {
     width: 100%;
     min-height: 44px;
@@ -2083,6 +2295,7 @@ body {
 .tenvi-dashboard.theme-standard .map-view-panel,
 .tenvi-dashboard.theme-standard .map-upload-box,
 .tenvi-dashboard.theme-standard .map-coordinate-panel div,
+.tenvi-dashboard.theme-standard .map-record-button,
 .tenvi-dashboard.theme-standard .todo-item,
 .tenvi-dashboard.theme-standard .note-item,
 .tenvi-dashboard.theme-standard .recent-note,
@@ -2100,6 +2313,7 @@ body {
 .tenvi-dashboard.theme-standard .recent-note,
 .tenvi-dashboard.theme-standard .calendar-event-item,
 .tenvi-dashboard.theme-standard .map-coordinate-panel div,
+.tenvi-dashboard.theme-standard .map-record-button,
 .tenvi-dashboard.theme-standard .analysis-section,
 .tenvi-dashboard.theme-standard .lap-panel li {
   border-left-color: #4f7cff;
@@ -2127,11 +2341,15 @@ body {
 .tenvi-dashboard.theme-standard .settings-note,
 .tenvi-dashboard.theme-standard .note-body p,
 .tenvi-dashboard.theme-standard .empty-state p,
-.tenvi-dashboard.theme-standard .calendar-event-item p {
+.tenvi-dashboard.theme-standard .calendar-event-item p,
+.tenvi-dashboard.theme-standard .map-record-button small,
+.tenvi-dashboard.theme-standard .map-detail-copy p {
   color: #667085;
 }
 
-.tenvi-dashboard.theme-standard .map-coordinate-panel dd {
+.tenvi-dashboard.theme-standard .map-coordinate-panel dd,
+.tenvi-dashboard.theme-standard .map-detail-copy h3,
+.tenvi-dashboard.theme-standard .map-record-button {
   color: #172033;
 }
 
@@ -2171,7 +2389,9 @@ body {
 .tenvi-dashboard.theme-standard .calendar-form input,
 .tenvi-dashboard.theme-standard .calendar-form textarea,
 .tenvi-dashboard.theme-standard .calendar-month-selectors select,
-.tenvi-dashboard.theme-standard .timer-duration-settings input {
+.tenvi-dashboard.theme-standard .timer-duration-settings input,
+.tenvi-dashboard.theme-standard .map-field input,
+.tenvi-dashboard.theme-standard .map-field textarea {
   color: #172033;
   border-color: #cfd8e3;
   background: #ffffff;
@@ -2182,7 +2402,9 @@ body {
 .tenvi-dashboard.theme-standard .notes-form input::placeholder,
 .tenvi-dashboard.theme-standard .notes-form textarea::placeholder,
 .tenvi-dashboard.theme-standard .calendar-form input::placeholder,
-.tenvi-dashboard.theme-standard .calendar-form textarea::placeholder {
+.tenvi-dashboard.theme-standard .calendar-form textarea::placeholder,
+.tenvi-dashboard.theme-standard .map-field input::placeholder,
+.tenvi-dashboard.theme-standard .map-field textarea::placeholder {
   color: #98a2b3;
 }
 
@@ -2193,7 +2415,9 @@ body {
 .tenvi-dashboard.theme-standard .calendar-form input:focus,
 .tenvi-dashboard.theme-standard .calendar-form textarea:focus,
 .tenvi-dashboard.theme-standard .calendar-month-selectors select:focus,
-.tenvi-dashboard.theme-standard .timer-duration-settings input:focus {
+.tenvi-dashboard.theme-standard .timer-duration-settings input:focus,
+.tenvi-dashboard.theme-standard .map-field input:focus,
+.tenvi-dashboard.theme-standard .map-field textarea:focus {
   border-color: #4f7cff;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.14);
@@ -2203,7 +2427,8 @@ body {
 .tenvi-dashboard.theme-standard .command-form button,
 .tenvi-dashboard.theme-standard .notes-form button,
 .tenvi-dashboard.theme-standard .calendar-form button,
-.tenvi-dashboard.theme-standard .timer-button {
+.tenvi-dashboard.theme-standard .timer-button,
+.tenvi-dashboard.theme-standard .map-primary-button {
   color: #ffffff;
   border-color: #245bdb;
   background: #245bdb;
@@ -2214,7 +2439,8 @@ body {
 .tenvi-dashboard.theme-standard .command-form button:hover,
 .tenvi-dashboard.theme-standard .notes-form button:hover,
 .tenvi-dashboard.theme-standard .calendar-form button:hover,
-.tenvi-dashboard.theme-standard .timer-button:hover {
+.tenvi-dashboard.theme-standard .timer-button:hover,
+.tenvi-dashboard.theme-standard .map-primary-button:hover:not(:disabled) {
   background: #1d4ed8;
   box-shadow: none;
 }
