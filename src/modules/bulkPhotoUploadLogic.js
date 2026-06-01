@@ -7,26 +7,81 @@ export const normalizeBulkUploadItemStatus = (status) =>
 
 export const createBulkPhotoAnalysisItem = ({
   errorMessage = '',
+  file = null,
   fileType = '',
   fileName = '',
   id,
   location = {},
   previewImage = null,
   status,
-}) => ({
-  errorMessage,
-  fileName,
-  id,
-  fileType,
-  latitude: location.latitude,
-  locationSource: location.locationSource ?? 'exif',
-  longitude: location.longitude,
-  originalFileName: fileName,
-  previewImage,
-  status: normalizeBulkUploadItemStatus(status ?? location.status),
-  takenAt: location.takenAt ?? '',
-  title: fileName.replace(/\.[^.]+$/, ''),
-})
+}) => {
+  const normalizedStatus = normalizeBulkUploadItemStatus(status ?? location.status)
+
+  return {
+    errorMessage,
+    file,
+    fileName,
+    id,
+    fileType,
+    latitude: location.latitude,
+    locationSource: location.locationSource ?? 'exif',
+    longitude: location.longitude,
+    originalFileName: fileName,
+    originalStatus: normalizedStatus,
+    previewImage,
+    status: normalizedStatus,
+    takenAt: location.takenAt ?? '',
+    title: fileName.replace(/\.[^.]+$/, ''),
+  }
+}
+
+export const getBulkMissingLocationItems = (items = []) =>
+  items.filter(
+    (item) =>
+      item?.originalStatus === 'missing-location' && item.status !== 'failed',
+  )
+
+export const toggleBulkMissingLocationSelection = (
+  selectedIds = [],
+  itemId,
+) => {
+  if (selectedIds.includes(itemId)) {
+    return selectedIds.filter((selectedId) => selectedId !== itemId)
+  }
+
+  return [...selectedIds, itemId]
+}
+
+export const selectAllBulkMissingLocationItems = (items = []) =>
+  getBulkMissingLocationItems(items).map((item) => item.id)
+
+export const clearBulkMissingLocationSelection = () => []
+
+export const applyLocationToBulkItems = (
+  items = [],
+  selectedIds = [],
+  location = {},
+) => {
+  const selectedIdSet = new Set(selectedIds)
+  const latitude = Number(location.latitude)
+  const longitude = Number(location.longitude)
+  const locationSource =
+    location.locationSource === 'search' ? 'search' : 'manual'
+
+  return items.map((item) => {
+    if (!selectedIdSet.has(item.id) || item.status === 'failed') {
+      return item
+    }
+
+    return {
+      ...item,
+      latitude,
+      locationSource,
+      longitude,
+      status: 'located',
+    }
+  })
+}
 
 export const createBulkUploadSummary = (items = []) =>
   items.reduce(

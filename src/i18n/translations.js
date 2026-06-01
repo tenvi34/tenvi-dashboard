@@ -348,6 +348,18 @@ export const translations = {
       bulkNoMissingItems: '위치정보 없는 사진이 없습니다.',
       bulkNoFailedItems: '처리 실패한 사진이 없습니다.',
       bulkMoreItems: (count) => `외 ${count}개 항목`,
+      bulkLocationAssignment: '위치정보 없는 사진 후처리',
+      bulkSelectedCount: (count) => `선택 ${count}장`,
+      bulkSelectAllMissing: '전체 선택',
+      bulkClearSelection: '선택 해제',
+      bulkMapClickReady:
+        '지도 클릭 또는 장소 검색 결과 선택으로 선택한 사진에 같은 위치를 적용합니다.',
+      bulkSelectMissingFirst: '위치를 적용할 사진을 먼저 선택하세요.',
+      bulkLastAssignedLocation: (source) =>
+        `마지막 적용 위치: ${source === 'search' ? '장소 검색' : '지도 클릭'}`,
+      bulkPreviewCreateError: '미리보기 이미지를 만들 수 없어 위치를 적용하지 못했습니다.',
+      bulkPendingLocation: '저장 전 위치',
+      bulkAssignedPhotoCount: (count) => `위치가 적용된 사진 ${count}장`,
     },
     tasks: {
       label: '태스크 모듈',
@@ -834,6 +846,20 @@ export const translations = {
       bulkNoMissingItems: 'No photos are missing location data.',
       bulkNoFailedItems: 'No photos failed processing.',
       bulkMoreItems: (count) => `${count} more items`,
+      bulkLocationAssignment: 'Missing-location post-processing',
+      bulkSelectedCount: (count) => `${count} selected`,
+      bulkSelectAllMissing: 'Select All',
+      bulkClearSelection: 'Clear Selection',
+      bulkMapClickReady:
+        'Click the map or choose a place search result to apply the same location to selected photos.',
+      bulkSelectMissingFirst: 'Select photos before applying a location.',
+      bulkLastAssignedLocation: (source) =>
+        `Last assigned location: ${source === 'search' ? 'Place search' : 'Map click'}`,
+      bulkPreviewCreateError:
+        'Could not create a preview image, so the location was not applied.',
+      bulkPendingLocation: 'Pending save location',
+      bulkAssignedPhotoCount: (count) =>
+        `${count} ${count === 1 ? 'photo' : 'photos'} assigned`,
     },
     tasks: {
       label: 'Task Module',

@@ -1101,6 +1101,15 @@ body {
   gap: 8px;
 }
 
+.map-bulk-assignment-panel {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.32);
+}
+
 .map-bulk-file-list,
 .map-bulk-failed-report {
   display: grid;
@@ -1119,6 +1128,31 @@ body {
   background: var(--surface);
 }
 
+.map-bulk-file-list li.is-selected {
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.1);
+}
+
+.map-bulk-check-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.map-bulk-check-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--neon-strong);
+}
+
+.map-bulk-check-row span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
 .map-bulk-file-list strong {
   color: #f4fdff;
   font-size: 14px;
@@ -1126,6 +1160,7 @@ body {
 }
 
 .map-bulk-file-list span,
+.map-bulk-file-list small,
 .map-bulk-note,
 .map-bulk-failed-report li {
   color: #a8c7d6;
@@ -1473,6 +1508,13 @@ body {
   box-shadow:
     0 0 0 6px rgba(101, 255, 188, 0.18),
     0 0 20px rgba(101, 255, 188, 0.42);
+}
+
+.map-marker-icon-bulk span {
+  background: #ffd166;
+  box-shadow:
+    0 0 0 6px rgba(255, 209, 102, 0.2),
+    0 0 20px rgba(255, 209, 102, 0.48);
 }
 
 .map-draft-preview,
@@ -2850,6 +2892,11 @@ body {
   background: #f8fafc;
 }
 
+.tenvi-dashboard.theme-standard .map-bulk-assignment-panel {
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
 .tenvi-dashboard.theme-standard .map-bulk-panel .map-status {
   color: #245bdb;
   border-color: #c7d7fe;
@@ -2871,11 +2918,17 @@ body {
   background: #ffffff;
 }
 
+.tenvi-dashboard.theme-standard .map-bulk-file-list li.is-selected {
+  border-color: #9db5ff;
+  background: #eef3ff;
+}
+
 .tenvi-dashboard.theme-standard .map-bulk-file-list strong {
   color: #172033;
 }
 
 .tenvi-dashboard.theme-standard .map-bulk-file-list span,
+.tenvi-dashboard.theme-standard .map-bulk-file-list small,
 .tenvi-dashboard.theme-standard .map-bulk-note,
 .tenvi-dashboard.theme-standard .map-bulk-failed-report li {
   color: #667085;

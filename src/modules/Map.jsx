@@ -14,7 +14,12 @@ import {
   createBulkPhotoRecordInputs,
   createBulkPhotoSaveResult,
   createBulkUploadSummary,
+  applyLocationToBulkItems,
+  clearBulkMissingLocationSelection,
   getBulkPhotoSaveCandidates,
+  getBulkMissingLocationItems,
+  selectAllBulkMissingLocationItems,
+  toggleBulkMissingLocationSelection,
 } from './bulkPhotoUploadLogic.js'
 import {
   applyManualLocationToDraft,
@@ -562,16 +567,43 @@ function PhotoCollectionSelect({ collections, onChange, t, value }) {
 }
 
 // 저장 전 사진 draft의 제목/메모와 좌표 상태 편집 패널
-function BulkUploadList({ emptyMessage, items, t, title }) {
+function BulkUploadList({
+  emptyMessage,
+  items,
+  onToggleItem,
+  selectable = false,
+  selectedIds = [],
+  t,
+  title,
+}) {
   return (
     <div className="map-bulk-list-section">
       <p className="recent-notes-title">{title}</p>
       {items.length > 0 ? (
         <ul className="map-bulk-file-list">
           {items.slice(0, 20).map((item) => (
-            <li key={item.id}>
-              <strong>{item.fileName}</strong>
-              <span>{getBulkItemStatusLabel(item.status, t)}</span>
+            <li
+              className={selectedIds.includes(item.id) ? 'is-selected' : ''}
+              key={item.id}
+            >
+              {selectable ? (
+                <label className="map-bulk-check-row">
+                  <input
+                    checked={selectedIds.includes(item.id)}
+                    type="checkbox"
+                    onChange={() => onToggleItem(item.id)}
+                  />
+                  <span>
+                    <strong>{item.fileName}</strong>
+                    <small>{getBulkItemStatusLabel(item.status, t)}</small>
+                  </span>
+                </label>
+              ) : (
+                <>
+                  <strong>{item.fileName}</strong>
+                  <span>{getBulkItemStatusLabel(item.status, t)}</span>
+                </>
+              )}
             </li>
           ))}
         </ul>
@@ -589,20 +621,24 @@ function BulkUploadList({ emptyMessage, items, t, title }) {
 }
 
 function BulkUploadPanel({
+  bulkAssignedLocation,
   bulkUpload,
   collections,
   onCancelAnalysis,
   onChangeCollection,
+  onClearSelection,
+  onSelectAllMissing,
+  onSelectBulkPlace,
   onReset,
   onSave,
+  onToggleMissingItem,
+  selectedMissingLocationItemIds,
   t,
 }) {
   const summary = createBulkUploadSummary(bulkUpload.items)
   const saveCandidates = getBulkPhotoSaveCandidates(bulkUpload.items)
   const locatedItems = bulkUpload.items.filter((item) => item.status === 'located')
-  const missingItems = bulkUpload.items.filter(
-    (item) => item.status === 'missing-location',
-  )
+  const missingItems = getBulkMissingLocationItems(bulkUpload.items)
   const failedItems = bulkUpload.items.filter((item) => item.status === 'failed')
   const progressValue =
     bulkUpload.total > 0
@@ -669,6 +705,55 @@ function BulkUploadPanel({
             {t.map.bulkMissingLocationPolicy}
           </div>
 
+          {missingItems.length > 0 ? (
+            <div className="map-bulk-assignment-panel">
+              <div className="map-section-header">
+                <div>
+                  <p className="module-label">{t.map.bulkLocationAssignment}</p>
+                  <strong>
+                    {t.map.bulkSelectedCount(
+                      selectedMissingLocationItemIds.length,
+                    )}
+                  </strong>
+                </div>
+              </div>
+              <div className="map-bulk-actions">
+                <button
+                  className="map-secondary-button"
+                  type="button"
+                  onClick={onSelectAllMissing}
+                >
+                  {t.map.bulkSelectAllMissing}
+                </button>
+                <button
+                  className="map-secondary-button"
+                  type="button"
+                  onClick={onClearSelection}
+                >
+                  {t.map.bulkClearSelection}
+                </button>
+              </div>
+              <div className="map-status" role="status">
+                {selectedMissingLocationItemIds.length > 0
+                  ? t.map.bulkMapClickReady
+                  : t.map.bulkSelectMissingFirst}
+              </div>
+              {bulkAssignedLocation ? (
+                <div className="map-status" role="status">
+                  {t.map.bulkLastAssignedLocation(
+                    bulkAssignedLocation.locationSource,
+                  )}
+                </div>
+              ) : null}
+              <PlaceSearchPanel
+                disabled={selectedMissingLocationItemIds.length === 0}
+                language={t.map.searchLanguage}
+                onSelectPlace={onSelectBulkPlace}
+                t={t}
+              />
+            </div>
+          ) : null}
+
           <PhotoCollectionSelect
             collections={collections}
             onChange={onChangeCollection}
@@ -715,6 +800,9 @@ function BulkUploadPanel({
           <BulkUploadList
             emptyMessage={t.map.bulkNoMissingItems}
             items={missingItems}
+            onToggleItem={onToggleMissingItem}
+            selectable
+            selectedIds={selectedMissingLocationItemIds}
             t={t}
             title={t.map.bulkMissingLocationList}
           />
@@ -1072,6 +1160,9 @@ function Map({ t }) {
     status: 'idle',
     total: 0,
   })
+  const [selectedMissingLocationItemIds, setSelectedMissingLocationItemIds] =
+    useState([])
+  const [bulkAssignedLocation, setBulkAssignedLocation] = useState(null)
   const [bulkSaveReport, setBulkSaveReport] = useState(null)
   const normalizedRecords = useMemo(
     () =>
@@ -1106,7 +1197,12 @@ function Map({ t }) {
     editDraft?.status === 'located'
       ? editDraft
       : activeRecord ?? (draft?.status === 'located' ? draft : null)
-  const canPickLocation = Boolean(draft || editDraft)
+  const canPickLocation = Boolean(
+    draft ||
+      editDraft ||
+      (['completed', 'cancelled'].includes(bulkUpload.status) &&
+        selectedMissingLocationItemIds.length > 0),
+  )
   const shouldFitBounds = !activeRecordId && !draft && !editDraft && !isLoading
   const getCollectionRecordCount = (collectionId) =>
     normalizedRecords.filter((record) => record.collectionId === collectionId).length
@@ -1136,6 +1232,20 @@ function Map({ t }) {
       }),
     [],
   )
+  const bulkMarkerIcon = useMemo(
+    () =>
+      L.divIcon({
+        className: 'map-marker-icon map-marker-icon-bulk',
+        html: '<span></span>',
+        iconAnchor: [12, 12],
+        iconSize: [24, 24],
+        popupAnchor: [0, -14],
+      }),
+    [],
+  )
+  const hasBulkAssignedLocation =
+    Number.isFinite(Number(bulkAssignedLocation?.latitude)) &&
+    Number.isFinite(Number(bulkAssignedLocation?.longitude))
 
   useEffect(() => {
     let isMounted = true
@@ -1177,7 +1287,10 @@ function Map({ t }) {
 
   const resetBulkUpload = () => {
     bulkCancelRef.current = false
+    // 임시 File 참조와 preview Blob 정리: bulk 상태를 비워 다음 업로드와 섞이지 않게 함
+    setBulkAssignedLocation(null)
     setBulkSaveReport(null)
+    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
     setBulkUpload({
       collectionId: null,
       items: [],
@@ -1196,7 +1309,9 @@ function Map({ t }) {
     setIsAddingPhoto(false)
     setError('')
     setStatusMessage('')
+    setBulkAssignedLocation(null)
     setBulkSaveReport(null)
+    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
     setBulkUpload({
       collectionId: null,
       items: [],
@@ -1229,6 +1344,7 @@ function Map({ t }) {
           items: [
             ...currentUpload.items,
             createBulkPhotoAnalysisItem({
+              file,
               fileName: file.name,
               fileType: file.type,
               id,
@@ -1246,6 +1362,7 @@ function Map({ t }) {
             ...currentUpload.items,
             createBulkPhotoAnalysisItem({
               errorMessage: t.map.readError,
+              file,
               fileName: file.name,
               fileType: file.type,
               id,
@@ -1323,14 +1440,32 @@ function Map({ t }) {
       return
     }
 
-    setDraft((currentDraft) => applyManualLocationToDraft(currentDraft, lat, lng))
-    setActiveRecordId('')
-    setViewportRequest(
-      createViewportRequest('manual-click', {
+    if (draft) {
+      setDraft((currentDraft) => applyManualLocationToDraft(currentDraft, lat, lng))
+      setActiveRecordId('')
+      setViewportRequest(
+        createViewportRequest('manual-click', {
+          latitude: lat,
+          longitude: lng,
+        }),
+      )
+      return
+    }
+
+    if (
+      ['completed', 'cancelled'].includes(bulkUpload.status) &&
+      selectedMissingLocationItemIds.length > 0
+    ) {
+      const location = {
         latitude: lat,
+        locationSource: 'manual',
         longitude: lng,
-      }),
-    )
+      }
+
+      // 지도 클릭 bulk 위치 적용: 단일 draft/edit 흐름이 없을 때만 현재 zoom 유지하며 일괄 반영
+      applyBulkLocationToSelection(location)
+      setViewportRequest(createViewportRequest('manual-click', location))
+    }
   }
 
   const handleSelectPlace = (place) => {
@@ -1487,6 +1622,90 @@ function Map({ t }) {
     }))
   }
 
+  const handleToggleMissingLocationItem = (itemId) => {
+    // bulk missing-location 선택 처리: 저장 후보 전환 전 항목만 사용자가 명시적으로 고름
+    setSelectedMissingLocationItemIds((currentIds) =>
+      toggleBulkMissingLocationSelection(currentIds, itemId),
+    )
+  }
+
+  const handleSelectAllMissingLocationItems = () => {
+    // 전체 선택 / 선택 해제: 원래 위치정보가 없었던 후처리 대상만 선택
+    setSelectedMissingLocationItemIds(
+      selectAllBulkMissingLocationItems(bulkUpload.items),
+    )
+  }
+
+  const handleClearMissingLocationSelection = () => {
+    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
+  }
+
+  const applyBulkLocationToSelection = async (location) => {
+    if (selectedMissingLocationItemIds.length === 0) {
+      setError(t.map.bulkSelectMissingFirst)
+      return
+    }
+
+    setError('')
+    const selectedIdSet = new Set(selectedMissingLocationItemIds)
+    const successfulIds = []
+
+    const itemsWithPreview = []
+
+    for (const item of bulkUpload.items) {
+      if (!selectedIdSet.has(item.id) || item.status === 'failed') {
+        itemsWithPreview.push(item)
+        continue
+      }
+
+      try {
+        const previewImage =
+          item.previewImage?.blob || !item.file
+            ? item.previewImage
+            : await createPreviewImageBlob(item.file)
+
+        if (!previewImage?.blob) {
+          throw new Error('Missing preview image.')
+        }
+
+        successfulIds.push(item.id)
+        itemsWithPreview.push({
+          ...item,
+          previewImage,
+        })
+      } catch {
+        // 일부 항목 처리 실패 fallback: 실패한 사진만 제외하고 나머지 위치 적용은 계속 진행
+        itemsWithPreview.push({
+          ...item,
+          errorMessage: t.map.bulkPreviewCreateError,
+          status: 'failed',
+        })
+      }
+    }
+
+    // 위치 적용 후 저장 후보 전환: 좌표와 preview Blob이 있는 항목만 기존 저장 후보 계산에 합류
+    setBulkUpload((currentUpload) => ({
+      ...currentUpload,
+      items: applyLocationToBulkItems(itemsWithPreview, successfulIds, location),
+      saveResult: null,
+    }))
+    setBulkAssignedLocation({
+      ...location,
+      appliedCount: successfulIds.length,
+    })
+    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
+  }
+
+  const handleSelectBulkPlace = (place) => {
+    // 장소 검색 결과 bulk 위치 적용: 선택 항목에 같은 검색 좌표를 반영
+    applyBulkLocationToSelection({
+      latitude: place.latitude,
+      locationSource: 'search',
+      longitude: place.longitude,
+    })
+    setViewportRequest(createViewportRequest('search-select', place))
+  }
+
   const handleSaveBulkLocatedPhotos = async () => {
     const recordInputs = createBulkPhotoRecordInputs(
       bulkUpload.items,
@@ -1511,6 +1730,8 @@ function Map({ t }) {
 
       setRecords(savedRecords)
       setBulkSaveReport(saveResult)
+      setBulkAssignedLocation(null)
+      setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
       setActiveRecordId(saveResult.savedRecords[0]?.id ?? '')
       setViewportRequest(createViewportRequest('fit-all'))
       setBulkUpload({
@@ -1814,12 +2035,18 @@ function Map({ t }) {
           <div className="map-left-scroll">
             {bulkUpload.status !== 'idle' ? (
               <BulkUploadPanel
+                bulkAssignedLocation={bulkAssignedLocation}
                 bulkUpload={bulkUpload}
                 collections={collections}
                 onCancelAnalysis={handleCancelBulkAnalysis}
                 onChangeCollection={handleChangeBulkCollection}
+                onClearSelection={handleClearMissingLocationSelection}
+                onSelectAllMissing={handleSelectAllMissingLocationItems}
+                onSelectBulkPlace={handleSelectBulkPlace}
                 onReset={resetBulkUpload}
                 onSave={handleSaveBulkLocatedPhotos}
+                onToggleMissingItem={handleToggleMissingLocationItem}
+                selectedMissingLocationItemIds={selectedMissingLocationItemIds}
                 t={t}
               />
             ) : null}
@@ -1908,6 +2135,32 @@ function Map({ t }) {
                     <span>
                       {editDraft.latitude.toFixed(6)},{' '}
                       {editDraft.longitude.toFixed(6)}
+                    </span>
+                  </div>
+                </Popup>
+              </Marker>
+            ) : null}
+
+            {hasBulkAssignedLocation ? (
+              // bulk 임시 위치는 아직 저장 record가 아니므로 저장 마커와 별도로 표시
+              <Marker
+                icon={bulkMarkerIcon}
+                position={[
+                  Number(bulkAssignedLocation.latitude),
+                  Number(bulkAssignedLocation.longitude),
+                ]}
+              >
+                <Popup>
+                  <div className="map-popup">
+                    <strong>{t.map.bulkPendingLocation}</strong>
+                    <span>
+                      {t.map.bulkAssignedPhotoCount(
+                        bulkAssignedLocation.appliedCount ?? 0,
+                      )}
+                    </span>
+                    <span>
+                      {Number(bulkAssignedLocation.latitude).toFixed(6)},{' '}
+                      {Number(bulkAssignedLocation.longitude).toFixed(6)}
                     </span>
                   </div>
                 </Popup>

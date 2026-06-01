@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
+  applyLocationToBulkItems,
+  clearBulkMissingLocationSelection,
   createBulkPhotoAnalysisItem,
   createBulkPhotoRecordInputs,
   createBulkPhotoSaveResult,
   createBulkUploadSummary,
   getBulkPhotoSaveCandidates,
+  selectAllBulkMissingLocationItems,
+  toggleBulkMissingLocationSelection,
 } from './bulkPhotoUploadLogic.js'
 
 const previewImage = {
@@ -129,5 +133,98 @@ describe('bulkPhotoUploadLogic', () => {
     })
     expect(result.savedRecords).toEqual([{ id: 'saved-1' }])
     expect(result.failedItems).toEqual([{ fileName: 'failed.jpg', status: 'failed' }])
+  })
+
+  it('toggles missing-location photo selection', () => {
+    expect(toggleBulkMissingLocationSelection([], 'missing-1')).toEqual([
+      'missing-1',
+    ])
+    expect(
+      toggleBulkMissingLocationSelection(['missing-1', 'missing-2'], 'missing-1'),
+    ).toEqual(['missing-2'])
+  })
+
+  it('selects all original missing-location items and clears selection', () => {
+    const items = [
+      createLocatedItem({ id: 'gps', originalStatus: 'located' }),
+      {
+        id: 'missing',
+        originalStatus: 'missing-location',
+        status: 'missing-location',
+      },
+      {
+        id: 'assigned',
+        originalStatus: 'missing-location',
+        status: 'located',
+      },
+      { id: 'failed', originalStatus: 'missing-location', status: 'failed' },
+    ]
+
+    expect(selectAllBulkMissingLocationItems(items)).toEqual([
+      'missing',
+      'assigned',
+    ])
+    expect(clearBulkMissingLocationSelection()).toEqual([])
+  })
+
+  it('applies manual location only to selected items', () => {
+    const result = applyLocationToBulkItems(
+      [
+        { id: 'first', status: 'missing-location' },
+        { id: 'second', status: 'missing-location' },
+        { id: 'failed', status: 'failed' },
+      ],
+      ['first', 'failed'],
+      {
+        latitude: 33.5903,
+        locationSource: 'manual',
+        longitude: 130.4208,
+      },
+    )
+
+    expect(result).toEqual([
+      {
+        id: 'first',
+        latitude: 33.5903,
+        locationSource: 'manual',
+        longitude: 130.4208,
+        status: 'located',
+      },
+      { id: 'second', status: 'missing-location' },
+      { id: 'failed', status: 'failed' },
+    ])
+  })
+
+  it('applies search location and turns assigned photos into save candidates', () => {
+    const [assigned, missing] = applyLocationToBulkItems(
+      [
+        createLocatedItem({
+          id: 'assigned',
+          originalStatus: 'missing-location',
+          status: 'missing-location',
+        }),
+        {
+          id: 'missing',
+          originalStatus: 'missing-location',
+          status: 'missing-location',
+        },
+      ],
+      ['assigned'],
+      {
+        latitude: 35.6812,
+        locationSource: 'search',
+        longitude: 139.7671,
+      },
+    )
+
+    expect(assigned).toMatchObject({
+      latitude: 35.6812,
+      locationSource: 'search',
+      longitude: 139.7671,
+      status: 'located',
+    })
+    expect(getBulkPhotoSaveCandidates([assigned, missing]).map((item) => item.id)).toEqual([
+      'assigned',
+    ])
   })
 })

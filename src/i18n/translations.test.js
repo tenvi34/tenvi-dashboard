@@ -214,6 +214,16 @@ const requiredMapKeys = [
   'bulkNoMissingItems',
   'bulkNoFailedItems',
   'bulkMoreItems',
+  'bulkLocationAssignment',
+  'bulkSelectedCount',
+  'bulkSelectAllMissing',
+  'bulkClearSelection',
+  'bulkMapClickReady',
+  'bulkSelectMissingFirst',
+  'bulkLastAssignedLocation',
+  'bulkPreviewCreateError',
+  'bulkPendingLocation',
+  'bulkAssignedPhotoCount',
 ]
 
 describe('translations', () => {
