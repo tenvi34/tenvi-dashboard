@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react'
+
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import { getMapArchiveSummary } from '../services/photoArchiveSummaryService.js'
 import {
   getMonthEvents,
   getNextEvent,
@@ -29,8 +32,18 @@ const getNoteTime = (note) => {
   return Number.isNaN(time) ? 0 : time
 }
 
-// Tasks, Notes, Calendar의 핵심 현황을 한 화면에 요약하는 컴포넌트입니다.
+const MAP_SUMMARY_STATUS = {
+  error: 'error',
+  loading: 'loading',
+  ready: 'ready',
+}
+
+// Tasks, Notes, Calendar, Map의 핵심 현황을 한 화면에 요약하는 컴포넌트입니다.
 function Dashboard({ t }) {
+  const [mapSummaryState, setMapSummaryState] = useState({
+    data: null,
+    status: MAP_SUMMARY_STATUS.loading,
+  })
   const tasks = readStoredList(STORAGE_KEYS.tasks)
   const notes = readStoredList(STORAGE_KEYS.notes)
   const calendarEvents = readStoredList(STORAGE_KEYS.calendarEvents)
@@ -47,6 +60,53 @@ function Dashboard({ t }) {
   const recentNotes = [...notes]
     .sort((firstNote, secondNote) => getNoteTime(secondNote) - getNoteTime(firstNote))
     .slice(0, 3)
+  const mapSummary = mapSummaryState.data
+  const hasMapRecords = Number(mapSummary?.totalPhotoRecords) > 0
+  const mapBriefingMessage =
+    mapSummaryState.status === MAP_SUMMARY_STATUS.error
+      ? t.dashboard.mapSummaryLoadError
+      : mapSummaryState.status === MAP_SUMMARY_STATUS.loading
+        ? t.dashboard.mapSummaryLoading
+        : hasMapRecords
+          ? t.dashboard.mapBriefing(mapSummary.totalPhotoRecords)
+          : t.dashboard.mapBriefingEmpty
+
+  useEffect(() => {
+    let isMounted = true
+
+    // Dashboard는 Map IndexedDB를 수정하지 않고 service의 읽기 요약만 비동기로 수신
+    const loadMapSummary = async () => {
+      setMapSummaryState((currentState) => ({
+        ...currentState,
+        status: MAP_SUMMARY_STATUS.loading,
+      }))
+
+      try {
+        const summary = await getMapArchiveSummary()
+
+        if (isMounted) {
+          setMapSummaryState({
+            data: summary,
+            status: MAP_SUMMARY_STATUS.ready,
+          })
+        }
+      } catch {
+        if (isMounted) {
+          // Map 요약 실패 격리: Dashboard 전체 렌더링은 유지하고 해당 패널만 안내
+          setMapSummaryState({
+            data: null,
+            status: MAP_SUMMARY_STATUS.error,
+          })
+        }
+      }
+    }
+
+    loadMapSummary()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   return (
     <section
@@ -62,6 +122,11 @@ function Dashboard({ t }) {
       </div>
 
       {/* Dashboard 요약 카드 영역: Tasks, Notes, Calendar 현황을 한 화면에서 확인합니다. */}
+      <div className="status-card dashboard-briefing" role="status">
+        <span>{t.dashboard.todayBriefing}</span>
+        <strong>{mapBriefingMessage}</strong>
+      </div>
+
       <div className="dashboard-summary-grid">
         {/* Tasks 요약 카드 */}
         <section className="summary-panel" aria-labelledby="task-summary-title">
@@ -202,6 +267,104 @@ function Dashboard({ t }) {
               </div>
             )}
           </div>
+        </section>
+
+        <section className="summary-panel" aria-labelledby="map-summary-title">
+          <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.mapSummary}</p>
+            <h3 id="map-summary-title">{t.modules.map}</h3>
+          </div>
+
+          {mapSummaryState.status === MAP_SUMMARY_STATUS.loading ? (
+            <div className="empty-state compact-empty" role="status">
+              <span>{t.common.systemMessage}</span>
+              <p>{t.dashboard.mapSummaryLoading}</p>
+            </div>
+          ) : null}
+
+          {mapSummaryState.status === MAP_SUMMARY_STATUS.error ? (
+            <div className="empty-state compact-empty" role="status">
+              <span>{t.common.systemMessage}</span>
+              <p>{t.dashboard.mapSummaryLoadError}</p>
+            </div>
+          ) : null}
+
+          {mapSummaryState.status === MAP_SUMMARY_STATUS.ready && !hasMapRecords ? (
+            <div className="empty-state compact-empty" role="status">
+              <span>{t.common.systemMessage}</span>
+              <p>{t.dashboard.noMapRecords}</p>
+            </div>
+          ) : null}
+
+          {mapSummaryState.status === MAP_SUMMARY_STATUS.ready && hasMapRecords ? (
+            <>
+              <div className="summary-metrics map-summary-metrics">
+                <div className="summary-metric">
+                  <span>{t.dashboard.totalMapRecords}</span>
+                  <strong>{mapSummary.totalPhotoRecords}</strong>
+                </div>
+                <div className="summary-metric">
+                  <span>{t.dashboard.totalMapCollections}</span>
+                  <strong>{mapSummary.totalCollections}</strong>
+                </div>
+              </div>
+
+              <div className="map-source-grid" aria-label={t.dashboard.mapLocationSources}>
+                <div>
+                  <span>{t.dashboard.mapSourceExif}</span>
+                  <strong>{mapSummary.locationSourceCounts.exif}</strong>
+                </div>
+                <div>
+                  <span>{t.dashboard.mapSourceManual}</span>
+                  <strong>{mapSummary.locationSourceCounts.manual}</strong>
+                </div>
+                <div>
+                  <span>{t.dashboard.mapSourceSearch}</span>
+                  <strong>{mapSummary.locationSourceCounts.search}</strong>
+                </div>
+                <div>
+                  <span>{t.dashboard.mapSourceUnknown}</span>
+                  <strong>{mapSummary.locationSourceCounts.unknown}</strong>
+                </div>
+              </div>
+
+              <div className="recent-notes">
+                <p className="recent-notes-title">{t.dashboard.recentMapRecords}</p>
+                <ul>
+                  {mapSummary.recentPhotoRecords.map((record) => (
+                    <li className="recent-note" key={record.id}>
+                      <strong>{record.title || t.dashboard.untitledMapRecord}</strong>
+                      <span>
+                        {record.collectionName || t.map.unassignedCollection} /{' '}
+                        {t.dashboard.mapLocationSourceValue(record.locationSource)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="recent-notes dashboard-map-collection">
+                <p className="recent-notes-title">{t.dashboard.representativeCollection}</p>
+                {mapSummary.representativeCollection ? (
+                  <ul>
+                    <li className="recent-note">
+                      <strong>{mapSummary.representativeCollection.name}</strong>
+                      <span>
+                        {t.dashboard.collectionPhotoCount(
+                          mapSummary.representativeCollection.photoCount,
+                        )}
+                      </span>
+                    </li>
+                  </ul>
+                ) : (
+                  <div className="empty-state compact-empty" role="status">
+                    <span>{t.common.systemMessage}</span>
+                    <p>{t.dashboard.noRepresentativeCollection}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : null}
         </section>
       </div>
     </section>
