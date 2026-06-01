@@ -933,6 +933,46 @@ body {
   gap: 10px;
 }
 
+/* 지도 모드 전환 탭 바 — 탐색/업로드/컬렉션 관리 */
+.map-mode-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(90, 212, 255, 0.18);
+}
+
+.map-mode-tab {
+  padding: 8px 18px;
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  color: #a8c7d6;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.map-mode-tab:hover {
+  color: #dff8ff;
+  border-color: rgba(90, 212, 255, 0.18);
+  background: rgba(5, 16, 31, 0.4);
+}
+
+.map-mode-tab.is-active {
+  color: var(--neon-strong);
+  border-color: rgba(90, 212, 255, 0.32);
+  background: rgba(5, 16, 31, 0.6);
+}
+
 .map-layout {
   display: grid;
   grid-template-columns: minmax(260px, 0.38fr) minmax(0, 1fr);
@@ -2562,6 +2602,14 @@ body {
 }
 
 /* 화면 크기별 반응형 레이아웃 */
+/* 업로드/컬렉션 관리 모드: 오른쪽 패널 없이 2열 — 1180px 이상에서만 적용 */
+@media (min-width: 1181px) {
+  .map-archive-layout[data-mode='upload'],
+  .map-archive-layout[data-mode='collections'] {
+    grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr);
+  }
+}
+
 @media (max-width: 1180px) {
   .dashboard-summary-grid {
     grid-template-columns: 1fr;
@@ -3195,6 +3243,28 @@ body {
 
 .tenvi-dashboard.theme-standard .todo-item.is-completed .todo-check span {
   color: #98a2b3;
+}
+
+.tenvi-dashboard.theme-standard .map-mode-tab {
+  color: #667085;
+  border-color: transparent;
+  background: transparent;
+}
+
+.tenvi-dashboard.theme-standard .map-mode-tab:hover {
+  color: #172033;
+  border-color: #d9e2ec;
+  background: #f4f7ff;
+}
+
+.tenvi-dashboard.theme-standard .map-mode-tab.is-active {
+  color: #245bdb;
+  border-color: #9db5ff;
+  background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-standard .map-mode-tabs {
+  border-bottom-color: #d9e2ec;
 }
 
 .tenvi-dashboard.theme-standard .map-add-toggle-button,

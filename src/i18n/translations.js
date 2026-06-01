@@ -373,6 +373,12 @@ export const translations = {
       bulkPreviewCreateError: '미리보기 이미지를 만들 수 없어 위치를 적용하지 못했습니다.',
       bulkPendingLocation: '저장 전 위치',
       bulkAssignedPhotoCount: (count) => `위치가 적용된 사진 ${count}장`,
+      modeTabs: '지도 모드',
+      modeExplore: '탐색',
+      modeUpload: '사진 업로드',
+      modeCollections: '컬렉션 관리',
+      collectionDeletePolicy:
+        '컬렉션을 삭제해도 연결된 사진은 삭제되지 않고 미분류로 이동합니다.',
     },
     tasks: {
       label: '태스크 모듈',
@@ -886,6 +892,12 @@ export const translations = {
       bulkPendingLocation: 'Pending save location',
       bulkAssignedPhotoCount: (count) =>
         `${count} ${count === 1 ? 'photo' : 'photos'} assigned`,
+      modeTabs: 'Map mode',
+      modeExplore: 'Explore',
+      modeUpload: 'Upload Photos',
+      modeCollections: 'Collections',
+      collectionDeletePolicy:
+        'Deleting a collection will not delete its photos — they will be moved to Uncategorized.',
     },
     tasks: {
       label: 'Task Module',

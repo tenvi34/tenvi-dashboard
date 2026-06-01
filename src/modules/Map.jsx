@@ -1134,6 +1134,299 @@ function PhotoRecordDetail({
   )
 }
 
+// 모드 전환 탭 — 탐색/업로드/컬렉션 관리 모드를 선택하는 탭 바
+function MapModeTabs({ activeMode, onChangeMode, t }) {
+  return (
+    <div className="map-mode-tabs" role="tablist" aria-label={t.map.modeTabs}>
+      <button
+        className={`map-mode-tab${activeMode === 'explore' ? ' is-active' : ''}`}
+        role="tab"
+        aria-selected={activeMode === 'explore'}
+        type="button"
+        onClick={() => onChangeMode('explore')}
+      >
+        {t.map.modeExplore}
+      </button>
+      <button
+        className={`map-mode-tab${activeMode === 'upload' ? ' is-active' : ''}`}
+        role="tab"
+        aria-selected={activeMode === 'upload'}
+        type="button"
+        onClick={() => onChangeMode('upload')}
+      >
+        {t.map.modeUpload}
+      </button>
+      <button
+        className={`map-mode-tab${activeMode === 'collections' ? ' is-active' : ''}`}
+        role="tab"
+        aria-selected={activeMode === 'collections'}
+        type="button"
+        onClick={() => onChangeMode('collections')}
+      >
+        {t.map.modeCollections}
+      </button>
+    </div>
+  )
+}
+
+// 탐색 모드 왼쪽 패널 — 컬렉션 필터, 기록 검색, 사진 목록
+function MapExplorePanel({
+  activeRecordId,
+  collections,
+  filteredEmptyMessage,
+  filteredRecords,
+  mapSearchQuery,
+  onSelectRecord,
+  onSetCollectionFilter,
+  onSetLocationSourceFilter,
+  onSetSearchQuery,
+  selectedCollectionFilter,
+  selectedLocationSourceFilter,
+  t,
+}) {
+  return (
+    <>
+      <div className="map-left-fixed">
+        {/* 컬렉션 필터: 컬렉션 관리는 전용 탭에서, 탐색 모드에서는 필터 선택만 제공 */}
+        <div className="map-section-header">
+          <p className="module-label">{t.map.collectionsLabel}</p>
+          <strong>{collections.length}</strong>
+        </div>
+        <div className="map-filter-options" aria-label={t.map.collectionFilter}>
+          <button
+            className={`map-filter-button ${
+              selectedCollectionFilter === COLLECTION_FILTER_ALL ? 'is-active' : ''
+            }`}
+            type="button"
+            onClick={() => onSetCollectionFilter(COLLECTION_FILTER_ALL)}
+          >
+            {t.map.allCollections}
+          </button>
+          <button
+            className={`map-filter-button ${
+              selectedCollectionFilter === COLLECTION_FILTER_UNASSIGNED ? 'is-active' : ''
+            }`}
+            type="button"
+            onClick={() => onSetCollectionFilter(COLLECTION_FILTER_UNASSIGNED)}
+          >
+            {t.map.unassignedCollection}
+          </button>
+          {collections.map((collection) => (
+            <button
+              className={`map-filter-button ${
+                selectedCollectionFilter === collection.id ? 'is-active' : ''
+              }`}
+              key={collection.id}
+              type="button"
+              onClick={() => onSetCollectionFilter(collection.id)}
+            >
+              {collection.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="map-record-search-panel">
+          <label className="map-field">
+            <span>{t.map.recordSearchLabel}</span>
+            <input
+              type="search"
+              value={mapSearchQuery}
+              onChange={(event) => onSetSearchQuery(event.target.value)}
+              placeholder={t.map.recordSearchPlaceholder}
+            />
+          </label>
+          <div className="map-search-controls">
+            <label className="map-field">
+              <span>{t.map.locationSourceFilter}</span>
+              <select
+                value={selectedLocationSourceFilter}
+                onChange={(event) => onSetLocationSourceFilter(event.target.value)}
+              >
+                {LOCATION_SOURCE_FILTER_OPTIONS.map((sourceFilter) => (
+                  <option key={sourceFilter} value={sourceFilter}>
+                    {t.map.locationSourceFilterOptions[sourceFilter]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="map-secondary-button"
+              type="button"
+              disabled={!mapSearchQuery}
+              onClick={() => onSetSearchQuery('')}
+            >
+              {t.map.clearSearch}
+            </button>
+          </div>
+          <p className="map-filter-result-count">
+            {t.map.filteredRecordCount(filteredRecords.length)}
+          </p>
+        </div>
+      </div>
+
+      <div className="map-left-scroll">
+        <PhotoRecordList
+          activeRecordId={activeRecordId}
+          emptyMessage={filteredEmptyMessage}
+          onSelectRecord={onSelectRecord}
+          records={filteredRecords}
+          t={t}
+        />
+      </div>
+    </>
+  )
+}
+
+// 사진 업로드 모드 왼쪽 패널 — 단일/다중 업로드, EXIF 분석, 위치정보 없는 사진 후처리
+function MapUploadPanel({
+  bulkAssignedLocation,
+  bulkSaveReport,
+  bulkUpload,
+  collections,
+  draft,
+  isAddingPhoto,
+  isSaving,
+  onCancelBulkAnalysis,
+  onChangeBulkCollection,
+  onChangeDraft,
+  onClearMissingLocationSelection,
+  onPhotoChange,
+  onResetBulkUpload,
+  onSaveBulkLocatedPhotos,
+  onSaveDraft,
+  onSelectAllMissingLocationItems,
+  onSelectBulkPlace,
+  onSelectPlace,
+  onToggleAddPhoto,
+  onToggleMissingLocationItem,
+  photoInputRef,
+  selectedMissingLocationItemIds,
+  t,
+}) {
+  const isBulkActive = bulkUpload.status !== 'idle'
+
+  return (
+    <>
+      <div className="map-left-fixed">
+        {/* 사진 파일 선택 버튼 — bulk 분석/저장 중에는 비활성 */}
+        <button
+          className={`map-add-toggle-button${isAddingPhoto ? ' is-open' : ''}`}
+          type="button"
+          disabled={
+            bulkUpload.status === 'analyzing' || bulkUpload.status === 'saving'
+          }
+          onClick={onToggleAddPhoto}
+        >
+          {isAddingPhoto ? t.map.cancelAddPhoto : t.map.addPhotoRecord}
+        </button>
+        <input
+          id="map-photo-input"
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="sr-only"
+          onChange={onPhotoChange}
+        />
+
+        {/* bulk 저장 후 일부 실패 항목 표시 */}
+        {bulkSaveReport?.failedItems.length > 0 ? (
+          <div className="map-status is-error" role="alert">
+            <strong>{t.map.bulkFailedList}</strong>
+            <ul className="map-bulk-failed-report">
+              {bulkSaveReport.failedItems.map((item, index) => (
+                <li key={`${item.fileName}-${index}`}>{item.fileName}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {/* 단일 업로드 draft 패널 — bulk 분석 중이 아닐 때만 표시 */}
+        {isAddingPhoto && !isBulkActive ? (
+          <>
+            {draft ? (
+              <div className="map-status" role="status">
+                {t.map.clickToSetLocation}
+              </div>
+            ) : null}
+            <PhotoDraftPanel
+              collections={collections}
+              draft={draft}
+              isSaving={isSaving}
+              language={t.map.searchLanguage}
+              onChangeDraft={onChangeDraft}
+              onSaveDraft={onSaveDraft}
+              onSelectPlace={onSelectPlace}
+              t={t}
+            />
+          </>
+        ) : null}
+      </div>
+
+      {/* bulk 분석 결과 스크롤 영역 */}
+      {isBulkActive ? (
+        <div className="map-left-scroll">
+          <BulkUploadPanel
+            bulkAssignedLocation={bulkAssignedLocation}
+            bulkUpload={bulkUpload}
+            collections={collections}
+            onCancelAnalysis={onCancelBulkAnalysis}
+            onChangeCollection={onChangeBulkCollection}
+            onClearSelection={onClearMissingLocationSelection}
+            onSelectAllMissing={onSelectAllMissingLocationItems}
+            onSelectBulkPlace={onSelectBulkPlace}
+            onReset={onResetBulkUpload}
+            onSave={onSaveBulkLocatedPhotos}
+            onToggleMissingItem={onToggleMissingLocationItem}
+            selectedMissingLocationItemIds={selectedMissingLocationItemIds}
+            t={t}
+          />
+        </div>
+      ) : null}
+    </>
+  )
+}
+
+// 컬렉션 관리 모드 패널 — 컬렉션 생성/수정/삭제, 연결 사진 수 표시
+function MapCollectionManagerPanel({
+  collectionDraft,
+  collections,
+  editingCollectionId,
+  getCollectionRecordCount,
+  onCancelCollectionEdit,
+  onChangeCollectionDraft,
+  onDeleteCollection,
+  onSaveCollection,
+  onStartCollectionEdit,
+  t,
+}) {
+  return (
+    <>
+      <div className="map-left-fixed">
+        {/* 컬렉션 삭제 정책 안내: 삭제해도 연결 사진은 미분류로 이동 */}
+        <div className="map-status" role="note">
+          {t.map.collectionDeletePolicy}
+        </div>
+      </div>
+
+      <div className="map-left-scroll">
+        <PhotoCollectionPanel
+          collectionDraft={collectionDraft}
+          collections={collections}
+          editingCollectionId={editingCollectionId}
+          getCollectionRecordCount={getCollectionRecordCount}
+          onCancelCollectionEdit={onCancelCollectionEdit}
+          onChangeCollectionDraft={onChangeCollectionDraft}
+          onDeleteCollection={onDeleteCollection}
+          onSaveCollection={onSaveCollection}
+          onStartCollectionEdit={onStartCollectionEdit}
+          t={t}
+        />
+      </div>
+    </>
+  )
+}
+
 // TENVI Map 모듈의 로컬 사진 지도 아카이브 화면
 function Map({ t }) {
   const photoInputRef = useRef(null)
@@ -1178,6 +1471,9 @@ function Map({ t }) {
     useState([])
   const [bulkAssignedLocation, setBulkAssignedLocation] = useState(null)
   const [bulkSaveReport, setBulkSaveReport] = useState(null)
+  // 현재 지도 모드 — 탐색/업로드/컬렉션 관리 전환 상태
+  // 모드 전환 시 진행 중인 draft나 bulk 결과를 강제 초기화하지 않고 화면만 분기
+  const [activeMapMode, setActiveMapMode] = useState('explore')
   const normalizedRecords = useMemo(
     () =>
       records.map((record) => ({
@@ -1905,225 +2201,96 @@ function Map({ t }) {
         <p className="module-meta">{t.map.archiveBadge}</p>
       </div>
 
-      <div className="map-archive-layout">
+      {/* 모드 전환 탭 — 탐색/업로드/컬렉션 관리 */}
+      <MapModeTabs activeMode={activeMapMode} onChangeMode={setActiveMapMode} t={t} />
+
+      {/* 공통 상태 메시지 — 모드 전환과 무관하게 항상 표시 */}
+      {isLoading ? (
+        <div className="map-status" role="status">
+          {t.map.loadingRecords}
+        </div>
+      ) : null}
+      {isReading ? (
+        <div className="map-status" role="status">
+          {t.map.reading}
+        </div>
+      ) : null}
+      {statusMessage ? (
+        <div className="map-status" role="status">
+          {statusMessage}
+        </div>
+      ) : null}
+      {error ? (
+        <div className="map-status is-error" role="alert">
+          {error}
+        </div>
+      ) : null}
+
+      {/* 3패널 레이아웃: upload/collections 모드에서는 오른쪽 패널 없이 2열로 전환 */}
+      <div className="map-archive-layout" data-mode={activeMapMode}>
         <aside className="map-control-panel">
-          {/* 고정 영역: 추가 버튼·상태·컬렉션 필터 */}
-          <div className="map-left-fixed">
-            <button
-              className={`map-add-toggle-button${isAddingPhoto ? ' is-open' : ''}`}
-              type="button"
-              disabled={
-                bulkUpload.status === 'analyzing' || bulkUpload.status === 'saving'
-              }
-              onClick={handleToggleAddPhoto}
-            >
-              {isAddingPhoto ? t.map.cancelAddPhoto : t.map.addPhotoRecord}
-            </button>
-            <input
-              id="map-photo-input"
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="sr-only"
-              onChange={handlePhotoChange}
-            />
-
-            {isLoading ? (
-              <div className="map-status" role="status">
-                {t.map.loadingRecords}
-              </div>
-            ) : null}
-
-            {isReading ? (
-              <div className="map-status" role="status">
-                {t.map.reading}
-              </div>
-            ) : null}
-
-            {statusMessage ? (
-              <div className="map-status" role="status">
-                {statusMessage}
-              </div>
-            ) : null}
-
-            {error ? (
-              <div className="map-status is-error" role="alert">
-                {error}
-              </div>
-            ) : null}
-
-            {/* 사진 등록 draft 패널 — 추가 모드일 때만 표시 */}
-            {bulkSaveReport?.failedItems.length > 0 ? (
-              <div className="map-status is-error" role="alert">
-                <strong>{t.map.bulkFailedList}</strong>
-                <ul className="map-bulk-failed-report">
-                  {bulkSaveReport.failedItems.map((item, index) => (
-                    <li key={`${item.fileName}-${index}`}>{item.fileName}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {isAddingPhoto && bulkUpload.status === 'idle' ? (
-              <>
-                {draft ? (
-                  <div className="map-status" role="status">
-                    {t.map.clickToSetLocation}
-                  </div>
-                ) : null}
-                <PhotoDraftPanel
-                  collections={collections}
-                  draft={draft}
-                  isSaving={isSaving}
-                  language={t.map.searchLanguage}
-                  onChangeDraft={handleChangeDraft}
-                  onSaveDraft={handleSaveDraft}
-                  onSelectPlace={handleSelectPlace}
-                  t={t}
-                />
-              </>
-            ) : null}
-
-            {/* 컬렉션 필터 헤더 + 관리 토글 버튼 */}
-            <div className="map-collection-header">
-              <div className="map-section-header">
-                <p className="module-label">{t.map.collectionsLabel}</p>
-                <strong>{collections.length}</strong>
-              </div>
-              <button
-                className="map-collection-toggle"
-                type="button"
-                onClick={handleToggleCollectionForm}
-              >
-                {isCollectionFormOpen
-                  ? t.map.closeCollectionForm
-                  : t.map.newCollection}
-              </button>
-            </div>
-
-            {/* 컬렉션 필터 버튼 — 항상 표시 */}
-            <div className="map-filter-options" aria-label={t.map.collectionFilter}>
-              <button
-                className={`map-filter-button ${
-                  selectedCollectionFilter === COLLECTION_FILTER_ALL ? 'is-active' : ''
-                }`}
-                type="button"
-                onClick={() => setSelectedCollectionFilter(COLLECTION_FILTER_ALL)}
-              >
-                {t.map.allCollections}
-              </button>
-              <button
-                className={`map-filter-button ${
-                  selectedCollectionFilter === COLLECTION_FILTER_UNASSIGNED
-                    ? 'is-active'
-                    : ''
-                }`}
-                type="button"
-                onClick={() =>
-                  setSelectedCollectionFilter(COLLECTION_FILTER_UNASSIGNED)
-                }
-              >
-                {t.map.unassignedCollection}
-              </button>
-              {collections.map((collection) => (
-                <button
-                  className={`map-filter-button ${
-                    selectedCollectionFilter === collection.id ? 'is-active' : ''
-                  }`}
-                  key={collection.id}
-                  type="button"
-                  onClick={() => setSelectedCollectionFilter(collection.id)}
-                >
-                  {collection.name}
-                </button>
-              ))}
-            </div>
-
-            {/* 컬렉션 관리 폼 + 카드 목록 — 관리 모드일 때만 표시 */}
-            <div className="map-record-search-panel">
-              <label className="map-field">
-                <span>{t.map.recordSearchLabel}</span>
-                <input
-                  type="search"
-                  value={mapSearchQuery}
-                  onChange={(event) => setMapSearchQuery(event.target.value)}
-                  placeholder={t.map.recordSearchPlaceholder}
-                />
-              </label>
-              <div className="map-search-controls">
-                <label className="map-field">
-                  <span>{t.map.locationSourceFilter}</span>
-                  <select
-                    value={selectedLocationSourceFilter}
-                    onChange={(event) =>
-                      setSelectedLocationSourceFilter(event.target.value)
-                    }
-                  >
-                    {LOCATION_SOURCE_FILTER_OPTIONS.map((sourceFilter) => (
-                      <option key={sourceFilter} value={sourceFilter}>
-                        {t.map.locationSourceFilterOptions[sourceFilter]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  className="map-secondary-button"
-                  type="button"
-                  disabled={!mapSearchQuery}
-                  onClick={() => setMapSearchQuery('')}
-                >
-                  {t.map.clearSearch}
-                </button>
-              </div>
-              <p className="map-filter-result-count">
-                {t.map.filteredRecordCount(filteredRecords.length)}
-              </p>
-            </div>
-
-            {isCollectionFormOpen ? (
-              <PhotoCollectionPanel
-                collectionDraft={collectionDraft}
-                collections={collections}
-                editingCollectionId={editingCollectionId}
-                getCollectionRecordCount={getCollectionRecordCount}
-                onCancelCollectionEdit={resetCollectionDraft}
-                onChangeCollectionDraft={handleChangeCollectionDraft}
-                onDeleteCollection={handleDeleteCollection}
-                onSaveCollection={handleSaveCollection}
-                onStartCollectionEdit={handleStartCollectionEdit}
-                t={t}
-              />
-            ) : null}
-          </div>
-
-          {/* 스크롤 영역: 사진 기록 목록 */}
-          <div className="map-left-scroll">
-            {bulkUpload.status !== 'idle' ? (
-              <BulkUploadPanel
-                bulkAssignedLocation={bulkAssignedLocation}
-                bulkUpload={bulkUpload}
-                collections={collections}
-                onCancelAnalysis={handleCancelBulkAnalysis}
-                onChangeCollection={handleChangeBulkCollection}
-                onClearSelection={handleClearMissingLocationSelection}
-                onSelectAllMissing={handleSelectAllMissingLocationItems}
-                onSelectBulkPlace={handleSelectBulkPlace}
-                onReset={resetBulkUpload}
-                onSave={handleSaveBulkLocatedPhotos}
-                onToggleMissingItem={handleToggleMissingLocationItem}
-                selectedMissingLocationItemIds={selectedMissingLocationItemIds}
-                t={t}
-              />
-            ) : null}
-            <PhotoRecordList
+          {/* 탐색 모드: 컬렉션 필터, 기록 검색, 사진 목록 */}
+          {activeMapMode === 'explore' ? (
+            <MapExplorePanel
               activeRecordId={activeRecordId}
-              emptyMessage={filteredEmptyMessage}
+              collections={collections}
+              filteredEmptyMessage={filteredEmptyMessage}
+              filteredRecords={filteredRecords}
+              mapSearchQuery={mapSearchQuery}
               onSelectRecord={handleSelectRecord}
-              records={filteredRecords}
+              onSetCollectionFilter={setSelectedCollectionFilter}
+              onSetLocationSourceFilter={setSelectedLocationSourceFilter}
+              onSetSearchQuery={setMapSearchQuery}
+              selectedCollectionFilter={selectedCollectionFilter}
+              selectedLocationSourceFilter={selectedLocationSourceFilter}
               t={t}
             />
-          </div>
+          ) : null}
+
+          {/* 업로드 모드: 단일/다중 업로드, EXIF 분석, 위치정보 없는 사진 후처리 */}
+          {activeMapMode === 'upload' ? (
+            <MapUploadPanel
+              bulkAssignedLocation={bulkAssignedLocation}
+              bulkSaveReport={bulkSaveReport}
+              bulkUpload={bulkUpload}
+              collections={collections}
+              draft={draft}
+              isAddingPhoto={isAddingPhoto}
+              isSaving={isSaving}
+              onCancelBulkAnalysis={handleCancelBulkAnalysis}
+              onChangeBulkCollection={handleChangeBulkCollection}
+              onChangeDraft={handleChangeDraft}
+              onClearMissingLocationSelection={handleClearMissingLocationSelection}
+              onPhotoChange={handlePhotoChange}
+              onResetBulkUpload={resetBulkUpload}
+              onSaveBulkLocatedPhotos={handleSaveBulkLocatedPhotos}
+              onSaveDraft={handleSaveDraft}
+              onSelectAllMissingLocationItems={handleSelectAllMissingLocationItems}
+              onSelectBulkPlace={handleSelectBulkPlace}
+              onSelectPlace={handleSelectPlace}
+              onToggleAddPhoto={handleToggleAddPhoto}
+              onToggleMissingLocationItem={handleToggleMissingLocationItem}
+              photoInputRef={photoInputRef}
+              selectedMissingLocationItemIds={selectedMissingLocationItemIds}
+              t={t}
+            />
+          ) : null}
+
+          {/* 컬렉션 관리 모드: 컬렉션 생성/수정/삭제 */}
+          {activeMapMode === 'collections' ? (
+            <MapCollectionManagerPanel
+              collectionDraft={collectionDraft}
+              collections={collections}
+              editingCollectionId={editingCollectionId}
+              getCollectionRecordCount={getCollectionRecordCount}
+              onCancelCollectionEdit={resetCollectionDraft}
+              onChangeCollectionDraft={handleChangeCollectionDraft}
+              onDeleteCollection={handleDeleteCollection}
+              onSaveCollection={handleSaveCollection}
+              onStartCollectionEdit={handleStartCollectionEdit}
+              t={t}
+            />
+          ) : null}
         </aside>
 
         <section className="map-view-panel" aria-label={t.map.mapLabel}>
@@ -2235,36 +2402,39 @@ function Map({ t }) {
           </MapContainer>
         </section>
 
-        <aside className="map-detail-column">
-          {editDraft ? (
-            <div className="map-status" role="status">
-              {t.map.clickToSetLocation}
-            </div>
-          ) : null}
-          {editDraft && activeRecord ? (
-            <PhotoEditPanel
-              collections={collections}
-              editDraft={editDraft}
-              isUpdating={isUpdating}
-              language={t.map.searchLanguage}
-              onCancelEdit={handleCancelEdit}
-              onChangeEditDraft={handleChangeEditDraft}
-              onSaveEdit={handleSaveEdit}
-              onSelectPlace={handleSelectPlace}
-              record={activeRecord}
-              t={t}
-            />
-          ) : (
-            <PhotoRecordDetail
-              collections={collections}
-              filterSummary={filterSummary}
-              onDeleteRecord={handleDeleteRecord}
-              onStartEdit={handleStartEdit}
-              record={activeRecord}
-              t={t}
-            />
-          )}
-        </aside>
+        {/* 오른쪽 상세 패널 — 탐색 모드에서만 표시 */}
+        {activeMapMode === 'explore' ? (
+          <aside className="map-detail-column">
+            {editDraft ? (
+              <div className="map-status" role="status">
+                {t.map.clickToSetLocation}
+              </div>
+            ) : null}
+            {editDraft && activeRecord ? (
+              <PhotoEditPanel
+                collections={collections}
+                editDraft={editDraft}
+                isUpdating={isUpdating}
+                language={t.map.searchLanguage}
+                onCancelEdit={handleCancelEdit}
+                onChangeEditDraft={handleChangeEditDraft}
+                onSaveEdit={handleSaveEdit}
+                onSelectPlace={handleSelectPlace}
+                record={activeRecord}
+                t={t}
+              />
+            ) : (
+              <PhotoRecordDetail
+                collections={collections}
+                filterSummary={filterSummary}
+                onDeleteRecord={handleDeleteRecord}
+                onStartEdit={handleStartEdit}
+                record={activeRecord}
+                t={t}
+              />
+            )}
+          </aside>
+        ) : null}
       </div>
     </section>
   )
