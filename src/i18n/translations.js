@@ -350,7 +350,7 @@ export const translations = {
       bulkMissingLocation: '위치정보 없음',
       bulkFailed: '처리 실패',
       bulkMissingLocationPolicy:
-        '위치정보가 없는 사진은 이번 단계에서 저장되지 않습니다. 이후 직접 위치 지정 기능에서 처리할 수 있습니다.',
+        '여러 사진을 선택한 뒤 지도 클릭 또는 장소 검색으로 같은 위치를 적용할 수 있습니다. 위치정보가 없는 사진은 위치 적용 후 저장 후보에 포함됩니다.',
       bulkSaveLocated: (count) => `위치정보 있는 사진 ${count}장 저장`,
       bulkSaving: '일괄 저장 중',
       bulkClearResults: '결과 정리',
@@ -363,15 +363,20 @@ export const translations = {
       bulkFailedList: '처리 실패 목록',
       bulkNoLocatedItems: '저장 후보 사진이 없습니다.',
       bulkNoMissingItems: '위치정보 없는 사진이 없습니다.',
+      bulkNoLocationTargetItems: '같은 위치를 적용할 수 있는 사진이 없습니다.',
       bulkNoFailedItems: '처리 실패한 사진이 없습니다.',
       bulkMoreItems: (count) => `외 ${count}개 항목`,
       bulkLocationAssignment: '위치정보 없는 사진 후처리',
+      bulkSharedLocationAssignment: '같은 위치 일괄 적용',
       bulkSelectedCount: (count) => `선택 ${count}장`,
       bulkSelectAllMissing: '전체 선택',
+      bulkSelectAllLocationTargets: '전체 사진 선택',
       bulkClearSelection: '선택 해제',
       bulkMapClickReady:
-        '지도 클릭 또는 장소 검색 결과 선택으로 선택한 사진에 같은 위치를 적용합니다.',
+        '지도 클릭 또는 장소 검색 결과 선택으로 선택한 사진에 같은 위치를 적용합니다. 기존 EXIF 좌표도 선택 시 새 위치로 바뀝니다.',
       bulkSelectMissingFirst: '위치를 적용할 사진을 먼저 선택하세요.',
+      bulkSelectLocationTargetsFirst: '같은 위치를 적용할 사진을 먼저 선택하세요.',
+      bulkSameLocationTargets: '같은 위치 적용 대상',
       bulkLastAssignedLocation: (source) =>
         `마지막 적용 위치: ${source === 'search' ? '장소 검색' : '지도 클릭'}`,
       bulkPreviewCreateError: '미리보기 이미지를 만들 수 없어 위치를 적용하지 못했습니다.',
@@ -871,7 +876,7 @@ export const translations = {
       bulkMissingLocation: 'No location',
       bulkFailed: 'Failed',
       bulkMissingLocationPolicy:
-        'Photos without location information will not be saved in this step. You can handle them later with manual location assignment.',
+        'Select multiple photos, then click the map or choose a place search result to apply the same location. Photos without location data become save candidates after assignment.',
       bulkSaveLocated: (count) => `Save ${count} located photos`,
       bulkSaving: 'Saving batch',
       bulkClearResults: 'Clear Results',
@@ -884,15 +889,21 @@ export const translations = {
       bulkFailedList: 'Failed items',
       bulkNoLocatedItems: 'No save candidate photos.',
       bulkNoMissingItems: 'No photos are missing location data.',
+      bulkNoLocationTargetItems: 'No photos can receive a shared location.',
       bulkNoFailedItems: 'No photos failed processing.',
       bulkMoreItems: (count) => `${count} more items`,
       bulkLocationAssignment: 'Missing-location post-processing',
+      bulkSharedLocationAssignment: 'Apply shared location',
       bulkSelectedCount: (count) => `${count} selected`,
       bulkSelectAllMissing: 'Select All',
+      bulkSelectAllLocationTargets: 'Select All Photos',
       bulkClearSelection: 'Clear Selection',
       bulkMapClickReady:
-        'Click the map or choose a place search result to apply the same location to selected photos.',
+        'Click the map or choose a place search result to apply the same location to selected photos. Existing EXIF coordinates are replaced when selected.',
       bulkSelectMissingFirst: 'Select photos before applying a location.',
+      bulkSelectLocationTargetsFirst:
+        'Select photos before applying a shared location.',
+      bulkSameLocationTargets: 'Shared location targets',
       bulkLastAssignedLocation: (source) =>
         `Last assigned location: ${source === 'search' ? 'Place search' : 'Map click'}`,
       bulkPreviewCreateError:

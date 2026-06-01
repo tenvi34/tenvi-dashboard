@@ -41,6 +41,9 @@ export const getBulkMissingLocationItems = (items = []) =>
       item?.originalStatus === 'missing-location' && item.status !== 'failed',
   )
 
+export const getBulkLocationAssignableItems = (items = []) =>
+  items.filter((item) => item?.status !== 'failed')
+
 export const toggleBulkMissingLocationSelection = (
   selectedIds = [],
   itemId,
@@ -54,6 +57,9 @@ export const toggleBulkMissingLocationSelection = (
 
 export const selectAllBulkMissingLocationItems = (items = []) =>
   getBulkMissingLocationItems(items).map((item) => item.id)
+
+export const selectAllBulkLocationAssignableItems = (items = []) =>
+  getBulkLocationAssignableItems(items).map((item) => item.id)
 
 export const clearBulkMissingLocationSelection = () => []
 

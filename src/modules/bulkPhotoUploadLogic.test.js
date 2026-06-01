@@ -6,7 +6,9 @@ import {
   createBulkPhotoRecordInputs,
   createBulkPhotoSaveResult,
   createBulkUploadSummary,
+  getBulkLocationAssignableItems,
   getBulkPhotoSaveCandidates,
+  selectAllBulkLocationAssignableItems,
   selectAllBulkMissingLocationItems,
   toggleBulkMissingLocationSelection,
 } from './bulkPhotoUploadLogic.js'
@@ -165,6 +167,24 @@ describe('bulkPhotoUploadLogic', () => {
       'assigned',
     ])
     expect(clearBulkMissingLocationSelection()).toEqual([])
+  })
+
+  it('selects all non-failed bulk items for shared location assignment', () => {
+    const items = [
+      createLocatedItem({ id: 'gps', originalStatus: 'located' }),
+      {
+        id: 'missing',
+        originalStatus: 'missing-location',
+        status: 'missing-location',
+      },
+      { id: 'failed', originalStatus: 'missing-location', status: 'failed' },
+    ]
+
+    expect(getBulkLocationAssignableItems(items).map((item) => item.id)).toEqual([
+      'gps',
+      'missing',
+    ])
+    expect(selectAllBulkLocationAssignableItems(items)).toEqual(['gps', 'missing'])
   })
 
   it('applies manual location only to selected items', () => {

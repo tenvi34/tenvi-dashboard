@@ -16,9 +16,10 @@ import {
   createBulkUploadSummary,
   applyLocationToBulkItems,
   clearBulkMissingLocationSelection,
+  getBulkLocationAssignableItems,
   getBulkPhotoSaveCandidates,
   getBulkMissingLocationItems,
-  selectAllBulkMissingLocationItems,
+  selectAllBulkLocationAssignableItems,
   toggleBulkMissingLocationSelection,
 } from './bulkPhotoUploadLogic.js'
 import {
@@ -68,6 +69,13 @@ const SEARCH_FOCUS_ZOOM = 17
 const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+const MAP_NAVIGATION_REQUEST_TYPES = new Set([
+  'exif-detect',
+  'manual-click',
+  'marker-select',
+  'record-select',
+  'search-select',
+])
 
 const createViewportRequest = (type, target) => ({
   latitude: target?.latitude,
@@ -159,6 +167,7 @@ function MapViewportController({
   target,
 }) {
   const map = useMap()
+  const handledNavigationRequestIdRef = useRef('')
 
   useEffect(() => {
     const requestLatitude = Number(request?.latitude)
@@ -169,13 +178,48 @@ function MapViewportController({
       Number.isFinite(requestLatitude) && Number.isFinite(requestLongitude)
     const hasTargetLocation =
       Number.isFinite(targetLatitude) && Number.isFinite(targetLongitude)
+    const requestType = request?.type
+    const isNavigationRequest = MAP_NAVIGATION_REQUEST_TYPES.has(requestType)
+    const isFitAllAuto = requestType === 'fit-all' && shouldFitBounds
+    // fit-all-forced: 선택·편집 상태에서도 강제로 전체 마커 범위 표시
+    const isFitAllForced = requestType === 'fit-all-forced'
 
-    if (hasRequestLocation || hasTargetLocation) {
+    if (isFitAllAuto || isFitAllForced) {
+      handledNavigationRequestIdRef.current = ''
+
+      if (records.length > 1) {
+        const bounds = L.latLngBounds(
+          records.map((record) => [record.latitude, record.longitude]),
+        )
+        map.fitBounds(bounds, { maxZoom: FIT_BOUNDS_MAX_ZOOM, padding: [36, 36] })
+      } else if (records.length === 1) {
+        map.setView([records[0].latitude, records[0].longitude], RECORD_FOCUS_ZOOM)
+      }
+
+      return
+    }
+
+    if (isNavigationRequest && (hasRequestLocation || hasTargetLocation)) {
+      const requestId = request?.requestId ?? ''
+
+      // 같은 이동 요청은 한 번만 처리해 선택/편집 패널 리렌더로 인한 지도 떨림 방지
+      if (requestId && handledNavigationRequestIdRef.current === requestId) {
+        return
+      }
+
+      handledNavigationRequestIdRef.current = requestId
       // 저장 record에는 status가 없으므로 이동 요청 좌표를 우선 사용
       const nextCenter = hasRequestLocation
         ? [requestLatitude, requestLongitude]
         : [targetLatitude, targetLongitude]
-      const requestType = request?.type
+      const currentCenter = map.getCenter()
+
+      if (
+        Math.abs(currentCenter.lat - nextCenter[0]) < 0.000001 &&
+        Math.abs(currentCenter.lng - nextCenter[1]) < 0.000001
+      ) {
+        return
+      }
 
       // intent별 zoom 정책: 선택/검색/EXIF는 확대, 수동 클릭은 현재 zoom 유지
       if (requestType === 'manual-click') {
@@ -199,21 +243,6 @@ function MapViewportController({
 
       map.flyTo(nextCenter, focusZoom, { duration: 0.65 })
       return
-    }
-
-    const isFitAllAuto = request?.type === 'fit-all' && shouldFitBounds
-    // fit-all-forced: 선택·편집 상태에서도 강제로 전체 마커 범위 표시
-    const isFitAllForced = request?.type === 'fit-all-forced'
-
-    if (isFitAllAuto || isFitAllForced) {
-      if (records.length > 1) {
-        const bounds = L.latLngBounds(
-          records.map((record) => [record.latitude, record.longitude]),
-        )
-        map.fitBounds(bounds, { maxZoom: FIT_BOUNDS_MAX_ZOOM, padding: [36, 36] })
-      } else if (records.length === 1) {
-        map.setView([records[0].latitude, records[0].longitude], RECORD_FOCUS_ZOOM)
-      }
     }
   }, [map, records, request, shouldFitBounds, target])
 
@@ -633,11 +662,11 @@ function BulkUploadPanel({
   onCancelAnalysis,
   onChangeCollection,
   onClearSelection,
-  onSelectAllMissing,
+  onSelectAllLocationTargets,
   onSelectBulkPlace,
   onReset,
   onSave,
-  onToggleMissingItem,
+  onToggleLocationTarget,
   selectedMissingLocationItemIds,
   t,
 }) {
@@ -645,6 +674,7 @@ function BulkUploadPanel({
   const saveCandidates = getBulkPhotoSaveCandidates(bulkUpload.items)
   const locatedItems = bulkUpload.items.filter((item) => item.status === 'located')
   const missingItems = getBulkMissingLocationItems(bulkUpload.items)
+  const assignableItems = getBulkLocationAssignableItems(bulkUpload.items)
   const failedItems = bulkUpload.items.filter((item) => item.status === 'failed')
   const progressValue =
     bulkUpload.total > 0
@@ -711,11 +741,11 @@ function BulkUploadPanel({
             {t.map.bulkMissingLocationPolicy}
           </div>
 
-          {missingItems.length > 0 ? (
+          {assignableItems.length > 0 ? (
             <div className="map-bulk-assignment-panel">
               <div className="map-section-header">
                 <div>
-                  <p className="module-label">{t.map.bulkLocationAssignment}</p>
+                  <p className="module-label">{t.map.bulkSharedLocationAssignment}</p>
                   <strong>
                     {t.map.bulkSelectedCount(
                       selectedMissingLocationItemIds.length,
@@ -727,9 +757,9 @@ function BulkUploadPanel({
                 <button
                   className="map-secondary-button"
                   type="button"
-                  onClick={onSelectAllMissing}
+                  onClick={onSelectAllLocationTargets}
                 >
-                  {t.map.bulkSelectAllMissing}
+                  {t.map.bulkSelectAllLocationTargets}
                 </button>
                 <button
                   className="map-secondary-button"
@@ -742,7 +772,7 @@ function BulkUploadPanel({
               <div className="map-status" role="status">
                 {selectedMissingLocationItemIds.length > 0
                   ? t.map.bulkMapClickReady
-                  : t.map.bulkSelectMissingFirst}
+                  : t.map.bulkSelectLocationTargetsFirst}
               </div>
               {bulkAssignedLocation ? (
                 <div className="map-status" role="status">
@@ -804,14 +834,22 @@ function BulkUploadPanel({
             title={t.map.bulkSaveCandidates}
           />
           <BulkUploadList
-            emptyMessage={t.map.bulkNoMissingItems}
-            items={missingItems}
-            onToggleItem={onToggleMissingItem}
+            emptyMessage={t.map.bulkNoLocationTargetItems}
+            items={assignableItems}
+            onToggleItem={onToggleLocationTarget}
             selectable
             selectedIds={selectedMissingLocationItemIds}
             t={t}
-            title={t.map.bulkMissingLocationList}
+            title={t.map.bulkSameLocationTargets}
           />
+          {missingItems.length > 0 ? (
+            <BulkUploadList
+              emptyMessage={t.map.bulkNoMissingItems}
+              items={missingItems}
+              t={t}
+              title={t.map.bulkMissingLocationList}
+            />
+          ) : null}
           <BulkUploadList
             emptyMessage={t.map.bulkNoFailedItems}
             items={failedItems}
@@ -1311,11 +1349,11 @@ function MapUploadPanel({
   onResetBulkUpload,
   onSaveBulkLocatedPhotos,
   onSaveDraft,
-  onSelectAllMissingLocationItems,
+  onSelectAllBulkLocationTargets,
   onSelectBulkPlace,
   onSelectPlace,
   onToggleAddPhoto,
-  onToggleMissingLocationItem,
+  onToggleBulkLocationTarget,
   photoInputRef,
   selectedMissingLocationItemIds,
   t,
@@ -1387,17 +1425,17 @@ function MapUploadPanel({
             bulkAssignedLocation={bulkAssignedLocation}
             bulkUpload={bulkUpload}
             collections={collections}
-            onCancelAnalysis={onCancelBulkAnalysis}
-            onChangeCollection={onChangeBulkCollection}
-            onClearSelection={onClearMissingLocationSelection}
-            onSelectAllMissing={onSelectAllMissingLocationItems}
-            onSelectBulkPlace={onSelectBulkPlace}
-            onReset={onResetBulkUpload}
-            onSave={onSaveBulkLocatedPhotos}
-            onToggleMissingItem={onToggleMissingLocationItem}
-            selectedMissingLocationItemIds={selectedMissingLocationItemIds}
-            t={t}
-          />
+              onCancelAnalysis={onCancelBulkAnalysis}
+              onChangeCollection={onChangeBulkCollection}
+              onClearSelection={onClearMissingLocationSelection}
+              onSelectAllLocationTargets={onSelectAllBulkLocationTargets}
+              onSelectBulkPlace={onSelectBulkPlace}
+              onReset={onResetBulkUpload}
+              onSave={onSaveBulkLocatedPhotos}
+              onToggleLocationTarget={onToggleBulkLocationTarget}
+              selectedMissingLocationItemIds={selectedMissingLocationItemIds}
+              t={t}
+            />
         </div>
       ) : null}
     </>
@@ -1961,17 +1999,17 @@ function Map({ t }) {
     }))
   }
 
-  const handleToggleMissingLocationItem = (itemId) => {
-    // bulk missing-location 선택 처리: 저장 후보 전환 전 항목만 사용자가 명시적으로 고름
+  const handleToggleBulkLocationTarget = (itemId) => {
+    // 같은 위치 적용 대상 선택: EXIF 사진도 사용자가 명시하면 좌표를 덮어쓸 수 있음
     setSelectedMissingLocationItemIds((currentIds) =>
       toggleBulkMissingLocationSelection(currentIds, itemId),
     )
   }
 
-  const handleSelectAllMissingLocationItems = () => {
-    // 전체 선택 / 선택 해제: 원래 위치정보가 없었던 후처리 대상만 선택
+  const handleSelectAllBulkLocationTargets = () => {
+    // 전체 선택: 처리 실패를 제외한 업로드 사진에 같은 위치를 적용할 수 있음
     setSelectedMissingLocationItemIds(
-      selectAllBulkMissingLocationItems(bulkUpload.items),
+      selectAllBulkLocationAssignableItems(bulkUpload.items),
     )
   }
 
@@ -1981,7 +2019,7 @@ function Map({ t }) {
 
   const applyBulkLocationToSelection = async (location) => {
     if (selectedMissingLocationItemIds.length === 0) {
-      setError(t.map.bulkSelectMissingFirst)
+      setError(t.map.bulkSelectLocationTargetsFirst)
       return
     }
 
@@ -2283,11 +2321,11 @@ function Map({ t }) {
               onResetBulkUpload={resetBulkUpload}
               onSaveBulkLocatedPhotos={handleSaveBulkLocatedPhotos}
               onSaveDraft={handleSaveDraft}
-              onSelectAllMissingLocationItems={handleSelectAllMissingLocationItems}
+              onSelectAllBulkLocationTargets={handleSelectAllBulkLocationTargets}
               onSelectBulkPlace={handleSelectBulkPlace}
               onSelectPlace={handleSelectPlace}
               onToggleAddPhoto={handleToggleAddPhoto}
-              onToggleMissingLocationItem={handleToggleMissingLocationItem}
+              onToggleBulkLocationTarget={handleToggleBulkLocationTarget}
               photoInputRef={photoInputRef}
               selectedMissingLocationItemIds={selectedMissingLocationItemIds}
               t={t}
