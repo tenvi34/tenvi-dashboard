@@ -402,7 +402,7 @@ function Settings({
       {/* Settings 설정 그룹 전체 그리드 */}
       <div className="settings-grid">
         {/* 언어 선택 그룹 */}
-        <section className="settings-panel">
+        <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.language}</p>
             <h3>{t.settings.interface}</h3>
@@ -425,7 +425,7 @@ function Settings({
         </section>
 
         {/* 기본 시작 모듈 선택 그룹 */}
-        <section className="settings-panel">
+        <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.defaultStartModule}</p>
             <h3>{t.settings.startup}</h3>
@@ -451,7 +451,7 @@ function Settings({
         </section>
 
         {/* 디자인 테마는 App 최상위 클래스에 반영되어 전체 모듈의 시각 톤을 전환합니다. */}
-        <section className="settings-panel">
+        <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.theme}</p>
             <h3>{t.settings.design}</h3>
@@ -473,7 +473,7 @@ function Settings({
         </section>
 
         {/* HUD 효과 강도는 선택한 디자인 테마 안에서 광원과 장식 밀도만 조절합니다. */}
-        <section className="settings-panel">
+        <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.hudEffect}</p>
             <h3>{t.settings.visuals}</h3>
@@ -495,8 +495,8 @@ function Settings({
           </div>
         </section>
 
-        {/* 저장된 Tasks/Notes 데이터 현황과 초기화 그룹 */}
-        <section className="settings-panel">
+        {/* 저장된 Tasks/Notes/Map 데이터 현황 그룹 */}
+        <section className="settings-panel settings-data-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.dataManagement}</p>
             <h3>{t.settings.storage}</h3>
@@ -515,43 +515,10 @@ function Settings({
               <strong>{mapPhotoCount}</strong>
             </div>
           </div>
-          <button
-            className="reset-button"
-            type="button"
-            onClick={() => setIsResetConfirmOpen(true)}
-          >
-            {t.settings.resetData}
-          </button>
-          <p className="settings-note">{t.settings.resetRequiresConfirmation}</p>
-
-          {isResetConfirmOpen ? (
-            /* 데이터 초기화 확인 패널 */
-            <div className="reset-confirm-panel" role="alert">
-              <p className="module-label">{t.settings.resetWarningLabel}</p>
-              <h4>{t.settings.resetWarningTitle}</h4>
-              <p>{t.settings.resetWarningMessage}</p>
-              <div className="reset-actions">
-                <button
-                  className="reset-button confirm-reset-button"
-                  type="button"
-                  onClick={handleConfirmReset}
-                >
-                  {t.settings.confirmReset}
-                </button>
-                <button
-                  className="settings-option"
-                  type="button"
-                  onClick={() => setIsResetConfirmOpen(false)}
-                >
-                  {t.settings.cancelReset}
-                </button>
-              </div>
-            </div>
-          ) : null}
         </section>
 
         {/* 데이터 백업/복원 그룹 */}
-        <section className="settings-panel">
+        <section className="settings-panel settings-backup-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.backupLabel}</p>
             <h3>{t.settings.backupTitle}</h3>
@@ -586,6 +553,47 @@ function Settings({
             <p className={`backup-status is-${backupStatus.type}`}>
               {backupStatus.message}
             </p>
+          ) : null}
+        </section>
+
+        {/* 데이터 삭제는 다른 설정과 위험도가 다르므로 별도 danger 패널로 분리 */}
+        <section className="settings-panel settings-danger-panel">
+          <div className="settings-panel-header">
+            <p className="module-label">{t.settings.resetWarningLabel}</p>
+            <h3>{t.settings.resetWarningTitle}</h3>
+          </div>
+          <button
+            className="reset-button"
+            type="button"
+            onClick={() => setIsResetConfirmOpen(true)}
+          >
+            {t.settings.resetData}
+          </button>
+          <p className="settings-note">{t.settings.resetRequiresConfirmation}</p>
+
+          {isResetConfirmOpen ? (
+            /* 데이터 초기화 확인 패널 */
+            <div className="reset-confirm-panel" role="alert">
+              <p className="module-label">{t.settings.resetWarningLabel}</p>
+              <h4>{t.settings.resetWarningTitle}</h4>
+              <p>{t.settings.resetWarningMessage}</p>
+              <div className="reset-actions">
+                <button
+                  className="reset-button confirm-reset-button"
+                  type="button"
+                  onClick={handleConfirmReset}
+                >
+                  {t.settings.confirmReset}
+                </button>
+                <button
+                  className="settings-option"
+                  type="button"
+                  onClick={() => setIsResetConfirmOpen(false)}
+                >
+                  {t.settings.cancelReset}
+                </button>
+              </div>
+            </div>
           ) : null}
         </section>
       </div>

@@ -554,6 +554,96 @@ body {
   margin-top: 14px;
 }
 
+/* Dashboard 정보 위계: 브리핑, 핵심 수치, 최근 항목의 무게를 분리 */
+.dashboard-module .module-header {
+  margin-bottom: 18px;
+}
+
+.dashboard-briefing {
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  padding: 18px 20px;
+  border-color: rgba(90, 212, 255, 0.28);
+  background:
+    linear-gradient(135deg, rgba(90, 212, 255, 0.12), rgba(5, 16, 31, 0.72)),
+    var(--surface);
+}
+
+.dashboard-briefing::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--neon);
+  box-shadow: 0 0 14px rgba(90, 212, 255, 0.5);
+}
+
+.dashboard-briefing strong {
+  font-size: 17px;
+}
+
+.summary-panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.summary-panel-header {
+  margin-bottom: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(90, 212, 255, 0.12);
+}
+
+.summary-panel-header h3 {
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.summary-metrics {
+  gap: 12px;
+}
+
+.summary-metric {
+  min-height: 82px;
+  padding: 13px;
+}
+
+.summary-metric strong {
+  font-size: 32px;
+}
+
+.recent-notes {
+  display: grid;
+  gap: 10px;
+}
+
+.recent-notes-title {
+  margin: 0;
+}
+
+.recent-note {
+  min-width: 0;
+  padding: 11px 12px;
+}
+
+.summary-panel:nth-child(4) .summary-metrics {
+  max-width: 520px;
+}
+
+.map-source-grid {
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.map-source-grid div {
+  padding: 10px;
+}
+
+.map-source-grid strong {
+  font-size: 20px;
+}
+
 .compact-empty {
   padding: 18px;
 }
@@ -2155,6 +2245,72 @@ body {
   background: rgba(255, 102, 134, 0.08);
 }
 
+/* Settings 위험 액션 구분: 보존/이동 액션과 삭제 액션을 시각적으로 분리 */
+.settings-preference-panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.settings-preference-panel .settings-panel-header,
+.settings-data-panel .settings-panel-header,
+.settings-backup-panel .settings-panel-header,
+.settings-danger-panel .settings-panel-header {
+  margin-bottom: 0;
+}
+
+.settings-data-panel {
+  grid-column: span 2;
+}
+
+.settings-data-panel .data-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
+.settings-backup-panel {
+  border-color: rgba(101, 255, 188, 0.22);
+  background:
+    linear-gradient(135deg, rgba(101, 255, 188, 0.06), rgba(2, 9, 18, 0.4)),
+    rgba(2, 9, 18, 0.42);
+}
+
+.settings-backup-panel .backup-actions {
+  margin-top: 2px;
+}
+
+.settings-danger-panel {
+  border-color: rgba(255, 102, 134, 0.34);
+  background:
+    linear-gradient(135deg, rgba(255, 102, 134, 0.1), rgba(2, 9, 18, 0.44)),
+    rgba(2, 9, 18, 0.42);
+}
+
+.settings-danger-panel .module-label,
+.settings-danger-panel .settings-panel-header h3 {
+  color: #ffd7df;
+}
+
+.settings-danger-panel .settings-note {
+  color: #f1c6cf;
+}
+
+.reset-confirm-panel {
+  padding: 16px;
+  border-left-width: 3px;
+}
+
+.backup-status {
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.backup-status.is-info {
+  color: #cceef8;
+  border-color: rgba(90, 212, 255, 0.24);
+  background: rgba(90, 212, 255, 0.08);
+}
+
 .notes-form {
   display: grid;
   gap: 10px;
@@ -2446,6 +2602,113 @@ body {
 .calendar-day.is-selected strong {
   border-color: rgba(1, 19, 28, 0.24);
   background: #f4fdff;
+}
+
+/* Calendar 목록 흐름: 선택 날짜, 목록, 입력 폼을 한 패널 안에서 명확히 분리 */
+.calendar-events-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.calendar-events-header {
+  margin-bottom: 0;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: var(--radius-control);
+  background:
+    linear-gradient(135deg, rgba(90, 212, 255, 0.08), rgba(5, 16, 31, 0.58)),
+    rgba(2, 9, 18, 0.34);
+}
+
+.calendar-events-header strong {
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  min-height: 46px;
+  border: 1px solid rgba(90, 212, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(90, 212, 255, 0.09);
+}
+
+.calendar-event-list {
+  max-height: 330px;
+  padding-right: 4px;
+}
+
+.calendar-event-item {
+  min-width: 0;
+  border-left-width: 3px;
+}
+
+.calendar-task-item {
+  border-color: rgba(101, 255, 188, 0.2);
+  border-left-color: rgba(101, 255, 188, 0.45);
+  background: rgba(5, 16, 31, 0.46);
+}
+
+.calendar-task-item h3 {
+  color: #dff8ff;
+  font-size: 16px;
+}
+
+.calendar-task-item p {
+  color: var(--muted-cyan);
+  font-size: 13px;
+}
+
+.calendar-due-task-section {
+  display: grid;
+  gap: 10px;
+  margin-top: 0;
+  padding-top: 16px;
+}
+
+.calendar-form {
+  margin-top: 0;
+  padding: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: var(--radius-control);
+  background: rgba(2, 9, 18, 0.34);
+}
+
+.calendar-form::before {
+  content: '';
+  display: block;
+  width: 42px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(90, 212, 255, 0.5);
+}
+
+.calendar-month-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.calendar-month-toolbar {
+  margin-bottom: 4px;
+}
+
+.calendar-day {
+  min-height: 72px;
+}
+
+.calendar-day.is-today {
+  border-color: rgba(101, 255, 188, 0.52);
+  background:
+    linear-gradient(135deg, rgba(101, 255, 188, 0.1), rgba(5, 16, 31, 0.46));
+}
+
+.calendar-day.is-selected {
+  box-shadow:
+    inset 0 0 0 1px rgba(244, 253, 255, 0.18),
+    0 0 22px rgba(90, 212, 255, 0.2);
+}
+
+.calendar-day.has-events::after {
+  bottom: 8px;
+  width: 8px;
+  height: 8px;
 }
 
 .todo-filters {
@@ -3047,11 +3310,16 @@ body {
   .settings-options,
   .settings-options-grid,
   .data-metrics,
+  .settings-data-panel .data-metrics,
   .backup-actions,
   .calendar-month-toolbar,
   .calendar-month-selectors,
   .reset-actions {
     grid-template-columns: 1fr;
+  }
+
+  .settings-data-panel {
+    grid-column: auto;
   }
 
   .todo-form button,
@@ -3612,4 +3880,63 @@ body {
   border-color: #9db5ff;
   background: #f4f7ff;
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .dashboard-briefing,
+.tenvi-dashboard.theme-standard .calendar-events-header,
+.tenvi-dashboard.theme-standard .calendar-form {
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .dashboard-briefing::before {
+  background: #4f7cff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .calendar-events-header strong {
+  color: #245bdb;
+  border-color: #c7d7fe;
+  background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-standard .calendar-task-item {
+  border-color: #d9e2ec;
+  border-left-color: #12b76a;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .calendar-task-item h3 {
+  color: #344054;
+}
+
+.tenvi-dashboard.theme-standard .calendar-task-item p {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .calendar-form::before {
+  background: #4f7cff;
+}
+
+.tenvi-dashboard.theme-standard .settings-backup-panel {
+  border-color: #a6f4c5;
+  background: #f6fef9;
+}
+
+.tenvi-dashboard.theme-standard .settings-danger-panel {
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-standard .settings-danger-panel .module-label,
+.tenvi-dashboard.theme-standard .settings-danger-panel .settings-panel-header h3,
+.tenvi-dashboard.theme-standard .settings-danger-panel .settings-note {
+  color: #912018;
+}
+
+.tenvi-dashboard.theme-standard .backup-status.is-info {
+  color: #245bdb;
+  border-color: #b9c9ff;
+  background: #eef3ff;
 }
