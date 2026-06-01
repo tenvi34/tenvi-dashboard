@@ -1116,7 +1116,7 @@ body {
 
 .map-archive-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr) minmax(260px, 340px);
+  grid-template-columns: minmax(240px, 296px) minmax(420px, 1fr) minmax(240px, 300px);
   gap: 16px;
   align-items: stretch;
   /* 데스크톱 3패널 작업 높이: 너무 작거나 과하게 커지지 않도록 균형 유지 */
@@ -1144,15 +1144,16 @@ body {
 .map-left-fixed {
   flex: 0 0 auto;
   display: grid;
-  gap: 10px;
+  gap: 9px;
   align-content: start;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
 }
 
 /* 왼쪽 패널 사진 목록 스크롤 영역: 남은 높이 차지 */
 .map-left-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  padding-right: 3px;
   overflow-y: auto;
   overflow-x: hidden;
   min-width: 0;
@@ -1410,7 +1411,7 @@ body {
 .map-record-search-panel {
   display: grid;
   gap: 10px;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid rgba(90, 212, 255, 0.16);
   border-radius: 8px;
   background: rgba(2, 9, 18, 0.32);
@@ -1418,9 +1419,13 @@ body {
 
 .map-search-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   align-items: end;
+}
+
+.map-search-controls .map-field {
+  grid-column: 1 / -1;
 }
 
 .map-filter-result-count {
@@ -1428,6 +1433,66 @@ body {
   color: var(--muted-cyan);
   font-size: 13px;
   font-weight: 700;
+}
+
+.map-collection-select-field select {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-record-filter-bar {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: var(--radius-control);
+  background: rgba(2, 9, 18, 0.3);
+}
+
+.map-record-filter-heading,
+.map-record-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.map-record-filter-heading strong {
+  color: var(--neon-strong);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.map-record-filter-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.map-filter-toggle-button {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 13px;
+}
+
+.map-filter-badge {
+  min-height: 30px;
+  border: 1px solid rgba(101, 255, 188, 0.28);
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #d7ffef;
+  background: rgba(101, 255, 188, 0.1);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.map-filter-badge:hover {
+  border-color: rgba(101, 255, 188, 0.48);
+  box-shadow: 0 0 14px rgba(101, 255, 188, 0.12);
 }
 
 .map-filter-button,
@@ -1732,7 +1797,7 @@ body {
 
 .map-record-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   padding: 0;
   margin: 0;
   list-style: none;
@@ -1743,9 +1808,9 @@ body {
   min-width: 0;
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  padding: 10px;
+  padding: 9px;
   border: 1px solid rgba(90, 212, 255, 0.18);
   border-left-color: var(--line-strong);
   border-radius: 8px;
@@ -1801,6 +1866,7 @@ body {
   max-width: 100%;
   max-height: 100%;
   /* 오른쪽 상세 패널은 작업 영역 안에서만 스크롤 */
+  padding-right: 3px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -1826,16 +1892,80 @@ body {
 }
 
 .map-filter-summary-panel {
-  min-height: 100%;
+  min-height: auto;
   align-content: start;
 }
 
 .map-filter-summary-grid {
-  grid-template-columns: 1fr;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
 }
 
-.map-filter-summary-grid div:first-child dd {
+.map-filter-summary-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: var(--radius-control);
+  background: rgba(2, 9, 18, 0.36);
+}
+
+.map-filter-summary-card h3 {
+  margin: 0;
   color: #f4fdff;
+  font-size: 19px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.map-filter-summary-card p {
+  margin: 0;
+  color: #b8dbe7;
+  line-height: 1.45;
+}
+
+.map-filter-summary-count {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-block: 1px solid rgba(90, 212, 255, 0.12);
+}
+
+.map-filter-summary-count span,
+.map-filter-summary-grid dt {
+  color: var(--muted-cyan);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.map-filter-summary-count strong {
+  color: var(--neon-strong);
+  font-size: 36px;
+  line-height: 1;
+}
+
+.map-filter-summary-grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(90, 212, 255, 0.14);
+  border-radius: var(--radius-control);
+  background: rgba(5, 16, 31, 0.42);
+}
+
+.map-filter-summary-grid dd {
+  margin: 0;
+  color: #f4fdff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .map-delete-button {
@@ -3159,7 +3289,7 @@ body {
 @media (min-width: 1181px) {
   .map-archive-layout[data-mode='upload'],
   .map-archive-layout[data-mode='collections'] {
-    grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr);
+    grid-template-columns: minmax(250px, 312px) minmax(420px, 1fr);
   }
 }
 
@@ -3880,6 +4010,45 @@ body {
   border-color: #9db5ff;
   background: #f4f7ff;
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .map-record-filter-bar,
+.tenvi-dashboard.theme-standard .map-record-search-panel,
+.tenvi-dashboard.theme-standard .map-filter-summary-card,
+.tenvi-dashboard.theme-standard .map-filter-summary-grid div {
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .map-filter-badge {
+  color: #067647;
+  border-color: #a6f4c5;
+  background: #ecfdf3;
+}
+
+.tenvi-dashboard.theme-standard .map-filter-badge:hover {
+  border-color: #6ce9a6;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .map-record-filter-heading strong,
+.tenvi-dashboard.theme-standard .map-filter-summary-count strong {
+  color: #245bdb;
+}
+
+.tenvi-dashboard.theme-standard .map-filter-summary-card h3,
+.tenvi-dashboard.theme-standard .map-filter-summary-grid dd {
+  color: #172033;
+}
+
+.tenvi-dashboard.theme-standard .map-filter-summary-card p,
+.tenvi-dashboard.theme-standard .map-filter-summary-count span,
+.tenvi-dashboard.theme-standard .map-filter-summary-grid dt {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .map-filter-summary-count {
+  border-block-color: #e4eaf2;
 }
 
 .tenvi-dashboard.theme-standard .dashboard-briefing,

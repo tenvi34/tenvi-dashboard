@@ -398,11 +398,6 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
 function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records, t }) {
   return (
     <section className="map-list-panel" aria-label={t.map.recordListLabel}>
-      <div className="map-section-header">
-        <p className="module-label">{t.map.recordListLabel}</p>
-        <strong>{records.length}</strong>
-      </div>
-
       {records.length > 0 ? (
         <ul className="map-record-list">
           {records.map((record) => (
@@ -1035,38 +1030,32 @@ function PhotoRecordDetail({
   if (!record) {
     return (
       <section className="map-detail-panel map-filter-summary-panel">
-        <div className="map-detail-copy">
+        <div className="map-filter-summary-card">
           <p className="module-label">{t.map.filterSummaryLabel}</p>
           <h3>{filterSummary.filterName}</h3>
-          <p>{t.map.noSelectedRecord}</p>
-        </div>
-
-        <div className="summary-metric summary-metric-wide">
-          <span>{t.map.visiblePhotoCount}</span>
-          <strong>{filterSummary.photoCount}</strong>
-        </div>
-
-        <dl className="map-coordinate-panel map-filter-summary-grid">
-          <div>
-            <dt>{t.map.sourceExif}</dt>
-            <dd>{filterSummary.sourceCounts.exif}</dd>
+          <div className="map-filter-summary-count">
+            <span>{t.map.visiblePhotoCount}</span>
+            <strong>{filterSummary.photoCount}</strong>
           </div>
-          <div>
-            <dt>{t.map.sourceManual}</dt>
-            <dd>{filterSummary.sourceCounts.manual}</dd>
-          </div>
-          <div>
-            <dt>{t.map.sourceSearch}</dt>
-            <dd>{filterSummary.sourceCounts.search}</dd>
-          </div>
-          <div>
-            <dt>{t.map.sourceUnknown}</dt>
-            <dd>{filterSummary.sourceCounts.unknown}</dd>
-          </div>
-        </dl>
-
-        <div className="empty-state compact-empty" role="status">
-          <span>{t.common.systemMessage}</span>
+          {/* 오른쪽 미선택 요약: 현재 필터 결과만 compact하게 집계 */}
+          <dl className="map-filter-summary-grid">
+            <div>
+              <dt>{t.map.sourceExif}</dt>
+              <dd>{filterSummary.sourceCounts.exif}</dd>
+            </div>
+            <div>
+              <dt>{t.map.sourceManual}</dt>
+              <dd>{filterSummary.sourceCounts.manual}</dd>
+            </div>
+            <div>
+              <dt>{t.map.sourceSearch}</dt>
+              <dd>{filterSummary.sourceCounts.search}</dd>
+            </div>
+            <div>
+              <dt>{t.map.sourceUnknown}</dt>
+              <dd>{filterSummary.sourceCounts.unknown}</dd>
+            </div>
+          </dl>
           <p>{t.map.selectRecordHint}</p>
         </div>
       </section>
@@ -1184,84 +1173,112 @@ function MapExplorePanel({
   selectedLocationSourceFilter,
   t,
 }) {
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const hasSearchFilter = mapSearchQuery.trim().length > 0
+  const hasLocationSourceFilter =
+    selectedLocationSourceFilter !== LOCATION_SOURCE_FILTER_ALL
+  const hasActiveFilter = hasSearchFilter || hasLocationSourceFilter
+
+  const handleResetFilters = () => {
+    onSetSearchQuery('')
+    onSetLocationSourceFilter(LOCATION_SOURCE_FILTER_ALL)
+  }
+
   return (
     <>
       <div className="map-left-fixed">
-        {/* 컬렉션 필터: 컬렉션 관리는 전용 탭에서, 탐색 모드에서는 필터 선택만 제공 */}
-        <div className="map-section-header">
-          <p className="module-label">{t.map.collectionsLabel}</p>
-          <strong>{collections.length}</strong>
-        </div>
-        <div className="map-filter-options" aria-label={t.map.collectionFilter}>
-          <button
-            className={`map-filter-button ${
-              selectedCollectionFilter === COLLECTION_FILTER_ALL ? 'is-active' : ''
-            }`}
-            type="button"
-            onClick={() => onSetCollectionFilter(COLLECTION_FILTER_ALL)}
+        <label className="map-field map-collection-select-field">
+          <span>{t.map.collectionFilter}</span>
+          {/* 컬렉션이 늘어도 탐색 패널 높이를 잡아먹지 않도록 select로 압축 */}
+          <select
+            value={selectedCollectionFilter}
+            onChange={(event) => onSetCollectionFilter(event.target.value)}
           >
-            {t.map.allCollections}
-          </button>
-          <button
-            className={`map-filter-button ${
-              selectedCollectionFilter === COLLECTION_FILTER_UNASSIGNED ? 'is-active' : ''
-            }`}
-            type="button"
-            onClick={() => onSetCollectionFilter(COLLECTION_FILTER_UNASSIGNED)}
-          >
-            {t.map.unassignedCollection}
-          </button>
-          {collections.map((collection) => (
-            <button
-              className={`map-filter-button ${
-                selectedCollectionFilter === collection.id ? 'is-active' : ''
-              }`}
-              key={collection.id}
-              type="button"
-              onClick={() => onSetCollectionFilter(collection.id)}
-            >
-              {collection.name}
-            </button>
-          ))}
-        </div>
+            <option value={COLLECTION_FILTER_ALL}>{t.map.allCollections}</option>
+            <option value={COLLECTION_FILTER_UNASSIGNED}>
+              {t.map.unassignedCollection}
+            </option>
+            {collections.map((collection) => (
+              <option key={collection.id} value={collection.id}>
+                {collection.name}
+              </option>
+            ))}
+          </select>
+        </label>
 
-        <div className="map-record-search-panel">
-          <label className="map-field">
-            <span>{t.map.recordSearchLabel}</span>
-            <input
-              type="search"
-              value={mapSearchQuery}
-              onChange={(event) => onSetSearchQuery(event.target.value)}
-              placeholder={t.map.recordSearchPlaceholder}
-            />
-          </label>
-          <div className="map-search-controls">
-            <label className="map-field">
-              <span>{t.map.locationSourceFilter}</span>
-              <select
-                value={selectedLocationSourceFilter}
-                onChange={(event) => onSetLocationSourceFilter(event.target.value)}
+        <div className="map-record-filter-bar">
+          <div className="map-record-filter-heading">
+            <p className="module-label">{t.map.recordListLabel}</p>
+            <strong>{filteredRecords.length}</strong>
+          </div>
+          <div className="map-record-filter-actions">
+            {hasActiveFilter ? (
+              <button
+                className="map-filter-badge"
+                type="button"
+                onClick={() => setIsFilterOpen(true)}
               >
-                {LOCATION_SOURCE_FILTER_OPTIONS.map((sourceFilter) => (
-                  <option key={sourceFilter} value={sourceFilter}>
-                    {t.map.locationSourceFilterOptions[sourceFilter]}
-                  </option>
-                ))}
-              </select>
-            </label>
+                {t.map.filtersActive}
+              </button>
+            ) : null}
             <button
-              className="map-secondary-button"
+              className="map-secondary-button map-filter-toggle-button"
               type="button"
-              disabled={!mapSearchQuery}
-              onClick={() => onSetSearchQuery('')}
+              aria-expanded={isFilterOpen}
+              onClick={() => setIsFilterOpen((currentValue) => !currentValue)}
             >
-              {t.map.clearSearch}
+              {isFilterOpen ? t.map.closeFilters : t.map.openFilters}
             </button>
           </div>
           <p className="map-filter-result-count">
             {t.map.filteredRecordCount(filteredRecords.length)}
           </p>
         </div>
+
+        {isFilterOpen ? (
+          <div className="map-record-search-panel">
+            {/* 접이식 필터: 목록 높이를 확보하기 위해 필요할 때만 노출 */}
+            <label className="map-field">
+              <span>{t.map.recordSearchLabel}</span>
+              <input
+                type="search"
+                value={mapSearchQuery}
+                onChange={(event) => onSetSearchQuery(event.target.value)}
+                placeholder={t.map.recordSearchPlaceholder}
+              />
+            </label>
+            <div className="map-search-controls">
+              <label className="map-field">
+                <span>{t.map.locationSourceFilter}</span>
+                <select
+                  value={selectedLocationSourceFilter}
+                  onChange={(event) => onSetLocationSourceFilter(event.target.value)}
+                >
+                  {LOCATION_SOURCE_FILTER_OPTIONS.map((sourceFilter) => (
+                    <option key={sourceFilter} value={sourceFilter}>
+                      {t.map.locationSourceFilterOptions[sourceFilter]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="map-secondary-button"
+                type="button"
+                disabled={!hasActiveFilter}
+                onClick={handleResetFilters}
+              >
+                {t.map.resetFilters}
+              </button>
+              <button
+                className="map-secondary-button"
+                type="button"
+                onClick={() => setIsFilterOpen(false)}
+              >
+                {t.map.closeFilters}
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="map-left-scroll">

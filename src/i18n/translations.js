@@ -289,6 +289,10 @@ export const translations = {
       recordSearchLabel: '사진 기록 검색',
       recordSearchPlaceholder: '사진 제목, 메모, 파일명 검색',
       clearSearch: '검색 초기화',
+      openFilters: '필터 열기',
+      closeFilters: '필터 닫기',
+      filtersActive: '필터 적용 중',
+      resetFilters: '필터 초기화',
       locationSourceFilter: '위치 방식 필터',
       locationSourceFilterOptions: {
         all: '전체',
@@ -805,6 +809,10 @@ export const translations = {
       recordSearchLabel: 'Photo record search',
       recordSearchPlaceholder: 'Search title, memo, or file name',
       clearSearch: 'Clear Search',
+      openFilters: 'Open filters',
+      closeFilters: 'Close filters',
+      filtersActive: 'Filters active',
+      resetFilters: 'Reset filters',
       locationSourceFilter: 'Location source filter',
       locationSourceFilterOptions: {
         all: 'All',
