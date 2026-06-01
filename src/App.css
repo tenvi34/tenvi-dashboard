@@ -33,7 +33,9 @@ body {
     radial-gradient(circle at 18% 12%, rgba(45, 125, 255, 0.22), transparent 28%),
     radial-gradient(circle at 82% 0%, rgba(90, 212, 255, 0.14), transparent 26%),
     linear-gradient(135deg, #050913 0%, #081527 48%, #03060d 100%);
-  overflow: hidden;
+  /* HUD 효과는 가로 번짐만 숨기고, 긴 모듈은 세로 페이지 스크롤 허용 */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .tenvi-grid {
@@ -980,18 +982,27 @@ body {
   align-items: stretch;
 }
 
+.map-mode-body {
+  min-width: 0;
+  min-height: 0;
+  /* 탭 아래 작업 영역 높이: 지도와 좌우 패널이 같은 기준 높이를 공유 */
+  height: clamp(680px, calc(100svh - 300px), 900px);
+}
+
 .map-archive-layout {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr) minmax(260px, 340px);
   gap: 16px;
   align-items: stretch;
   /* 데스크톱 3패널 작업 높이: 너무 작거나 과하게 커지지 않도록 균형 유지 */
-  height: clamp(700px, calc(100svh - 260px), 860px);
   min-width: 0;
+  min-height: 0;
+  height: 100%;
 }
 
 .map-control-panel,
-.map-view-panel {
+.map-view-panel,
+.map-detail-column {
   min-height: 0;
   min-width: 0;
 }
@@ -1000,7 +1011,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: 0;
+  /* flex 자식의 내부 스크롤이 부모 높이 안에서 계산되도록 유지 */
   overflow: hidden;
 }
 
@@ -1015,9 +1026,10 @@ body {
 
 /* 왼쪽 패널 사진 목록 스크롤 영역: 남은 높이 차지 */
 .map-left-scroll {
-  flex: 1 1 400px;
-  min-height: 340px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   min-width: 0;
 }
 
@@ -1538,6 +1550,8 @@ body {
 
 .map-view-panel {
   position: relative;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
   border: 1px solid rgba(90, 212, 255, 0.22);
   border-radius: 10px;
@@ -1547,6 +1561,7 @@ body {
 .photo-map {
   width: 100%;
   height: 100%;
+  min-height: 0;
   background: #06101d;
 }
 
@@ -1657,7 +1672,10 @@ body {
 
 .map-detail-column {
   min-width: 0;
+  min-height: 0;
   max-width: 100%;
+  max-height: 100%;
+  /* 오른쪽 상세 패널은 작업 영역 안에서만 스크롤 */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -2632,6 +2650,11 @@ body {
 
   .map-layout {
     grid-template-columns: 1fr;
+  }
+
+  .map-mode-body {
+    height: auto;
+    min-height: 0;
   }
 
   .map-archive-layout {

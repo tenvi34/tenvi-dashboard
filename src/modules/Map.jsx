@@ -2227,7 +2227,8 @@ function Map({ t }) {
       ) : null}
 
       {/* 3패널 레이아웃: upload/collections 모드에서는 오른쪽 패널 없이 2열로 전환 */}
-      <div className="map-archive-layout" data-mode={activeMapMode}>
+      <div className="map-mode-body">
+        <div className="map-archive-layout" data-mode={activeMapMode}>
         <aside className="map-control-panel">
           {/* 탐색 모드: 컬렉션 필터, 기록 검색, 사진 목록 */}
           {activeMapMode === 'explore' ? (
@@ -2435,6 +2436,7 @@ function Map({ t }) {
             )}
           </aside>
         ) : null}
+        </div>
       </div>
     </section>
   )
