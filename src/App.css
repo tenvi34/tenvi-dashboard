@@ -945,13 +945,14 @@ body {
   grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr) minmax(260px, 340px);
   gap: 16px;
   align-items: stretch;
-  height: calc(100svh - 340px);
-  min-height: 600px;
+  /* 데스크톱 3패널 작업 높이: 너무 작거나 과하게 커지지 않도록 균형 유지 */
+  height: clamp(700px, calc(100svh - 260px), 860px);
   min-width: 0;
 }
 
 .map-control-panel,
 .map-view-panel {
+  min-height: 0;
   min-width: 0;
 }
 
@@ -959,6 +960,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -973,10 +975,15 @@ body {
 
 /* 왼쪽 패널 사진 목록 스크롤 영역: 남은 높이 차지 */
 .map-left-scroll {
-  flex: 1 1 0;
-  min-height: 120px;
+  flex: 1 1 400px;
+  min-height: 340px;
   overflow-y: auto;
   min-width: 0;
+}
+
+/* 대량 업로드 결과는 긴 목록이라 왼쪽 스크롤 영역에서 접근성 유지 */
+.map-left-scroll > .map-bulk-panel {
+  margin-bottom: 14px;
 }
 
 .map-upload-box {
@@ -1051,6 +1058,78 @@ body {
   color: #ffd7df;
   border-color: rgba(255, 102, 134, 0.3);
   background: rgba(255, 102, 134, 0.1);
+}
+
+.map-bulk-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(5, 16, 31, 0.68);
+}
+
+.map-bulk-progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(90, 212, 255, 0.12);
+}
+
+.map-bulk-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--neon-strong), var(--blue));
+  transition: width 0.18s ease;
+}
+
+.map-bulk-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.map-bulk-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.map-bulk-list-section {
+  display: grid;
+  gap: 8px;
+}
+
+.map-bulk-file-list,
+.map-bulk-failed-report {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.map-bulk-file-list li {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid rgba(90, 212, 255, 0.14);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.map-bulk-file-list strong {
+  color: #f4fdff;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.map-bulk-file-list span,
+.map-bulk-note,
+.map-bulk-failed-report li {
+  color: #a8c7d6;
+  font-size: 13px;
 }
 
 .map-draft-panel,
@@ -1496,6 +1575,19 @@ body {
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.map-filter-summary-panel {
+  min-height: 100%;
+  align-content: start;
+}
+
+.map-filter-summary-grid {
+  grid-template-columns: 1fr;
+}
+
+.map-filter-summary-grid div:first-child dd {
+  color: #f4fdff;
 }
 
 .map-delete-button {
@@ -2515,6 +2607,8 @@ body {
   .calendar-layout,
   .map-layout,
   .map-archive-layout,
+  .map-bulk-actions,
+  .map-bulk-summary-grid,
   .map-date-row,
   .map-collection-actions,
   .map-search-form,
@@ -2707,6 +2801,8 @@ body {
 .tenvi-dashboard.theme-standard .calendar-events-panel,
 .tenvi-dashboard.theme-standard .calendar-month-panel,
 .tenvi-dashboard.theme-standard .calendar-day,
+.tenvi-dashboard.theme-standard .map-bulk-panel,
+.tenvi-dashboard.theme-standard .map-bulk-file-list li,
 .tenvi-dashboard.theme-standard .map-view-panel,
 .tenvi-dashboard.theme-standard .map-upload-box,
 .tenvi-dashboard.theme-standard .map-coordinate-panel div,
@@ -2745,6 +2841,44 @@ body {
 .tenvi-dashboard.theme-standard .timer-stat,
 .tenvi-dashboard.theme-standard .data-metric {
   background: #ffffff;
+}
+
+/* 일반 모드 전용 대비 보정: HUD 색상 잔류로 인한 대량 업로드 패널 저대비 방지 */
+.tenvi-dashboard.theme-standard .map-bulk-panel {
+  color: #172033;
+  border-color: #d9e2ec;
+  background: #f8fafc;
+}
+
+.tenvi-dashboard.theme-standard .map-bulk-panel .map-status {
+  color: #245bdb;
+  border-color: #c7d7fe;
+  background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-standard .map-bulk-panel .map-status.is-error {
+  color: #b42318;
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-standard .map-bulk-progress {
+  background: #e4eaf2;
+}
+
+.tenvi-dashboard.theme-standard .map-bulk-file-list li {
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .map-bulk-file-list strong {
+  color: #172033;
+}
+
+.tenvi-dashboard.theme-standard .map-bulk-file-list span,
+.tenvi-dashboard.theme-standard .map-bulk-note,
+.tenvi-dashboard.theme-standard .map-bulk-failed-report li {
+  color: #667085;
 }
 
 .tenvi-dashboard.theme-standard .status-card span,

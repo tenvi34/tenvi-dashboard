@@ -117,6 +117,30 @@ export const createPhotoRecord = async (recordInput) => {
 }
 
 // 사진 기록의 제목/메모/좌표 갱신용 저장소 계약
+// IndexedDB 일괄 저장 helper: 항목별 실패를 분리해 대량 업로드 전체 진행을 보호
+export const createPhotoRecords = async (recordInputs) => {
+  const results = []
+
+  for (const recordInput of recordInputs) {
+    try {
+      const record = await createPhotoRecord(recordInput)
+
+      results.push({
+        record,
+        status: 'saved',
+      })
+    } catch (error) {
+      results.push({
+        error,
+        fileName: recordInput?.originalFileName ?? '',
+        status: 'failed',
+      })
+    }
+  }
+
+  return results
+}
+
 export const updatePhotoRecord = async (id, patch) => {
   const currentRecord = await runStoreTransaction('readonly', (store) =>
     store.get(id),

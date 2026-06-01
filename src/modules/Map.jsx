@@ -10,6 +10,13 @@ import {
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
+  createBulkPhotoAnalysisItem,
+  createBulkPhotoRecordInputs,
+  createBulkPhotoSaveResult,
+  createBulkUploadSummary,
+  getBulkPhotoSaveCandidates,
+} from './bulkPhotoUploadLogic.js'
+import {
   applyManualLocationToDraft,
   applySearchLocationToDraft,
   COLLECTION_FILTER_ALL,
@@ -29,6 +36,7 @@ import {
 } from './mapLogic.js'
 import {
   createPhotoRecord,
+  createPhotoRecords,
   deletePhotoRecord,
   getPhotoRecords,
   updatePhotoRecord,
@@ -75,6 +83,56 @@ const getCollectionName = (collectionId, collections, t) => {
   const collection = collections.find((item) => item.id === collectionId)
 
   return collection?.name ?? t.map.unassignedCollection
+}
+
+const createBulkUploadId = (file, index) =>
+  `${file.name}-${file.lastModified}-${file.size}-${index}`
+
+const getBulkItemStatusLabel = (status, t) => {
+  if (status === 'located') {
+    return t.map.bulkLocated
+  }
+
+  if (status === 'missing-location') {
+    return t.map.bulkMissingLocation
+  }
+
+  return t.map.bulkFailed
+}
+
+const getMapSummaryLocationSource = (source) =>
+  ['exif', 'manual', 'search'].includes(source) ? source : 'unknown'
+
+const createMapFilterSummary = (records, selectedFilter, collections, t) => {
+  const collection = collections.find((item) => item.id === selectedFilter)
+  const filterName =
+    selectedFilter === COLLECTION_FILTER_ALL
+      ? t.map.allCollections
+      : selectedFilter === COLLECTION_FILTER_UNASSIGNED
+        ? t.map.unassignedCollection
+        : collection?.name ?? t.map.unassignedCollection
+  const sourceCounts = records.reduce(
+    (counts, record) => {
+      const source = getMapSummaryLocationSource(record.locationSource)
+
+      return {
+        ...counts,
+        [source]: counts[source] + 1,
+      }
+    },
+    {
+      exif: 0,
+      manual: 0,
+      search: 0,
+      unknown: 0,
+    },
+  )
+
+  return {
+    filterName,
+    photoCount: records.length,
+    sourceCounts,
+  }
 }
 
 // 선택 기록, draft, 전체 기록 상태와 이동 요청을 기준으로 지도 화면 제어
@@ -504,6 +562,174 @@ function PhotoCollectionSelect({ collections, onChange, t, value }) {
 }
 
 // 저장 전 사진 draft의 제목/메모와 좌표 상태 편집 패널
+function BulkUploadList({ emptyMessage, items, t, title }) {
+  return (
+    <div className="map-bulk-list-section">
+      <p className="recent-notes-title">{title}</p>
+      {items.length > 0 ? (
+        <ul className="map-bulk-file-list">
+          {items.slice(0, 20).map((item) => (
+            <li key={item.id}>
+              <strong>{item.fileName}</strong>
+              <span>{getBulkItemStatusLabel(item.status, t)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="empty-state compact-empty" role="status">
+          <span>{t.common.systemMessage}</span>
+          <p>{emptyMessage}</p>
+        </div>
+      )}
+      {items.length > 20 ? (
+        <p className="map-bulk-note">{t.map.bulkMoreItems(items.length - 20)}</p>
+      ) : null}
+    </div>
+  )
+}
+
+function BulkUploadPanel({
+  bulkUpload,
+  collections,
+  onCancelAnalysis,
+  onChangeCollection,
+  onReset,
+  onSave,
+  t,
+}) {
+  const summary = createBulkUploadSummary(bulkUpload.items)
+  const saveCandidates = getBulkPhotoSaveCandidates(bulkUpload.items)
+  const locatedItems = bulkUpload.items.filter((item) => item.status === 'located')
+  const missingItems = bulkUpload.items.filter(
+    (item) => item.status === 'missing-location',
+  )
+  const failedItems = bulkUpload.items.filter((item) => item.status === 'failed')
+  const progressValue =
+    bulkUpload.total > 0
+      ? Math.round((bulkUpload.processed / bulkUpload.total) * 100)
+      : 0
+
+  return (
+    <section className="map-bulk-panel" aria-label={t.map.bulkUploadTitle}>
+      <div className="map-section-header">
+        <div>
+          <p className="module-label">{t.map.bulkUploadLabel}</p>
+          <strong>{t.map.bulkUploadTitle}</strong>
+        </div>
+        {bulkUpload.status === 'analyzing' ? (
+          <button
+            className="map-secondary-button"
+            type="button"
+            onClick={onCancelAnalysis}
+          >
+            {t.map.bulkCancelAnalysis}
+          </button>
+        ) : null}
+      </div>
+
+      {bulkUpload.status === 'analyzing' ? (
+        <>
+          <div className="map-status" role="status">
+            {t.map.bulkAnalyzingProgress(bulkUpload.processed, bulkUpload.total)}
+          </div>
+          <div className="map-bulk-progress" aria-hidden="true">
+            <span style={{ width: `${progressValue}%` }} />
+          </div>
+        </>
+      ) : null}
+
+      {bulkUpload.status === 'cancelled' ? (
+        <div className="map-status" role="status">
+          {t.map.bulkAnalysisCancelled}
+        </div>
+      ) : null}
+
+      {['completed', 'cancelled', 'saving'].includes(bulkUpload.status) ? (
+        <>
+          <div className="map-bulk-summary-grid">
+            <div className="summary-metric">
+              <span>{t.map.bulkTotalFiles}</span>
+              <strong>{summary.total}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.map.bulkLocated}</span>
+              <strong>{summary.located}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.map.bulkMissingLocation}</span>
+              <strong>{summary.missingLocation}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.map.bulkFailed}</span>
+              <strong>{summary.failed}</strong>
+            </div>
+          </div>
+
+          <div className="map-status" role="status">
+            {t.map.bulkMissingLocationPolicy}
+          </div>
+
+          <PhotoCollectionSelect
+            collections={collections}
+            onChange={onChangeCollection}
+            t={t}
+            value={bulkUpload.collectionId}
+          />
+
+          <div className="map-bulk-actions">
+            <button
+              className="map-primary-button"
+              type="button"
+              disabled={saveCandidates.length === 0 || bulkUpload.status === 'saving'}
+              onClick={onSave}
+            >
+              {bulkUpload.status === 'saving'
+                ? t.map.bulkSaving
+                : t.map.bulkSaveLocated(saveCandidates.length)}
+            </button>
+            <button
+              className="map-secondary-button"
+              type="button"
+              disabled={bulkUpload.status === 'saving'}
+              onClick={onReset}
+            >
+              {t.map.bulkClearResults}
+            </button>
+          </div>
+
+          {bulkUpload.saveResult ? (
+            <div className="map-status" role="status">
+              {t.map.bulkSaveComplete(
+                bulkUpload.saveResult.successCount,
+                bulkUpload.saveResult.failedCount,
+              )}
+            </div>
+          ) : null}
+
+          <BulkUploadList
+            emptyMessage={t.map.bulkNoLocatedItems}
+            items={locatedItems}
+            t={t}
+            title={t.map.bulkSaveCandidates}
+          />
+          <BulkUploadList
+            emptyMessage={t.map.bulkNoMissingItems}
+            items={missingItems}
+            t={t}
+            title={t.map.bulkMissingLocationList}
+          />
+          <BulkUploadList
+            emptyMessage={t.map.bulkNoFailedItems}
+            items={failedItems}
+            t={t}
+            title={t.map.bulkFailedList}
+          />
+        </>
+      ) : null}
+    </section>
+  )
+}
+
 function PhotoDraftPanel({
   collections,
   draft,
@@ -701,6 +927,7 @@ function PhotoEditPanel({
 // 선택된 저장 기록의 미리보기, 메타데이터, 삭제 동작 상세 패널
 function PhotoRecordDetail({
   collections,
+  filterSummary,
   onDeleteRecord,
   onStartEdit,
   record,
@@ -708,10 +935,42 @@ function PhotoRecordDetail({
 }) {
   if (!record) {
     return (
-      <div className="empty-state compact-empty" role="status">
-        <span>{t.common.systemMessage}</span>
-        <p>{t.map.noSelectedRecord}</p>
-      </div>
+      <section className="map-detail-panel map-filter-summary-panel">
+        <div className="map-detail-copy">
+          <p className="module-label">{t.map.filterSummaryLabel}</p>
+          <h3>{filterSummary.filterName}</h3>
+          <p>{t.map.noSelectedRecord}</p>
+        </div>
+
+        <div className="summary-metric summary-metric-wide">
+          <span>{t.map.visiblePhotoCount}</span>
+          <strong>{filterSummary.photoCount}</strong>
+        </div>
+
+        <dl className="map-coordinate-panel map-filter-summary-grid">
+          <div>
+            <dt>{t.map.sourceExif}</dt>
+            <dd>{filterSummary.sourceCounts.exif}</dd>
+          </div>
+          <div>
+            <dt>{t.map.sourceManual}</dt>
+            <dd>{filterSummary.sourceCounts.manual}</dd>
+          </div>
+          <div>
+            <dt>{t.map.sourceSearch}</dt>
+            <dd>{filterSummary.sourceCounts.search}</dd>
+          </div>
+          <div>
+            <dt>{t.map.sourceUnknown}</dt>
+            <dd>{filterSummary.sourceCounts.unknown}</dd>
+          </div>
+        </dl>
+
+        <div className="empty-state compact-empty" role="status">
+          <span>{t.common.systemMessage}</span>
+          <p>{t.map.selectRecordHint}</p>
+        </div>
+      </section>
     )
   }
 
@@ -778,6 +1037,8 @@ function PhotoRecordDetail({
 
 // TENVI Map 모듈의 로컬 사진 지도 아카이브 화면
 function Map({ t }) {
+  const photoInputRef = useRef(null)
+  const bulkCancelRef = useRef(false)
   const [records, setRecords] = useState([])
   const [collections, setCollections] = useState([])
   const [selectedCollectionFilter, setSelectedCollectionFilter] = useState(
@@ -803,6 +1064,15 @@ function Map({ t }) {
   )
   const [statusMessage, setStatusMessage] = useState('')
   const [error, setError] = useState('')
+  const [bulkUpload, setBulkUpload] = useState({
+    collectionId: null,
+    items: [],
+    processed: 0,
+    saveResult: null,
+    status: 'idle',
+    total: 0,
+  })
+  const [bulkSaveReport, setBulkSaveReport] = useState(null)
   const normalizedRecords = useMemo(
     () =>
       records.map((record) => ({
@@ -819,6 +1089,17 @@ function Map({ t }) {
         selectedCollectionFilter,
       ),
     [collections, normalizedRecords, selectedCollectionFilter],
+  )
+  const filterSummary = useMemo(
+    () =>
+      // 오른쪽 빈 상태 요약: 저장소 재조회 없이 현재 필터 결과만 집계
+      createMapFilterSummary(
+        filteredRecords,
+        selectedCollectionFilter,
+        collections,
+        t,
+      ),
+    [collections, filteredRecords, selectedCollectionFilter, t],
   )
   const activeRecord = normalizedRecords.find((record) => record.id === activeRecordId)
   const focusTarget =
@@ -894,8 +1175,97 @@ function Map({ t }) {
     }
   }, [activeRecordId, filteredRecords])
 
+  const resetBulkUpload = () => {
+    bulkCancelRef.current = false
+    setBulkSaveReport(null)
+    setBulkUpload({
+      collectionId: null,
+      items: [],
+      processed: 0,
+      saveResult: null,
+      status: 'idle',
+      total: 0,
+    })
+  }
+
+  const analyzeBulkPhotoFiles = async (files) => {
+    bulkCancelRef.current = false
+    setDraft(null)
+    setEditDraft(null)
+    setActiveRecordId('')
+    setIsAddingPhoto(false)
+    setError('')
+    setStatusMessage('')
+    setBulkSaveReport(null)
+    setBulkUpload({
+      collectionId: null,
+      items: [],
+      processed: 0,
+      saveResult: null,
+      status: 'analyzing',
+      total: files.length,
+    })
+
+    // 대량 업로드 분석 큐 처리: 500장 이상에서도 메모리 급증을 피하도록 파일을 순차 분석
+    for (const [index, file] of files.entries()) {
+      // 진행률 업데이트와 취소 확인: 취소 이후의 미처리 파일은 분석하지 않음
+      if (bulkCancelRef.current) {
+        setBulkUpload((currentUpload) => ({
+          ...currentUpload,
+          status: 'cancelled',
+        }))
+        return
+      }
+
+      const id = createBulkUploadId(file, index)
+
+      try {
+        const location = await readPhotoLocation(file)
+        const previewImage =
+          location.status === 'located' ? await createPreviewImageBlob(file) : null
+
+        setBulkUpload((currentUpload) => ({
+          ...currentUpload,
+          items: [
+            ...currentUpload.items,
+            createBulkPhotoAnalysisItem({
+              fileName: file.name,
+              fileType: file.type,
+              id,
+              location,
+              previewImage,
+              status: location.status,
+            }),
+          ],
+          processed: currentUpload.processed + 1,
+        }))
+      } catch {
+        setBulkUpload((currentUpload) => ({
+          ...currentUpload,
+          items: [
+            ...currentUpload.items,
+            createBulkPhotoAnalysisItem({
+              errorMessage: t.map.readError,
+              fileName: file.name,
+              fileType: file.type,
+              id,
+              status: 'failed',
+            }),
+          ],
+          processed: currentUpload.processed + 1,
+        }))
+      }
+    }
+
+    setBulkUpload((currentUpload) => ({
+      ...currentUpload,
+      status: bulkCancelRef.current ? 'cancelled' : 'completed',
+    }))
+  }
+
   const handlePhotoChange = async (event) => {
-    const [file] = event.target.files
+    const files = Array.from(event.target.files ?? [])
+    const [file] = files
 
     setError('')
     setStatusMessage('')
@@ -904,7 +1274,14 @@ function Map({ t }) {
       return
     }
 
+    if (files.length > 1) {
+      event.target.value = ''
+      await analyzeBulkPhotoFiles(files)
+      return
+    }
+
     setIsReading(true)
+    resetBulkUpload()
 
     try {
       // 원본 저장 없이 EXIF 위치와 리사이즈 미리보기 Blob만 draft에 보관
@@ -1098,9 +1475,68 @@ function Map({ t }) {
     }
   }
 
+  const handleCancelBulkAnalysis = () => {
+    bulkCancelRef.current = true
+  }
+
+  const handleChangeBulkCollection = (collectionId) => {
+    setBulkUpload((currentUpload) => ({
+      ...currentUpload,
+      collectionId,
+      saveResult: null,
+    }))
+  }
+
+  const handleSaveBulkLocatedPhotos = async () => {
+    const recordInputs = createBulkPhotoRecordInputs(
+      bulkUpload.items,
+      bulkUpload.collectionId,
+    )
+
+    if (recordInputs.length === 0) {
+      setError(t.map.bulkNoSaveCandidates)
+      return
+    }
+
+    setError('')
+    setBulkUpload((currentUpload) => ({
+      ...currentUpload,
+      status: 'saving',
+    }))
+
+    try {
+      const results = await createPhotoRecords(recordInputs)
+      const saveResult = createBulkPhotoSaveResult(results)
+      const savedRecords = await getPhotoRecords()
+
+      setRecords(savedRecords)
+      setBulkSaveReport(saveResult)
+      setActiveRecordId(saveResult.savedRecords[0]?.id ?? '')
+      setViewportRequest(createViewportRequest('fit-all'))
+      setBulkUpload({
+        collectionId: null,
+        items: [],
+        processed: 0,
+        saveResult: null,
+        status: 'idle',
+        total: 0,
+      })
+      setStatusMessage(
+        t.map.bulkSaveComplete(saveResult.successCount, saveResult.failedCount),
+      )
+    } catch {
+      setError(t.map.bulkSaveError)
+      setBulkUpload((currentUpload) => ({
+        ...currentUpload,
+        status: 'completed',
+      }))
+    }
+  }
+
   const handleStartEdit = () => {
     setDraft(null)
     setIsAddingPhoto(false)
+    resetBulkUpload()
     setEditDraft(createEditDraft(activeRecord))
     setViewportRequest(createViewportRequest('record-select', activeRecord))
     setStatusMessage('')
@@ -1193,7 +1629,7 @@ function Map({ t }) {
       setDraft(null)
       setError('')
     } else {
-      setIsAddingPhoto(true)
+      photoInputRef.current?.click()
     }
   }
 
@@ -1229,14 +1665,19 @@ function Map({ t }) {
             <button
               className={`map-add-toggle-button${isAddingPhoto ? ' is-open' : ''}`}
               type="button"
+              disabled={
+                bulkUpload.status === 'analyzing' || bulkUpload.status === 'saving'
+              }
               onClick={handleToggleAddPhoto}
             >
               {isAddingPhoto ? t.map.cancelAddPhoto : t.map.addPhotoRecord}
             </button>
             <input
               id="map-photo-input"
+              ref={photoInputRef}
               type="file"
               accept="image/*"
+              multiple
               className="sr-only"
               onChange={handlePhotoChange}
             />
@@ -1266,7 +1707,18 @@ function Map({ t }) {
             ) : null}
 
             {/* 사진 등록 draft 패널 — 추가 모드일 때만 표시 */}
-            {isAddingPhoto ? (
+            {bulkSaveReport?.failedItems.length > 0 ? (
+              <div className="map-status is-error" role="alert">
+                <strong>{t.map.bulkFailedList}</strong>
+                <ul className="map-bulk-failed-report">
+                  {bulkSaveReport.failedItems.map((item, index) => (
+                    <li key={`${item.fileName}-${index}`}>{item.fileName}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {isAddingPhoto && bulkUpload.status === 'idle' ? (
               <>
                 {draft ? (
                   <div className="map-status" role="status">
@@ -1360,6 +1812,17 @@ function Map({ t }) {
 
           {/* 스크롤 영역: 사진 기록 목록 */}
           <div className="map-left-scroll">
+            {bulkUpload.status !== 'idle' ? (
+              <BulkUploadPanel
+                bulkUpload={bulkUpload}
+                collections={collections}
+                onCancelAnalysis={handleCancelBulkAnalysis}
+                onChangeCollection={handleChangeBulkCollection}
+                onReset={resetBulkUpload}
+                onSave={handleSaveBulkLocatedPhotos}
+                t={t}
+              />
+            ) : null}
             <PhotoRecordList
               activeRecordId={activeRecordId}
               emptyMessage={filteredEmptyMessage}
@@ -1475,6 +1938,7 @@ function Map({ t }) {
           ) : (
             <PhotoRecordDetail
               collections={collections}
+              filterSummary={filterSummary}
               onDeleteRecord={handleDeleteRecord}
               onStartEdit={handleStartEdit}
               record={activeRecord}
