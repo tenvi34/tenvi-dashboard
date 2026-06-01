@@ -9,6 +9,8 @@ const DATE_CANDIDATE_KEYS = [
 const LOCATION_SOURCES = ['exif', 'manual', 'search']
 export const COLLECTION_FILTER_ALL = 'all'
 export const COLLECTION_FILTER_UNASSIGNED = 'unassigned'
+export const LOCATION_SOURCE_FILTER_ALL = 'all'
+export const LOCATION_SOURCE_FILTER_UNKNOWN = 'unknown'
 
 const isValidCoordinate = (value) => Number.isFinite(value)
 
@@ -69,6 +71,36 @@ export const filterPhotoRecordsByCollection = (
 }
 
 // EXIF 날짜 값을 UI 저장용 문자열로 통일
+const normalizeSearchText = (value) => String(value ?? '').trim().toLowerCase()
+
+// 알 수 없는 locationSource fallback 처리: 필터에서는 legacy 값을 unknown으로 분류
+export const normalizeLocationSourceForFilter = (source) =>
+  LOCATION_SOURCES.includes(source) ? source : LOCATION_SOURCE_FILTER_UNKNOWN
+
+// 검색/위치 방식 필터 순수 함수: 컬렉션 필터 이후의 화면 record에 추가 조건 적용
+export const filterPhotoRecordsBySearchAndLocation = (
+  records,
+  { locationSourceFilter = LOCATION_SOURCE_FILTER_ALL, searchQuery = '' } = {},
+) => {
+  const normalizedQuery = normalizeSearchText(searchQuery)
+
+  return records.filter((record) => {
+    const matchesSearch =
+      !normalizedQuery ||
+      [record?.title, record?.memo, record?.originalFileName].some((value) =>
+        normalizeSearchText(value).includes(normalizedQuery),
+      )
+    const normalizedSource = normalizeLocationSourceForFilter(
+      record?.locationSource,
+    )
+    const matchesSource =
+      locationSourceFilter === LOCATION_SOURCE_FILTER_ALL ||
+      normalizedSource === locationSourceFilter
+
+    return matchesSearch && matchesSource
+  })
+}
+
 export const formatExifDate = (value) => {
   if (!value) {
     return ''

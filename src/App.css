@@ -1230,6 +1230,29 @@ body {
   gap: 10px;
 }
 
+.map-record-search-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.32);
+}
+
+.map-search-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.map-filter-result-count {
+  margin: 0;
+  color: var(--muted-cyan);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .map-filter-button,
 .map-collection-item {
   width: 100%;
@@ -2653,6 +2676,7 @@ body {
   .map-bulk-summary-grid,
   .map-date-row,
   .map-collection-actions,
+  .map-search-controls,
   .map-search-form,
   .todo-item,
   .calendar-event-item,
@@ -2895,6 +2919,15 @@ body {
 .tenvi-dashboard.theme-standard .map-bulk-assignment-panel {
   border-color: #d9e2ec;
   background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .map-record-search-panel {
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .map-filter-result-count {
+  color: #667085;
 }
 
 .tenvi-dashboard.theme-standard .map-bulk-panel .map-status {

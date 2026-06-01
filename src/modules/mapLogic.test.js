@@ -9,7 +9,9 @@ import {
   createPhotoRecordInput,
   createPhotoRecordUpdatePatch,
   filterPhotoRecordsByCollection,
+  filterPhotoRecordsBySearchAndLocation,
   createManualLocation,
+  LOCATION_SOURCE_FILTER_UNKNOWN,
   normalizePhotoRecordCollectionId,
   normalizeLocationSource,
   isPhotoDraftReadyToSave,
@@ -200,5 +202,121 @@ describe('mapLogic', () => {
         (record) => record.id,
       ),
     ).toEqual(['photo-1'])
+  })
+
+  it('searches photo records by title, memo, and original file name without case sensitivity', () => {
+    const records = [
+      {
+        id: 'title',
+        title: 'Fukuoka Tower',
+        memo: '',
+        originalFileName: 'a.jpg',
+      },
+      {
+        id: 'memo',
+        title: 'Dinner',
+        memo: 'Deku tree cafe',
+        originalFileName: 'b.jpg',
+      },
+      {
+        id: 'file',
+        title: '',
+        memo: '',
+        originalFileName: 'Canal-City.JPG',
+      },
+    ]
+
+    expect(
+      filterPhotoRecordsBySearchAndLocation(records, {
+        searchQuery: ' fukuoka ',
+      }).map((record) => record.id),
+    ).toEqual(['title'])
+    expect(
+      filterPhotoRecordsBySearchAndLocation(records, {
+        searchQuery: 'DEKU',
+      }).map((record) => record.id),
+    ).toEqual(['memo'])
+    expect(
+      filterPhotoRecordsBySearchAndLocation(records, {
+        searchQuery: 'canal',
+      }).map((record) => record.id),
+    ).toEqual(['file'])
+  })
+
+  it('does not apply search filtering when query is blank', () => {
+    const records = [{ id: 'first' }, { id: 'second' }]
+
+    expect(
+      filterPhotoRecordsBySearchAndLocation(records, { searchQuery: '   ' }),
+    ).toEqual(records)
+  })
+
+  it('filters photo records by location source including unknown fallback', () => {
+    const records = [
+      { id: 'exif', locationSource: 'exif' },
+      { id: 'manual', locationSource: 'manual' },
+      { id: 'search', locationSource: 'search' },
+      { id: 'legacy', locationSource: 'legacy' },
+      { id: 'missing' },
+    ]
+
+    expect(
+      filterPhotoRecordsBySearchAndLocation(records, {
+        locationSourceFilter: 'manual',
+      }).map((record) => record.id),
+    ).toEqual(['manual'])
+    expect(
+      filterPhotoRecordsBySearchAndLocation(records, {
+        locationSourceFilter: LOCATION_SOURCE_FILTER_UNKNOWN,
+      }).map((record) => record.id),
+    ).toEqual(['legacy', 'missing'])
+  })
+
+  it('applies search and location filters after collection filtering', () => {
+    const collections = [{ id: 'trip' }]
+    const records = [
+      {
+        id: 'match',
+        collectionId: 'trip',
+        locationSource: 'manual',
+        title: 'Deku slope',
+      },
+      {
+        id: 'wrong-source',
+        collectionId: 'trip',
+        locationSource: 'exif',
+        title: 'Deku bridge',
+      },
+      {
+        id: 'wrong-collection',
+        collectionId: null,
+        locationSource: 'manual',
+        title: 'Deku market',
+      },
+    ]
+    const collectionFiltered = filterPhotoRecordsByCollection(
+      records,
+      collections,
+      'trip',
+    )
+
+    expect(
+      filterPhotoRecordsBySearchAndLocation(collectionFiltered, {
+        locationSourceFilter: 'manual',
+        searchQuery: 'deku',
+      }).map((record) => record.id),
+    ).toEqual(['match'])
+  })
+
+  it('returns an empty array when no record matches search and location filters', () => {
+    expect(
+      filterPhotoRecordsBySearchAndLocation(
+        [{ id: 'photo', locationSource: 'exif', title: 'Beach' }],
+        {
+          locationSourceFilter: 'manual',
+          searchQuery: 'mountain',
+        },
+      ),
+    ).toEqual([])
   })
 })

@@ -31,9 +31,12 @@ import {
   createPhotoRecordInput,
   createPhotoRecordUpdatePatch,
   filterPhotoRecordsByCollection,
+  filterPhotoRecordsBySearchAndLocation,
   isPhotoCollectionInputValid,
   isEditDraftReadyToSave,
   isPhotoDraftReadyToSave,
+  LOCATION_SOURCE_FILTER_ALL,
+  LOCATION_SOURCE_FILTER_UNKNOWN,
   normalizePhotoCollectionInput,
   normalizePhotoRecordCollectionId,
   normalizeLocationSource,
@@ -107,6 +110,14 @@ const getBulkItemStatusLabel = (status, t) => {
 
 const getMapSummaryLocationSource = (source) =>
   ['exif', 'manual', 'search'].includes(source) ? source : 'unknown'
+
+const LOCATION_SOURCE_FILTER_OPTIONS = [
+  LOCATION_SOURCE_FILTER_ALL,
+  'exif',
+  'manual',
+  'search',
+  LOCATION_SOURCE_FILTER_UNKNOWN,
+]
 
 const createMapFilterSummary = (records, selectedFilter, collections, t) => {
   const collection = collections.find((item) => item.id === selectedFilter)
@@ -1132,6 +1143,9 @@ function Map({ t }) {
   const [selectedCollectionFilter, setSelectedCollectionFilter] = useState(
     COLLECTION_FILTER_ALL,
   )
+  const [mapSearchQuery, setMapSearchQuery] = useState('')
+  const [selectedLocationSourceFilter, setSelectedLocationSourceFilter] =
+    useState(LOCATION_SOURCE_FILTER_ALL)
   const [collectionDraft, setCollectionDraft] = useState(() =>
     normalizePhotoCollectionInput(),
   )
@@ -1172,7 +1186,7 @@ function Map({ t }) {
       })),
     [collections, records],
   )
-  const filteredRecords = useMemo(
+  const collectionFilteredRecords = useMemo(
     () =>
       filterPhotoRecordsByCollection(
         normalizedRecords,
@@ -1180,6 +1194,15 @@ function Map({ t }) {
         selectedCollectionFilter,
       ),
     [collections, normalizedRecords, selectedCollectionFilter],
+  )
+  const filteredRecords = useMemo(
+    () =>
+      // 컬렉션 필터와 검색/위치 필터 조합: 컬렉션 결과에 추가 조건을 순서대로 적용
+      filterPhotoRecordsBySearchAndLocation(collectionFilteredRecords, {
+        locationSourceFilter: selectedLocationSourceFilter,
+        searchQuery: mapSearchQuery,
+      }),
+    [collectionFilteredRecords, mapSearchQuery, selectedLocationSourceFilter],
   )
   const filterSummary = useMemo(
     () =>
@@ -1218,9 +1241,12 @@ function Map({ t }) {
     [],
   )
   const filteredEmptyMessage =
-    selectedCollectionFilter === COLLECTION_FILTER_ALL
-      ? t.map.noRecords
-      : t.map.noFilteredRecords
+    mapSearchQuery.trim() ||
+    selectedLocationSourceFilter !== LOCATION_SOURCE_FILTER_ALL
+      ? t.map.noMatchingRecords
+      : selectedCollectionFilter === COLLECTION_FILTER_ALL
+        ? t.map.noRecords
+        : t.map.noFilteredRecords
   const draftMarkerIcon = useMemo(
     () =>
       L.divIcon({
@@ -2015,6 +2041,46 @@ function Map({ t }) {
             </div>
 
             {/* 컬렉션 관리 폼 + 카드 목록 — 관리 모드일 때만 표시 */}
+            <div className="map-record-search-panel">
+              <label className="map-field">
+                <span>{t.map.recordSearchLabel}</span>
+                <input
+                  type="search"
+                  value={mapSearchQuery}
+                  onChange={(event) => setMapSearchQuery(event.target.value)}
+                  placeholder={t.map.recordSearchPlaceholder}
+                />
+              </label>
+              <div className="map-search-controls">
+                <label className="map-field">
+                  <span>{t.map.locationSourceFilter}</span>
+                  <select
+                    value={selectedLocationSourceFilter}
+                    onChange={(event) =>
+                      setSelectedLocationSourceFilter(event.target.value)
+                    }
+                  >
+                    {LOCATION_SOURCE_FILTER_OPTIONS.map((sourceFilter) => (
+                      <option key={sourceFilter} value={sourceFilter}>
+                        {t.map.locationSourceFilterOptions[sourceFilter]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="map-secondary-button"
+                  type="button"
+                  disabled={!mapSearchQuery}
+                  onClick={() => setMapSearchQuery('')}
+                >
+                  {t.map.clearSearch}
+                </button>
+              </div>
+              <p className="map-filter-result-count">
+                {t.map.filteredRecordCount(filteredRecords.length)}
+              </p>
+            </div>
+
             {isCollectionFormOpen ? (
               <PhotoCollectionPanel
                 collectionDraft={collectionDraft}
