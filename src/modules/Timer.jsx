@@ -162,10 +162,11 @@ function Timer({ t }) {
       <div className="module-header">
         <div>
           <p className="module-label">{t.timer.label}</p>
-          <h2 id="timer-title" className="sr-only">
-            {t.timer.label}
-          </h2>
+          <h2 id="timer-title">{t.timer.title}</h2>
         </div>
+        <p className="module-meta">
+          {activeTab === 'timer' ? t.timer.timerTab : t.timer.stopwatchTab}
+        </p>
       </div>
 
       {/* Timer / Stopwatch 전환 탭 */}

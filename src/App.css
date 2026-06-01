@@ -23,10 +23,18 @@ body {
   --danger: #ff6686;
   --surface: rgba(5, 16, 31, 0.58);
   --surface-soft: rgba(2, 9, 18, 0.42);
+  --radius-panel: 10px;
+  --radius-control: 8px;
+  --control-height: 46px;
+  --panel-padding: 22px;
+  --module-gap: 16px;
+  --focus-ring: 0 0 0 3px rgba(90, 212, 255, 0.14);
+  --hover-glow: 0 0 18px rgba(90, 212, 255, 0.14);
+  --panel-shadow: 0 0 30px rgba(45, 125, 255, 0.12);
 
   position: relative;
   min-height: 100svh;
-  padding: 42px 24px;
+  padding: 34px 22px;
   box-sizing: border-box;
   color: #dff8ff;
   background:
@@ -36,6 +44,28 @@ body {
   /* HUD 효과는 가로 번짐만 숨기고, 긴 모듈은 세로 페이지 스크롤 허용 */
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+/* 전체 shell 스크롤: 페이지 흐름을 기본으로 두고 가로 넘침만 차단 */
+.tenvi-dashboard * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90, 212, 255, 0.42) rgba(2, 9, 18, 0.34);
+}
+
+.tenvi-dashboard *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.tenvi-dashboard *::-webkit-scrollbar-track {
+  background: rgba(2, 9, 18, 0.34);
+  border-radius: 999px;
+}
+
+.tenvi-dashboard *::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(2, 9, 18, 0.34);
+  border-radius: 999px;
+  background: rgba(90, 212, 255, 0.42);
 }
 
 .tenvi-grid {
@@ -63,7 +93,7 @@ body {
 .module-panel {
   border: 1px solid var(--line);
   background: var(--panel-bg);
-  box-shadow: 0 0 34px rgba(45, 125, 255, 0.13);
+  box-shadow: var(--panel-shadow);
   backdrop-filter: blur(16px);
 }
 
@@ -72,9 +102,9 @@ body {
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
-  padding: 24px 28px;
+  padding: 22px 26px;
   margin-bottom: 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-panel);
 }
 
 .tenvi-kicker,
@@ -184,7 +214,7 @@ body {
 /* 좌측 사이드바와 모듈 전환 버튼 */
 .tenvi-workspace {
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: 232px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
@@ -193,10 +223,10 @@ body {
   position: sticky;
   top: 24px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-panel);
   padding: 16px;
   background: var(--panel-bg);
-  box-shadow: 0 0 34px rgba(45, 125, 255, 0.13);
+  box-shadow: var(--panel-shadow);
   backdrop-filter: blur(16px);
 }
 
@@ -295,8 +325,8 @@ body {
 
 /* 공통 모듈 패널, 제목, 요약 카드 */
 .module-panel {
-  border-radius: 10px;
-  padding: 24px;
+  border-radius: var(--radius-panel);
+  padding: var(--panel-padding);
 }
 
 .module-header {
@@ -305,7 +335,7 @@ body {
   align-items: flex-start;
   gap: 16px;
   padding-bottom: 16px;
-  margin-bottom: 20px;
+  margin-bottom: var(--module-gap);
   border-bottom: 1px solid rgba(90, 212, 255, 0.14);
 }
 
@@ -313,7 +343,12 @@ body {
   margin: 5px 0 0;
   color: #f4fdff;
   font-size: 24px;
+  line-height: 1.15;
   letter-spacing: 0;
+}
+
+.module-header p {
+  margin-block-start: 0;
 }
 
 .module-meta span {
@@ -527,7 +562,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(150px, auto) auto;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: var(--module-gap);
 }
 
 /* 입력 폼과 공통 버튼 상태 */
@@ -535,7 +570,7 @@ body {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: var(--module-gap);
 }
 
 .todo-form input,
@@ -884,7 +919,7 @@ body {
 
 .timer-controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -2606,6 +2641,243 @@ body {
   color: #b8dbe7;
 }
 
+/* 공통 입력 스타일: 모듈별 폼이 달라도 조작감과 focus 대비를 동일하게 유지 */
+.todo-form input,
+.command-form input,
+.notes-form input,
+.notes-form textarea,
+.calendar-form input,
+.calendar-form textarea,
+.calendar-month-selectors select,
+.timer-duration-settings input,
+.map-field input,
+.map-field select,
+.map-field textarea,
+.map-search-form input,
+.map-search-form select {
+  min-height: var(--control-height);
+  border-color: var(--line);
+  border-radius: var(--radius-control);
+  padding: 12px 14px;
+  color: #f4fdff;
+  background: rgba(2, 9, 18, 0.76);
+}
+
+.todo-form input::placeholder,
+.command-form input::placeholder,
+.notes-form input::placeholder,
+.notes-form textarea::placeholder,
+.calendar-form input::placeholder,
+.calendar-form textarea::placeholder,
+.map-field input::placeholder,
+.map-field textarea::placeholder,
+.map-search-form input::placeholder {
+  color: rgba(190, 229, 240, 0.5);
+}
+
+.todo-form input:focus,
+.command-form input:focus,
+.notes-form input:focus,
+.notes-form textarea:focus,
+.calendar-form input:focus,
+.calendar-form textarea:focus,
+.calendar-month-selectors select:focus,
+.timer-duration-settings input:focus,
+.map-field input:focus,
+.map-field select:focus,
+.map-field textarea:focus,
+.map-search-form input:focus,
+.map-search-form select:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: var(--focus-ring);
+  background: rgba(4, 14, 28, 0.96);
+}
+
+/* 공통 버튼 계층: primary/secondary/danger/ghost 계열을 기존 클래스명 위에 정렬 */
+.todo-form button,
+.command-form button,
+.notes-form button,
+.calendar-form button,
+.timer-button,
+.map-primary-button,
+.map-search-form button {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  font-weight: 800;
+}
+
+.timer-button.secondary,
+.settings-option,
+.calendar-nav-button,
+.command-link-button,
+.map-secondary-button,
+.map-add-toggle-button,
+.map-collection-toggle,
+.map-fit-all-button {
+  min-height: 40px;
+  border-radius: var(--radius-control);
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+}
+
+.filter-button,
+.timer-tab,
+.map-mode-tab,
+.language-button,
+.sidebar-button {
+  border-radius: var(--radius-control);
+}
+
+.filter-button,
+.timer-tab,
+.map-mode-tab {
+  color: #aacbd8;
+  background: transparent;
+}
+
+.filter-button.is-active,
+.timer-tab.is-active,
+.map-mode-tab.is-active,
+.settings-option.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.14);
+  box-shadow: inset 0 0 16px rgba(90, 212, 255, 0.1);
+}
+
+.delete-button,
+.reset-button,
+.map-delete-button {
+  border-color: rgba(255, 102, 134, 0.3);
+  color: #ffd7df;
+  background: rgba(255, 102, 134, 0.1);
+}
+
+.todo-form button:hover,
+.command-form button:hover,
+.notes-form button:hover,
+.calendar-form button:hover,
+.timer-button:hover,
+.settings-option:hover,
+.calendar-nav-button:hover,
+.command-link-button:hover,
+.map-primary-button:hover:not(:disabled),
+.map-secondary-button:hover:not(:disabled),
+.map-search-form button:hover:not(:disabled),
+.map-add-toggle-button:hover,
+.map-collection-toggle:hover,
+.map-fit-all-button:hover,
+.filter-button:hover,
+.timer-tab:hover,
+.map-mode-tab:hover,
+.delete-button:hover,
+.reset-button:hover,
+.sidebar-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  box-shadow: var(--hover-glow);
+}
+
+.delete-button:hover,
+.reset-button:hover,
+.map-delete-button:hover {
+  border-color: rgba(255, 102, 134, 0.5);
+  box-shadow: 0 0 18px rgba(255, 102, 134, 0.12);
+}
+
+.todo-form button:focus-visible,
+.command-form button:focus-visible,
+.notes-form button:focus-visible,
+.calendar-form button:focus-visible,
+.timer-button:focus-visible,
+.settings-option:focus-visible,
+.calendar-nav-button:focus-visible,
+.command-link-button:focus-visible,
+.map-primary-button:focus-visible,
+.map-secondary-button:focus-visible,
+.map-search-form button:focus-visible,
+.filter-button:focus-visible,
+.timer-tab:focus-visible,
+.map-mode-tab:focus-visible,
+.delete-button:focus-visible,
+.reset-button:focus-visible,
+.sidebar-button:focus-visible,
+.language-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+}
+
+.todo-form button:active,
+.command-form button:active,
+.notes-form button:active,
+.calendar-form button:active,
+.timer-button:active,
+.settings-option:active,
+.calendar-nav-button:active,
+.command-link-button:active,
+.map-primary-button:active,
+.map-secondary-button:active,
+.filter-button:active,
+.timer-tab:active,
+.map-mode-tab:active,
+.delete-button:active,
+.reset-button:active,
+.sidebar-button:active {
+  transform: translateY(0);
+}
+
+.status-card,
+.summary-panel,
+.summary-metric,
+.analysis-panel,
+.analysis-metric,
+.analysis-section,
+.command-history,
+.timer-duration-settings label,
+.timer-display-panel,
+.timer-stat,
+.lap-panel,
+.todo-item,
+.note-item,
+.empty-state {
+  border-radius: var(--radius-control);
+}
+
+.status-card,
+.analysis-panel,
+.command-history,
+.timer-display-panel,
+.lap-panel {
+  padding: 18px;
+}
+
+.todo-list,
+.notes-list,
+.analysis-sections,
+.lap-panel ol {
+  gap: 10px;
+}
+
+.empty-state {
+  padding: 24px;
+  border-color: rgba(90, 212, 255, 0.28);
+  background: rgba(2, 9, 18, 0.42);
+}
+
+.compact-empty {
+  padding: 16px;
+}
+
+/* 내부 스크롤 제한: 긴 결과와 작업 패널만 자체 스크롤을 허용 */
+.calendar-event-list,
+.map-left-scroll,
+.map-detail-column {
+  scrollbar-gutter: stable;
+}
+
 /* 스크린 리더 전용 텍스트 */
 .sr-only {
   position: absolute;
@@ -2809,10 +3081,27 @@ body {
   --danger: #d92d20;
   --surface: #f8fafc;
   --surface-soft: #f4f7fb;
+  --focus-ring: 0 0 0 3px rgba(79, 124, 255, 0.14);
+  --hover-glow: none;
+  --panel-shadow: 0 12px 36px rgba(28, 39, 62, 0.07);
 
   color: #172033;
   background: #eef3f8;
   overflow: auto;
+}
+
+/* 일반 모드 대비 보정: HUD 네온은 줄이고 긴 사용 시간의 명도 대비를 우선 */
+.tenvi-dashboard.theme-standard * {
+  scrollbar-color: #b8c7dc #eef3f8;
+}
+
+.tenvi-dashboard.theme-standard *::-webkit-scrollbar-track {
+  background: #eef3f8;
+}
+
+.tenvi-dashboard.theme-standard *::-webkit-scrollbar-thumb {
+  border-color: #eef3f8;
+  background: #b8c7dc;
 }
 
 .tenvi-dashboard.theme-standard .tenvi-grid {
@@ -2824,7 +3113,7 @@ body {
 .tenvi-dashboard.theme-standard .tenvi-sidebar {
   border-color: #d9e2ec;
   background: #ffffff;
-  box-shadow: 0 14px 42px rgba(28, 39, 62, 0.08);
+  box-shadow: var(--panel-shadow);
   backdrop-filter: none;
 }
 
