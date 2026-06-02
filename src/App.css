@@ -555,8 +555,77 @@ body {
 }
 
 /* Dashboard 정보 위계: 브리핑, 핵심 수치, 최근 항목의 무게를 분리 */
-.dashboard-module .module-header {
-  margin-bottom: 18px;
+.dashboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(90, 212, 255, 0.18);
+}
+
+.dashboard-tab {
+  min-height: 36px;
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  color: #a8c7d6;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.dashboard-tab:hover {
+  color: #dff8ff;
+  border-color: rgba(90, 212, 255, 0.18);
+  background: rgba(5, 16, 31, 0.4);
+}
+
+.dashboard-tab.is-active {
+  color: var(--neon-strong);
+  border-color: rgba(90, 212, 255, 0.32);
+  background: rgba(5, 16, 31, 0.6);
+}
+
+.dashboard-tab-panel {
+  min-width: 0;
+}
+
+.dashboard-tab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.dashboard-tab-grid > .summary-panel {
+  grid-column: auto;
+}
+
+.dashboard-overview-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+}
+
+.dashboard-overview-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-system-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-system-metrics .summary-metric strong {
+  font-size: 22px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .dashboard-briefing {
@@ -3477,7 +3546,9 @@ body {
 }
 
 @media (max-width: 1180px) {
-  .dashboard-summary-grid {
+  .dashboard-summary-grid,
+  .dashboard-tab-grid,
+  .dashboard-overview-grid {
     grid-template-columns: 1fr;
   }
 
@@ -4210,6 +4281,26 @@ body {
   color: #245bdb;
   border-color: #9db5ff;
   background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-standard .dashboard-tab {
+  color: #344054;
+}
+
+.tenvi-dashboard.theme-standard .dashboard-tab:hover {
+  color: #172033;
+  border-color: #d9e2ec;
+  background: #f4f7ff;
+}
+
+.tenvi-dashboard.theme-standard .dashboard-tab.is-active {
+  color: #245bdb;
+  border-color: #9db5ff;
+  background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-standard .dashboard-tabs {
+  border-bottom-color: #d9e2ec;
 }
 
 .tenvi-dashboard.theme-standard .map-mode-tabs {

@@ -96,6 +96,23 @@ const requiredDashboardKeys = [
   'noTodayEvents',
   'noTodayDueTasks',
   'noNextEvent',
+  'tabsLabel',
+  'tabs',
+  'overviewMetrics',
+  'quickStatus',
+  'priorityItems',
+  'recentHighlights',
+  'activeTaskList',
+  'systemSummary',
+  'currentSettings',
+  'timerSessions',
+  'currentLanguage',
+  'defaultStartModule',
+  'hudEffect',
+  'theme',
+  'storedData',
+  'storageOverview',
+  'totalSchedules',
 ]
 
 const requiredTasksKeys = [

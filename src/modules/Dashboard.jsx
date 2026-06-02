@@ -3,12 +3,15 @@ import { useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import { getMapArchiveSummary } from '../services/photoArchiveSummaryService.js'
 import {
+  getCalendarEventDateLabel,
   getMonthEvents,
   getNextEvent,
   getScheduledDateCount,
   getTodayEvents,
 } from './calendarLogic.js'
 import { getTodayDueTasks } from './tasksLogic.js'
+
+const DASHBOARD_TABS = ['overview', 'work', 'archive', 'system']
 
 // Dashboard 요약에 사용할 저장 목록을 localStorage에서 안전하게 읽습니다.
 const readStoredList = (storageKey) => {
@@ -26,6 +29,13 @@ const readStoredList = (storageKey) => {
   }
 }
 
+const readStoredNumber = (storageKey) => {
+  const savedValue = localStorage.getItem(storageKey)
+  const parsedValue = Number.parseInt(savedValue, 10)
+
+  return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
+}
+
 // 최근 Notes 정렬에 사용할 작성 시각을 숫자로 변환합니다.
 const getNoteTime = (note) => {
   const time = new Date(note.createdAt).getTime()
@@ -38,8 +48,14 @@ const MAP_SUMMARY_STATUS = {
   ready: 'ready',
 }
 
-// Tasks, Notes, Calendar, Map의 핵심 현황을 한 화면에 요약하는 컴포넌트입니다.
-function Dashboard({ t }) {
+function Dashboard({
+  hudEffect = 'normal',
+  language = 'ko',
+  startModule = 'tasks',
+  t,
+  theme = 'hud',
+}) {
+  const [activeDashboardTab, setActiveDashboardTab] = useState('overview')
   const [mapSummaryState, setMapSummaryState] = useState({
     data: null,
     status: MAP_SUMMARY_STATUS.loading,
@@ -49,9 +65,14 @@ function Dashboard({ t }) {
   const calendarEvents = readStoredList(STORAGE_KEYS.calendarEvents)
   const completedTasks = tasks.filter((task) => task.completed).length
   const activeTasks = tasks.length - completedTasks
-  // Dashboard는 Calendar 데이터를 읽기만 하며, 저장 key와 이벤트 구조는 Calendar 모듈과 동일하게 유지합니다.
+  const activeTaskList = tasks.filter((task) => !task.completed).slice(0, 4)
+  const timerCompletedSessions = readStoredNumber(
+    STORAGE_KEYS.timerCompletedSessions,
+  )
+
+  // 기존 Calendar 요약 데이터를 탭별로 재배치하기 위해 계산 흐름은 유지합니다.
   const allTodayEvents = getTodayEvents(calendarEvents)
-  const todayEvents = getTodayEvents(calendarEvents).slice(0, 3)
+  const todayEvents = allTodayEvents.slice(0, 3)
   const allTodayDueTasks = getTodayDueTasks(tasks)
   const todayDueTasks = allTodayDueTasks.slice(0, 3)
   const monthEvents = getMonthEvents(calendarEvents)
@@ -62,6 +83,8 @@ function Dashboard({ t }) {
     .slice(0, 3)
   const mapSummary = mapSummaryState.data
   const hasMapRecords = Number(mapSummary?.totalPhotoRecords) > 0
+  const mapPhotoCount = Number(mapSummary?.totalPhotoRecords) || 0
+  const mapCollectionCount = Number(mapSummary?.totalCollections) || 0
   const mapBriefingMessage =
     mapSummaryState.status === MAP_SUMMARY_STATUS.error
       ? t.dashboard.mapSummaryLoadError
@@ -74,7 +97,7 @@ function Dashboard({ t }) {
   useEffect(() => {
     let isMounted = true
 
-    // Dashboard는 Map IndexedDB를 수정하지 않고 service의 읽기 요약만 비동기로 수신
+    // Dashboard는 Map IndexedDB를 수정하지 않고 service에서 읽은 요약만 비동기로 수신
     const loadMapSummary = async () => {
       setMapSummaryState((currentState) => ({
         ...currentState,
@@ -92,7 +115,6 @@ function Dashboard({ t }) {
         }
       } catch {
         if (isMounted) {
-          // Map 요약 실패 격리: Dashboard 전체 렌더링은 유지하고 해당 패널만 안내
           setMapSummaryState({
             data: null,
             status: MAP_SUMMARY_STATUS.error,
@@ -108,31 +130,199 @@ function Dashboard({ t }) {
     }
   }, [])
 
-  return (
-    <section
-      className="module-panel dashboard-module"
-      aria-labelledby="dashboard-title"
-    >
-      {/* Dashboard 상단 제목 영역 */}
-      <div className="module-header">
-        <div>
-          <p className="module-label">{t.dashboard.label}</p>
-          <h2 id="dashboard-title">{t.dashboard.title}</h2>
-        </div>
-      </div>
+  const renderEmptyState = (message) => (
+    <div className="empty-state compact-empty" role="status">
+      <span>{t.common.systemMessage}</span>
+      <p>{message}</p>
+    </div>
+  )
 
-      {/* Dashboard 요약 카드 영역: Tasks, Notes, Calendar 현황을 한 화면에서 확인합니다. */}
+  const renderNoteList = (items = recentNotes) =>
+    items.length > 0 ? (
+      <ul>
+        {items.map((note) => (
+          <li className="recent-note" key={note.id}>
+            <strong>{note.title || t.notes.untitled}</strong>
+            {note.content ? <span>{note.content}</span> : null}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      renderEmptyState(t.dashboard.noRecentNotes)
+    )
+
+  const renderTodayScheduleList = () =>
+    todayEvents.length > 0 ? (
+      <ul>
+        {todayEvents.map((calendarEvent) => (
+          <li className="recent-note" key={calendarEvent.id}>
+            <strong>{calendarEvent.title}</strong>
+            {calendarEvent.memo ? <span>{calendarEvent.memo}</span> : null}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      renderEmptyState(t.dashboard.noTodayEvents)
+    )
+
+  const renderDueTaskList = () =>
+    todayDueTasks.length > 0 ? (
+      <ul>
+        {todayDueTasks.map((task) => (
+          <li className="recent-note" key={task.id}>
+            <strong>{task.title}</strong>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      renderEmptyState(t.dashboard.noTodayDueTasks)
+    )
+
+  const renderNextEvent = () =>
+    nextEvent ? (
+      <ul>
+        <li className="recent-note">
+          <strong>
+            {getCalendarEventDateLabel(nextEvent)} - {nextEvent.title}
+          </strong>
+          {nextEvent.memo ? <span>{nextEvent.memo}</span> : null}
+        </li>
+      </ul>
+    ) : (
+      renderEmptyState(t.dashboard.noNextEvent)
+    )
+
+  const renderMapSummaryBody = () => {
+    if (mapSummaryState.status === MAP_SUMMARY_STATUS.loading) {
+      return renderEmptyState(t.dashboard.mapSummaryLoading)
+    }
+
+    if (mapSummaryState.status === MAP_SUMMARY_STATUS.error) {
+      return renderEmptyState(t.dashboard.mapSummaryLoadError)
+    }
+
+    if (!hasMapRecords) {
+      return renderEmptyState(t.dashboard.noMapRecords)
+    }
+
+    return (
+      <>
+        <div className="summary-metrics map-summary-metrics">
+          <div className="summary-metric">
+            <span>{t.dashboard.totalMapRecords}</span>
+            <strong>{mapSummary.totalPhotoRecords}</strong>
+          </div>
+          <div className="summary-metric">
+            <span>{t.dashboard.totalMapCollections}</span>
+            <strong>{mapSummary.totalCollections}</strong>
+          </div>
+        </div>
+
+        <div className="map-source-grid" aria-label={t.dashboard.mapLocationSources}>
+          <div>
+            <span>{t.dashboard.mapSourceExif}</span>
+            <strong>{mapSummary.locationSourceCounts.exif}</strong>
+          </div>
+          <div>
+            <span>{t.dashboard.mapSourceManual}</span>
+            <strong>{mapSummary.locationSourceCounts.manual}</strong>
+          </div>
+          <div>
+            <span>{t.dashboard.mapSourceSearch}</span>
+            <strong>{mapSummary.locationSourceCounts.search}</strong>
+          </div>
+          <div>
+            <span>{t.dashboard.mapSourceUnknown}</span>
+            <strong>{mapSummary.locationSourceCounts.unknown}</strong>
+          </div>
+        </div>
+
+        <div className="recent-notes">
+          <p className="recent-notes-title">{t.dashboard.recentMapRecords}</p>
+          <ul>
+            {mapSummary.recentPhotoRecords.map((record) => (
+              <li className="recent-note" key={record.id}>
+                <strong>{record.title || t.dashboard.untitledMapRecord}</strong>
+                <span>
+                  {record.collectionName || t.map.unassignedCollection} /{' '}
+                  {t.dashboard.mapLocationSourceValue(record.locationSource)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </>
+    )
+  }
+
+  const renderOverviewTab = () => (
+    <>
+      {/* 개요 탭: 첫 화면에서 핵심 상태만 빠르게 확인 */}
       <div className="status-card dashboard-briefing" role="status">
         <span>{t.dashboard.todayBriefing}</span>
         <strong>{mapBriefingMessage}</strong>
       </div>
 
-      <div className="dashboard-summary-grid">
-        {/* Tasks 요약 카드 */}
-        <section className="summary-panel" aria-labelledby="task-summary-title">
+      <div className="dashboard-tab-grid dashboard-overview-grid">
+        <section className="summary-panel dashboard-overview-panel">
+          <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.overviewMetrics}</p>
+            <h3>{t.dashboard.quickStatus}</h3>
+          </div>
+          <div className="summary-metrics dashboard-overview-metrics">
+            <div className="summary-metric">
+              <span>{t.dashboard.totalTasks}</span>
+              <strong>{tasks.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.activeTasks}</span>
+              <strong>{activeTasks}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.completedTasks}</span>
+              <strong>{completedTasks}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.todayEvents}</span>
+              <strong>{allTodayEvents.length || (nextEvent ? 1 : 0)}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.totalNotes}</span>
+              <strong>{notes.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.totalMapRecords}</span>
+              <strong>{mapPhotoCount}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="summary-panel dashboard-priority-panel">
+          <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.priorityItems}</p>
+            <h3>{t.dashboard.recentHighlights}</h3>
+          </div>
+          <div className="recent-notes">
+            <p className="recent-notes-title">{t.dashboard.nextEvent}</p>
+            {renderNextEvent()}
+          </div>
+          <div className="recent-notes">
+            <p className="recent-notes-title">{t.dashboard.recentNotes}</p>
+            {renderNoteList(recentNotes.slice(0, 1))}
+          </div>
+        </section>
+      </div>
+    </>
+  )
+
+  const renderWorkTab = () => (
+    <>
+      {/* 작업 탭: Tasks와 Calendar 중심으로 기존 요약 데이터를 재배치 */}
+      <div className="dashboard-tab-grid">
+        <section className="summary-panel">
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.tasksSummary}</p>
-            <h3 id="task-summary-title">{t.modules.tasks}</h3>
+            <h3>{t.modules.tasks}</h3>
           </div>
           <div className="summary-metrics">
             <div className="summary-metric">
@@ -148,56 +338,35 @@ function Dashboard({ t }) {
               <strong>{completedTasks}</strong>
             </div>
           </div>
-        </section>
-
-        {/* Notes 요약 카드 */}
-        <section className="summary-panel" aria-labelledby="notes-summary-title">
-          <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.notesSummary}</p>
-            <h3 id="notes-summary-title">{t.modules.notes}</h3>
-          </div>
-          <div className="summary-metric summary-metric-wide">
-            <span>{t.dashboard.totalNotes}</span>
-            <strong>{notes.length}</strong>
-          </div>
-
-          <div className="recent-notes" aria-label={t.dashboard.recentNotes}>
-            <p className="recent-notes-title">{t.dashboard.recentNotes}</p>
-            {recentNotes.length > 0 ? (
+          <div className="recent-notes">
+            <p className="recent-notes-title">{t.dashboard.activeTaskList}</p>
+            {activeTaskList.length > 0 ? (
               <ul>
-                {recentNotes.map((note) => (
-                  <li className="recent-note" key={note.id}>
-                    <strong>{note.title || t.notes.untitled}</strong>
-                    {note.content ? <span>{note.content}</span> : null}
+                {activeTaskList.map((task) => (
+                  <li className="recent-note" key={task.id}>
+                    <strong>{task.title}</strong>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="empty-state compact-empty" role="status">
-                <span>{t.common.systemMessage}</span>
-                <p>{t.dashboard.noRecentNotes}</p>
-              </div>
+              renderEmptyState(t.command.noActiveTasks)
             )}
+          </div>
+          <div className="recent-notes dashboard-due-tasks">
+            <p className="recent-notes-title">{t.dashboard.todayDueTasks}</p>
+            {renderDueTaskList()}
           </div>
         </section>
 
-        <section
-          className="summary-panel"
-          aria-labelledby="calendar-summary-title"
-        >
-          {/* Calendar 요약 카드 */}
+        <section className="summary-panel">
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.calendarSummary}</p>
-            <h3 id="calendar-summary-title">{t.modules.calendar}</h3>
+            <h3>{t.modules.calendar}</h3>
           </div>
           <div className="summary-metrics">
             <div className="summary-metric">
               <span>{t.dashboard.todayEvents}</span>
               <strong>{allTodayEvents.length}</strong>
-            </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.todayDueTasks}</span>
-              <strong>{allTodayDueTasks.length}</strong>
             </div>
             <div className="summary-metric">
               <span>{t.dashboard.monthEvents}</span>
@@ -208,164 +377,137 @@ function Dashboard({ t }) {
               <strong>{scheduledDateCount}</strong>
             </div>
           </div>
-
-          {/* 오늘 일정 일부 목록 */}
-          <div className="recent-notes" aria-label={t.dashboard.todayEvents}>
+          <div className="recent-notes">
             <p className="recent-notes-title">{t.dashboard.todayEvents}</p>
-            {todayEvents.length > 0 ? (
-              <ul>
-                {todayEvents.map((calendarEvent) => (
-                  <li className="recent-note" key={calendarEvent.id}>
-                    <strong>{calendarEvent.title}</strong>
-                    {calendarEvent.memo ? <span>{calendarEvent.memo}</span> : null}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="empty-state compact-empty" role="status">
-                <span>{t.common.systemMessage}</span>
-                <p>{t.dashboard.noTodayEvents}</p>
-              </div>
-            )}
+            {renderTodayScheduleList()}
           </div>
-
-          {/* 오늘 마감 Task 일부 목록 */}
-          <div className="recent-notes dashboard-due-tasks">
-            <p className="recent-notes-title">{t.dashboard.todayDueTasks}</p>
-            {todayDueTasks.length > 0 ? (
-              <ul>
-                {todayDueTasks.map((task) => (
-                  <li className="recent-note" key={task.id}>
-                    <strong>{task.title}</strong>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="empty-state compact-empty" role="status">
-                <span>{t.common.systemMessage}</span>
-                <p>{t.dashboard.noTodayDueTasks}</p>
-              </div>
-            )}
-          </div>
-
-          {/* 다음 예정 일정 1개 */}
           <div className="recent-notes dashboard-calendar-next">
             <p className="recent-notes-title">{t.dashboard.nextEvent}</p>
-            {nextEvent ? (
-              <ul>
-                <li className="recent-note">
-                  <strong>
-                    {nextEvent.date} - {nextEvent.title}
-                  </strong>
-                  {nextEvent.memo ? <span>{nextEvent.memo}</span> : null}
-                </li>
-              </ul>
-            ) : (
-              <div className="empty-state compact-empty" role="status">
-                <span>{t.common.systemMessage}</span>
-                <p>{t.dashboard.noNextEvent}</p>
-              </div>
-            )}
+            {renderNextEvent()}
+          </div>
+        </section>
+      </div>
+    </>
+  )
+
+  const renderArchiveTab = () => (
+    <>
+      {/* 기록 탭: Notes와 Map Archive 요약을 분리 */}
+      <div className="dashboard-tab-grid">
+        <section className="summary-panel">
+          <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.notesSummary}</p>
+            <h3>{t.modules.notes}</h3>
+          </div>
+          <div className="summary-metric summary-metric-wide">
+            <span>{t.dashboard.totalNotes}</span>
+            <strong>{notes.length}</strong>
+          </div>
+          <div className="recent-notes" aria-label={t.dashboard.recentNotes}>
+            <p className="recent-notes-title">{t.dashboard.recentNotes}</p>
+            {renderNoteList()}
           </div>
         </section>
 
-        <section className="summary-panel" aria-labelledby="map-summary-title">
+        <section className="summary-panel">
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.mapSummary}</p>
-            <h3 id="map-summary-title">{t.modules.map}</h3>
+            <h3>{t.modules.map}</h3>
           </div>
-
-          {mapSummaryState.status === MAP_SUMMARY_STATUS.loading ? (
-            <div className="empty-state compact-empty" role="status">
-              <span>{t.common.systemMessage}</span>
-              <p>{t.dashboard.mapSummaryLoading}</p>
-            </div>
-          ) : null}
-
-          {mapSummaryState.status === MAP_SUMMARY_STATUS.error ? (
-            <div className="empty-state compact-empty" role="status">
-              <span>{t.common.systemMessage}</span>
-              <p>{t.dashboard.mapSummaryLoadError}</p>
-            </div>
-          ) : null}
-
-          {mapSummaryState.status === MAP_SUMMARY_STATUS.ready && !hasMapRecords ? (
-            <div className="empty-state compact-empty" role="status">
-              <span>{t.common.systemMessage}</span>
-              <p>{t.dashboard.noMapRecords}</p>
-            </div>
-          ) : null}
-
-          {mapSummaryState.status === MAP_SUMMARY_STATUS.ready && hasMapRecords ? (
-            <>
-              <div className="summary-metrics map-summary-metrics">
-                <div className="summary-metric">
-                  <span>{t.dashboard.totalMapRecords}</span>
-                  <strong>{mapSummary.totalPhotoRecords}</strong>
-                </div>
-                <div className="summary-metric">
-                  <span>{t.dashboard.totalMapCollections}</span>
-                  <strong>{mapSummary.totalCollections}</strong>
-                </div>
-              </div>
-
-              <div className="map-source-grid" aria-label={t.dashboard.mapLocationSources}>
-                <div>
-                  <span>{t.dashboard.mapSourceExif}</span>
-                  <strong>{mapSummary.locationSourceCounts.exif}</strong>
-                </div>
-                <div>
-                  <span>{t.dashboard.mapSourceManual}</span>
-                  <strong>{mapSummary.locationSourceCounts.manual}</strong>
-                </div>
-                <div>
-                  <span>{t.dashboard.mapSourceSearch}</span>
-                  <strong>{mapSummary.locationSourceCounts.search}</strong>
-                </div>
-                <div>
-                  <span>{t.dashboard.mapSourceUnknown}</span>
-                  <strong>{mapSummary.locationSourceCounts.unknown}</strong>
-                </div>
-              </div>
-
-              <div className="recent-notes">
-                <p className="recent-notes-title">{t.dashboard.recentMapRecords}</p>
-                <ul>
-                  {mapSummary.recentPhotoRecords.map((record) => (
-                    <li className="recent-note" key={record.id}>
-                      <strong>{record.title || t.dashboard.untitledMapRecord}</strong>
-                      <span>
-                        {record.collectionName || t.map.unassignedCollection} /{' '}
-                        {t.dashboard.mapLocationSourceValue(record.locationSource)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="recent-notes dashboard-map-collection">
-                <p className="recent-notes-title">{t.dashboard.representativeCollection}</p>
-                {mapSummary.representativeCollection ? (
-                  <ul>
-                    <li className="recent-note">
-                      <strong>{mapSummary.representativeCollection.name}</strong>
-                      <span>
-                        {t.dashboard.collectionPhotoCount(
-                          mapSummary.representativeCollection.photoCount,
-                        )}
-                      </span>
-                    </li>
-                  </ul>
-                ) : (
-                  <div className="empty-state compact-empty" role="status">
-                    <span>{t.common.systemMessage}</span>
-                    <p>{t.dashboard.noRepresentativeCollection}</p>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : null}
+          {renderMapSummaryBody()}
         </section>
+      </div>
+    </>
+  )
+
+  const renderSystemTab = () => (
+    <>
+      {/* 시스템 탭: 설정 변경이 아닌 읽기 전용 현재 상태 요약 */}
+      <div className="dashboard-tab-grid dashboard-system-grid">
+        <section className="summary-panel">
+          <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.systemSummary}</p>
+            <h3>{t.dashboard.currentSettings}</h3>
+          </div>
+          <div className="summary-metrics dashboard-system-metrics">
+            <div className="summary-metric">
+              <span>{t.dashboard.timerSessions}</span>
+              <strong>{timerCompletedSessions}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.currentLanguage}</span>
+              <strong>{t.languages[language] ?? language}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.defaultStartModule}</span>
+              <strong>{t.modules[startModule] ?? startModule}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.hudEffect}</span>
+              <strong>{t.settings.effects[hudEffect] ?? hudEffect}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.theme}</span>
+              <strong>{t.settings.themes[theme] ?? theme}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="summary-panel">
+          <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.storedData}</p>
+            <h3>{t.dashboard.storageOverview}</h3>
+          </div>
+          <div className="summary-metrics dashboard-system-metrics">
+            <div className="summary-metric">
+              <span>{t.dashboard.totalTasks}</span>
+              <strong>{tasks.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.totalNotes}</span>
+              <strong>{notes.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.totalSchedules}</span>
+              <strong>{calendarEvents.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.totalMapRecords}</span>
+              <strong>{mapPhotoCount}</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  )
+
+  const tabRenderers = {
+    archive: renderArchiveTab,
+    overview: renderOverviewTab,
+    system: renderSystemTab,
+    work: renderWorkTab,
+  }
+
+  return (
+    <section className="module-panel dashboard-module" aria-label={t.modules.dashboard}>
+      {/* Dashboard 탭 구성 */}
+      <div className="dashboard-tabs" aria-label={t.dashboard.tabsLabel}>
+        {DASHBOARD_TABS.map((tabId) => (
+          <button
+            className={`dashboard-tab ${
+              activeDashboardTab === tabId ? 'is-active' : ''
+            }`}
+            key={tabId}
+            type="button"
+            onClick={() => setActiveDashboardTab(tabId)}
+          >
+            {t.dashboard.tabs[tabId]}
+          </button>
+        ))}
+      </div>
+
+      <div className="dashboard-tab-panel">
+        {tabRenderers[activeDashboardTab]()}
       </div>
     </section>
   )

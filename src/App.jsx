@@ -78,7 +78,15 @@ function App() {
   // activeModule 문자열을 실제 모듈 컴포넌트로 바꾸는 중앙 전환 지점입니다.
   const moduleComponents = useMemo(
     () => ({
-      dashboard: <Dashboard t={t} />,
+      dashboard: (
+        <Dashboard
+          hudEffect={hudEffect}
+          language={language}
+          startModule={startModule}
+          t={t}
+          theme={theme}
+        />
+      ),
       command: <Command onModuleChange={setActiveModule} t={t} />,
       tasks: <Tasks t={t} />,
       notes: <Notes t={t} />,
