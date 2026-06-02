@@ -177,7 +177,7 @@ describe('commandLogic createResult', () => {
 
     expect(result.title).toBe(t.command.todaySchedulesResult)
     expect(result.items[0].values).toEqual([
-      '2026-05-14 - Planning sync: Review roadmap',
+      '2026.05.14 - Planning sync: Review roadmap',
     ])
     expect(result.metrics[0].value).toBe(1)
   })
@@ -248,7 +248,7 @@ describe('commandLogic createResult', () => {
 
     expect(result.title).toBe(t.command.searchSchedulesResult)
     expect(result.items[0].values).toEqual([
-      '2026-05-14 - Planning sync: Review roadmap',
+      '2026.05.14 - Planning sync: Review roadmap',
     ])
   })
 
@@ -285,7 +285,7 @@ describe('commandLogic createResult', () => {
     })
 
     expect(titleResult.items[0].values).toEqual([
-      '2026-05-20 - Launch check: TENVI calendar',
+      '2026.05.20 - Launch check: TENVI calendar',
     ])
     expect(missingKeywordResult.title).toBe(t.command.missingKeyword)
     expect(missingKeywordResult.type).toBe('help')
@@ -307,7 +307,7 @@ describe('commandLogic createResult', () => {
 
     expect(result.title).toBe(t.command.nextScheduleResult)
     expect(result.items[0].values).toEqual([
-      '2026-05-20 - Launch check: TENVI calendar',
+      '2026.05.20 - Launch check: TENVI calendar',
     ])
   })
 
@@ -372,7 +372,7 @@ describe('commandLogic createResult', () => {
     expect(result.title).toBe(t.command.todayTasksResult)
     expect(result.items[0].values).toEqual(['Write project plan'])
     expect(result.items[1].values).toEqual([
-      '2026-05-14 - Planning sync: Review roadmap',
+      '2026.05.14 - Planning sync: Review roadmap',
     ])
     expect(result.metrics.map((metric) => metric.value)).toEqual([1, 1])
   })

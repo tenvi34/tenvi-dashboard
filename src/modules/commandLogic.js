@@ -1,5 +1,11 @@
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
-import { countEventsByDate, getDateKey, parseDateKey } from './calendarLogic.js'
+import {
+  countEventsByDate,
+  getCalendarEventDateLabel,
+  getMonthEvents,
+  getNextEvent,
+  getTodayEvents,
+} from './calendarLogic.js'
 import { getTodayDueTasks } from './tasksLogic.js'
 
 export const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
@@ -225,34 +231,8 @@ const createMetric = (label, value) => ({ label, value })
 // Calendar 이벤트를 Command 결과 목록에 표시할 문자열로 변환합니다.
 const formatScheduleItem = (event) =>
   event.memo
-    ? `${event.date} - ${event.title}: ${event.memo}`
-    : `${event.date} - ${event.title}`
-
-// Command 결과에 사용할 이번 달 Calendar 이벤트 목록을 반환합니다.
-const getMonthEvents = (events, currentDate) => {
-  const { month, year } = parseDateKey(getDateKey(currentDate))
-
-  return events.filter((event) => {
-    const eventDate = parseDateKey(event.date)
-
-    return eventDate.year === year && eventDate.month === month
-  })
-}
-
-// 오늘 이후 가장 가까운 Calendar 일정을 Command 결과용으로 찾습니다.
-const getNextSchedule = (events, currentDate) => {
-  const todayKey = getDateKey(currentDate)
-
-  return [...events]
-    .filter((event) => event.date > todayKey)
-    .sort((firstEvent, secondEvent) => {
-      if (firstEvent.date !== secondEvent.date) {
-        return firstEvent.date.localeCompare(secondEvent.date)
-      }
-
-      return firstEvent.createdAt.localeCompare(secondEvent.createdAt)
-    })[0]
-}
+    ? `${getCalendarEventDateLabel(event)} - ${event.title}: ${event.memo}`
+    : `${getCalendarEventDateLabel(event)} - ${event.title}`
 
 // 도움말 결과에 표시할 사용 가능한 명령 목록 item을 생성합니다.
 const createCommandListItem = (t) => ({
@@ -275,8 +255,7 @@ export const createResult = ({
   const stats = getTaskStats(tasks)
   const recentNotes = getRecentNotes(notes)
   const recommendation = getRecommendation(stats, notes.length, t)
-  const todayKey = getDateKey(currentDate)
-  const todaySchedules = calendarEvents.filter((event) => event.date === todayKey)
+  const todaySchedules = getTodayEvents(calendarEvents, currentDate)
   const todayDueTasks = getTodayDueTasks(tasks, currentDate)
   const thisMonthSchedules = getMonthEvents(calendarEvents, currentDate)
 
@@ -526,7 +505,7 @@ export const createResult = ({
   }
 
   if (parsedCommand.type === 'nextSchedule') {
-    const nextSchedule = getNextSchedule(calendarEvents, currentDate)
+    const nextSchedule = getNextEvent(calendarEvents, currentDate)
 
     return {
       items: [

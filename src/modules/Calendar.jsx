@@ -3,12 +3,16 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import {
   countEventsByDate,
   createCalendarEvent,
+  getCalendarEventDateLabel,
+  getCalendarDayRangeMeta,
   getAdjacentMonth,
   getClampedDateKey,
   getDateKey,
   getEventsForDate,
   getMonthCalendarCells,
+  isRangedCalendarEvent,
   isFullMoonDate,
+  isValidCalendarDateRange,
   parseDateKey,
   readCalendarEvents,
   removeCalendarEvent,
@@ -53,6 +57,9 @@ function Calendar({ t }) {
   const [tasks] = useState(readStoredTasks)
   const [title, setTitle] = useState('')
   const [memo, setMemo] = useState('')
+  const [startDate, setStartDate] = useState(initialDate)
+  const [endDate, setEndDate] = useState(initialDate)
+  const [formMessage, setFormMessage] = useState('')
   const selectedEvents = getEventsForDate(events, selectedDate)
   const selectedDueTasks = getTasksDueOnDate(tasks, selectedDate)
   const eventCounts = useMemo(() => {
@@ -71,6 +78,20 @@ function Calendar({ t }) {
   const calendarCells = useMemo(
     () => getMonthCalendarCells(visibleYear, visibleMonth),
     [visibleMonth, visibleYear],
+  )
+  const rangeMetaByDate = useMemo(
+    () =>
+      calendarCells.reduce((rangeMetaMap, cell) => {
+        if (cell) {
+          rangeMetaMap[cell.dateKey] = getCalendarDayRangeMeta(
+            events,
+            cell.dateKey,
+          )
+        }
+
+        return rangeMetaMap
+      }, {}),
+    [calendarCells, events],
   )
   const todayDate = getDateKey()
 
@@ -92,6 +113,9 @@ function Calendar({ t }) {
   // 사용자가 선택한 날짜를 저장하고 해당 월로 달력을 이동합니다.
   const selectDate = (dateKey) => {
     setSelectedDate(dateKey)
+    setStartDate(dateKey)
+    setEndDate(dateKey)
+    setFormMessage('')
     syncVisibleMonth(dateKey)
   }
 
@@ -108,6 +132,9 @@ function Calendar({ t }) {
     setVisibleYear(nextMonth.year)
     setVisibleMonth(nextMonth.month)
     setSelectedDate(nextDateKey)
+    setStartDate(nextDateKey)
+    setEndDate(nextDateKey)
+    setFormMessage('')
   }
 
   // 연도 선택값이 바뀌면 선택 날짜와 보이는 연도를 함께 갱신합니다.
@@ -118,6 +145,9 @@ function Calendar({ t }) {
 
     setVisibleYear(nextYear)
     setSelectedDate(nextDateKey)
+    setStartDate(nextDateKey)
+    setEndDate(nextDateKey)
+    setFormMessage('')
   }
 
   // 월 선택값이 바뀌면 선택 날짜와 보이는 월을 함께 갱신합니다.
@@ -128,30 +158,61 @@ function Calendar({ t }) {
 
     setVisibleMonth(nextMonth)
     setSelectedDate(nextDateKey)
+    setStartDate(nextDateKey)
+    setEndDate(nextDateKey)
+    setFormMessage('')
   }
 
   // 현재 선택 날짜에 새 Calendar 이벤트를 추가합니다.
   const handleAddEvent = (event) => {
     event.preventDefault()
 
+    if (!isValidCalendarDateRange(startDate, endDate)) {
+      setFormMessage(t.calendar.dateRangeError)
+      return
+    }
+
     const nextEvent = createCalendarEvent({
-      date: selectedDate,
+      date: startDate,
+      endDate,
       memo,
+      startDate,
       title,
     })
 
     if (!nextEvent) {
+      setFormMessage(t.calendar.dateRangeError)
       return
     }
 
     persistEvents([...events, nextEvent])
     setTitle('')
     setMemo('')
+    setStartDate(selectedDate)
+    setEndDate(selectedDate)
+    setFormMessage('')
   }
 
   // 지정한 Calendar 이벤트를 삭제하고 저장소에 반영합니다.
   const handleDeleteEvent = (eventId) => {
     persistEvents(removeCalendarEvent(events, eventId))
+  }
+
+  const handleStartDateChange = (event) => {
+    const nextStartDate = event.target.value
+
+    setSelectedDate(nextStartDate)
+    setStartDate(nextStartDate)
+    setEndDate((currentEndDate) =>
+      currentEndDate < nextStartDate ? nextStartDate : currentEndDate,
+    )
+    setFormMessage('')
+    syncVisibleMonth(nextStartDate)
+  }
+
+  const handleEndDateChange = (event) => {
+    setEndDate(event.target.value)
+    setFormMessage('')
   }
 
   return (
@@ -187,9 +248,27 @@ function Calendar({ t }) {
           {selectedEvents.length > 0 ? (
             <ul className="calendar-event-list">
               {selectedEvents.map((calendarEvent) => (
-                <li className="calendar-event-item" key={calendarEvent.id}>
+                <li
+                  className={`calendar-event-item ${
+                    isRangedCalendarEvent(calendarEvent)
+                      ? 'calendar-event-item-range'
+                      : ''
+                  }`}
+                  key={calendarEvent.id}
+                >
                   <div>
-                    <h3>{calendarEvent.title}</h3>
+                    <div className="calendar-event-title-row">
+                      <h3>{calendarEvent.title}</h3>
+                      {isRangedCalendarEvent(calendarEvent) ? (
+                        // 선택 날짜 목록의 기간 라벨 표시
+                        <span className="calendar-event-badge">
+                          {t.calendar.rangeBadge}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="calendar-event-date">
+                      {getCalendarEventDateLabel(calendarEvent)}
+                    </p>
                     {calendarEvent.memo ? <p>{calendarEvent.memo}</p> : null}
                   </div>
                   <button
@@ -260,6 +339,34 @@ function Calendar({ t }) {
               placeholder={t.calendar.memoPlaceholder}
             />
 
+            <div className="calendar-date-range">
+              <label>
+                <span>{t.calendar.startDateLabel}</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={handleStartDateChange}
+                />
+              </label>
+              <label>
+                <span>{t.calendar.endDateLabel}</span>
+                <input
+                  type="date"
+                  min={startDate}
+                  value={endDate}
+                  onChange={handleEndDateChange}
+                />
+              </label>
+            </div>
+
+            <p className="calendar-form-hint">{t.calendar.dateRangeHint}</p>
+
+            {formMessage ? (
+              <p className="calendar-form-message" role="alert">
+                {formMessage}
+              </p>
+            ) : null}
+
             <button type="submit">{t.calendar.addEvent}</button>
           </form>
         </section>
@@ -318,16 +425,45 @@ function Calendar({ t }) {
           </div>
 
           {/* 월간 달력 셀: 선택일, 오늘, 일정 있음, 보름달 표시를 함께 렌더링합니다. */}
+          <div className="calendar-legend" aria-label={t.calendar.legendLabel}>
+            <span>
+              <i className="calendar-legend-dot"></i>
+              {t.calendar.singleEventLegend}
+            </span>
+            <span>
+              <i className="calendar-legend-bar"></i>
+              {t.calendar.rangeEventLegend}
+            </span>
+            <span>
+              <i className="calendar-legend-count">2</i>
+              {t.calendar.eventCountLegend}
+            </span>
+          </div>
+
           <div className="calendar-month-grid">
-            {calendarCells.map((cell, index) =>
-              cell ? (
+            {calendarCells.map((cell, index) => {
+              if (!cell) {
+                return (
+                  <span
+                    className="calendar-day is-empty"
+                    key={`empty-${visibleYear}-${visibleMonth}-${index}`}
+                  ></span>
+                )
+              }
+
+              const rangeMeta = rangeMetaByDate[cell.dateKey] ?? {
+                classNames: [],
+                hasRangeEvents: false,
+              }
+
+              return (
                 <button
                   className={`calendar-day ${
                     cell.dateKey === selectedDate ? 'is-selected' : ''
                   } ${cell.dateKey === todayDate ? 'is-today' : ''} ${
                     eventCounts[cell.dateKey] ? 'has-events' : ''
                   } ${isFullMoonDate(cell.dateKey) ? 'is-full-moon' : ''
-                  }`}
+                  } ${rangeMeta.classNames.join(' ')}`}
                   key={cell.dateKey}
                   type="button"
                   onClick={() => selectDate(cell.dateKey)}
@@ -335,9 +471,17 @@ function Calendar({ t }) {
                     eventCounts[cell.dateKey]
                       ? `, ${t.calendar.eventCount(eventCounts[cell.dateKey])}`
                       : ''
+                  }${
+                    rangeMeta.hasRangeEvents
+                      ? `, ${t.calendar.rangeEventLegend}`
+                      : ''
                   }`}
                 >
                   <span>{cell.day}</span>
+                  {rangeMeta.hasRangeEvents ? (
+                    // 하루 일정과 기간 일정 indicator 구분
+                    <span className="calendar-range-indicator"></span>
+                  ) : null}
                   {eventCounts[cell.dateKey] ? (
                     <strong>{eventCounts[cell.dateKey]}</strong>
                   ) : null}
@@ -351,13 +495,8 @@ function Calendar({ t }) {
                     </span>
                   ) : null}
                 </button>
-              ) : (
-                <span
-                  className="calendar-day is-empty"
-                  key={`empty-${visibleYear}-${visibleMonth}-${index}`}
-                ></span>
-              ),
-            )}
+              )
+            })}
           </div>
         </section>
       </div>

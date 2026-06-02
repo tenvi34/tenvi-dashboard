@@ -14,11 +14,21 @@ export const parseDateKey = (dateKey) => {
   return { day, month: month - 1, year }
 }
 
+const isDateKey = (dateKey) => {
+  if (typeof dateKey !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+    return false
+  }
+
+  const { day, month, year } = parseDateKey(dateKey)
+
+  return getDateKey(new Date(year, month, day)) === dateKey
+}
+
 // 지정한 연월에 포함된 총 일수를 계산합니다.
 export const getDaysInMonth = (year, month) =>
   new Date(year, month + 1, 0).getDate()
 
-// 월 이동 시 존재하지 않는 날짜를 해당 월의 마지막 날로 보정한 날짜 키를 만듭니다.
+// 월 이동 때 존재하지 않는 날짜를 해당 월의 마지막 날로 보정한 날짜 키를 만듭니다.
 export const getClampedDateKey = (year, month, day) => {
   const clampedDay = Math.min(Math.max(day, 1), getDaysInMonth(year, month))
 
@@ -39,7 +49,7 @@ const SYNODIC_MONTH_DAYS = 29.530588853
 const FULL_MOON_REFERENCE_UTC = Date.UTC(2000, 0, 21, 4, 40)
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 
-// 지정한 날짜가 평균 삭망월 기준 보름달 근사일인지 판단합니다.
+// 지정한 날짜가 평균 달 주기 기준 보름달 근사일인지 판단합니다.
 export const isFullMoonDate = (dateKey) => {
   const { day, month, year } = parseDateKey(dateKey)
   const targetDateUtcNoon = Date.UTC(year, month, day, 12)
@@ -49,7 +59,7 @@ export const isFullMoonDate = (dateKey) => {
     ((daysSinceReference % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) %
     SYNODIC_MONTH_DAYS
 
-  // 실제 천문 시각은 지역과 시간대에 따라 달라지므로, 날짜 셀 표시는 평균 삭망월 기반 근사값으로 처리합니다.
+  // 실제 천문 시각은 지역과 시간대에 따라 달라지므로 날짜 셀 표시는 평균 주기 기반 근사값으로 처리합니다.
   return (
     cyclePosition <= 0.5 || cyclePosition >= SYNODIC_MONTH_DAYS - 0.5
   )
@@ -61,7 +71,7 @@ export const getMonthCalendarCells = (year, month) => {
   const dayCount = getDaysInMonth(year, month)
   const cells = []
 
-  // 월간 달력은 7열 고정이므로 시작 요일 전후 빈 칸도 명시적으로 채웁니다.
+  // 월간 달력은 7열 고정이므로 시작 요일 이전 빈 칸도 명시적으로 채웁니다.
   for (let index = 0; index < firstWeekday; index += 1) {
     cells.push(null)
   }
@@ -80,16 +90,45 @@ export const getMonthCalendarCells = (year, month) => {
   return cells
 }
 
-// localStorage에서 복원한 값이 Calendar 이벤트 형식인지 검증합니다.
-const isCalendarEvent = (event) =>
-  event !== null &&
-  typeof event === 'object' &&
-  !Array.isArray(event) &&
-  typeof event.id === 'string' &&
-  typeof event.date === 'string' &&
-  typeof event.title === 'string' &&
-  typeof event.memo === 'string' &&
-  typeof event.createdAt === 'string'
+// 시작일/종료일 검증
+export const isValidCalendarDateRange = (startDate, endDate = startDate) =>
+  isDateKey(startDate) && isDateKey(endDate) && endDate >= startDate
+
+export const getCalendarEventStartDate = (event) => event.startDate || event.date
+
+export const getCalendarEventEndDate = (event) =>
+  event.endDate || event.startDate || event.date
+
+// 기존 일정 호환 처리
+export const normalizeCalendarEvent = (event) => {
+  if (
+    event === null ||
+    typeof event !== 'object' ||
+    Array.isArray(event) ||
+    typeof event.id !== 'string' ||
+    !isDateKey(event.date) ||
+    typeof event.title !== 'string' ||
+    typeof event.memo !== 'string' ||
+    typeof event.createdAt !== 'string'
+  ) {
+    return null
+  }
+
+  const startDate = getCalendarEventStartDate(event)
+  const endDate = getCalendarEventEndDate(event)
+
+  if (!isValidCalendarDateRange(startDate, endDate)) {
+    return null
+  }
+
+  return {
+    ...event,
+    startDate,
+    endDate,
+  }
+}
+
+const isCalendarEvent = (event) => normalizeCalendarEvent(event) !== null
 
 // 저장된 JSON 문자열에서 유효한 Calendar 이벤트 목록만 복원합니다.
 export const readCalendarEvents = (storageValue) => {
@@ -100,16 +139,114 @@ export const readCalendarEvents = (storageValue) => {
   try {
     const parsedValue = JSON.parse(storageValue)
 
-    // Calendar 데이터는 새 key에만 저장하며, 손상된 항목은 화면 렌더링 전에 제외합니다.
+    // Calendar 데이터는 기존 저장 객체를 강제 마이그레이션하지 않고, 렌더링 전에 유효성만 검증합니다.
     return Array.isArray(parsedValue) ? parsedValue.filter(isCalendarEvent) : []
   } catch {
     return []
   }
 }
 
-// 특정 날짜 키에 등록된 Calendar 이벤트만 필터링합니다.
+export const isRangedCalendarEvent = (event) =>
+  getCalendarEventEndDate(event) !== getCalendarEventStartDate(event)
+
+export const RANGE_POSITION = {
+  end: 'end',
+  middle: 'middle',
+  single: 'single',
+  start: 'start',
+}
+
+export const PERIOD_CLASS_BY_POSITION = {
+  [RANGE_POSITION.end]: 'period-end',
+  [RANGE_POSITION.middle]: 'period-middle',
+  [RANGE_POSITION.start]: 'period-start',
+}
+
+export const formatCalendarDate = (dateKey) => dateKey.replaceAll('-', '.')
+
+export const getCalendarEventDateLabel = (event) =>
+  isRangedCalendarEvent(event)
+    ? `${formatCalendarDate(getCalendarEventStartDate(event))} ~ ${formatCalendarDate(
+        getCalendarEventEndDate(event),
+      )}`
+    : formatCalendarDate(getCalendarEventStartDate(event))
+
+// 선택 날짜가 기간 안에 포함되는지 판단하는 함수
+export const eventOccursOnDate = (event, dateKey) =>
+  getCalendarEventStartDate(event) <= dateKey &&
+  getCalendarEventEndDate(event) >= dateKey
+
+export const getDateKeysBetween = (startDateKey, endDateKey = startDateKey) => {
+  if (!isValidCalendarDateRange(startDateKey, endDateKey)) {
+    return []
+  }
+
+  const { day, month, year } = parseDateKey(startDateKey)
+  const currentDate = new Date(year, month, day)
+  const dateKeys = []
+
+  while (getDateKey(currentDate) <= endDateKey) {
+    dateKeys.push(getDateKey(currentDate))
+    currentDate.setDate(currentDate.getDate() + 1)
+  }
+
+  return dateKeys
+}
+
+export const getCalendarEventDateKeys = (event) =>
+  getDateKeysBetween(getCalendarEventStartDate(event), getCalendarEventEndDate(event))
+
 export const getEventsForDate = (events, dateKey) =>
-  events.filter((event) => event.date === dateKey)
+  events.filter((event) => eventOccursOnDate(event, dateKey))
+
+// 기간 일정 표시 class 계산
+export const getCalendarEventRangePosition = (event, dateKey) => {
+  if (!eventOccursOnDate(event, dateKey)) {
+    return null
+  }
+
+  const startDate = getCalendarEventStartDate(event)
+  const endDate = getCalendarEventEndDate(event)
+
+  if (startDate === endDate) {
+    return RANGE_POSITION.single
+  }
+
+  if (dateKey === startDate) {
+    return RANGE_POSITION.start
+  }
+
+  if (dateKey === endDate) {
+    return RANGE_POSITION.end
+  }
+
+  return RANGE_POSITION.middle
+}
+
+export const getCalendarDayRangeMeta = (events, dateKey) => {
+  const positions = events
+    .map((event) => getCalendarEventRangePosition(event, dateKey))
+    .filter(Boolean)
+  const rangePositions = positions.filter(
+    (position) => position !== RANGE_POSITION.single,
+  )
+  const periodPosition = [
+    RANGE_POSITION.start,
+    RANGE_POSITION.end,
+    RANGE_POSITION.middle,
+  ].find((position) => rangePositions.includes(position))
+
+  return {
+    classNames: [
+      rangePositions.length > 0 ? 'has-range-events' : '',
+      periodPosition ? PERIOD_CLASS_BY_POSITION[periodPosition] : '',
+    ].filter(Boolean),
+    hasRangeEvents: rangePositions.length > 0,
+    hasSingleDayEvents: positions.includes(RANGE_POSITION.single),
+    periodPosition: periodPosition ?? null,
+    rangeEventCount: rangePositions.length,
+  }
+}
 
 // 오늘 날짜에 해당하는 Calendar 이벤트를 반환합니다.
 export const getTodayEvents = (events, today = new Date()) =>
@@ -118,56 +255,82 @@ export const getTodayEvents = (events, today = new Date()) =>
 // 현재 날짜가 속한 월의 Calendar 이벤트만 반환합니다.
 export const getMonthEvents = (events, currentDate = new Date()) => {
   const { month, year } = parseDateKey(getDateKey(currentDate))
+  const firstDateKey = getDateKey(new Date(year, month, 1))
+  const lastDateKey = getDateKey(new Date(year, month, getDaysInMonth(year, month)))
 
-  return events.filter((event) => {
-    const eventDate = parseDateKey(event.date)
-
-    return eventDate.year === year && eventDate.month === month
-  })
+  return events.filter(
+    (event) =>
+      getCalendarEventStartDate(event) <= lastDateKey &&
+      getCalendarEventEndDate(event) >= firstDateKey,
+  )
 }
 
 // 이벤트가 하나 이상 있는 날짜의 개수를 계산합니다.
 export const getScheduledDateCount = (events) =>
-  new Set(events.map((event) => event.date)).size
+  new Set(events.flatMap(getCalendarEventDateKeys)).size
 
 // 오늘 이후 가장 가까운 Calendar 이벤트를 찾습니다.
 export const getNextEvent = (events, currentDate = new Date()) => {
   const todayKey = getDateKey(currentDate)
 
   return [...events]
-    .filter((event) => event.date > todayKey)
+    .filter((event) => getCalendarEventEndDate(event) > todayKey)
     .sort((firstEvent, secondEvent) => {
-      if (firstEvent.date !== secondEvent.date) {
-        return firstEvent.date.localeCompare(secondEvent.date)
+      const firstStartDate = getCalendarEventStartDate(firstEvent)
+      const secondStartDate = getCalendarEventStartDate(secondEvent)
+      const firstNextDate = firstStartDate > todayKey ? firstStartDate : todayKey
+      const secondNextDate =
+        secondStartDate > todayKey ? secondStartDate : todayKey
+
+      if (firstNextDate !== secondNextDate) {
+        return firstNextDate.localeCompare(secondNextDate)
       }
 
       return firstEvent.createdAt.localeCompare(secondEvent.createdAt)
     })[0]
 }
 
-// 날짜별 Calendar 이벤트 개수를 집계합니다.
+// 달력 날짜별 일정 표시 계산
 export const countEventsByDate = (events) =>
   events.reduce((eventCounts, event) => {
-    eventCounts[event.date] = (eventCounts[event.date] ?? 0) + 1
+    getCalendarEventDateKeys(event).forEach((dateKey) => {
+      eventCounts[dateKey] = (eventCounts[dateKey] ?? 0) + 1
+    })
 
     return eventCounts
   }, {})
 
 // 입력값을 정리해 새 Calendar 이벤트 객체를 생성합니다.
-export const createCalendarEvent = ({ date, memo, title }) => {
+export const createCalendarEvent = ({
+  date,
+  endDate = date,
+  memo,
+  startDate = date,
+  title,
+}) => {
   const normalizedTitle = title.trim()
   const normalizedMemo = memo.trim()
+  const normalizedStartDate = startDate || date
+  const normalizedEndDate = endDate || normalizedStartDate
 
-  if (!date || !normalizedTitle) {
+  if (
+    !isValidCalendarDateRange(normalizedStartDate, normalizedEndDate) ||
+    !normalizedTitle
+  ) {
     return null
   }
 
+  const createdAt = new Date().toISOString()
+
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    date,
+    date: normalizedStartDate,
+    startDate: normalizedStartDate,
+    endDate: normalizedEndDate,
     title: normalizedTitle,
     memo: normalizedMemo,
-    createdAt: new Date().toISOString(),
+    createdAt,
+    updatedAt: createdAt,
   }
 }
 

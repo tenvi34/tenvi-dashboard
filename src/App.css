@@ -2483,6 +2483,82 @@ body {
   resize: vertical;
 }
 
+.calendar-date-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(90, 212, 255, 0.05);
+}
+
+.calendar-date-range label {
+  display: grid;
+  gap: 6px;
+}
+
+.calendar-date-range span,
+.calendar-event-date {
+  color: #78b8cb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-event-date {
+  margin-top: 8px;
+}
+
+.calendar-form-hint {
+  margin: -2px 0 0;
+  color: #8fbaca;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.calendar-form-message {
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 183, 200, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 99, 132, 0.08);
+  color: #ffb7c8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.calendar-event-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.calendar-event-title-row h3 {
+  min-width: 0;
+}
+
+.calendar-event-badge {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid rgba(101, 255, 188, 0.26);
+  border-radius: 999px;
+  color: #9fffd4;
+  background: rgba(101, 255, 188, 0.08);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-event-item-range {
+  border-left-color: rgba(101, 255, 188, 0.58);
+  background:
+    linear-gradient(90deg, rgba(101, 255, 188, 0.1), rgba(5, 16, 31, 0.72));
+}
+
 .calendar-form button {
   min-height: 46px;
   color: #00131c;
@@ -2629,6 +2705,60 @@ body {
   text-transform: uppercase;
 }
 
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid rgba(90, 212, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.28);
+  color: #9fc8d7;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.calendar-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-legend-dot,
+.calendar-legend-bar,
+.calendar-legend-count {
+  flex: 0 0 auto;
+}
+
+.calendar-legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--neon);
+  box-shadow: 0 0 8px var(--neon);
+}
+
+.calendar-legend-bar {
+  width: 22px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(101, 255, 188, 0.72);
+  box-shadow: 0 0 10px rgba(101, 255, 188, 0.24);
+}
+
+.calendar-legend-count {
+  min-width: 17px;
+  min-height: 17px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #00131c;
+  background: var(--neon-strong);
+  font-style: normal;
+  font-size: 10px;
+}
+
 .calendar-day {
   position: relative;
   display: grid;
@@ -2676,9 +2806,58 @@ body {
   box-shadow: 0 0 22px rgba(90, 212, 255, 0.2);
 }
 
+.calendar-day.has-range-events {
+  border-color: rgba(101, 255, 188, 0.26);
+  background:
+    linear-gradient(180deg, rgba(101, 255, 188, 0.06), rgba(5, 16, 31, 0.46));
+}
+
+.calendar-day.is-selected.has-range-events {
+  color: #00131c;
+  border-color: var(--neon-strong);
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+}
+
+.calendar-range-indicator {
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  bottom: 21px;
+  z-index: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(101, 255, 188, 0.78);
+  box-shadow: 0 0 12px rgba(101, 255, 188, 0.24);
+  pointer-events: none;
+}
+
+.calendar-day.period-start .calendar-range-indicator {
+  left: 15px;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.calendar-day.period-middle .calendar-range-indicator {
+  left: 4px;
+  right: 4px;
+  border-radius: 2px;
+}
+
+.calendar-day.period-end .calendar-range-indicator {
+  right: 15px;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+.calendar-day.is-selected .calendar-range-indicator {
+  background: rgba(0, 19, 28, 0.58);
+  box-shadow: none;
+}
+
 .calendar-day.has-events::after {
   content: '';
   position: absolute;
+  z-index: 2;
   bottom: 9px;
   width: 7px;
   height: 7px;
@@ -2693,6 +2872,7 @@ body {
 
 .calendar-moon {
   position: absolute;
+  z-index: 3;
   left: 7px;
   bottom: 5px;
   font-size: 14px;
@@ -2706,6 +2886,7 @@ body {
 
 .calendar-day strong {
   position: absolute;
+  z-index: 4;
   top: 6px;
   right: 6px;
   min-width: 18px;
@@ -2721,6 +2902,8 @@ body {
 }
 
 .calendar-day > span:first-child {
+  position: relative;
+  z-index: 3;
   font-size: 16px;
   line-height: 1;
 }
@@ -3406,6 +3589,7 @@ body {
   .todo-form,
   .command-form,
   .calendar-layout,
+  .calendar-date-range,
   .map-layout,
   .map-archive-layout,
   .map-bulk-actions,
@@ -3421,6 +3605,11 @@ body {
   }
 
   .note-header {
+    flex-direction: column;
+  }
+
+  .calendar-legend {
+    align-items: flex-start;
     flex-direction: column;
   }
 
@@ -3929,6 +4118,56 @@ body {
 .tenvi-dashboard.theme-standard .calendar-day.has-events::after {
   background: #12b76a;
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .calendar-date-range,
+.tenvi-dashboard.theme-standard .calendar-legend {
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .calendar-form-hint,
+.tenvi-dashboard.theme-standard .calendar-legend,
+.tenvi-dashboard.theme-standard .calendar-event-date {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .calendar-form-message {
+  color: #b42318;
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-standard .calendar-event-badge {
+  color: #067647;
+  border-color: #abefc6;
+  background: #ecfdf3;
+}
+
+.tenvi-dashboard.theme-standard .calendar-event-item-range {
+  border-left-color: #12b76a;
+  background: #f0fdf7;
+}
+
+.tenvi-dashboard.theme-standard .calendar-day.has-range-events {
+  border-color: #abefc6;
+  background: #f0fdf7;
+}
+
+.tenvi-dashboard.theme-standard .calendar-day.is-selected.has-range-events {
+  color: #ffffff;
+  border-color: #245bdb;
+  background: #245bdb;
+}
+
+.tenvi-dashboard.theme-standard .calendar-range-indicator,
+.tenvi-dashboard.theme-standard .calendar-legend-bar {
+  background: #12b76a;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .calendar-day.is-selected .calendar-range-indicator {
+  background: rgba(23, 32, 51, 0.5);
 }
 
 .tenvi-dashboard.theme-standard .calendar-moon {

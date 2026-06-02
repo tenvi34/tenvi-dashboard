@@ -39,6 +39,8 @@ const requiredCalendarKeys = [
   'label',
   'title',
   'selectedDate',
+  'startDateLabel',
+  'endDateLabel',
   'titleLabel',
   'memoLabel',
   'addEvent',
@@ -55,6 +57,13 @@ const requiredCalendarKeys = [
   'fullMoon',
   'noEvents',
   'noDueTasks',
+  'dateRangeError',
+  'dateRangeHint',
+  'rangeBadge',
+  'legendLabel',
+  'singleEventLegend',
+  'rangeEventLegend',
+  'eventCountLegend',
   'deleteEvent',
 ]
 
