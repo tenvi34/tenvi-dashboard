@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import MobileTabBar from './components/MobileTabBar.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import { STORAGE_KEYS } from './constants/storageKeys.js'
 import { isSupportedLanguage, translations } from './i18n/translations.js'
@@ -25,6 +26,15 @@ const MODULES = [
   { id: 'calendar' },
   { id: 'map' },
   { id: 'timer' },
+  { id: 'settings' },
+]
+
+// 모바일 하단 탭바는 기존 activeModule을 공유해 PC Sidebar와 같은 화면 전환 흐름을 사용합니다.
+const MOBILE_TAB_MODULES = [
+  { id: 'dashboard' },
+  { id: 'tasks' },
+  { id: 'notes' },
+  { id: 'map' },
   { id: 'settings' },
 ]
 
@@ -162,6 +172,13 @@ function App() {
             {moduleComponents[activeModule]}
           </section>
         </section>
+
+        <MobileTabBar
+          activeModule={activeModule}
+          modules={MOBILE_TAB_MODULES}
+          onModuleChange={setActiveModule}
+          t={t}
+        />
       </section>
     </main>
   )
