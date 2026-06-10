@@ -2295,6 +2295,15 @@ function Map({ t }) {
     setActiveMobileMapView('detail')
   }
 
+  const handleShowActiveRecordOnMap = () => {
+    setActiveMobileMapView('map')
+
+    if (activeRecord) {
+      // 상세에서 지도 보기로 돌아갈 때 선택 기록 중심으로 Leaflet 이동 요청 재실행
+      setViewportRequest(createViewportRequest('record-select', activeRecord))
+    }
+  }
+
   const handleDeleteRecord = async (recordId) => {
     if (!window.confirm(t.map.deleteConfirm)) {
       return
@@ -2595,7 +2604,7 @@ function Map({ t }) {
               <button
                 className="map-secondary-button"
                 type="button"
-                onClick={() => setActiveMobileMapView('map')}
+                onClick={handleShowActiveRecordOnMap}
               >
                 {t.map.backToMap}
               </button>
