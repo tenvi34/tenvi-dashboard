@@ -1288,6 +1288,18 @@ function MobileMapPreviewCard({ collections, onOpenDetail, record, t }) {
   )
 }
 
+function MobileMapEmptyCard({ onOpenList, t }) {
+  return (
+    <div className="mobile-map-empty-card" role="note">
+      <strong>{t.map.mobileMapEmptyTitle}</strong>
+      <p>{t.map.mobileMapEmptyDescription}</p>
+      <button className="map-secondary-button" type="button" onClick={onOpenList}>
+        {t.map.backToList}
+      </button>
+    </div>
+  )
+}
+
 function MapExplorePanel({
   activeRecordId,
   collections,
@@ -1622,6 +1634,7 @@ function Map({ t }) {
   const [activeMapMode, setActiveMapMode] = useState('explore')
   // 모바일 Map 보기 전환 상태: PC 3패널은 유지하고 작은 화면에서만 단일 보기로 분기
   const [activeMobileMapView, setActiveMobileMapView] = useState('map')
+  const [hasMobileMapViewInteraction, setHasMobileMapViewInteraction] = useState(false)
   const normalizedRecords = useMemo(
     () =>
       records.map((record) => ({
@@ -1716,6 +1729,23 @@ function Map({ t }) {
   const hasBulkAssignedLocation =
     Number.isFinite(Number(bulkAssignedLocation?.latitude)) &&
     Number.isFinite(Number(bulkAssignedLocation?.longitude))
+
+  useEffect(() => {
+    if (
+      !isLoading &&
+      normalizedRecords.length === 0 &&
+      activeMobileMapView === 'map' &&
+      !hasMobileMapViewInteraction
+    ) {
+      // 모바일 초기 빈 상태: 빈 지도보다 목록 안내가 먼저 보이도록 1회만 보정
+      setActiveMobileMapView('list')
+    }
+  }, [
+    activeMobileMapView,
+    hasMobileMapViewInteraction,
+    isLoading,
+    normalizedRecords.length,
+  ])
 
   useEffect(() => {
     let isMounted = true
@@ -2289,19 +2319,33 @@ function Map({ t }) {
     handleSelectRecord(recordId, 'marker-select')
   }
 
+  const handleChangeMobileMapView = (nextView) => {
+    setHasMobileMapViewInteraction(true)
+    setActiveMobileMapView(nextView)
+  }
+
   const handleSelectRecordFromList = (recordId) => {
     // 목록 선택 후 모바일에서는 바로 상세 보기로 이동하고, PC에서는 기존 3패널 선택 흐름 유지
     handleSelectRecord(recordId)
-    setActiveMobileMapView('detail')
+    handleChangeMobileMapView('detail')
   }
 
   const handleShowActiveRecordOnMap = () => {
-    setActiveMobileMapView('map')
+    handleChangeMobileMapView('map')
 
     if (activeRecord) {
       // 상세에서 지도 보기로 돌아갈 때 선택 기록 중심으로 Leaflet 이동 요청 재실행
       setViewportRequest(createViewportRequest('record-select', activeRecord))
     }
+  }
+
+  const handleSelectMobileMapView = (nextView) => {
+    if (nextView === 'map' && activeRecord) {
+      handleShowActiveRecordOnMap()
+      return
+    }
+
+    handleChangeMobileMapView(nextView)
   }
 
   const handleDeleteRecord = async (recordId) => {
@@ -2322,7 +2366,7 @@ function Map({ t }) {
         currentDraft?.id === recordId ? null : currentDraft,
       )
       if (activeRecordId === recordId) {
-        setActiveMobileMapView('list')
+        handleChangeMobileMapView('list')
       }
       setViewportRequest(createViewportRequest('fit-all'))
       setStatusMessage(t.map.deleteComplete)
@@ -2372,7 +2416,7 @@ function Map({ t }) {
       {activeMapMode === 'explore' ? (
         <MobileMapViewTabs
           activeView={activeMobileMapView}
-          onChangeView={setActiveMobileMapView}
+          onChangeView={handleSelectMobileMapView}
           t={t}
         />
       ) : null}
@@ -2590,8 +2634,18 @@ function Map({ t }) {
           {activeMapMode === 'explore' && !editDraft ? (
             <MobileMapPreviewCard
               collections={collections}
-              onOpenDetail={() => setActiveMobileMapView('detail')}
+              onOpenDetail={() => handleChangeMobileMapView('detail')}
               record={activeRecord}
+              t={t}
+            />
+          ) : null}
+          {activeMapMode === 'explore' &&
+          filteredRecords.length === 0 &&
+          !activeRecord &&
+          !draft &&
+          !editDraft ? (
+            <MobileMapEmptyCard
+              onOpenList={() => handleChangeMobileMapView('list')}
               t={t}
             />
           ) : null}
@@ -2600,22 +2654,6 @@ function Map({ t }) {
         {/* 오른쪽 상세 패널 — 탐색 모드에서만 표시 */}
         {activeMapMode === 'explore' ? (
           <aside className="map-detail-column">
-            <div className="mobile-map-detail-actions">
-              <button
-                className="map-secondary-button"
-                type="button"
-                onClick={handleShowActiveRecordOnMap}
-              >
-                {t.map.backToMap}
-              </button>
-              <button
-                className="map-secondary-button"
-                type="button"
-                onClick={() => setActiveMobileMapView('list')}
-              >
-                {t.map.backToList}
-              </button>
-            </div>
             {editDraft ? (
               <div className="map-status" role="status">
                 {t.map.clickToSetLocation}

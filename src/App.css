@@ -2153,7 +2153,7 @@ body {
 
 .mobile-map-view-tabs,
 .mobile-map-preview-card,
-.mobile-map-detail-actions {
+.mobile-map-empty-card {
   display: none;
 }
 
@@ -4070,15 +4070,36 @@ body {
     outline-offset: 2px;
   }
 
-  .map-view-panel.has-mobile-preview .map-fit-all-button {
-    bottom: 92px;
+  .mobile-map-empty-card {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 1100;
+    display: grid;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid rgba(90, 212, 255, 0.28);
+    border-radius: 9px;
+    background: rgba(3, 8, 16, 0.9);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(12px);
   }
 
-  .mobile-map-detail-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 10px;
+  .mobile-map-empty-card strong {
+    color: #f4fdff;
+    font-size: 15px;
+  }
+
+  .mobile-map-empty-card p {
+    margin: 0;
+    color: #b8dbe7;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .map-view-panel.has-mobile-preview .map-fit-all-button {
+    bottom: 92px;
   }
 
   .map-upload-box {
@@ -4984,7 +5005,8 @@ body {
 }
 
 .tenvi-dashboard.theme-standard .mobile-map-view-tabs,
-.tenvi-dashboard.theme-standard .mobile-map-preview-card {
+.tenvi-dashboard.theme-standard .mobile-map-preview-card,
+.tenvi-dashboard.theme-standard .mobile-map-empty-card {
   border-color: #d9e2ec;
   background: #ffffff;
   box-shadow: 0 12px 24px rgba(31, 42, 68, 0.12);
@@ -5002,11 +5024,13 @@ body {
 }
 
 .tenvi-dashboard.theme-standard .mobile-map-preview-card,
-.tenvi-dashboard.theme-standard .mobile-map-preview-card strong {
+.tenvi-dashboard.theme-standard .mobile-map-preview-card strong,
+.tenvi-dashboard.theme-standard .mobile-map-empty-card strong {
   color: #172033;
 }
 
-.tenvi-dashboard.theme-standard .mobile-map-preview-card small {
+.tenvi-dashboard.theme-standard .mobile-map-preview-card small,
+.tenvi-dashboard.theme-standard .mobile-map-empty-card p {
   color: #667085;
 }
 

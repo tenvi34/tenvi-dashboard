@@ -169,6 +169,8 @@ const requiredMapKeys = [
   'openMapDetail',
   'backToMap',
   'backToList',
+  'mobileMapEmptyTitle',
+  'mobileMapEmptyDescription',
   'fileName',
   'latitude',
   'longitude',
