@@ -2,6 +2,14 @@ body {
   background: #03060d;
 }
 
+body.tenvi-modal-open {
+  overflow: hidden;
+}
+
+body.tenvi-modal-open .tenvi-dashboard {
+  overflow: hidden;
+}
+
 /* 앱 배경과 HUD 변수 */
 #root {
   width: 100%;
@@ -1869,6 +1877,86 @@ body {
   border: 1px solid rgba(90, 212, 255, 0.2);
   border-radius: 8px;
   background: rgba(2, 9, 18, 0.46);
+}
+
+.map-photo-preview-button {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.map-photo-preview-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 3px;
+}
+
+.map-photo-preview-button img {
+  display: block;
+}
+
+.map-photo-lightbox {
+  position: fixed;
+  z-index: 4200;
+  inset: 0;
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  padding:
+    calc(18px + env(safe-area-inset-top))
+    18px
+    calc(18px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgba(0, 5, 12, 0.88);
+  backdrop-filter: blur(12px);
+}
+
+.map-photo-lightbox-body {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+  width: min(100%, 1100px);
+  min-height: 100%;
+}
+
+.map-photo-lightbox-image {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border: 1px solid rgba(90, 212, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(2, 9, 18, 0.76);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.map-photo-lightbox-close {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  justify-self: end;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(90, 212, 255, 0.32);
+  border-radius: var(--radius-control);
+  color: #dff8ff;
+  background: rgba(3, 8, 16, 0.86);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.map-photo-lightbox-close:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
 }
 
 .map-record-list {
@@ -4132,6 +4220,21 @@ body {
     max-height: 280px;
   }
 
+  .map-photo-lightbox {
+    padding:
+      calc(12px + env(safe-area-inset-top))
+      10px
+      calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .map-photo-lightbox-body {
+    min-height: 100%;
+  }
+
+  .map-photo-lightbox-close {
+    top: 0;
+  }
+
   .map-coordinate-panel {
     grid-template-columns: 1fr;
   }
@@ -4726,6 +4829,22 @@ body {
 .tenvi-dashboard.theme-standard .map-upload-box strong {
   color: #ffffff;
   background: #245bdb;
+}
+
+.tenvi-dashboard.theme-standard .map-photo-lightbox {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.tenvi-dashboard.theme-standard .map-photo-lightbox-image {
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(31, 42, 68, 0.28);
+}
+
+.tenvi-dashboard.theme-standard .map-photo-lightbox-close {
+  color: #172033;
+  border-color: #d9e2ec;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .tenvi-dashboard.theme-standard .photo-map {

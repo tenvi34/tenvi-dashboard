@@ -326,6 +326,54 @@ function PhotoPreview({ alt, blob, className }) {
   return <img alt={alt} className={className} src={src} />
 }
 
+function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
+  if (!blob) {
+    return <PhotoPreview alt={alt} blob={blob} className={className} />
+  }
+
+  return (
+    <button
+      className="map-photo-preview-button"
+      type="button"
+      aria-label={t.map.openPhotoPreview}
+      onClick={() => onOpen({ alt, blob })}
+    >
+      <PhotoPreview alt={alt} blob={blob} className={className} />
+    </button>
+  )
+}
+
+function PhotoLightbox({ photo, onClose, t }) {
+  if (!photo) {
+    return null
+  }
+
+  return (
+    <div
+      className="map-photo-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t.map.photoPreviewLabel}
+      onClick={onClose}
+    >
+      <div className="map-photo-lightbox-body" onClick={(event) => event.stopPropagation()}>
+        <button
+          className="map-photo-lightbox-close"
+          type="button"
+          onClick={onClose}
+        >
+          {t.map.closePhotoPreview}
+        </button>
+        <PhotoPreview
+          alt={photo.alt}
+          blob={photo.blob}
+          className="map-photo-lightbox-image"
+        />
+      </div>
+    </div>
+  )
+}
+
 // 저장 기록 마커
 function PhotoRecordMarker({ icon, isActive, onSelectRecord, record, t }) {
   const markerRef = useRef(null)
@@ -907,6 +955,7 @@ function PhotoDraftPanel({
   isSaving,
   language,
   onChangeDraft,
+  onOpenPhoto,
   onSaveDraft,
   onSelectPlace,
   t,
@@ -924,10 +973,12 @@ function PhotoDraftPanel({
 
   return (
     <section className="map-draft-panel" aria-label={t.map.draftLabel}>
-      <PhotoPreview
+      <PhotoPreviewButton
         alt={draft.title || draft.originalFileName}
         blob={draft.previewImageBlob}
         className="map-draft-preview"
+        onOpen={onOpenPhoto}
+        t={t}
       />
 
       {draft.status === 'missing-location' ? (
@@ -1009,6 +1060,7 @@ function PhotoEditPanel({
   language,
   onCancelEdit,
   onChangeEditDraft,
+  onOpenPhoto,
   onSaveEdit,
   onSelectPlace,
   record,
@@ -1018,10 +1070,12 @@ function PhotoEditPanel({
 
   return (
     <section className="map-detail-panel" aria-label={t.map.editLabel}>
-      <PhotoPreview
+      <PhotoPreviewButton
         alt={record.title}
         blob={record.previewImageBlob}
         className="map-detail-preview"
+        onOpen={onOpenPhoto}
+        t={t}
       />
 
       <label className="map-field">
@@ -1100,6 +1154,7 @@ function PhotoRecordDetail({
   collections,
   filterSummary,
   onDeleteRecord,
+  onOpenPhoto,
   onStartEdit,
   record,
   t,
@@ -1141,10 +1196,12 @@ function PhotoRecordDetail({
 
   return (
     <section className="map-detail-panel" aria-label={t.map.detailLabel}>
-      <PhotoPreview
+      <PhotoPreviewButton
         alt={record.title}
         blob={record.previewImageBlob}
         className="map-detail-preview"
+        onOpen={onOpenPhoto}
+        t={t}
       />
       <div className="map-detail-copy">
         <h3>{record.title}</h3>
@@ -1448,6 +1505,7 @@ function MapUploadPanel({
   onChangeBulkCollection,
   onChangeDraft,
   onClearMissingLocationSelection,
+  onOpenPhoto,
   onPhotoChange,
   onResetBulkUpload,
   onSaveBulkLocatedPhotos,
@@ -1510,12 +1568,13 @@ function MapUploadPanel({
             <PhotoDraftPanel
               collections={collections}
               draft={draft}
-              isSaving={isSaving}
-              language={t.map.searchLanguage}
-              onChangeDraft={onChangeDraft}
-              onSaveDraft={onSaveDraft}
-              onSelectPlace={onSelectPlace}
-              t={t}
+                isSaving={isSaving}
+                language={t.map.searchLanguage}
+                onChangeDraft={onChangeDraft}
+                onOpenPhoto={onOpenPhoto}
+                onSaveDraft={onSaveDraft}
+                onSelectPlace={onSelectPlace}
+                t={t}
             />
           </>
         ) : null}
@@ -1629,6 +1688,7 @@ function Map({ t }) {
     useState([])
   const [bulkAssignedLocation, setBulkAssignedLocation] = useState(null)
   const [bulkSaveReport, setBulkSaveReport] = useState(null)
+  const [photoViewer, setPhotoViewer] = useState(null)
   // 지도 모드 상태
   // 모드 전환 화면 분기
   const [activeMapMode, setActiveMapMode] = useState('explore')
@@ -1729,6 +1789,27 @@ function Map({ t }) {
   const hasBulkAssignedLocation =
     Number.isFinite(Number(bulkAssignedLocation?.latitude)) &&
     Number.isFinite(Number(bulkAssignedLocation?.longitude))
+
+  useEffect(() => {
+    if (!photoViewer) {
+      return undefined
+    }
+
+    document.body.classList.add('tenvi-modal-open')
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setPhotoViewer(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.classList.remove('tenvi-modal-open')
+    }
+  }, [photoViewer])
 
   useEffect(() => {
     if (
@@ -2483,6 +2564,7 @@ function Map({ t }) {
               onChangeBulkCollection={handleChangeBulkCollection}
               onChangeDraft={handleChangeDraft}
               onClearMissingLocationSelection={handleClearMissingLocationSelection}
+              onOpenPhoto={setPhotoViewer}
               onPhotoChange={handlePhotoChange}
               onResetBulkUpload={resetBulkUpload}
               onSaveBulkLocatedPhotos={handleSaveBulkLocatedPhotos}
@@ -2667,6 +2749,7 @@ function Map({ t }) {
                 language={t.map.searchLanguage}
                 onCancelEdit={handleCancelEdit}
                 onChangeEditDraft={handleChangeEditDraft}
+                onOpenPhoto={setPhotoViewer}
                 onSaveEdit={handleSaveEdit}
                 onSelectPlace={handleSelectPlace}
                 record={activeRecord}
@@ -2677,6 +2760,7 @@ function Map({ t }) {
                 collections={collections}
                 filterSummary={filterSummary}
                 onDeleteRecord={handleDeleteRecord}
+                onOpenPhoto={setPhotoViewer}
                 onStartEdit={handleStartEdit}
                 record={activeRecord}
                 t={t}
@@ -2686,6 +2770,11 @@ function Map({ t }) {
         ) : null}
         </div>
       </div>
+      <PhotoLightbox
+        photo={photoViewer}
+        onClose={() => setPhotoViewer(null)}
+        t={t}
+      />
     </section>
   )
 }
