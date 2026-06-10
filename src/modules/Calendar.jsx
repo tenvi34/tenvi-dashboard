@@ -60,6 +60,7 @@ function Calendar({ t }) {
   const [startDate, setStartDate] = useState(initialDate)
   const [endDate, setEndDate] = useState(initialDate)
   const [formMessage, setFormMessage] = useState('')
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false)
   const selectedEvents = getEventsForDate(events, selectedDate)
   const selectedDueTasks = getTasksDueOnDate(tasks, selectedDate)
   const eventCounts = useMemo(() => {
@@ -94,6 +95,14 @@ function Calendar({ t }) {
     [calendarCells, events],
   )
   const todayDate = getDateKey()
+
+  const resetEventForm = () => {
+    setTitle('')
+    setMemo('')
+    setStartDate(selectedDate)
+    setEndDate(selectedDate)
+    setFormMessage('')
+  }
 
   // 변경된 일정 목록을 localStorage와 화면 상태에 함께 반영합니다.
   const persistEvents = (nextEvents) => {
@@ -186,11 +195,8 @@ function Calendar({ t }) {
     }
 
     persistEvents([...events, nextEvent])
-    setTitle('')
-    setMemo('')
-    setStartDate(selectedDate)
-    setEndDate(selectedDate)
-    setFormMessage('')
+    resetEventForm()
+    setIsEventFormOpen(false)
   }
 
   // 지정한 Calendar 이벤트를 삭제하고 저장소에 반영합니다.
@@ -213,6 +219,11 @@ function Calendar({ t }) {
   const handleEndDateChange = (event) => {
     setEndDate(event.target.value)
     setFormMessage('')
+  }
+
+  const handleCancelEventForm = () => {
+    resetEventForm()
+    setIsEventFormOpen(false)
   }
 
   return (
@@ -316,7 +327,22 @@ function Calendar({ t }) {
           </div>
 
           {/* 선택된 날짜에 새 일정을 추가하는 입력 폼 */}
-          <form className="calendar-form" onSubmit={handleAddEvent}>
+          {/* 모바일 일정 추가 폼 접힘/펼침 상태 */}
+          <button
+            className="calendar-form-toggle"
+            type="button"
+            aria-expanded={isEventFormOpen}
+            aria-controls="calendar-event-form"
+            onClick={() => setIsEventFormOpen((isOpen) => !isOpen)}
+          >
+            {isEventFormOpen ? t.calendar.closeEventForm : t.calendar.openEventForm}
+          </button>
+
+          <form
+            id="calendar-event-form"
+            className={`calendar-form ${isEventFormOpen ? 'is-open' : ''}`}
+            onSubmit={handleAddEvent}
+          >
             <label className="sr-only" htmlFor="calendar-title-input">
               {t.calendar.titleLabel}
             </label>
@@ -367,7 +393,16 @@ function Calendar({ t }) {
               </p>
             ) : null}
 
-            <button type="submit">{t.calendar.addEvent}</button>
+            <div className="calendar-form-actions">
+              <button type="submit">{t.calendar.addEvent}</button>
+              <button
+                className="calendar-form-cancel"
+                type="button"
+                onClick={handleCancelEventForm}
+              >
+                {t.calendar.cancelEventForm}
+              </button>
+            </div>
           </form>
         </section>
 

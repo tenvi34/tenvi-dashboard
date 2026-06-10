@@ -2642,6 +2642,22 @@ body {
   font-weight: 800;
 }
 
+.calendar-form-toggle {
+  display: none;
+}
+
+.calendar-form-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.calendar-form-cancel {
+  display: none;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+}
+
 .calendar-due-task-section {
   margin-top: 16px;
   padding-top: 16px;
@@ -3731,6 +3747,56 @@ body {
     outline-offset: 2px;
   }
 
+  .mobile-tabbar-more {
+    position: relative;
+    min-width: 0;
+  }
+
+  .mobile-tabbar-more-button {
+    width: 100%;
+  }
+
+  .mobile-tabbar-menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    display: grid;
+    gap: 6px;
+    width: min(180px, calc(100vw - 24px));
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: rgba(3, 8, 16, 0.96);
+    box-shadow: 0 -10px 30px rgba(45, 125, 255, 0.18);
+    backdrop-filter: blur(16px);
+  }
+
+  .mobile-tabbar-menu-button {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(90, 212, 255, 0.18);
+    border-radius: 7px;
+    padding: 0 12px;
+    color: #dff8ff;
+    background: rgba(2, 9, 18, 0.64);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mobile-tabbar-menu-button.is-active {
+    color: #f4fdff;
+    border-color: var(--line-strong);
+    background: rgba(90, 212, 255, 0.14);
+  }
+
+  .mobile-tabbar-menu-button:focus-visible {
+    outline: 2px solid var(--neon);
+    outline-offset: 2px;
+  }
+
   .module-panel {
     padding: 18px;
   }
@@ -3893,9 +3959,135 @@ body {
     gap: 5px;
   }
 
+  /* 모바일에서는 달력 선택이 먼저 오고 세부 일정은 아래에서 확인 */
+  .calendar-month-panel {
+    order: 1;
+  }
+
+  .calendar-events-panel {
+    order: 2;
+    gap: 12px;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 28px);
+  }
+
+  .calendar-events-header {
+    padding: 12px;
+  }
+
+  .calendar-events-header h3 {
+    font-size: 18px;
+  }
+
+  .calendar-events-header strong {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 22px;
+  }
+
+  .calendar-event-list {
+    max-height: none;
+    padding-right: 0;
+    overflow: visible;
+  }
+
+  .calendar-event-item {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .calendar-event-item h3 {
+    font-size: 16px;
+  }
+
+  .calendar-event-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .calendar-form-toggle {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    color: #00131c;
+    background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .calendar-form {
+    display: none;
+  }
+
+  .calendar-form.is-open {
+    display: grid;
+  }
+
+  .calendar-form-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-form-cancel {
+    display: block;
+    color: #dff8ff;
+    background: rgba(5, 16, 31, 0.5);
+  }
+
   .calendar-day,
   .calendar-day.is-empty {
-    min-height: 54px;
+    min-height: 52px;
+  }
+
+  .calendar-day > span:first-child {
+    font-size: 14px;
+  }
+
+  .calendar-day strong {
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    min-height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+  }
+
+  /* 좁은 날짜 셀에서 기간 바와 점/아이콘이 겹치지 않도록 위치 압축 */
+  .calendar-range-indicator {
+    left: 7px;
+    right: 7px;
+    bottom: 17px;
+    height: 4px;
+  }
+
+  .calendar-day.period-start .calendar-range-indicator {
+    left: 10px;
+  }
+
+  .calendar-day.period-middle .calendar-range-indicator {
+    left: 3px;
+    right: 3px;
+  }
+
+  .calendar-day.period-end .calendar-range-indicator {
+    right: 10px;
+  }
+
+  .calendar-day.has-events::after {
+    bottom: 6px;
+    width: 6px;
+    height: 6px;
+  }
+
+  .calendar-moon {
+    left: 4px;
+    bottom: 3px;
+    font-size: 11px;
+  }
+
+  .calendar-day.has-events .calendar-moon {
+    left: 4px;
   }
 
   .sidebar-nav {
@@ -4054,6 +4246,24 @@ body {
   border-color: #9db5ff;
   background: #eef3ff;
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-menu {
+  border-color: #d9e2ec;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -10px 30px rgba(28, 39, 62, 0.12);
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-menu-button {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-menu-button.is-active {
+  color: #245bdb;
+  border-color: #9db5ff;
+  background: #eef3ff;
 }
 
 .tenvi-dashboard.theme-standard .tenvi-header h1,
@@ -4385,6 +4595,7 @@ body {
 .tenvi-dashboard.theme-standard .command-form button,
 .tenvi-dashboard.theme-standard .notes-form button,
 .tenvi-dashboard.theme-standard .calendar-form button,
+.tenvi-dashboard.theme-standard .calendar-form-toggle,
 .tenvi-dashboard.theme-standard .timer-button,
 .tenvi-dashboard.theme-standard .map-primary-button,
 .tenvi-dashboard.theme-standard .map-search-form button {
@@ -4398,11 +4609,24 @@ body {
 .tenvi-dashboard.theme-standard .command-form button:hover,
 .tenvi-dashboard.theme-standard .notes-form button:hover,
 .tenvi-dashboard.theme-standard .calendar-form button:hover,
+.tenvi-dashboard.theme-standard .calendar-form-toggle:hover,
 .tenvi-dashboard.theme-standard .timer-button:hover,
 .tenvi-dashboard.theme-standard .map-primary-button:hover:not(:disabled),
 .tenvi-dashboard.theme-standard .map-search-form button:hover:not(:disabled) {
   background: #1d4ed8;
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .calendar-form-cancel {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .calendar-form-cancel:hover {
+  color: #172033;
+  border-color: #9db5ff;
+  background: #f4f7ff;
 }
 
 .tenvi-dashboard.theme-standard .delete-button,

@@ -35,6 +35,12 @@ const MOBILE_TAB_MODULES = [
   { id: 'tasks' },
   { id: 'notes' },
   { id: 'map' },
+]
+
+const MOBILE_MORE_MODULES = [
+  { id: 'calendar' },
+  { id: 'command' },
+  { id: 'timer' },
   { id: 'settings' },
 ]
 
@@ -175,6 +181,7 @@ function App() {
 
         <MobileTabBar
           activeModule={activeModule}
+          moreModules={MOBILE_MORE_MODULES}
           modules={MOBILE_TAB_MODULES}
           onModuleChange={setActiveModule}
           t={t}
