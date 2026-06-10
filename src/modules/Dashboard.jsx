@@ -13,7 +13,7 @@ import { getTodayDueTasks } from './tasksLogic.js'
 
 const DASHBOARD_TABS = ['overview', 'work', 'archive', 'system']
 
-// Dashboard 요약에 사용할 저장 목록을 localStorage에서 안전하게 읽습니다.
+// Dashboard 저장 목록 읽기
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -36,7 +36,7 @@ const readStoredNumber = (storageKey) => {
   return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
 }
 
-// 최근 Notes 정렬에 사용할 작성 시각을 숫자로 변환합니다.
+// Notes 작성 시각 변환
 const getNoteTime = (note) => {
   const time = new Date(note.createdAt).getTime()
   return Number.isNaN(time) ? 0 : time
@@ -70,7 +70,7 @@ function Dashboard({
     STORAGE_KEYS.timerCompletedSessions,
   )
 
-  // 기존 Calendar 요약 데이터를 탭별로 재배치하기 위해 계산 흐름은 유지합니다.
+  // Calendar 요약 재배치
   const allTodayEvents = getTodayEvents(calendarEvents)
   const todayEvents = allTodayEvents.slice(0, 3)
   const allTodayDueTasks = getTodayDueTasks(tasks)
@@ -97,7 +97,7 @@ function Dashboard({
   useEffect(() => {
     let isMounted = true
 
-    // Dashboard는 Map IndexedDB를 수정하지 않고 service에서 읽은 요약만 비동기로 수신
+    // Map 요약 읽기 전용
     const loadMapSummary = async () => {
       setMapSummaryState((currentState) => ({
         ...currentState,
@@ -257,7 +257,7 @@ function Dashboard({
 
   const renderOverviewTab = () => (
     <>
-      {/* 개요 탭: 첫 화면에서 핵심 상태만 빠르게 확인 */}
+      {/* 개요 탭 */}
       <div className="status-card dashboard-briefing" role="status">
         <span>{t.dashboard.todayBriefing}</span>
         <strong>{mapBriefingMessage}</strong>
@@ -317,7 +317,7 @@ function Dashboard({
 
   const renderWorkTab = () => (
     <>
-      {/* 작업 탭: Tasks와 Calendar 중심으로 기존 요약 데이터를 재배치 */}
+      {/* 작업 탭 */}
       <div className="dashboard-tab-grid">
         <section className="summary-panel">
           <div className="summary-panel-header">
@@ -392,7 +392,7 @@ function Dashboard({
 
   const renderArchiveTab = () => (
     <>
-      {/* 기록 탭: Notes와 Map Archive 요약을 분리 */}
+      {/* 기록 탭 */}
       <div className="dashboard-tab-grid">
         <section className="summary-panel">
           <div className="summary-panel-header">
@@ -422,7 +422,7 @@ function Dashboard({
 
   const renderSystemTab = () => (
     <>
-      {/* 시스템 탭: 설정 변경이 아닌 읽기 전용 현재 상태 요약 */}
+      {/* 시스템 탭 */}
       <div className="dashboard-tab-grid dashboard-system-grid">
         <section className="summary-panel">
           <div className="summary-panel-header">
@@ -490,7 +490,7 @@ function Dashboard({
 
   return (
     <section className="module-panel dashboard-module" aria-label={t.modules.dashboard}>
-      {/* Dashboard 탭 구성 */}
+      {/* Dashboard 탭 */}
       <div className="dashboard-tabs" aria-label={t.dashboard.tabsLabel}>
         {DASHBOARD_TABS.map((tabId) => (
           <button

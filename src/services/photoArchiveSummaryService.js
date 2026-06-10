@@ -18,7 +18,7 @@ const createEmptyLocationSourceCounts = () => ({
   unknown: 0,
 })
 
-// Dashboard 요약 전용 순수 계산: IndexedDB 구조 변경 없이 읽은 배열만 집계
+// Dashboard Map 요약 계산
 export const createMapArchiveSummary = (records = [], collections = []) => {
   const collectionMap = new Map(
     collections
@@ -99,7 +99,7 @@ export const createMapArchiveSummary = (records = [], collections = []) => {
   }
 }
 
-// Dashboard 조회 계층: IndexedDB에서는 읽기만 수행하고 화면에는 가벼운 요약 객체만 전달
+// Dashboard Map 요약 조회
 export const getMapArchiveSummary = async () => {
   const [records, collections] = await Promise.all([
     getPhotoRecords(),

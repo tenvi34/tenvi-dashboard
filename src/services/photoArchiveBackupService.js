@@ -27,7 +27,7 @@ const normalizeCollectionId = (collectionId, collections = []) => {
   return collectionId
 }
 
-// IndexedDB Blob을 JSON 백업에 넣기 위한 data URL 문자열로 변환
+// Blob data URL 변환
 export const blobToDataUrl = (blob) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -37,7 +37,7 @@ export const blobToDataUrl = (blob) =>
     reader.readAsDataURL(blob)
   })
 
-// 백업 data URL을 IndexedDB에 다시 넣을 Blob으로 복원
+// data URL Blob 복원
 export const dataUrlToBlob = async (dataUrl) => {
   if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
     throw new Error('Invalid image data URL.')
@@ -52,7 +52,7 @@ export const dataUrlToBlob = async (dataUrl) => {
   return response.blob()
 }
 
-// IndexedDB 사진 기록을 JSON 백업 가능한 구조로 직렬화
+// 사진 기록 직렬화
 export const serializePhotoRecordsForBackup = async (records) =>
   Promise.all(
     records.map(async (record) => ({
@@ -75,7 +75,7 @@ export const serializePhotoRecordsForBackup = async (records) =>
     })),
   )
 
-// Map 백업 record의 필수 메타데이터와 이미지 문자열을 복원 전 검증
+// Map record 복원 검증
 export const validateMapBackupRecordShape = (record, collections = []) => {
   if (!isPlainObject(record)) {
     return null
@@ -111,7 +111,7 @@ export const validateMapBackupRecordShape = (record, collections = []) => {
   }
 }
 
-// Map 컬렉션 백업 record의 필수 구조 검증
+// Map 컬렉션 검증
 export const validateMapCollectionBackupRecordShape = (collection) => {
   if (
     !isPlainObject(collection) ||
@@ -135,11 +135,11 @@ export const validateMapCollectionBackupRecordShape = (collection) => {
   }
 }
 
-// IndexedDB 컬렉션을 JSON 백업 가능한 구조로 직렬화
+// 컬렉션 직렬화
 export const serializePhotoCollectionsForBackup = (collections) =>
   collections.map(validateMapCollectionBackupRecordShape).filter(Boolean)
 
-// 복원 전 컬렉션 손상 여부와 정상 복원 가능 목록 요약 생성
+// 컬렉션 복원 요약
 export const preparePhotoCollectionsForRestore = (backupCollections) => {
   const totalCount = Array.isArray(backupCollections)
     ? backupCollections.length
@@ -176,7 +176,7 @@ export const preparePhotoCollectionsForRestore = (backupCollections) => {
   }
 }
 
-// 복원 전 모든 이미지 data URL을 Blob으로 변환하고 손상 record 요약 생성
+// 이미지 Blob 복원 요약
 export const preparePhotoRecordsForRestore = async (
   backupRecords,
   collections = [],
@@ -203,7 +203,7 @@ export const preparePhotoRecordsForRestore = async (
     }
 
     try {
-      // 기존 IndexedDB 데이터를 건드리기 전 Blob 복원 가능 여부 사전 확인
+      // Blob 복원 사전 확인
       const previewImageBlob = await dataUrlToBlob(
         normalizedRecord.previewImageDataUrl,
       )

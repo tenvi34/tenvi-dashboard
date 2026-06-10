@@ -17,7 +17,7 @@ const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 const HUD_EFFECTS = ['normal', 'reduced']
 const THEMES = ['hud', 'standard']
 
-// 새 모듈을 추가할 때는 사이드바 목록과 아래 moduleComponents 매핑을 함께 맞춰야 합니다.
+// 모듈 목록과 매핑
 const MODULES = [
   { id: 'dashboard' },
   { id: 'command' },
@@ -29,7 +29,7 @@ const MODULES = [
   { id: 'settings' },
 ]
 
-// 모바일 하단 탭바는 기존 activeModule을 공유해 PC Sidebar와 같은 화면 전환 흐름을 사용합니다.
+// 모바일 탭 activeModule 공유
 const MOBILE_TAB_MODULES = [
   { id: 'dashboard' },
   { id: 'tasks' },
@@ -44,35 +44,35 @@ const MOBILE_MORE_MODULES = [
   { id: 'settings' },
 ]
 
-// 앱 전역 설정과 현재 모듈 화면을 관리하는 최상위 컴포넌트입니다.
+// 앱 최상위 컴포넌트
 function App() {
   const [startModule, setStartModule] = useState(() => {
     const savedStartModule = localStorage.getItem(STORAGE_KEYS.startModule)
 
-    // localStorage 값이 예전 버전이거나 손상된 경우 안전한 기본 모듈로 시작합니다.
+    // 기본 모듈 fallback
     return START_MODULES.includes(savedStartModule) ? savedStartModule : 'tasks'
   })
   const [activeModule, setActiveModule] = useState(startModule)
   const [hudEffect, setHudEffect] = useState(() => {
     const savedHudEffect = localStorage.getItem(STORAGE_KEYS.hudEffect)
 
-    // 허용된 HUD 효과만 복원해 CSS 클래스가 예상 범위를 벗어나지 않게 합니다.
+    // HUD 효과 검증
     return HUD_EFFECTS.includes(savedHudEffect) ? savedHudEffect : 'normal'
   })
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem(STORAGE_KEYS.theme)
 
-    // 테마 값은 최상위 CSS 클래스에 직접 연결되므로 허용된 값만 복원합니다.
+    // 테마 값 검증
     return THEMES.includes(savedTheme) ? savedTheme : 'hud'
   })
   const [language, setLanguage] = useState(() => {
     const savedLanguage = localStorage.getItem(STORAGE_KEYS.language)
 
-    // 지원하지 않는 언어 코드는 translations 접근 오류를 막기 위해 기본 언어로 되돌립니다.
+    // 언어 코드 fallback
     return isSupportedLanguage(savedLanguage) ? savedLanguage : 'ko'
   })
 
-  // 설정 변경은 App 상태를 기준으로 즉시 저장되어 새로고침 후에도 유지됩니다.
+  // 설정 즉시 저장
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.language, language)
   }, [language])
@@ -91,7 +91,7 @@ function App() {
 
   const t = translations[language]
   const activeModuleLabel = t.modules[activeModule] ?? t.modules.tasks
-  // activeModule 문자열을 실제 모듈 컴포넌트로 바꾸는 중앙 전환 지점입니다.
+  // 모듈 컴포넌트 전환
   const moduleComponents = useMemo(
     () => ({
       dashboard: (
@@ -113,7 +113,7 @@ function App() {
         <Settings
           hudEffect={hudEffect}
           language={language}
-          // Settings는 App의 전역 설정 setter를 받아 저장 흐름을 한곳으로 유지합니다.
+          // Settings 전역 setter
           onHudEffectChange={setHudEffect}
           onLanguageChange={setLanguage}
           onStartModuleChange={setStartModule}
@@ -131,9 +131,9 @@ function App() {
     <main className={`tenvi-dashboard theme-${theme} hud-${hudEffect}`}>
       <div className="tenvi-grid" aria-hidden="true"></div>
 
-      {/* TENVI 전체 화면 프레임: 상단 헤더와 모듈 작업 영역을 감쌉니다. */}
+      {/* TENVI 화면 프레임 */}
       <section className="tenvi-shell" aria-labelledby="tenvi-title">
-        {/* 앱 상단 브랜드, 언어 전환, 시스템 상태 영역 */}
+        {/* 상단 브랜드 영역 */}
         <header className="tenvi-header">
           <div>
             {/* <p className="tenvi-kicker">Personal AI Command Dashboard</p> */}
@@ -161,7 +161,7 @@ function App() {
           </div>
         </header>
 
-        {/* 좌측 Sidebar와 우측 활성 모듈 화면 영역 */}
+        {/* Sidebar와 모듈 화면 */}
         <section className="tenvi-workspace">
           <Sidebar
             activeModule={activeModule}
@@ -170,7 +170,7 @@ function App() {
             t={t}
           />
 
-          {/* activeModule 값에 따라 실제 화면 컴포넌트가 교체되는 영역 */}
+          {/* activeModule 렌더 영역 */}
           <section
             className="module-stage"
             aria-label={`${activeModuleLabel} ${t.app.stageLabel}`}

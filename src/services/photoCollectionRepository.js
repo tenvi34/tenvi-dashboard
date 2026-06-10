@@ -12,7 +12,7 @@ const createCollectionId = () => {
   return `collection-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-// IndexedDB 컬렉션 record의 누락 필드 보정
+// 컬렉션 record 보정
 const normalizeCollection = (collection) => ({
   id: collection.id,
   name: String(collection.name ?? '').trim(),
@@ -23,7 +23,7 @@ const normalizeCollection = (collection) => ({
   updatedAt: String(collection.updatedAt ?? collection.createdAt ?? new Date().toISOString()),
 })
 
-// 컬렉션 store 단일 작업용 트랜잭션 래퍼
+// 컬렉션 트랜잭션 래퍼
 const runCollectionTransaction = async (mode, action) => {
   const database = await openPhotoArchiveDatabase()
 
@@ -54,7 +54,7 @@ const runCollectionTransaction = async (mode, action) => {
   })
 }
 
-// 저장된 모든 Map 컬렉션 조회
+// Map 컬렉션 조회
 export const getPhotoCollections = async () => {
   const collections = await runCollectionTransaction('readonly', (store) =>
     store.getAll(),
@@ -65,7 +65,7 @@ export const getPhotoCollections = async () => {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
-// 새 Map 컬렉션 생성
+// Map 컬렉션 생성
 export const createPhotoCollection = async (collectionInput) => {
   const now = new Date().toISOString()
   const collection = normalizeCollection({
@@ -80,7 +80,7 @@ export const createPhotoCollection = async (collectionInput) => {
   return collection
 }
 
-// 기존 Map 컬렉션 수정
+// Map 컬렉션 수정
 export const updatePhotoCollection = async (id, patch) => {
   const currentCollection = await runCollectionTransaction('readonly', (store) =>
     store.get(id),
@@ -104,7 +104,7 @@ export const updatePhotoCollection = async (id, patch) => {
   return nextCollection
 }
 
-// 컬렉션 삭제와 연결 사진의 미분류 이동을 같은 IndexedDB 트랜잭션에서 처리
+// 컬렉션 삭제 transaction
 export const deletePhotoCollection = async (collectionId) => {
   const database = await openPhotoArchiveDatabase()
 

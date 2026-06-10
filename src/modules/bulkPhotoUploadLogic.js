@@ -109,7 +109,7 @@ export const createBulkUploadSummary = (items = []) =>
     },
   )
 
-// 위치정보 없는 사진 제외 정책: 최종 저장 후보는 좌표와 미리보기 Blob이 있는 located 항목만 허용
+// bulk 저장 후보 정책
 export const getBulkPhotoSaveCandidates = (items = []) =>
   items.filter(
     (item) =>
@@ -146,7 +146,7 @@ export const createBulkPhotoRecordInputs = (items = [], collectionId = null) =>
     .map((item) => createBulkPhotoRecordInput(item, collectionId))
     .filter(Boolean)
 
-// 일부 저장 실패 처리: 성공 항목과 실패 항목을 분리해 UI 결과 표시용으로 정리
+// bulk 저장 결과 정리
 export const createBulkPhotoSaveResult = (results = []) => ({
   failedCount: results.filter((result) => result.status === 'failed').length,
   failedItems: results.filter((result) => result.status === 'failed'),

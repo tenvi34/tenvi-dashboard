@@ -14,15 +14,15 @@ const wait = (milliseconds) =>
     setTimeout(resolve, milliseconds)
   })
 
-// 검색어, 언어, 국가 범위를 포함한 캐시 키 생성
+// 검색 캐시 key
 const getCacheKey = (query, language, countryCode) =>
   `${query.trim().toLowerCase()}::${language}::${countryCode}`
 
-// 검색 UI의 범위 선택값을 Nominatim countrycodes 값으로 변환
+// Nominatim 국가 코드
 export const getCountryCodeForSearchScope = (scope) =>
   PLACE_SEARCH_SCOPES[scope] ?? PLACE_SEARCH_SCOPES.all
 
-// Nominatim 주소 객체를 결과 목록에 표시할 짧은 주소로 정리
+// Nominatim 주소 요약
 export const createAddressSummary = (address = {}) =>
   [
     address.suburb,
@@ -33,7 +33,7 @@ export const createAddressSummary = (address = {}) =>
     .filter(Boolean)
     .join(', ')
 
-// Nominatim 응답을 TENVI 내부 검색 결과 구조로 정규화
+// Nominatim 결과 정규화
 export const normalizePlaceSearchResult = (result) => {
   const latitude = Number(result?.lat)
   const longitude = Number(result?.lon)
@@ -58,13 +58,13 @@ export const normalizePlaceSearchResult = (result) => {
   }
 }
 
-// 검색어와 언어별 메모리 캐시로 동일 요청 반복 방지
+// 검색 메모리 캐시
 export const clearPlaceSearchCache = () => {
   cache.clear()
   lastRequestTime = 0
 }
 
-// 공개 Nominatim API 호출을 한 곳에 모은 provider 교체용 함수 계약
+// Nominatim provider 계약
 export const searchPlaces = async (
   query,
   { fetcher = fetch, language = 'en', scope = 'all' } = {},
@@ -85,7 +85,7 @@ export const searchPlaces = async (
   const elapsedTime = Date.now() - lastRequestTime
 
   if (elapsedTime < MIN_REQUEST_INTERVAL) {
-    // 공개 무료 API 정책을 지키기 위한 앱 전체 초당 1회 요청 제한
+    // Nominatim 요청 제한
     await wait(MIN_REQUEST_INTERVAL - elapsedTime)
   }
 

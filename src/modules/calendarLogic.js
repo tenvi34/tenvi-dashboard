@@ -1,4 +1,4 @@
-// Date 객체를 Calendar/Tasks가 공유하는 YYYY-MM-DD 키로 변환합니다.
+// YYYY-MM-DD 변환
 export const getDateKey = (date = new Date()) => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -7,7 +7,7 @@ export const getDateKey = (date = new Date()) => {
   return `${year}-${month}-${day}`
 }
 
-// YYYY-MM-DD 키를 Date 생성에 맞는 year/month/day 값으로 분해합니다.
+// 날짜 key 분해
 export const parseDateKey = (dateKey) => {
   const [year, month, day] = dateKey.split('-').map((value) => Number(value))
 
@@ -24,18 +24,18 @@ const isDateKey = (dateKey) => {
   return getDateKey(new Date(year, month, day)) === dateKey
 }
 
-// 지정한 연월에 포함된 총 일수를 계산합니다.
+// 월 일수 계산
 export const getDaysInMonth = (year, month) =>
   new Date(year, month + 1, 0).getDate()
 
-// 월 이동 때 존재하지 않는 날짜를 해당 월의 마지막 날로 보정한 날짜 키를 만듭니다.
+// 월 이동 날짜 보정
 export const getClampedDateKey = (year, month, day) => {
   const clampedDay = Math.min(Math.max(day, 1), getDaysInMonth(year, month))
 
   return getDateKey(new Date(year, month, clampedDay))
 }
 
-// 현재 연월에서 offset만큼 이동한 연월 값을 계산합니다.
+// 월 offset 계산
 export const getAdjacentMonth = (year, month, offset) => {
   const targetDate = new Date(year, month + offset, 1)
 
@@ -49,7 +49,7 @@ const SYNODIC_MONTH_DAYS = 29.530588853
 const FULL_MOON_REFERENCE_UTC = Date.UTC(2000, 0, 21, 4, 40)
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 
-// 지정한 날짜가 평균 달 주기 기준 보름달 근사일인지 판단합니다.
+// 보름달 근사 판단
 export const isFullMoonDate = (dateKey) => {
   const { day, month, year } = parseDateKey(dateKey)
   const targetDateUtcNoon = Date.UTC(year, month, day, 12)
@@ -59,19 +59,19 @@ export const isFullMoonDate = (dateKey) => {
     ((daysSinceReference % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) %
     SYNODIC_MONTH_DAYS
 
-  // 실제 천문 시각은 지역과 시간대에 따라 달라지므로 날짜 셀 표시는 평균 주기 기반 근사값으로 처리합니다.
+  // 평균 주기 근사값
   return (
     cyclePosition <= 0.5 || cyclePosition >= SYNODIC_MONTH_DAYS - 0.5
   )
 }
 
-// 월간 달력 그리드에 사용할 빈 칸과 날짜 칸 배열을 생성합니다.
+// 월간 그리드 생성
 export const getMonthCalendarCells = (year, month) => {
   const firstWeekday = new Date(year, month, 1).getDay()
   const dayCount = getDaysInMonth(year, month)
   const cells = []
 
-  // 월간 달력은 7열 고정이므로 시작 요일 이전 빈 칸도 명시적으로 채웁니다.
+  // 7열 빈 칸 채움
   for (let index = 0; index < firstWeekday; index += 1) {
     cells.push(null)
   }
@@ -130,7 +130,7 @@ export const normalizeCalendarEvent = (event) => {
 
 const isCalendarEvent = (event) => normalizeCalendarEvent(event) !== null
 
-// 저장된 JSON 문자열에서 유효한 Calendar 이벤트 목록만 복원합니다.
+// Calendar 이벤트 복원
 export const readCalendarEvents = (storageValue) => {
   if (!storageValue) {
     return []
@@ -139,7 +139,7 @@ export const readCalendarEvents = (storageValue) => {
   try {
     const parsedValue = JSON.parse(storageValue)
 
-    // Calendar 데이터는 기존 저장 객체를 강제 마이그레이션하지 않고, 렌더링 전에 유효성만 검증합니다.
+    // 렌더 전 유효성 검증
     return Array.isArray(parsedValue) ? parsedValue.filter(isCalendarEvent) : []
   } catch {
     return []
@@ -171,7 +171,7 @@ export const getCalendarEventDateLabel = (event) =>
       )}`
     : formatCalendarDate(getCalendarEventStartDate(event))
 
-// 선택 날짜가 기간 안에 포함되는지 판단하는 함수
+// 기간 포함 판단
 export const eventOccursOnDate = (event, dateKey) =>
   getCalendarEventStartDate(event) <= dateKey &&
   getCalendarEventEndDate(event) >= dateKey
@@ -248,11 +248,11 @@ export const getCalendarDayRangeMeta = (events, dateKey) => {
   }
 }
 
-// 오늘 날짜에 해당하는 Calendar 이벤트를 반환합니다.
+// 오늘 이벤트 반환
 export const getTodayEvents = (events, today = new Date()) =>
   getEventsForDate(events, getDateKey(today))
 
-// 현재 날짜가 속한 월의 Calendar 이벤트만 반환합니다.
+// 현재 월 이벤트 반환
 export const getMonthEvents = (events, currentDate = new Date()) => {
   const { month, year } = parseDateKey(getDateKey(currentDate))
   const firstDateKey = getDateKey(new Date(year, month, 1))
@@ -265,11 +265,11 @@ export const getMonthEvents = (events, currentDate = new Date()) => {
   )
 }
 
-// 이벤트가 하나 이상 있는 날짜의 개수를 계산합니다.
+// 이벤트 날짜 수 계산
 export const getScheduledDateCount = (events) =>
   new Set(events.flatMap(getCalendarEventDateKeys)).size
 
-// 오늘 이후 가장 가까운 Calendar 이벤트를 찾습니다.
+// 다음 Calendar 이벤트
 export const getNextEvent = (events, currentDate = new Date()) => {
   const todayKey = getDateKey(currentDate)
 
@@ -300,7 +300,7 @@ export const countEventsByDate = (events) =>
     return eventCounts
   }, {})
 
-// 입력값을 정리해 새 Calendar 이벤트 객체를 생성합니다.
+// Calendar 이벤트 생성
 export const createCalendarEvent = ({
   date,
   endDate = date,
@@ -334,6 +334,6 @@ export const createCalendarEvent = ({
   }
 }
 
-// 지정한 이벤트 id를 제외한 Calendar 이벤트 목록을 반환합니다.
+// Calendar 이벤트 제외
 export const removeCalendarEvent = (events, eventId) =>
   events.filter((event) => event.id !== eventId)

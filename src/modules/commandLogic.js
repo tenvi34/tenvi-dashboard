@@ -18,7 +18,7 @@ export const LANGUAGE_STORAGE_KEY = STORAGE_KEYS.language
 export const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
 export const LANGUAGES = ['ko', 'en']
 
-// Command 분석에 사용할 저장 목록을 localStorage에서 안전하게 읽습니다.
+// Command 저장 목록 읽기
 export const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -28,14 +28,14 @@ export const readStoredList = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
-    // 명령 콘솔은 분석 도구이므로 저장소가 손상되어도 빈 목록으로 안전하게 진행합니다.
+    // 손상 저장소 fallback
     return Array.isArray(parsedValue) ? parsedValue : []
   } catch {
     return []
   }
 }
 
-// Command 분석에 사용할 저장 숫자 값을 안전하게 읽습니다.
+// Command 숫자 읽기
 export const readStoredNumber = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
   const parsedValue = Number.parseInt(savedValue, 10)
@@ -43,27 +43,27 @@ export const readStoredNumber = (storageKey) => {
   return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
 }
 
-// 저장된 선택값이 허용 목록에 없으면 기본값으로 대체합니다.
+// 선택값 fallback
 export const readStoredChoice = (storageKey, allowedValues, fallback) => {
   const savedValue = localStorage.getItem(storageKey)
 
   return allowedValues.includes(savedValue) ? savedValue : fallback
 }
 
-// Command Console의 데이터 상태 명령에 필요한 설정 값을 모읍니다.
+// 데이터 상태 설정 수집
 export const readCommandDataStatus = () => ({
   language: readStoredChoice(LANGUAGE_STORAGE_KEY, LANGUAGES, 'ko'),
   startModule: readStoredChoice(START_MODULE_STORAGE_KEY, START_MODULES, 'tasks'),
   timerSessions: readStoredNumber(TIMER_SESSIONS_STORAGE_KEY),
 })
 
-// 최근 Note 정렬에 사용할 작성 시각을 숫자로 변환합니다.
+// Note 작성 시각 변환
 const getNoteTime = (note) => {
   const time = new Date(note.createdAt).getTime()
   return Number.isNaN(time) ? 0 : time
 }
 
-// 최신 작성 순서로 제한된 개수의 Note 목록을 반환합니다.
+// 최근 Note 목록
 export const getRecentNotes = (notes, limit = 3) =>
   [...notes]
     .sort(
@@ -71,7 +71,7 @@ export const getRecentNotes = (notes, limit = 3) =>
     )
     .slice(0, limit)
 
-// Task 전체/완료/미완료 수와 완료율을 계산합니다.
+// Task 통계 계산
 export const getTaskStats = (tasks) => {
   const completed = tasks.filter((task) => task.completed).length
   const active = tasks.length - completed
@@ -86,14 +86,14 @@ export const getTaskStats = (tasks) => {
   }
 }
 
-// 명령 비교를 위해 앞뒤 공백과 대소문자를 정규화합니다.
+// 명령 정규화
 export const normalizeCommand = (command) => command.trim().toLowerCase()
 
-// 정규화된 명령이 alias 목록 중 하나와 정확히 일치하는지 확인합니다.
+// alias 일치 확인
 const matchesCommand = (normalizedCommand, aliases) =>
   aliases.some((alias) => normalizedCommand === alias)
 
-// 검색형 명령에서 alias 뒤에 붙은 검색어를 추출합니다.
+// 검색어 추출
 const parseKeywordCommand = (command, normalizedCommand, aliases) => {
   const matchedAlias = aliases.find((alias) => normalizedCommand.startsWith(alias))
 
@@ -104,11 +104,11 @@ const parseKeywordCommand = (command, normalizedCommand, aliases) => {
   return command.slice(matchedAlias.length).trim()
 }
 
-// 사용자 입력 명령을 Command Console이 처리할 intent 객체로 변환합니다.
+// command intent 변환
 export const parseCommand = (command) => {
   const normalizedCommand = normalizeCommand(command)
 
-  // 한글/영어 alias를 하나의 command type으로 정규화해 결과 생성 로직을 단순하게 유지합니다.
+  // alias type 정규화
   if (matchesCommand(normalizedCommand, ['도움말', 'help'])) {
     return { type: 'help' }
   }
@@ -208,7 +208,7 @@ export const parseCommand = (command) => {
   return { type: 'unknown' }
 }
 
-// 현재 Task/Note 상태에 맞는 추천 행동 문구를 선택합니다.
+// 추천 행동 선택
 const getRecommendation = (stats, noteCount, t) => {
   if (stats.active > 0) {
     return t.command.recommendations.reviewActive
@@ -221,27 +221,27 @@ const getRecommendation = (stats, noteCount, t) => {
   return t.command.recommendations.allClear
 }
 
-// 아직 완료되지 않은 첫 번째 Task를 추천 대상으로 반환합니다.
+// 추천 Task 선택
 export const getRecommendedTask = (tasks) =>
   tasks.find((task) => !task.completed)
 
-// Command 결과 패널에 표시할 metric 객체를 생성합니다.
+// metric 객체 생성
 const createMetric = (label, value) => ({ label, value })
 
-// Calendar 이벤트를 Command 결과 목록에 표시할 문자열로 변환합니다.
+// Calendar 결과 문자열
 const formatScheduleItem = (event) =>
   event.memo
     ? `${getCalendarEventDateLabel(event)} - ${event.title}: ${event.memo}`
     : `${getCalendarEventDateLabel(event)} - ${event.title}`
 
-// 도움말 결과에 표시할 사용 가능한 명령 목록 item을 생성합니다.
+// 도움말 item 생성
 const createCommandListItem = (t) => ({
   isCommandList: true,
   label: t.command.availableCommands,
   values: t.command.examples,
 })
 
-// 파싱된 명령과 저장 데이터를 바탕으로 화면에 표시할 Command 결과를 생성합니다.
+// Command 결과 생성
 export const createResult = ({
   calendarEvents = [],
   command,
@@ -259,7 +259,7 @@ export const createResult = ({
   const todayDueTasks = getTodayDueTasks(tasks, currentDate)
   const thisMonthSchedules = getMonthEvents(calendarEvents, currentDate)
 
-  // 각 명령은 UI가 공통으로 렌더링할 수 있는 metrics/items 구조를 반환합니다.
+  // 공통 결과 구조
   if (parsedCommand.type === 'help') {
     return {
       items: [createCommandListItem(t)],

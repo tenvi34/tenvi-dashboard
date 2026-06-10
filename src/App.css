@@ -2,7 +2,7 @@ body {
   background: #03060d;
 }
 
-/* 앱 전체 배경과 HUD 공통 변수 */
+/* 앱 배경과 HUD 변수 */
 #root {
   width: 100%;
   max-width: none;
@@ -42,12 +42,12 @@ body {
     radial-gradient(circle at 18% 12%, rgba(45, 125, 255, 0.22), transparent 28%),
     radial-gradient(circle at 82% 0%, rgba(90, 212, 255, 0.14), transparent 26%),
     linear-gradient(135deg, #050913 0%, #081527 48%, #03060d 100%);
-  /* HUD 효과는 가로 번짐만 숨기고, 긴 모듈은 세로 페이지 스크롤 허용 */
+  /* HUD 가로 넘침 차단 */
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-/* 전체 shell 스크롤: 페이지 흐름을 기본으로 두고 가로 넘침만 차단 */
+/* shell 스크롤 기준 */
 .tenvi-dashboard * {
   scrollbar-width: thin;
   scrollbar-color: rgba(90, 212, 255, 0.42) rgba(2, 9, 18, 0.34);
@@ -81,7 +81,7 @@ body {
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 86%);
 }
 
-/* 상단 헤더와 앱 프레임 */
+/* 헤더와 앱 프레임 */
 .tenvi-shell {
   position: relative;
   z-index: 1;
@@ -212,7 +212,7 @@ body {
   box-shadow: none;
 }
 
-/* 좌측 사이드바와 모듈 전환 버튼 */
+/* 사이드바와 모듈 전환 */
 .tenvi-workspace {
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr);
@@ -328,7 +328,7 @@ body {
   min-width: 0;
 }
 
-/* 공통 모듈 패널, 제목, 요약 카드 */
+/* 공통 패널과 카드 */
 .module-panel {
   border-radius: var(--radius-panel);
   padding: var(--panel-padding);
@@ -412,7 +412,7 @@ body {
   align-items: stretch;
 }
 
-/* Dashboard 요약 카드와 최근 항목 */
+/* Dashboard 요약과 최근 항목 */
 .summary-panel {
   min-width: 0;
   padding: 18px;
@@ -559,7 +559,7 @@ body {
   margin-top: 14px;
 }
 
-/* Dashboard 정보 위계: 브리핑, 핵심 수치, 최근 항목의 무게를 분리 */
+/* Dashboard 정보 위계 */
 .dashboard-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -729,7 +729,7 @@ body {
   margin-bottom: var(--module-gap);
 }
 
-/* 입력 폼과 공통 버튼 상태 */
+/* 입력 폼과 버튼 상태 */
 .command-form {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -835,7 +835,7 @@ body {
   margin-bottom: 16px;
 }
 
-/* Command 결과 패널과 명령 히스토리 */
+/* Command 결과와 히스토리 */
 .analysis-header {
   margin-bottom: 16px;
 }
@@ -979,7 +979,7 @@ body {
   background: rgba(2, 9, 18, 0.45);
 }
 
-/* Timer / Stopwatch 화면 */
+/* Timer 화면 */
 .timer-tab {
   min-height: 40px;
   border: 1px solid transparent;
@@ -1134,7 +1134,7 @@ body {
   gap: 10px;
 }
 
-/* 지도 모드 전환 탭 바 — 탐색/업로드/컬렉션 관리 */
+/* 지도 모드 탭 */
 .map-mode-tabs {
   display: flex;
   gap: 4px;
@@ -1184,7 +1184,7 @@ body {
 .map-mode-body {
   min-width: 0;
   min-height: 0;
-  /* 탭 아래 작업 영역 높이: 지도와 좌우 패널이 같은 기준 높이를 공유 */
+  /* 지도 작업 높이 */
   height: clamp(680px, calc(100svh - 300px), 900px);
 }
 
@@ -1193,7 +1193,7 @@ body {
   grid-template-columns: minmax(240px, 296px) minmax(420px, 1fr) minmax(240px, 300px);
   gap: 16px;
   align-items: stretch;
-  /* 데스크톱 3패널 작업 높이: 너무 작거나 과하게 커지지 않도록 균형 유지 */
+  /* 데스크톱 3패널 높이 */
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -1210,11 +1210,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
-  /* flex 자식의 내부 스크롤이 부모 높이 안에서 계산되도록 유지 */
+  /* flex 내부 스크롤 기준 */
   overflow: hidden;
 }
 
-/* 왼쪽 패널 상단 고정 영역: 버튼·상태·필터 */
+/* 왼쪽 고정 영역 */
 .map-left-fixed {
   flex: 0 0 auto;
   display: grid;
@@ -1223,7 +1223,7 @@ body {
   padding-bottom: 8px;
 }
 
-/* 왼쪽 패널 사진 목록 스크롤 영역: 남은 높이 차지 */
+/* 왼쪽 스크롤 영역 */
 .map-left-scroll {
   flex: 1 1 auto;
   min-height: 0;
@@ -1233,7 +1233,7 @@ body {
   min-width: 0;
 }
 
-/* 대량 업로드 결과는 긴 목록이라 왼쪽 스크롤 영역에서 접근성 유지 */
+/* 대량 업로드 목록 여백 */
 .map-left-scroll > .map-bulk-panel {
   margin-bottom: 14px;
 }
@@ -1941,7 +1941,7 @@ body {
   min-height: 0;
   max-width: 100%;
   max-height: 100%;
-  /* 오른쪽 상세 패널은 작업 영역 안에서만 스크롤 */
+  /* 상세 패널 내부 스크롤 */
   padding-right: 3px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -2049,7 +2049,7 @@ body {
   min-height: 44px;
 }
 
-/* 사진 기록 추가 토글 버튼 */
+/* 사진 추가 토글 */
 .map-add-toggle-button {
   width: 100%;
   min-height: 44px;
@@ -2081,7 +2081,7 @@ body {
   background: rgba(2, 9, 18, 0.42);
 }
 
-/* 컬렉션 필터 헤더 행: 라벨 + 관리 버튼 */
+/* 컬렉션 필터 헤더 */
 .map-collection-header {
   display: flex;
   align-items: center;
@@ -2090,7 +2090,7 @@ body {
   margin-top: 2px;
 }
 
-/* 컬렉션 관리 토글 버튼 (작은 보조 버튼) */
+/* 컬렉션 관리 토글 */
 .map-collection-toggle {
   flex: 0 0 auto;
   min-height: 32px;
@@ -2117,7 +2117,7 @@ body {
   color: #f4fdff;
 }
 
-/* 지도 위 전체 위치 보기 플로팅 버튼 */
+/* 전체 위치 플로팅 버튼 */
 .map-fit-all-button {
   position: absolute;
   bottom: 20px;
@@ -2257,7 +2257,7 @@ body {
   align-items: start;
 }
 
-/* Settings 설정 그룹, 데이터 초기화, 백업/복원 */
+/* Settings 설정 그룹 */
 .settings-panel {
   min-width: 0;
   padding: 18px;
@@ -2457,7 +2457,7 @@ body {
   background: rgba(255, 102, 134, 0.08);
 }
 
-/* Settings 위험 액션 구분: 보존/이동 액션과 삭제 액션을 시각적으로 분리 */
+/* Settings 위험 액션 구분 */
 .settings-preference-panel {
   display: grid;
   align-content: start;
@@ -2536,7 +2536,7 @@ body {
   font-weight: 800;
 }
 
-/* Calendar 일정 목록과 월간 달력 */
+/* Calendar 목록과 월간 달력 */
 .calendar-layout {
   display: grid;
   grid-template-columns: minmax(300px, 0.88fr) minmax(440px, 1.12fr);
@@ -3015,7 +3015,7 @@ body {
   background: #f4fdff;
 }
 
-/* Calendar 목록 흐름: 선택 날짜, 목록, 입력 폼을 한 패널 안에서 명확히 분리 */
+/* Calendar 목록 흐름 */
 .calendar-events-panel {
   display: grid;
   gap: 16px;
@@ -3133,7 +3133,7 @@ body {
   background: rgba(2, 9, 18, 0.45);
 }
 
-/* Tasks 필터와 Tasks/Notes 목록 */
+/* Tasks 필터와 목록 */
 .filter-button {
   min-height: 40px;
   color: #aacbd8;
@@ -3315,7 +3315,7 @@ body {
   color: #b8dbe7;
 }
 
-/* 공통 입력 스타일: 모듈별 폼이 달라도 조작감과 focus 대비를 동일하게 유지 */
+/* 공통 입력 스타일 */
 .todo-form input,
 .command-form input,
 .notes-form input,
@@ -3368,7 +3368,7 @@ body {
   background: rgba(4, 14, 28, 0.96);
 }
 
-/* 공통 버튼 계층: primary/secondary/danger/ghost 계열을 기존 클래스명 위에 정렬 */
+/* 공통 버튼 계층 */
 .todo-form button,
 .command-form button,
 .notes-form button,
@@ -3545,14 +3545,14 @@ body {
   padding: 16px;
 }
 
-/* 내부 스크롤 제한: 긴 결과와 작업 패널만 자체 스크롤을 허용 */
+/* 내부 스크롤 제한 */
 .calendar-event-list,
 .map-left-scroll,
 .map-detail-column {
   scrollbar-gutter: stable;
 }
 
-/* 스크린 리더 전용 텍스트 */
+/* 스크린 리더 텍스트 */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -3565,8 +3565,8 @@ body {
   border: 0;
 }
 
-/* 화면 크기별 반응형 레이아웃 */
-/* 업로드/컬렉션 관리 모드: 오른쪽 패널 없이 2열 — 1180px 이상에서만 적용 */
+/* 반응형 레이아웃 */
+/* 업로드/컬렉션 2열 */
 @media (min-width: 1181px) {
   .map-archive-layout[data-mode='upload'],
   .map-archive-layout[data-mode='collections'] {
@@ -3638,11 +3638,11 @@ body {
   }
 }
 
-/* PC 레이아웃과 모바일 레이아웃 분리 기준 */
+/* PC/모바일 분기 */
 @media (max-width: 860px) {
   .tenvi-dashboard {
     min-height: 100dvh;
-    /* iPhone safe-area와 하단 탭바 높이만큼 본문 여백 확보 */
+    /* iPhone safe-area 여백 */
     padding: 18px 12px calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom) + 18px);
   }
 
@@ -3690,7 +3690,7 @@ body {
     gap: 0;
   }
 
-  /* 모바일에서는 Sidebar 대신 하단 탭바로 주요 모듈 이동 */
+  /* 모바일 하단 탭바 */
   .tenvi-sidebar {
     display: none;
   }
@@ -3974,7 +3974,7 @@ body {
     outline-offset: 2px;
   }
 
-  /* 모바일 탐색은 PC 3패널을 그대로 쌓지 않고 지도/목록/상세 중 한 보기만 노출 */
+  /* 모바일 Map 단일 보기 */
   .map-archive-layout[data-mode='explore'][data-mobile-view='map'] .map-control-panel,
   .map-archive-layout[data-mode='explore'][data-mobile-view='map'] .map-detail-column,
   .map-archive-layout[data-mode='explore'][data-mobile-view='list'] .map-view-panel,
@@ -4103,7 +4103,58 @@ body {
   }
 
   .map-upload-box {
-    min-height: 136px;
+    min-height: 148px;
+    padding: 16px;
+    align-content: center;
+  }
+
+  .map-upload-box span,
+  .map-upload-box strong {
+    overflow-wrap: anywhere;
+  }
+
+  .map-archive-layout[data-mode='upload'] .map-left-fixed,
+  .map-archive-layout[data-mode='upload'] .map-left-scroll {
+    gap: 12px;
+    padding-right: 0;
+  }
+
+  .map-archive-layout[data-mode='upload'] .map-view-panel {
+    height: min(50svh, 420px);
+    min-height: 360px;
+  }
+
+  .map-draft-panel {
+    gap: 12px;
+  }
+
+  .map-draft-preview {
+    max-height: 280px;
+  }
+
+  .map-coordinate-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .map-search-form,
+  .map-search-controls,
+  .map-bulk-actions,
+  .map-bulk-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-bulk-assignment-panel {
+    padding: 12px;
+  }
+
+  .map-bulk-check-row input {
+    width: 20px;
+    height: 20px;
+  }
+
+  .map-bulk-file-list li,
+  .map-bulk-failed-report li {
+    overflow-wrap: anywhere;
   }
 
   .map-bulk-panel,
@@ -4116,7 +4167,7 @@ body {
     gap: 5px;
   }
 
-  /* 모바일에서는 달력 선택이 먼저 오고 세부 일정은 아래에서 확인 */
+  /* 모바일 Calendar 순서 */
   .calendar-month-panel {
     order: 1;
   }
@@ -4210,7 +4261,7 @@ body {
     font-size: 10px;
   }
 
-  /* 좁은 날짜 셀에서 기간 바와 점/아이콘이 겹치지 않도록 위치 압축 */
+  /* 모바일 기간 표시 압축 */
   .calendar-range-indicator {
     left: 7px;
     right: 7px;
@@ -4357,7 +4408,7 @@ body {
   overflow: auto;
 }
 
-/* 일반 모드 대비 보정: HUD 네온은 줄이고 긴 사용 시간의 명도 대비를 우선 */
+/* 일반 모드 대비 */
 .tenvi-dashboard.theme-standard * {
   scrollbar-color: #b8c7dc #eef3f8;
 }
@@ -4575,7 +4626,7 @@ body {
   background: #ffffff;
 }
 
-/* 일반 모드 전용 대비 보정: HUD 색상 잔류로 인한 대량 업로드 패널 저대비 방지 */
+/* 일반 모드 대량 업로드 대비 */
 .tenvi-dashboard.theme-standard .map-bulk-panel {
   color: #172033;
   border-color: #d9e2ec;

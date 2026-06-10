@@ -25,11 +25,11 @@ import {
   validateBackupPayload,
 } from './settingsBackup.js'
 
-// Settings는 데이터 개수 표시와 초기화를 담당하므로 실제 모듈의 저장 키와 같아야 합니다.
+// Settings 저장 key
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 
-// Settings 화면의 데이터 현황 표시를 위해 저장 목록의 개수를 안전하게 읽습니다.
+// 저장 목록 개수 읽기
 const readStoredCount = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -39,14 +39,14 @@ const readStoredCount = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
-    // 저장소 상태 표시용이므로 예상 밖 데이터는 삭제하지 않고 0개로만 보여줍니다.
+    // 저장소 상태 fallback
     return Array.isArray(parsedValue) ? parsedValue.length : 0
   } catch {
     return 0
   }
 }
 
-// 백업 생성을 위해 지정한 localStorage 목록 데이터를 안전하게 복원합니다.
+// 백업용 목록 복원
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -63,7 +63,7 @@ const readStoredList = (storageKey) => {
   }
 }
 
-// 백업에 포함할 완료 타이머 세션 수를 안전한 숫자로 복원합니다.
+// 백업용 Timer 세션 복원
 const readStoredCompletedSessions = () => {
   const savedValue = localStorage.getItem(STORAGE_KEYS.timerCompletedSessions)
   const parsedValue = Number.parseInt(savedValue, 10)
@@ -71,7 +71,7 @@ const readStoredCompletedSessions = () => {
   return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
 }
 
-// 언어, 시작 모듈, HUD 효과, 데이터 초기화와 백업/복원을 관리하는 컴포넌트입니다.
+// Settings 컴포넌트
 function Settings({
   hudEffect,
   language,
@@ -94,7 +94,7 @@ function Settings({
   useEffect(() => {
     let isMounted = true
 
-    // Settings 저장소 현황에 Map IndexedDB 기록 개수 반영
+    // Map 기록 개수 반영
     getPhotoRecordCount()
       .then((count) => {
         if (isMounted) {
@@ -112,19 +112,19 @@ function Settings({
     }
   }, [dataVersion])
 
-  // 사용자가 확인한 뒤 Tasks와 Notes 저장 데이터만 초기화합니다.
+  // Tasks/Notes 초기화
   const handleConfirmReset = () => {
-    // 초기화는 사용자 콘텐츠인 Tasks/Notes만 대상으로 하고 앱 설정은 유지합니다.
+    // 앱 설정 유지
     localStorage.removeItem(TASKS_STORAGE_KEY)
     localStorage.removeItem(NOTES_STORAGE_KEY)
     setIsResetConfirmOpen(false)
     setDataVersion((currentVersion) => currentVersion + 1)
   }
 
-  // reset 직후 컴포넌트를 다시 렌더링해 저장소 개수 표시를 최신화하기 위한 상태입니다.
+  // reset 후 개수 갱신
   void dataVersion
 
-  // 현재 TENVI 데이터를 JSON 백업 파일로 내보냅니다.
+  // JSON 백업 내보내기
   const handleExportBackup = async () => {
     try {
       const mapPhotoRecords = await serializePhotoRecordsForBackup(
@@ -166,9 +166,9 @@ function Settings({
     }
   }
 
-  // 선택한 JSON 백업 파일을 검증한 뒤 기존 localStorage 데이터로 복원합니다.
+  // JSON 백업 복원
   const restoreLocalStorageData = (validatedBackup) => {
-    // 기존 key 문자열과 저장 구조를 유지해야 이전 데이터와 다른 모듈 동작이 깨지지 않습니다.
+    // 기존 key 구조 유지
     localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(validatedBackup.tasks))
     localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(validatedBackup.notes))
     localStorage.setItem(
@@ -190,7 +190,7 @@ function Settings({
 
     try {
       const backupPayload = JSON.parse(await backupFile.text())
-      // 백업 파일은 기존 localStorage key에 다시 쓰이므로, TENVI 형식과 값 범위를 먼저 검증합니다.
+      // 백업 형식 사전 검증
       const validatedBackup = validateBackupPayload(backupPayload)
 
       if (!validatedBackup) {
@@ -198,7 +198,7 @@ function Settings({
         return
       }
 
-      // 검증과 Blob 복원 준비가 끝나기 전에는 기존 저장소를 변경하지 않습니다.
+      // 저장소 변경 전 검증
       const collectionRestorePlan = validatedBackup.hasMapPhotoCollections
         ? preparePhotoCollectionsForRestore(validatedBackup.mapPhotoCollections)
         : null
@@ -280,7 +280,7 @@ function Settings({
         : null
 
       try {
-        // Map 필드가 없는 이전 백업은 현재 IndexedDB 기록을 유지
+        // 이전 백업 Map 유지
         if (
           validatedBackup.hasMapPhotoRecords &&
           validatedBackup.hasMapPhotoCollections
@@ -311,7 +311,7 @@ function Settings({
 
         restoreLocalStorageData(validatedBackup)
       } catch {
-        // localStorage와 IndexedDB를 함께 묶을 수 없으므로 가능한 범위에서 복원 전 데이터로 롤백
+        // 복원 실패 rollback
         if (previousMapRecords) {
           await replacePhotoArchiveData({
             records: previousMapRecords,
@@ -391,7 +391,7 @@ function Settings({
       className="module-panel settings-module"
       aria-labelledby="settings-title"
     >
-      {/* Settings 상단 제목 영역 */}
+      {/* Settings 헤더 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.settings.label}</p>
@@ -399,9 +399,9 @@ function Settings({
         </div>
       </div>
 
-      {/* Settings 설정 그룹 전체 그리드 */}
+      {/* Settings 그리드 */}
       <div className="settings-grid">
-        {/* 언어 선택 그룹 */}
+        {/* 언어 선택 */}
         <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.language}</p>
@@ -415,7 +415,7 @@ function Settings({
                 }`}
                 key={languageId}
                 type="button"
-                // 실제 저장은 App 상태 변경 후 App의 useEffect에서 처리됩니다.
+                // App 저장 흐름
                 onClick={() => onLanguageChange(languageId)}
               >
                 {t.languages[languageId]}
@@ -424,7 +424,7 @@ function Settings({
           </div>
         </section>
 
-        {/* 기본 시작 모듈 선택 그룹 */}
+        {/* 기본 시작 모듈 */}
         <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.defaultStartModule}</p>
@@ -441,7 +441,7 @@ function Settings({
                 }`}
                 key={moduleId}
                 type="button"
-                // 시작 모듈 설정은 다음 앱 로드 시 초기 activeModule 값으로 사용됩니다.
+                // 다음 로드 시작 모듈
                 onClick={() => onStartModuleChange(moduleId)}
               >
                 {t.modules[moduleId]}
@@ -450,7 +450,7 @@ function Settings({
           </div>
         </section>
 
-        {/* 디자인 테마는 App 최상위 클래스에 반영되어 전체 모듈의 시각 톤을 전환합니다. */}
+        {/* 디자인 테마 */}
         <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.theme}</p>
@@ -472,7 +472,7 @@ function Settings({
           </div>
         </section>
 
-        {/* HUD 효과 강도는 선택한 디자인 테마 안에서 광원과 장식 밀도만 조절합니다. */}
+        {/* HUD 효과 강도 */}
         <section className="settings-panel settings-preference-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.hudEffect}</p>
@@ -486,7 +486,7 @@ function Settings({
                 }`}
                 key={effectId}
                 type="button"
-                // HUD 효과는 App의 최상위 CSS 클래스에 반영되어 전체 화면 톤을 바꿉니다.
+                // HUD CSS 클래스 반영
                 onClick={() => onHudEffectChange(effectId)}
               >
                 {t.settings.effects[effectId]}
@@ -495,7 +495,7 @@ function Settings({
           </div>
         </section>
 
-        {/* 저장된 Tasks/Notes/Map 데이터 현황 그룹 */}
+        {/* 저장 데이터 현황 */}
         <section className="settings-panel settings-data-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.dataManagement}</p>
@@ -517,7 +517,7 @@ function Settings({
           </div>
         </section>
 
-        {/* 데이터 백업/복원 그룹 */}
+        {/* 백업/복원 */}
         <section className="settings-panel settings-backup-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.backupLabel}</p>
@@ -556,7 +556,7 @@ function Settings({
           ) : null}
         </section>
 
-        {/* 데이터 삭제는 다른 설정과 위험도가 다르므로 별도 danger 패널로 분리 */}
+        {/* 데이터 삭제 danger 패널 */}
         <section className="settings-panel settings-danger-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.resetWarningLabel}</p>
@@ -572,7 +572,7 @@ function Settings({
           <p className="settings-note">{t.settings.resetRequiresConfirmation}</p>
 
           {isResetConfirmOpen ? (
-            /* 데이터 초기화 확인 패널 */
+            /* 데이터 초기화 확인 */
             <div className="reset-confirm-panel" role="alert">
               <p className="module-label">{t.settings.resetWarningLabel}</p>
               <h4>{t.settings.resetWarningTitle}</h4>

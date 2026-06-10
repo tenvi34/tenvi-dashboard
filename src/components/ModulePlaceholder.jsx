@@ -1,4 +1,4 @@
-// 아직 구현되지 않은 모듈의 기본 안내 화면을 렌더링하는 컴포넌트입니다.
+// 미구현 모듈 안내
 function ModulePlaceholder({ label, title, message, systemMessage }) {
   return (
     <section className="module-panel placeholder-module">

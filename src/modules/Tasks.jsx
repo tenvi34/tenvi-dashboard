@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import { createTask, normalizeDueDate } from './tasksLogic.js'
 
-// TENVI로 이름이 바뀌어도 기존 todo-manager-lite 사용자의 Tasks 데이터를 보존해야 합니다.
+// 기존 Tasks key 보존
 const STORAGE_KEY = STORAGE_KEYS.tasks
 
 const FILTERS = ['all', 'active', 'completed']
 
-// 사용자의 Task 추가, 완료, 삭제, 필터링을 관리하는 컴포넌트입니다.
+// Tasks 컴포넌트
 function Tasks({ t }) {
   const [todos, setTodos] = useState(() => {
     const savedTodos = localStorage.getItem(STORAGE_KEY)
@@ -17,7 +17,7 @@ function Tasks({ t }) {
     }
 
     try {
-      // 저장 데이터가 깨져도 앱 전체가 멈추지 않도록 빈 목록으로 복구합니다.
+      // 손상 데이터 fallback
       return JSON.parse(savedTodos)
     } catch {
       return []
@@ -27,12 +27,12 @@ function Tasks({ t }) {
   const [dueDate, setDueDate] = useState('')
   const [filter, setFilter] = useState('all')
 
-  // todos 상태가 Tasks 데이터의 단일 저장 원천입니다.
+  // Tasks 단일 저장 원천
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
   }, [todos])
 
-  // 입력 폼의 제목과 마감일로 새 Task를 생성해 목록 앞에 추가합니다.
+  // Task 생성
   const handleAddTodo = (event) => {
     event.preventDefault()
 
@@ -53,7 +53,7 @@ function Tasks({ t }) {
     setDueDate('')
   }
 
-  // 지정한 Task의 완료 상태를 반대로 전환합니다.
+  // Task 완료 토글
   const handleToggleTodo = (todoId) => {
     setTodos((currentTodos) =>
       currentTodos.map((todo) =>
@@ -62,7 +62,7 @@ function Tasks({ t }) {
     )
   }
 
-  // 지정한 Task를 현재 목록에서 제거합니다.
+  // Task 삭제
   const handleDeleteTodo = (todoId) => {
     setTodos((currentTodos) =>
       currentTodos.filter((todo) => todo.id !== todoId),
@@ -73,7 +73,7 @@ function Tasks({ t }) {
   const activeCount = todos.length - completedCount
 
   const filteredTodos = useMemo(() => {
-    // 원본 todos는 그대로 두고 화면에 보여줄 목록만 필터링합니다.
+    // 화면 목록 필터링
     if (filter === 'active') {
       return todos.filter((todo) => !todo.completed)
     }
@@ -89,7 +89,7 @@ function Tasks({ t }) {
 
   return (
     <section className="module-panel todo-module" aria-labelledby="todo-title">
-      {/* Tasks 상단 제목과 현재 필터 표시 영역 */}
+      {/* Tasks 헤더 */}
       <div className="module-header todo-module-header">
         <div>
           <p className="module-label">{t.tasks.label}</p>
@@ -100,7 +100,7 @@ function Tasks({ t }) {
         </p>
       </div>
 
-      {/* Tasks 개수 요약 카드 */}
+      {/* Tasks 요약 카드 */}
       <div className="status-stack task-stats" aria-label={t.tasks.summaryLabel}>
         <div className="status-card">
           <span>{t.tasks.total}</span>
@@ -116,7 +116,7 @@ function Tasks({ t }) {
         </div>
       </div>
 
-      {/* 새 Task 입력 영역 */}
+      {/* Task 입력 영역 */}
       <form className="todo-form" onSubmit={handleAddTodo}>
         <label className="sr-only" htmlFor="todo-input">
           {t.tasks.inputLabel}
@@ -141,7 +141,7 @@ function Tasks({ t }) {
         <button type="submit">{t.tasks.add}</button>
       </form>
 
-      {/* Task 필터 버튼 영역 */}
+      {/* Task 필터 버튼 */}
       <div className="todo-filters" aria-label={t.tasks.filtersLabel}>
         {FILTERS.map((item) => (
           <button
@@ -155,7 +155,7 @@ function Tasks({ t }) {
         ))}
       </div>
 
-      {/* Task 목록 또는 빈 상태 메시지 */}
+      {/* Task 목록 */}
       {filteredTodos.length > 0 ? (
         <ul className="todo-list" aria-label={t.tasks.listLabel}>
           {filteredTodos.map((todo) => (

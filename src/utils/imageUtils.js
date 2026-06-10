@@ -2,7 +2,7 @@ const DEFAULT_MAX_SIZE = 1200
 const DEFAULT_MIME_TYPE = 'image/jpeg'
 const DEFAULT_QUALITY = 0.82
 
-// 원본 비율을 유지하는 미리보기 크기 계산
+// 미리보기 크기 계산
 export const calculatePreviewSize = (width, height, maxSize = DEFAULT_MAX_SIZE) => {
   if (width <= 0 || height <= 0) {
     return { height: 0, width: 0 }
@@ -16,7 +16,7 @@ export const calculatePreviewSize = (width, height, maxSize = DEFAULT_MAX_SIZE) 
   }
 }
 
-// 임시 object URL 기반 브라우저 이미지 로드
+// object URL 이미지 로드
 const loadImageFromFile = (file) =>
   new Promise((resolve, reject) => {
     const image = new Image()
@@ -51,7 +51,7 @@ const canvasToBlob = (canvas, mimeType, quality) =>
     )
   })
 
-// 원본 저장 없이 IndexedDB용 미리보기 Blob 생성
+// IndexedDB 미리보기 Blob
 export const createPreviewImageBlob = async (
   file,
   {

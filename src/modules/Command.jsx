@@ -12,13 +12,13 @@ import {
 
 const HISTORY_LIMIT = 5
 
-// 저장된 Tasks/Notes/Calendar 데이터를 분석하고 rule 기반 명령을 실행하는 컴포넌트입니다.
+// Command 컴포넌트
 function Command({ onModuleChange, t }) {
   const [command, setCommand] = useState('')
   const [history, setHistory] = useState([])
   const [result, setResult] = useState(null)
 
-  // 입력된 명령을 파싱해 결과를 만들고 필요한 경우 모듈 이동을 요청합니다.
+  // 명령 실행
   const executeCommand = (commandText) => {
     const trimmedCommand = commandText.trim()
 
@@ -26,7 +26,7 @@ function Command({ onModuleChange, t }) {
       return
     }
 
-    // 실행 순간의 localStorage를 읽어 다른 모듈에서 방금 바뀐 데이터까지 반영합니다.
+    // 실행 시점 데이터 반영
     const tasks = readStoredList(TASKS_STORAGE_KEY)
     const notes = readStoredList(NOTES_STORAGE_KEY)
     const calendarEvents = readStoredList(CALENDAR_STORAGE_KEY)
@@ -44,13 +44,13 @@ function Command({ onModuleChange, t }) {
     setResult(nextResult)
 
     if (nextResult.navigateTo) {
-      // Command는 라우터를 쓰지 않고 App의 activeModule 상태 변경만 요청합니다.
+      // activeModule 이동 요청
       onModuleChange(nextResult.navigateTo)
     }
 
     setHistory((currentHistory) => {
       const normalizedCommand = normalizeCommand(trimmedCommand)
-      // 최근 명령은 현재 세션용이며, 같은 명령은 최신 위치로만 유지합니다.
+      // 최근 명령 중복 정리
       const uniqueHistory = currentHistory.filter(
         (historyItem) => normalizeCommand(historyItem) !== normalizedCommand,
       )
@@ -60,7 +60,7 @@ function Command({ onModuleChange, t }) {
     setCommand('')
   }
 
-  // 명령 입력 폼 제출을 가로채 현재 입력값을 실행합니다.
+  // 명령 폼 제출
   const handleExecute = (event) => {
     event.preventDefault()
     executeCommand(command)
@@ -71,7 +71,7 @@ function Command({ onModuleChange, t }) {
       className="module-panel command-module"
       aria-labelledby="command-title"
     >
-      {/* Command Console 상단 제목 영역 */}
+      {/* Command 헤더 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.command.label}</p>
@@ -80,7 +80,7 @@ function Command({ onModuleChange, t }) {
         <p className="module-meta">{t.command.mode}</p>
       </div>
 
-      {/* 명령어 입력 영역 */}
+      {/* 명령어 입력 */}
       <form className="command-form" onSubmit={handleExecute}>
         <label className="sr-only" htmlFor="command-input">
           {t.command.inputLabel}
@@ -95,7 +95,7 @@ function Command({ onModuleChange, t }) {
         <button type="submit">{t.command.execute}</button>
       </form>
 
-      {/* 명령 실행 결과 패널: metrics와 목록형 결과가 함께 표시됩니다. */}
+      {/* 명령 결과 패널 */}
       <section className="analysis-panel" aria-live="polite">
         <div className="analysis-header">
           <p className="module-label">{t.command.systemAnalysis}</p>
@@ -117,7 +117,7 @@ function Command({ onModuleChange, t }) {
 
             <div className="analysis-sections">
               {result.items.map((item) => (
-                /* 결과 세부 섹션 또는 도움말 명령 목록 */
+                /* 결과 세부 섹션 */
                 <section className="analysis-section" key={item.label}>
                   <h4>{item.label}</h4>
                   <ul className={item.isCommandList ? 'command-list' : ''}>
@@ -149,7 +149,7 @@ function Command({ onModuleChange, t }) {
         )}
       </section>
 
-      {/* 현재 브라우저 세션에서만 유지되는 최근 명령 목록 */}
+      {/* 최근 명령 목록 */}
       <section className="command-history" aria-label={t.command.history}>
         <p className="recent-notes-title">{t.command.history}</p>
         {history.length > 0 ? (

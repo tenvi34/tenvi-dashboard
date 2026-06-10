@@ -14,11 +14,11 @@ export const LOCATION_SOURCE_FILTER_UNKNOWN = 'unknown'
 
 const isValidCoordinate = (value) => Number.isFinite(value)
 
-// 기존 기록의 누락되거나 알 수 없는 locationSource fallback
+// locationSource fallback
 export const normalizeLocationSource = (source) =>
   LOCATION_SOURCES.includes(source) ? source : 'manual'
 
-// 기존 사진 record의 collectionId 누락과 삭제된 컬렉션 참조 보정
+// collectionId 보정
 export const normalizePhotoRecordCollectionId = (record, collections = []) => {
   const collectionId = record?.collectionId
 
@@ -36,7 +36,7 @@ export const normalizePhotoRecordCollectionId = (record, collections = []) => {
   return collectionId
 }
 
-// Map 컬렉션 입력값을 저장소에 넣기 전 구조로 정규화
+// 컬렉션 입력 정규화
 export const normalizePhotoCollectionInput = (input = {}) => ({
   description: String(input.description ?? '').trim(),
   endDate: String(input.endDate ?? ''),
@@ -44,11 +44,11 @@ export const normalizePhotoCollectionInput = (input = {}) => ({
   startDate: String(input.startDate ?? ''),
 })
 
-// 컬렉션 이름이 있어야 생성/수정 가능
+// 컬렉션 이름 검증
 export const isPhotoCollectionInputValid = (input = {}) =>
   Boolean(normalizePhotoCollectionInput(input).name)
 
-// 필터 옵션별 지도/목록 표시 record 계산
+// 컬렉션 필터 계산
 export const filterPhotoRecordsByCollection = (
   records,
   collections,
@@ -61,7 +61,7 @@ export const filterPhotoRecordsByCollection = (
   const collectionIds = new Set(collections.map((collection) => collection.id))
 
   if (selectedFilter === COLLECTION_FILTER_UNASSIGNED) {
-    // 미분류는 collectionId가 없거나 삭제된 컬렉션을 가리키는 기존 record 포함
+    // 미분류 record 포함
     return records.filter(
       (record) => !record.collectionId || !collectionIds.has(record.collectionId),
     )
@@ -70,14 +70,14 @@ export const filterPhotoRecordsByCollection = (
   return records.filter((record) => record.collectionId === selectedFilter)
 }
 
-// EXIF 날짜 값을 UI 저장용 문자열로 통일
+// EXIF 날짜 정규화
 const normalizeSearchText = (value) => String(value ?? '').trim().toLowerCase()
 
-// 알 수 없는 locationSource fallback 처리: 필터에서는 legacy 값을 unknown으로 분류
+// legacy source 분류
 export const normalizeLocationSourceForFilter = (source) =>
   LOCATION_SOURCES.includes(source) ? source : LOCATION_SOURCE_FILTER_UNKNOWN
 
-// 검색/위치 방식 필터 순수 함수: 컬렉션 필터 이후의 화면 record에 추가 조건 적용
+// 검색/위치 필터
 export const filterPhotoRecordsBySearchAndLocation = (
   records,
   { locationSourceFilter = LOCATION_SOURCE_FILTER_ALL, searchQuery = '' } = {},
@@ -113,7 +113,7 @@ export const formatExifDate = (value) => {
   return String(value)
 }
 
-// EXIF GPS와 촬영일을 Map 위치 상태로 정규화
+// EXIF 위치 정규화
 export const normalizePhotoLocation = (fileName, metadata = {}) => {
   const latitude = Number(metadata.latitude)
   const longitude = Number(metadata.longitude)
@@ -138,7 +138,7 @@ export const normalizePhotoLocation = (fileName, metadata = {}) => {
   }
 }
 
-// 지도 클릭 좌표를 현재 선택 사진의 임시 위치로 반영
+// 지도 클릭 위치 반영
 export const createManualLocation = (previousLocation, latitude, longitude) => {
   const nextLatitude = Number(latitude)
   const nextLongitude = Number(longitude)
@@ -147,7 +147,7 @@ export const createManualLocation = (previousLocation, latitude, longitude) => {
     return previousLocation
   }
 
-  // 지도 클릭 좌표를 현재 사진의 임시 위치로만 반영
+  // 임시 위치 반영
   return {
     fileName: previousLocation?.fileName ?? '',
     latitude: nextLatitude,
@@ -158,7 +158,7 @@ export const createManualLocation = (previousLocation, latitude, longitude) => {
   }
 }
 
-// 선택한 사진, 미리보기 Blob, EXIF 위치 기반 저장 전 draft 생성
+// 사진 draft 생성
 export const createPhotoDraft = (file, location, previewImage) => ({
   collectionId: null,
   fileType: file.type,
@@ -176,7 +176,7 @@ export const createPhotoDraft = (file, location, previewImage) => ({
   title: file.name.replace(/\.[^.]+$/, ''),
 })
 
-// 검색 결과 좌표를 draft 위치로 반영
+// 검색 좌표 반영
 export const applySearchLocationToDraft = (draft, place) => {
   const latitude = Number(place?.latitude)
   const longitude = Number(place?.longitude)
@@ -194,7 +194,7 @@ export const applySearchLocationToDraft = (draft, place) => {
   }
 }
 
-// 저장 전 draft에 지도 클릭 좌표 적용
+// draft 지도 좌표 적용
 export const applyManualLocationToDraft = (draft, latitude, longitude) => {
   const manualLocation = createManualLocation(
     {
@@ -218,7 +218,7 @@ export const applyManualLocationToDraft = (draft, latitude, longitude) => {
   }
 }
 
-// IndexedDB 신규 저장 전 필수 좌표와 미리보기 Blob 검증
+// 신규 저장 검증
 export const isPhotoDraftReadyToSave = (draft) =>
   Boolean(
     draft?.previewImageBlob &&
@@ -227,7 +227,7 @@ export const isPhotoDraftReadyToSave = (draft) =>
       isValidCoordinate(Number(draft.longitude)),
   )
 
-// 저장된 기록을 원본 변경 없이 편집용 draft로 복사
+// 편집 draft 복사
 export const createEditDraft = (record) => {
   if (!record) {
     return null
@@ -246,7 +246,7 @@ export const createEditDraft = (record) => {
   }
 }
 
-// IndexedDB update 전 편집 draft 좌표와 제목 검증
+// 편집 draft 검증
 export const isEditDraftReadyToSave = (editDraft) =>
   Boolean(
     editDraft?.id &&
@@ -255,7 +255,7 @@ export const isEditDraftReadyToSave = (editDraft) =>
       isValidCoordinate(Number(editDraft.longitude)),
   )
 
-// 편집 draft를 저장소 update patch 구조로 변환
+// update patch 변환
 export const createPhotoRecordUpdatePatch = (editDraft) => {
   if (!isEditDraftReadyToSave(editDraft)) {
     return null
@@ -271,7 +271,7 @@ export const createPhotoRecordUpdatePatch = (editDraft) => {
   }
 }
 
-// 화면 draft를 저장소 입력 구조로 변환
+// 저장소 입력 변환
 export const createPhotoRecordInput = (draft) => {
   if (!isPhotoDraftReadyToSave(draft)) {
     return null
@@ -295,7 +295,7 @@ export const createPhotoRecordInput = (draft) => {
 }
 
 export const readPhotoLocation = async (file) => {
-  // 업로드 사진 저장 없이 브라우저 메모리에서 EXIF만 읽기
+  // 메모리 EXIF 읽기
   const gpsMetadata = await exifr.gps(file).catch(() => null)
   const metadata = await exifr
     .parse(file, {

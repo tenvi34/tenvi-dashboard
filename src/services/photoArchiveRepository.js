@@ -11,7 +11,7 @@ const createRecordId = () => {
   return `photo-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-// IndexedDB 초기화와 사진/컬렉션 저장소 준비
+// IndexedDB 저장소 준비
 export const openPhotoArchiveDatabase = () =>
   new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
@@ -19,7 +19,7 @@ export const openPhotoArchiveDatabase = () =>
     request.onupgradeneeded = () => {
       const database = request.result
 
-      // 기존 photoRecords store는 재생성하지 않고, 없는 경우에만 최초 생성
+      // photoRecords 최초 생성
       if (!database.objectStoreNames.contains(PHOTO_RECORD_STORE_NAME)) {
         const store = database.createObjectStore(PHOTO_RECORD_STORE_NAME, {
           keyPath: 'id',
@@ -29,7 +29,7 @@ export const openPhotoArchiveDatabase = () =>
         store.createIndex('updatedAt', 'updatedAt')
       }
 
-      // DB v2 컬렉션 store 추가: 기존 사진 record는 업그레이드 중 수정하지 않음
+      // DB v2 컬렉션 추가
       if (!database.objectStoreNames.contains(PHOTO_COLLECTION_STORE_NAME)) {
         const store = database.createObjectStore(PHOTO_COLLECTION_STORE_NAME, {
           keyPath: 'id',
@@ -44,7 +44,7 @@ export const openPhotoArchiveDatabase = () =>
     request.onerror = () => reject(request.error)
   })
 
-// 화면 코드에서 저장소 세부 API를 숨기기 위한 트랜잭션 Promise 래퍼
+// 트랜잭션 Promise 래퍼
 const runStoreTransaction = async (mode, action) => {
   const database = await openPhotoArchiveDatabase()
 
@@ -75,7 +75,7 @@ const runStoreTransaction = async (mode, action) => {
   })
 }
 
-// 기존 사진 기록의 collectionId 누락을 화면 호환용 null로 보정
+// record collectionId 보정
 const normalizePhotoRecord = (record) => ({
   ...record,
   collectionId:
@@ -84,7 +84,7 @@ const normalizePhotoRecord = (record) => ({
       : null,
 })
 
-// 저장된 모든 사진 지도 기록을 생성일 최신순으로 조회
+// 사진 기록 최신순 조회
 export const getPhotoRecords = async () => {
   const records = await runStoreTransaction('readonly', (store) => store.getAll())
 
@@ -93,14 +93,14 @@ export const getPhotoRecords = async () => {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
-// Settings 데이터 현황과 백업 안내에 사용할 Map 기록 개수 조회
+// Map 기록 개수 조회
 export const getPhotoRecordCount = async () => {
   const count = await runStoreTransaction('readonly', (store) => store.count())
 
   return count
 }
 
-// 리사이즈된 미리보기 Blob과 메타데이터 저장
+// 사진 기록 저장
 export const createPhotoRecord = async (recordInput) => {
   const now = new Date().toISOString()
   const record = {
@@ -116,8 +116,8 @@ export const createPhotoRecord = async (recordInput) => {
   return record
 }
 
-// 사진 기록의 제목/메모/좌표 갱신용 저장소 계약
-// IndexedDB 일괄 저장 helper: 항목별 실패를 분리해 대량 업로드 전체 진행을 보호
+// 사진 기록 update 계약
+// IndexedDB 일괄 저장 helper
 export const createPhotoRecords = async (recordInputs) => {
   const results = []
 
@@ -163,14 +163,14 @@ export const updatePhotoRecord = async (id, patch) => {
   return nextRecord
 }
 
-// 사용자가 삭제한 사진 기록과 미리보기 Blob 제거
+// 사진 기록 삭제
 export const deletePhotoRecord = async (id) => {
   await runStoreTransaction('readwrite', (store) => store.delete(id))
 
   return id
 }
 
-// 백업 복원용 전체 교체: 사진/컬렉션 store를 가능한 같은 IndexedDB 트랜잭션에서 처리
+// 백업 복원 전체 교체
 export const replacePhotoArchiveData = async ({ records, collections }) => {
   const database = await openPhotoArchiveDatabase()
   const storeNames = collections
@@ -212,6 +212,6 @@ export const replacePhotoArchiveData = async ({ records, collections }) => {
   })
 }
 
-// 기존 호출 호환용 사진 record만 전체 교체
+// 사진 record 전체 교체
 export const replacePhotoRecords = async (records) =>
   replacePhotoArchiveData({ records })

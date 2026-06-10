@@ -1,5 +1,5 @@
-// 모든 언어는 같은 key 구조를 유지해야 모듈에서 t.xxx 접근을 안전하게 사용할 수 있습니다.
-// 일부 값은 문자열이 아니라 현재 숫자를 받아 문구를 만드는 함수입니다.
+// 언어 key 구조
+// 동적 문구 함수
 export const translations = {
   ko: {
     app: {
@@ -1138,7 +1138,6 @@ export const translations = {
   },
 }
 
-// localStorage에서 복원한 언어 코드가 translations에 실제로 있는지 확인합니다.
-// 전달된 언어 코드가 translations에 실제로 존재하는지 확인합니다.
+// 언어 코드 검증
 export const isSupportedLanguage = (language) =>
   Object.prototype.hasOwnProperty.call(translations, language)

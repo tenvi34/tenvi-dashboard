@@ -159,7 +159,7 @@ const createMapFilterSummary = (records, selectedFilter, collections, t) => {
   }
 }
 
-// 선택 기록, draft, 전체 기록 상태와 이동 요청을 기준으로 지도 화면 제어
+// 지도 화면 제어
 function MapViewportController({
   layoutKey,
   records,
@@ -182,7 +182,7 @@ function MapViewportController({
     const requestType = request?.type
     const isNavigationRequest = MAP_NAVIGATION_REQUEST_TYPES.has(requestType)
     const isFitAllAuto = requestType === 'fit-all' && shouldFitBounds
-    // fit-all-forced: 선택·편집 상태에서도 강제로 전체 마커 범위 표시
+    // 강제 전체 마커 범위
     const isFitAllForced = requestType === 'fit-all-forced'
     const container = map.getContainer()
     const mapSize = map.getSize()
@@ -192,7 +192,7 @@ function MapViewportController({
       mapSize.x > 0 &&
       mapSize.y > 0
 
-    // 모바일 목록/상세 보기에서는 지도 패널이 숨겨져 Leaflet 이동 계산이 NaN이 될 수 있음
+    // 숨김 지도 방어
     if (!canMeasureMap) {
       return
     }
@@ -226,13 +226,13 @@ function MapViewportController({
     if (isNavigationRequest && (hasRequestLocation || hasTargetLocation)) {
       const requestId = request?.requestId ?? ''
 
-      // 같은 이동 요청은 한 번만 처리해 선택/편집 패널 리렌더로 인한 지도 떨림 방지
+      // 중복 이동 방지
       if (requestId && handledNavigationRequestIdRef.current === requestId) {
         return
       }
 
       handledNavigationRequestIdRef.current = requestId
-      // 저장 record에는 status가 없으므로 이동 요청 좌표를 우선 사용
+      // 이동 요청 좌표 우선
       const nextCenter = hasRequestLocation
         ? [requestLatitude, requestLongitude]
         : [targetLatitude, targetLongitude]
@@ -245,7 +245,7 @@ function MapViewportController({
         return
       }
 
-      // intent별 zoom 정책: 선택/검색/EXIF는 확대, 수동 클릭은 현재 zoom 유지
+      // intent별 zoom 정책
       if (requestType === 'manual-click') {
         map.setView(nextCenter, map.getZoom())
         return
@@ -273,7 +273,7 @@ function MapViewportController({
   return null
 }
 
-// 사진 등록 또는 편집 중 지도 클릭 좌표 전달
+// 지도 클릭 좌표 전달
 function ManualLocationPicker({ disabled, onPickLocation }) {
   useMapEvents({
     click(event) {
@@ -286,7 +286,7 @@ function ManualLocationPicker({ disabled, onPickLocation }) {
   return null
 }
 
-// 모바일 보기 전환 후 Leaflet 타일 크기 재계산
+// Leaflet 크기 재계산
 function MapResizeController({ watchValue }) {
   const map = useMap()
 
@@ -301,7 +301,7 @@ function MapResizeController({ watchValue }) {
   return null
 }
 
-// IndexedDB Blob을 임시 object URL로 바꾸는 이미지 컴포넌트
+// IndexedDB Blob 미리보기
 function PhotoPreview({ alt, blob, className }) {
   const [src, setSrc] = useState('')
 
@@ -311,7 +311,7 @@ function PhotoPreview({ alt, blob, className }) {
       return undefined
     }
 
-    // 컴포넌트 해제 시 Blob URL 메모리 정리
+    // Blob URL 정리
     const objectUrl = URL.createObjectURL(blob)
 
     setSrc(objectUrl)
@@ -326,13 +326,13 @@ function PhotoPreview({ alt, blob, className }) {
   return <img alt={alt} className={className} src={src} />
 }
 
-// 저장 기록 마커와 선택 시 팝업 열기 제어
+// 저장 기록 마커
 function PhotoRecordMarker({ icon, isActive, onSelectRecord, record, t }) {
   const markerRef = useRef(null)
 
   useEffect(() => {
     if (isActive) {
-      // 목록 선택과 마커 선택 상태를 같은 팝업 표시로 연결
+      // 선택 팝업 연결
       markerRef.current?.openPopup()
     }
   }, [isActive])
@@ -359,7 +359,7 @@ function PhotoRecordMarker({ icon, isActive, onSelectRecord, record, t }) {
   )
 }
 
-// 명시적 버튼/Enter 검색만 수행하는 장소 검색 패널
+// 장소 검색 패널
 function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
@@ -380,7 +380,7 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
     setHasSearched(true)
 
     try {
-      // 사용자가 입력한 장소명만 전송하는 명시적 검색 요청
+      // 명시적 장소 검색
       setResults(await searchPlaces(trimmedQuery, { language, scope }))
     } catch {
       setResults([])
@@ -462,7 +462,7 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
   )
 }
 
-// 사진 기록 목록에서 선택 진입점을 제공하는 패널
+// 사진 기록 목록
 function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records, t }) {
   return (
     <section className="map-list-panel" aria-label={t.map.recordListLabel}>
@@ -502,7 +502,7 @@ function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records
   )
 }
 
-// 컬렉션 생성/수정 폼과 카드 목록 — 컬렉션 관리 패널이 열렸을 때만 렌더
+// 컬렉션 관리 패널
 function PhotoCollectionPanel({
   collectionDraft,
   collections,
@@ -620,7 +620,7 @@ function PhotoCollectionPanel({
   )
 }
 
-// 사진 저장/편집 시 컬렉션 연결 선택
+// 컬렉션 선택
 function PhotoCollectionSelect({ collections, onChange, t, value }) {
   return (
     <label className="map-field">
@@ -640,7 +640,7 @@ function PhotoCollectionSelect({ collections, onChange, t, value }) {
   )
 }
 
-// 저장 전 사진 draft의 제목/메모와 좌표 상태 편집 패널
+// 대량 업로드 목록
 function BulkUploadList({
   emptyMessage,
   items,
@@ -1001,7 +1001,7 @@ function PhotoDraftPanel({
   )
 }
 
-// 저장 기록 편집용 제목/메모/위치 draft 패널
+// 기록 편집 패널
 function PhotoEditPanel({
   collections,
   editDraft,
@@ -1095,7 +1095,7 @@ function PhotoEditPanel({
   )
 }
 
-// 선택된 저장 기록의 미리보기, 메타데이터, 삭제 동작 상세 패널
+// 기록 상세 패널
 function PhotoRecordDetail({
   collections,
   filterSummary,
@@ -1114,7 +1114,7 @@ function PhotoRecordDetail({
             <span>{t.map.visiblePhotoCount}</span>
             <strong>{filterSummary.photoCount}</strong>
           </div>
-          {/* 오른쪽 미선택 요약: 현재 필터 결과만 compact하게 집계 */}
+          {/* 필터 결과 요약 */}
           <dl className="map-filter-summary-grid">
             <div>
               <dt>{t.map.sourceExif}</dt>
@@ -1200,7 +1200,7 @@ function PhotoRecordDetail({
   )
 }
 
-// 모드 전환 탭 — 탐색/업로드/컬렉션 관리 모드를 선택하는 탭 바
+// 모드 전환 탭
 function MapModeTabs({ activeMode, onChangeMode, t }) {
   return (
     <div className="map-mode-tabs" role="tablist" aria-label={t.map.modeTabs}>
@@ -1235,7 +1235,7 @@ function MapModeTabs({ activeMode, onChangeMode, t }) {
   )
 }
 
-// 탐색 모드 왼쪽 패널 — 컬렉션 필터, 기록 검색, 사진 목록
+// 모바일 Map 보기 탭
 function MobileMapViewTabs({ activeView, onChangeView, t }) {
   const views = [
     { id: 'map', label: t.map.mobileMapViewMap },
@@ -1330,7 +1330,7 @@ function MapExplorePanel({
       <div className="map-left-fixed">
         <label className="map-field map-collection-select-field">
           <span>{t.map.collectionFilter}</span>
-          {/* 컬렉션이 늘어도 탐색 패널 높이를 잡아먹지 않도록 select로 압축 */}
+          {/* 컬렉션 select 압축 */}
           <select
             value={selectedCollectionFilter}
             onChange={(event) => onSetCollectionFilter(event.target.value)}
@@ -1378,7 +1378,7 @@ function MapExplorePanel({
 
         {isFilterOpen ? (
           <div className="map-record-search-panel">
-            {/* 접이식 필터: 목록 높이를 확보하기 위해 필요할 때만 노출 */}
+            {/* 접이식 필터 */}
             <label className="map-field">
               <span>{t.map.recordSearchLabel}</span>
               <input
@@ -1435,7 +1435,7 @@ function MapExplorePanel({
   )
 }
 
-// 사진 업로드 모드 왼쪽 패널 — 단일/다중 업로드, EXIF 분석, 위치정보 없는 사진 후처리
+// 사진 업로드 패널
 function MapUploadPanel({
   bulkAssignedLocation,
   bulkSaveReport,
@@ -1466,7 +1466,7 @@ function MapUploadPanel({
   return (
     <>
       <div className="map-left-fixed">
-        {/* 사진 파일 선택 버튼 — bulk 분석/저장 중에는 비활성 */}
+        {/* 사진 선택 버튼 */}
         <button
           className={`map-add-toggle-button${isAddingPhoto ? ' is-open' : ''}`}
           type="button"
@@ -1487,7 +1487,7 @@ function MapUploadPanel({
           onChange={onPhotoChange}
         />
 
-        {/* bulk 저장 후 일부 실패 항목 표시 */}
+        {/* bulk 저장 실패 */}
         {bulkSaveReport?.failedItems.length > 0 ? (
           <div className="map-status is-error" role="alert">
             <strong>{t.map.bulkFailedList}</strong>
@@ -1499,7 +1499,7 @@ function MapUploadPanel({
           </div>
         ) : null}
 
-        {/* 단일 업로드 draft 패널 — bulk 분석 중이 아닐 때만 표시 */}
+        {/* 단일 업로드 draft */}
         {isAddingPhoto && !isBulkActive ? (
           <>
             {draft ? (
@@ -1521,7 +1521,7 @@ function MapUploadPanel({
         ) : null}
       </div>
 
-      {/* bulk 분석 결과 스크롤 영역 */}
+      {/* bulk 결과 영역 */}
       {isBulkActive ? (
         <div className="map-left-scroll">
           <BulkUploadPanel
@@ -1545,7 +1545,7 @@ function MapUploadPanel({
   )
 }
 
-// 컬렉션 관리 모드 패널 — 컬렉션 생성/수정/삭제, 연결 사진 수 표시
+// 컬렉션 관리 모드
 function MapCollectionManagerPanel({
   collectionDraft,
   collections,
@@ -1561,7 +1561,7 @@ function MapCollectionManagerPanel({
   return (
     <>
       <div className="map-left-fixed">
-        {/* 컬렉션 삭제 정책 안내: 삭제해도 연결 사진은 미분류로 이동 */}
+        {/* 컬렉션 삭제 정책 */}
         <div className="map-status" role="note">
           {t.map.collectionDeletePolicy}
         </div>
@@ -1585,7 +1585,7 @@ function MapCollectionManagerPanel({
   )
 }
 
-// TENVI Map 모듈의 로컬 사진 지도 아카이브 화면
+// TENVI Map 모듈
 function Map({ t }) {
   const photoInputRef = useRef(null)
   const bulkCancelRef = useRef(false)
@@ -1604,9 +1604,9 @@ function Map({ t }) {
   const [draft, setDraft] = useState(null)
   const [editDraft, setEditDraft] = useState(null)
   const [activeRecordId, setActiveRecordId] = useState('')
-  // 사진 등록 폼 표시 여부 — 기본 접힘
+  // 사진 등록 폼 상태
   const [isAddingPhoto, setIsAddingPhoto] = useState(false)
-  // 컬렉션 생성/수정 폼 표시 여부 — 기본 접힘
+  // 컬렉션 폼 상태
   const [isCollectionFormOpen, setIsCollectionFormOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isReading, setIsReading] = useState(false)
@@ -1629,10 +1629,10 @@ function Map({ t }) {
     useState([])
   const [bulkAssignedLocation, setBulkAssignedLocation] = useState(null)
   const [bulkSaveReport, setBulkSaveReport] = useState(null)
-  // 현재 지도 모드 — 탐색/업로드/컬렉션 관리 전환 상태
-  // 모드 전환 시 진행 중인 draft나 bulk 결과를 강제 초기화하지 않고 화면만 분기
+  // 지도 모드 상태
+  // 모드 전환 화면 분기
   const [activeMapMode, setActiveMapMode] = useState('explore')
-  // 모바일 Map 보기 전환 상태: PC 3패널은 유지하고 작은 화면에서만 단일 보기로 분기
+  // 모바일 Map 보기 상태
   const [activeMobileMapView, setActiveMobileMapView] = useState('map')
   const [hasMobileMapViewInteraction, setHasMobileMapViewInteraction] = useState(false)
   const normalizedRecords = useMemo(
@@ -1654,7 +1654,7 @@ function Map({ t }) {
   )
   const filteredRecords = useMemo(
     () =>
-      // 컬렉션 필터와 검색/위치 필터 조합: 컬렉션 결과에 추가 조건을 순서대로 적용
+      // 컬렉션/검색 필터 조합
       filterPhotoRecordsBySearchAndLocation(collectionFilteredRecords, {
         locationSourceFilter: selectedLocationSourceFilter,
         searchQuery: mapSearchQuery,
@@ -1663,7 +1663,7 @@ function Map({ t }) {
   )
   const filterSummary = useMemo(
     () =>
-      // 오른쪽 빈 상태 요약: 저장소 재조회 없이 현재 필터 결과만 집계
+      // 필터 결과 집계
       createMapFilterSummary(
         filteredRecords,
         selectedCollectionFilter,
@@ -1737,7 +1737,7 @@ function Map({ t }) {
       activeMobileMapView === 'map' &&
       !hasMobileMapViewInteraction
     ) {
-      // 모바일 초기 빈 상태: 빈 지도보다 목록 안내가 먼저 보이도록 1회만 보정
+      // 모바일 빈 상태 보정
       setActiveMobileMapView('list')
     }
   }, [
@@ -1750,7 +1750,7 @@ function Map({ t }) {
   useEffect(() => {
     let isMounted = true
 
-    // 새로고침 후 IndexedDB 사진 기록과 컬렉션 복원용 초기 조회
+    // IndexedDB 초기 조회
     Promise.all([getPhotoRecords(), getPhotoCollections()])
       .then(([savedRecords, savedCollections]) => {
         if (isMounted) {
@@ -1780,14 +1780,14 @@ function Map({ t }) {
       activeRecordId &&
       !filteredRecords.some((record) => record.id === activeRecordId)
     ) {
-      // 필터 변경으로 선택 record가 화면 밖으로 나가면 상세/팝업 선택 해제
+      // 필터 밖 선택 해제
       setActiveRecordId('')
     }
   }, [activeRecordId, filteredRecords])
 
   const resetBulkUpload = () => {
     bulkCancelRef.current = false
-    // 임시 File 참조와 preview Blob 정리: bulk 상태를 비워 다음 업로드와 섞이지 않게 함
+    // bulk 임시 상태 정리
     setBulkAssignedLocation(null)
     setBulkSaveReport(null)
     setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
@@ -1821,9 +1821,9 @@ function Map({ t }) {
       total: files.length,
     })
 
-    // 대량 업로드 분석 큐 처리: 500장 이상에서도 메모리 급증을 피하도록 파일을 순차 분석
+    // bulk 순차 분석
     for (const [index, file] of files.entries()) {
-      // 진행률 업데이트와 취소 확인: 취소 이후의 미처리 파일은 분석하지 않음
+      // 진행률과 취소 확인
       if (bulkCancelRef.current) {
         setBulkUpload((currentUpload) => ({
           ...currentUpload,
@@ -1901,7 +1901,7 @@ function Map({ t }) {
     resetBulkUpload()
 
     try {
-      // 원본 저장 없이 EXIF 위치와 리사이즈 미리보기 Blob만 draft에 보관
+      // EXIF와 미리보기 보관
       const [location, previewImage] = await Promise.all([
         readPhotoLocation(file),
         createPreviewImageBlob(file),
@@ -1962,7 +1962,7 @@ function Map({ t }) {
         longitude: lng,
       }
 
-      // 지도 클릭 bulk 위치 적용: 단일 draft/edit 흐름이 없을 때만 현재 zoom 유지하며 일괄 반영
+      // bulk 지도 클릭 위치
       applyBulkLocationToSelection(location)
       setViewportRequest(createViewportRequest('manual-click', location))
     }
@@ -2059,7 +2059,7 @@ function Map({ t }) {
     setError('')
 
     try {
-      // 컬렉션 삭제와 사진 연결 해제는 repository의 단일 transaction에서 처리
+      // 컬렉션 삭제 transaction
       await deletePhotoCollection(collection.id)
       setCollections((currentCollections) =>
         currentCollections.filter((item) => item.id !== collection.id),
@@ -2123,14 +2123,14 @@ function Map({ t }) {
   }
 
   const handleToggleBulkLocationTarget = (itemId) => {
-    // 같은 위치 적용 대상 선택: EXIF 사진도 사용자가 명시하면 좌표를 덮어쓸 수 있음
+    // 같은 위치 적용 대상
     setSelectedMissingLocationItemIds((currentIds) =>
       toggleBulkMissingLocationSelection(currentIds, itemId),
     )
   }
 
   const handleSelectAllBulkLocationTargets = () => {
-    // 전체 선택: 처리 실패를 제외한 업로드 사진에 같은 위치를 적용할 수 있음
+    // 같은 위치 전체 선택
     setSelectedMissingLocationItemIds(
       selectAllBulkLocationAssignableItems(bulkUpload.items),
     )
@@ -2174,7 +2174,7 @@ function Map({ t }) {
           previewImage,
         })
       } catch {
-        // 일부 항목 처리 실패 fallback: 실패한 사진만 제외하고 나머지 위치 적용은 계속 진행
+        // 일부 실패 fallback
         itemsWithPreview.push({
           ...item,
           errorMessage: t.map.bulkPreviewCreateError,
@@ -2183,7 +2183,7 @@ function Map({ t }) {
       }
     }
 
-    // 위치 적용 후 저장 후보 전환: 좌표와 preview Blob이 있는 항목만 기존 저장 후보 계산에 합류
+    // 위치 적용 후 저장 후보
     setBulkUpload((currentUpload) => ({
       ...currentUpload,
       items: applyLocationToBulkItems(itemsWithPreview, successfulIds, location),
@@ -2197,7 +2197,7 @@ function Map({ t }) {
   }
 
   const handleSelectBulkPlace = (place) => {
-    // 장소 검색 결과 bulk 위치 적용: 선택 항목에 같은 검색 좌표를 반영
+    // bulk 장소 검색 위치
     applyBulkLocationToSelection({
       latitude: place.latitude,
       locationSource: 'search',
@@ -2281,7 +2281,7 @@ function Map({ t }) {
     setError('')
 
     try {
-      // 저장 버튼 이후에만 IndexedDB 기록 업데이트
+      // 저장 버튼 후 IndexedDB 업데이트
       const updatedRecord = await updatePhotoRecord(editDraft.id, updatePatch)
 
       if (!updatedRecord) {
@@ -2311,7 +2311,7 @@ function Map({ t }) {
     setEditDraft(null)
     setIsAddingPhoto(false)
     setActiveRecordId(recordId)
-    // 같은 기록 재클릭도 지도 이동을 다시 실행하기 위한 요청 객체
+    // 재클릭 이동 요청
     setViewportRequest(createViewportRequest(requestType, selectedRecord))
   }
 
@@ -2325,7 +2325,7 @@ function Map({ t }) {
   }
 
   const handleSelectRecordFromList = (recordId) => {
-    // 목록 선택 후 모바일에서는 바로 상세 보기로 이동하고, PC에서는 기존 3패널 선택 흐름 유지
+    // 목록 선택 후 상세 이동
     handleSelectRecord(recordId)
     handleChangeMobileMapView('detail')
   }
@@ -2334,7 +2334,7 @@ function Map({ t }) {
     handleChangeMobileMapView('map')
 
     if (activeRecord) {
-      // 상세에서 지도 보기로 돌아갈 때 선택 기록 중심으로 Leaflet 이동 요청 재실행
+      // 선택 기록 지도 포커스
       setViewportRequest(createViewportRequest('record-select', activeRecord))
     }
   }
@@ -2356,7 +2356,7 @@ function Map({ t }) {
     setError('')
 
     try {
-      // IndexedDB 기록과 화면 목록을 함께 갱신하는 삭제 처리
+      // IndexedDB 삭제 반영
       await deletePhotoRecord(recordId)
       setRecords((currentRecords) =>
         currentRecords.filter((record) => record.id !== recordId),
@@ -2375,7 +2375,7 @@ function Map({ t }) {
     }
   }
 
-  // 사진 등록 폼 펼치기/접기 — 닫을 때 미저장 draft만 초기화, 저장 기록에는 영향 없음
+  // 사진 등록 폼 토글
   const handleToggleAddPhoto = () => {
     if (isAddingPhoto) {
       setIsAddingPhoto(false)
@@ -2386,7 +2386,7 @@ function Map({ t }) {
     }
   }
 
-  // 컬렉션 생성/수정 폼 펼치기/접기 — 닫을 때 입력 draft만 초기화, 기존 컬렉션 데이터에는 영향 없음
+  // 컬렉션 폼 토글
   const handleToggleCollectionForm = () => {
     if (isCollectionFormOpen) {
       setIsCollectionFormOpen(false)
@@ -2396,7 +2396,7 @@ function Map({ t }) {
     }
   }
 
-  // 현재 필터의 전체 마커가 보이도록 지도 범위 조정 — 선택 상태는 유지
+  // 전체 마커 범위
   const handleFitAllMarkers = () => {
     setViewportRequest(createViewportRequest('fit-all-forced'))
   }
@@ -2411,7 +2411,7 @@ function Map({ t }) {
         <p className="module-meta">{t.map.archiveBadge}</p>
       </div>
 
-      {/* 모드 전환 탭 — 탐색/업로드/컬렉션 관리 */}
+      {/* 모드 전환 탭 */}
       <MapModeTabs activeMode={activeMapMode} onChangeMode={setActiveMapMode} t={t} />
       {activeMapMode === 'explore' ? (
         <MobileMapViewTabs
@@ -2421,7 +2421,7 @@ function Map({ t }) {
         />
       ) : null}
 
-      {/* 공통 상태 메시지 — 모드 전환과 무관하게 항상 표시 */}
+      {/* 공통 상태 메시지 */}
       {isLoading ? (
         <div className="map-status" role="status">
           {t.map.loadingRecords}
@@ -2443,7 +2443,7 @@ function Map({ t }) {
         </div>
       ) : null}
 
-      {/* 3패널 레이아웃: upload/collections 모드에서는 오른쪽 패널 없이 2열로 전환 */}
+      {/* Map 패널 레이아웃 */}
       <div className="map-mode-body">
         <div
           className="map-archive-layout"
@@ -2451,7 +2451,7 @@ function Map({ t }) {
           data-mode={activeMapMode}
         >
         <aside className="map-control-panel">
-          {/* 탐색 모드: 컬렉션 필터, 기록 검색, 사진 목록 */}
+          {/* 탐색 모드 */}
           {activeMapMode === 'explore' ? (
             <MapExplorePanel
               activeRecordId={activeRecordId}
@@ -2469,7 +2469,7 @@ function Map({ t }) {
             />
           ) : null}
 
-          {/* 업로드 모드: 단일/다중 업로드, EXIF 분석, 위치정보 없는 사진 후처리 */}
+          {/* 업로드 모드 */}
           {activeMapMode === 'upload' ? (
             <MapUploadPanel
               bulkAssignedLocation={bulkAssignedLocation}
@@ -2498,7 +2498,7 @@ function Map({ t }) {
             />
           ) : null}
 
-          {/* 컬렉션 관리 모드: 컬렉션 생성/수정/삭제 */}
+          {/* 컬렉션 관리 모드 */}
           {activeMapMode === 'collections' ? (
             <MapCollectionManagerPanel
               collectionDraft={collectionDraft}
@@ -2523,7 +2523,7 @@ function Map({ t }) {
           }`}
           aria-label={t.map.mapLabel}
         >
-          {/* 전체 위치 보기: 등록·편집 중이 아닐 때, 마커가 하나 이상일 때 표시 */}
+          {/* 전체 위치 보기 */}
           {filteredRecords.length > 0 && !draft && !editDraft ? (
             <button
               className="map-fit-all-button"
@@ -2606,7 +2606,7 @@ function Map({ t }) {
             ) : null}
 
             {hasBulkAssignedLocation ? (
-              // bulk 임시 위치는 아직 저장 record가 아니므로 저장 마커와 별도로 표시
+              // bulk 임시 위치
               <Marker
                 icon={bulkMarkerIcon}
                 position={[
@@ -2651,7 +2651,7 @@ function Map({ t }) {
           ) : null}
         </section>
 
-        {/* 오른쪽 상세 패널 — 탐색 모드에서만 표시 */}
+        {/* 상세 패널 */}
         {activeMapMode === 'explore' ? (
           <aside className="map-detail-column">
             {editDraft ? (
