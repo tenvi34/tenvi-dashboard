@@ -161,6 +161,7 @@ const createMapFilterSummary = (records, selectedFilter, collections, t) => {
 
 // 선택 기록, draft, 전체 기록 상태와 이동 요청을 기준으로 지도 화면 제어
 function MapViewportController({
+  layoutKey,
   records,
   request,
   shouldFitBounds,
@@ -183,17 +184,40 @@ function MapViewportController({
     const isFitAllAuto = requestType === 'fit-all' && shouldFitBounds
     // fit-all-forced: 선택·편집 상태에서도 강제로 전체 마커 범위 표시
     const isFitAllForced = requestType === 'fit-all-forced'
+    const container = map.getContainer()
+    const mapSize = map.getSize()
+    const canMeasureMap =
+      container.offsetWidth > 0 &&
+      container.offsetHeight > 0 &&
+      mapSize.x > 0 &&
+      mapSize.y > 0
+
+    // 모바일 목록/상세 보기에서는 지도 패널이 숨겨져 Leaflet 이동 계산이 NaN이 될 수 있음
+    if (!canMeasureMap) {
+      return
+    }
 
     if (isFitAllAuto || isFitAllForced) {
       handledNavigationRequestIdRef.current = ''
 
-      if (records.length > 1) {
+      const visibleRecords = records
+        .map((record) => ({
+          ...record,
+          latitude: Number(record.latitude),
+          longitude: Number(record.longitude),
+        }))
+        .filter((record) => Number.isFinite(record.latitude) && Number.isFinite(record.longitude))
+
+      if (visibleRecords.length > 1) {
         const bounds = L.latLngBounds(
-          records.map((record) => [record.latitude, record.longitude]),
+          visibleRecords.map((record) => [record.latitude, record.longitude]),
         )
         map.fitBounds(bounds, { maxZoom: FIT_BOUNDS_MAX_ZOOM, padding: [36, 36] })
-      } else if (records.length === 1) {
-        map.setView([records[0].latitude, records[0].longitude], RECORD_FOCUS_ZOOM)
+      } else if (visibleRecords.length === 1) {
+        map.setView(
+          [visibleRecords[0].latitude, visibleRecords[0].longitude],
+          RECORD_FOCUS_ZOOM,
+        )
       }
 
       return
@@ -244,7 +268,7 @@ function MapViewportController({
       map.flyTo(nextCenter, focusZoom, { duration: 0.65 })
       return
     }
-  }, [map, records, request, shouldFitBounds, target])
+  }, [layoutKey, map, records, request, shouldFitBounds, target])
 
   return null
 }
@@ -258,6 +282,21 @@ function ManualLocationPicker({ disabled, onPickLocation }) {
       }
     },
   })
+
+  return null
+}
+
+// 모바일 보기 전환 후 Leaflet 타일 크기 재계산
+function MapResizeController({ watchValue }) {
+  const map = useMap()
+
+  useEffect(() => {
+    const resizeTimer = window.setTimeout(() => {
+      map.invalidateSize()
+    }, 120)
+
+    return () => window.clearTimeout(resizeTimer)
+  }, [map, watchValue])
 
   return null
 }
@@ -1197,6 +1236,58 @@ function MapModeTabs({ activeMode, onChangeMode, t }) {
 }
 
 // 탐색 모드 왼쪽 패널 — 컬렉션 필터, 기록 검색, 사진 목록
+function MobileMapViewTabs({ activeView, onChangeView, t }) {
+  const views = [
+    { id: 'map', label: t.map.mobileMapViewMap },
+    { id: 'list', label: t.map.mobileMapViewList },
+    { id: 'detail', label: t.map.mobileMapViewDetail },
+  ]
+
+  return (
+    <div
+      className="mobile-map-view-tabs"
+      role="tablist"
+      aria-label={t.map.mobileMapViewsLabel}
+    >
+      {views.map((view) => (
+        <button
+          className={`mobile-map-view-tab ${
+            activeView === view.id ? 'is-active' : ''
+          }`}
+          key={view.id}
+          type="button"
+          role="tab"
+          aria-selected={activeView === view.id}
+          onClick={() => onChangeView(view.id)}
+        >
+          {view.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function MobileMapPreviewCard({ collections, onOpenDetail, record, t }) {
+  if (!record) {
+    return null
+  }
+
+  return (
+    <button className="mobile-map-preview-card" type="button" onClick={onOpenDetail}>
+      <PhotoPreview
+        alt={record.title}
+        blob={record.previewImageBlob}
+        className="mobile-map-preview-thumb"
+      />
+      <span>
+        <strong>{record.title}</strong>
+        <small>{getCollectionName(record.collectionId, collections, t)}</small>
+      </span>
+      <em>{t.map.openMapDetail}</em>
+    </button>
+  )
+}
+
 function MapExplorePanel({
   activeRecordId,
   collections,
@@ -1529,6 +1620,8 @@ function Map({ t }) {
   // 현재 지도 모드 — 탐색/업로드/컬렉션 관리 전환 상태
   // 모드 전환 시 진행 중인 draft나 bulk 결과를 강제 초기화하지 않고 화면만 분기
   const [activeMapMode, setActiveMapMode] = useState('explore')
+  // 모바일 Map 보기 전환 상태: PC 3패널은 유지하고 작은 화면에서만 단일 보기로 분기
+  const [activeMobileMapView, setActiveMobileMapView] = useState('map')
   const normalizedRecords = useMemo(
     () =>
       records.map((record) => ({
@@ -2196,6 +2289,12 @@ function Map({ t }) {
     handleSelectRecord(recordId, 'marker-select')
   }
 
+  const handleSelectRecordFromList = (recordId) => {
+    // 목록 선택 후 모바일에서는 바로 상세 보기로 이동하고, PC에서는 기존 3패널 선택 흐름 유지
+    handleSelectRecord(recordId)
+    setActiveMobileMapView('detail')
+  }
+
   const handleDeleteRecord = async (recordId) => {
     if (!window.confirm(t.map.deleteConfirm)) {
       return
@@ -2213,6 +2312,9 @@ function Map({ t }) {
       setEditDraft((currentDraft) =>
         currentDraft?.id === recordId ? null : currentDraft,
       )
+      if (activeRecordId === recordId) {
+        setActiveMobileMapView('list')
+      }
       setViewportRequest(createViewportRequest('fit-all'))
       setStatusMessage(t.map.deleteComplete)
     } catch {
@@ -2258,6 +2360,13 @@ function Map({ t }) {
 
       {/* 모드 전환 탭 — 탐색/업로드/컬렉션 관리 */}
       <MapModeTabs activeMode={activeMapMode} onChangeMode={setActiveMapMode} t={t} />
+      {activeMapMode === 'explore' ? (
+        <MobileMapViewTabs
+          activeView={activeMobileMapView}
+          onChangeView={setActiveMobileMapView}
+          t={t}
+        />
+      ) : null}
 
       {/* 공통 상태 메시지 — 모드 전환과 무관하게 항상 표시 */}
       {isLoading ? (
@@ -2283,7 +2392,11 @@ function Map({ t }) {
 
       {/* 3패널 레이아웃: upload/collections 모드에서는 오른쪽 패널 없이 2열로 전환 */}
       <div className="map-mode-body">
-        <div className="map-archive-layout" data-mode={activeMapMode}>
+        <div
+          className="map-archive-layout"
+          data-mobile-view={activeMobileMapView}
+          data-mode={activeMapMode}
+        >
         <aside className="map-control-panel">
           {/* 탐색 모드: 컬렉션 필터, 기록 검색, 사진 목록 */}
           {activeMapMode === 'explore' ? (
@@ -2293,7 +2406,7 @@ function Map({ t }) {
               filteredEmptyMessage={filteredEmptyMessage}
               filteredRecords={filteredRecords}
               mapSearchQuery={mapSearchQuery}
-              onSelectRecord={handleSelectRecord}
+              onSelectRecord={handleSelectRecordFromList}
               onSetCollectionFilter={setSelectedCollectionFilter}
               onSetLocationSourceFilter={setSelectedLocationSourceFilter}
               onSetSearchQuery={setMapSearchQuery}
@@ -2349,7 +2462,14 @@ function Map({ t }) {
           ) : null}
         </aside>
 
-        <section className="map-view-panel" aria-label={t.map.mapLabel}>
+        <section
+          className={`map-view-panel ${
+            activeMapMode === 'explore' && activeRecord && !editDraft
+              ? 'has-mobile-preview'
+              : ''
+          }`}
+          aria-label={t.map.mapLabel}
+        >
           {/* 전체 위치 보기: 등록·편집 중이 아닐 때, 마커가 하나 이상일 때 표시 */}
           {filteredRecords.length > 0 && !draft && !editDraft ? (
             <button
@@ -2368,11 +2488,13 @@ function Map({ t }) {
           >
             <TileLayer attribution={OSM_ATTRIBUTION} url={OSM_TILE_URL} />
             <MapViewportController
+              layoutKey={activeMobileMapView}
               request={viewportRequest}
               records={filteredRecords}
               shouldFitBounds={shouldFitBounds}
               target={focusTarget}
             />
+            <MapResizeController watchValue={`${activeMapMode}-${activeMobileMapView}`} />
             <ManualLocationPicker
               disabled={!canPickLocation}
               onPickLocation={handlePickLocation}
@@ -2456,11 +2578,35 @@ function Map({ t }) {
               </Marker>
             ) : null}
           </MapContainer>
+          {activeMapMode === 'explore' && !editDraft ? (
+            <MobileMapPreviewCard
+              collections={collections}
+              onOpenDetail={() => setActiveMobileMapView('detail')}
+              record={activeRecord}
+              t={t}
+            />
+          ) : null}
         </section>
 
         {/* 오른쪽 상세 패널 — 탐색 모드에서만 표시 */}
         {activeMapMode === 'explore' ? (
           <aside className="map-detail-column">
+            <div className="mobile-map-detail-actions">
+              <button
+                className="map-secondary-button"
+                type="button"
+                onClick={() => setActiveMobileMapView('map')}
+              >
+                {t.map.backToMap}
+              </button>
+              <button
+                className="map-secondary-button"
+                type="button"
+                onClick={() => setActiveMobileMapView('list')}
+              >
+                {t.map.backToList}
+              </button>
+            </div>
             {editDraft ? (
               <div className="map-status" role="status">
                 {t.map.clickToSetLocation}
