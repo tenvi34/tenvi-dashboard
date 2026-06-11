@@ -2565,6 +2565,7 @@ body.tenvi-modal-open .tenvi-dashboard {
 
 .settings-data-panel .data-metrics {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 10px;
   margin-bottom: 0;
 }
 
@@ -2576,7 +2577,7 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .settings-backup-panel .backup-actions {
-  margin-top: 2px;
+  margin-top: 10px;
 }
 
 .settings-danger-panel {
@@ -2584,6 +2585,10 @@ body.tenvi-modal-open .tenvi-dashboard {
   background:
     linear-gradient(135deg, rgba(255, 102, 134, 0.1), rgba(2, 9, 18, 0.44)),
     rgba(2, 9, 18, 0.42);
+}
+
+.settings-danger-panel > .reset-button {
+  margin-top: 10px;
 }
 
 .settings-danger-panel .module-label,
