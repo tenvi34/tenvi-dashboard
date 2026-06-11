@@ -90,6 +90,7 @@ function Settings({
   const backupFileInputRef = useRef(null)
   const taskCount = readStoredCount(TASKS_STORAGE_KEY)
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
+  const isHudTheme = theme === 'hud'
 
   useEffect(() => {
     let isMounted = true
@@ -487,6 +488,7 @@ function Settings({
                   hudEffect === effectId ? 'is-active' : ''
                 }`}
                 key={effectId}
+                disabled={!isHudTheme}
                 type="button"
                 // HUD CSS 클래스 반영
                 onClick={() => onHudEffectChange(effectId)}

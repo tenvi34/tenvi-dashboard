@@ -2393,10 +2393,17 @@ body.tenvi-modal-open .tenvi-dashboard {
     color 0.18s ease;
 }
 
-.settings-option:hover {
+.settings-option:hover:not(:disabled) {
   transform: translateY(-1px);
   border-color: var(--line-strong);
   box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.settings-option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .settings-option.is-active {
@@ -4642,7 +4649,7 @@ body.tenvi-modal-open .tenvi-dashboard {
 .tenvi-dashboard.theme-standard .sidebar-button:hover,
 .tenvi-dashboard.theme-standard .filter-button:hover,
 .tenvi-dashboard.theme-standard .timer-tab:hover,
-.tenvi-dashboard.theme-standard .settings-option:hover,
+.tenvi-dashboard.theme-standard .settings-option:hover:not(:disabled),
 .tenvi-dashboard.theme-standard .calendar-nav-button:hover,
 .tenvi-dashboard.theme-standard .command-link-button:hover {
   color: #172033;
