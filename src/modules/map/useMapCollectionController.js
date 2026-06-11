@@ -10,6 +10,7 @@ import {
   updatePhotoCollection,
 } from '../../services/photoCollectionRepository.js'
 
+// 컬렉션 CRUD 상태 컨트롤러
 function useMapCollectionController({
   getCollectionRecordCount,
   setCollections,
@@ -22,6 +23,7 @@ function useMapCollectionController({
   const [collectionDraft, setCollectionDraft] = useState(() =>
     normalizePhotoCollectionInput(),
   )
+  // 편집 중인 컬렉션 id
   const [editingCollectionId, setEditingCollectionId] = useState('')
 
   const handleChangeCollectionDraft = (patch) => {
@@ -49,6 +51,7 @@ function useMapCollectionController({
     setError('')
 
     try {
+      // id 유무로 생성/수정 분기
       if (editingCollectionId) {
         const updatedCollection = await updatePhotoCollection(
           editingCollectionId,
@@ -109,6 +112,7 @@ function useMapCollectionController({
       setSelectedCollectionFilter((currentFilter) =>
         currentFilter === collection.id ? COLLECTION_FILTER_UNASSIGNED : currentFilter,
       )
+      // 삭제 중인 draft 방어
       if (editingCollectionId === collection.id) {
         resetCollectionDraft()
       }

@@ -109,6 +109,7 @@ export const deletePhotoCollection = async (collectionId) => {
   const database = await openPhotoArchiveDatabase()
 
   return new Promise((resolve, reject) => {
+    // 컬렉션 삭제와 record 연결 해제 동시 처리
     const transaction = database.transaction(
       [PHOTO_COLLECTION_STORE_NAME, PHOTO_RECORD_STORE_NAME],
       'readwrite',
@@ -124,6 +125,7 @@ export const deletePhotoCollection = async (collectionId) => {
     recordsRequest.onsuccess = () => {
       recordsRequest.result.forEach((record) => {
         if (record.collectionId === collectionId) {
+          // 사진 자체는 보존
           affectedRecordCount += 1
           recordStore.put({
             ...record,

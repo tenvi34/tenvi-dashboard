@@ -181,7 +181,7 @@ function MapViewportController({
     const requestType = request?.type
     const isNavigationRequest = MAP_NAVIGATION_REQUEST_TYPES.has(requestType)
     const isFitAllAuto = requestType === 'fit-all' && shouldFitBounds
-    // 媛뺤젣 ?꾩껜 留덉빱 踰붿쐞
+    // 강제 전체 마커 범위
     const isFitAllForced = requestType === 'fit-all-forced'
     const container = map.getContainer()
     const mapSize = map.getSize()
@@ -915,7 +915,7 @@ function PhotoDraftPanel({
   )
 }
 
-// 湲곕줉 ?몄쭛 ?⑤꼸
+// 기록 편집 패널
 function PhotoEditPanel({
   collections,
   editDraft,
@@ -1150,7 +1150,7 @@ function MapExplorePanel({
       <div className="map-left-fixed">
         <label className="map-field map-collection-select-field">
           <span>{t.map.collectionFilter}</span>
-          {/* 而щ젆??select ?뺤텞 */}
+          {/* 컬렉션 select 압축 */}
           <select
             value={selectedCollectionFilter}
             onChange={(event) => onSetCollectionFilter(event.target.value)}
@@ -1367,7 +1367,7 @@ function MapUploadPanel({
   )
 }
 
-// 而щ젆??愿由?紐⑤뱶
+// 컬렉션 관리 모드
 function MapCollectionManagerPanel({
   collectionDraft,
   collections,
@@ -1383,7 +1383,7 @@ function MapCollectionManagerPanel({
   return (
     <>
       <div className="map-left-fixed">
-        {/* 而щ젆????젣 ?뺤콉 */}
+        {/* 컬렉션 삭제 정책 */}
         <div className="map-status" role="note">
           {t.map.collectionDeletePolicy}
         </div>
@@ -1407,7 +1407,7 @@ function MapCollectionManagerPanel({
   )
 }
 
-// TENVI Map 紐⑤뱢
+// TENVI Map 모듈
 function Map({ t }) {
   const photoInputRef = useRef(null)
   const [records, setRecords] = useState([])
@@ -1423,7 +1423,7 @@ function Map({ t }) {
   const [activeRecordId, setActiveRecordId] = useState('')
   // 사진 등록 폼 상태
   const [isAddingPhoto, setIsAddingPhoto] = useState(false)
-  // 濡쒕뵫 ?곹깭
+  // 로딩 상태
   const [isLoading, setIsLoading] = useState(true)
   const [isReading, setIsReading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -1437,7 +1437,7 @@ function Map({ t }) {
   // 지도 모드 상태
   // 모드 전환 화면 분기
   const [activeMapMode, setActiveMapMode] = useState('explore')
-  // 紐⑤컮??Map 蹂닿린 ?곹깭
+  // 모바일 Map 보기 상태
   const [activeMobileMapView, setActiveMobileMapView] = useState('map')
   const [hasMobileMapViewInteraction, setHasMobileMapViewInteraction] = useState(false)
   const {
@@ -1604,7 +1604,7 @@ function Map({ t }) {
       activeMobileMapView === 'map' &&
       !hasMobileMapViewInteraction
     ) {
-      // 紐⑤컮??鍮??곹깭 蹂댁젙
+      // 모바일 빈 상태 보정
       setActiveMobileMapView('list')
     }
   }, [
@@ -1617,7 +1617,7 @@ function Map({ t }) {
   useEffect(() => {
     let isMounted = true
 
-    // IndexedDB 珥덇린 議고쉶
+    // IndexedDB 초기 조회
     Promise.all([getPhotoRecords(), getPhotoCollections()])
       .then(([savedRecords, savedCollections]) => {
         if (isMounted) {
@@ -1893,7 +1893,7 @@ function Map({ t }) {
     setError('')
 
     try {
-      // IndexedDB ??젣 諛섏쁺
+      // IndexedDB 삭제 반영
       await deletePhotoRecord(recordId)
       setRecords((currentRecords) =>
         currentRecords.filter((record) => record.id !== recordId),
@@ -1923,7 +1923,7 @@ function Map({ t }) {
     }
   }
 
-  // ?꾩껜 留덉빱 踰붿쐞
+  // 전체 마커 범위
   const handleFitAllMarkers = () => {
     setViewportRequest(createViewportRequest('fit-all-forced'))
   }
@@ -1970,7 +1970,7 @@ function Map({ t }) {
         </div>
       ) : null}
 
-      {/* Map ?⑤꼸 ?덉씠?꾩썐 */}
+      {/* Map 패널 레이아웃 */}
       <div className="map-mode-body">
         <div
           className="map-archive-layout"
@@ -1978,7 +1978,7 @@ function Map({ t }) {
           data-mode={activeMapMode}
         >
         <aside className="map-control-panel">
-          {/* ?먯깋 紐⑤뱶 */}
+          {/* 탐색 모드 */}
           {activeMapMode === 'explore' ? (
             <MapExplorePanel
               activeRecordId={activeRecordId}
@@ -2026,7 +2026,7 @@ function Map({ t }) {
             />
           ) : null}
 
-          {/* 而щ젆??愿由?紐⑤뱶 */}
+          {/* 컬렉션 관리 모드 */}
           {activeMapMode === 'collections' ? (
             <MapCollectionManagerPanel
               collectionDraft={collectionDraft}
@@ -2051,7 +2051,7 @@ function Map({ t }) {
           }`}
           aria-label={t.map.mapLabel}
         >
-          {/* ?꾩껜 ?꾩튂 蹂닿린 */}
+          {/* 전체 위치 보기 */}
           {filteredRecords.length > 0 && !draft && !editDraft ? (
             <button
               className="map-fit-all-button"
@@ -2134,7 +2134,7 @@ function Map({ t }) {
             ) : null}
 
             {hasBulkAssignedLocation ? (
-              // bulk ?꾩떆 ?꾩튂
+              // bulk 임시 위치
               <Marker
                 icon={bulkMarkerIcon}
                 position={[

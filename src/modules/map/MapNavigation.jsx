@@ -1,5 +1,6 @@
 import { PhotoPreview } from './MapPhotoPreview.jsx'
 
+// Map 상위 모드 전환 탭
 function MapModeTabs({ activeMode, onChangeMode, t }) {
   return (
     <div className="map-mode-tabs" role="tablist" aria-label={t.map.modeTabs}>
@@ -34,6 +35,7 @@ function MapModeTabs({ activeMode, onChangeMode, t }) {
   )
 }
 
+// 모바일 단일 보기 전환 탭
 function MobileMapViewTabs({ activeView, onChangeView, t }) {
   const views = [
     { id: 'map', label: t.map.mobileMapViewMap },
@@ -65,6 +67,7 @@ function MobileMapViewTabs({ activeView, onChangeView, t }) {
   )
 }
 
+// 모바일 지도 선택 기록 미리보기
 function MobileMapPreviewCard({ collectionName, onOpenDetail, record, t }) {
   if (!record) {
     return null
@@ -86,6 +89,7 @@ function MobileMapPreviewCard({ collectionName, onOpenDetail, record, t }) {
   )
 }
 
+// 모바일 지도 빈 상태 안내
 function MobileMapEmptyCard({ onOpenList, t }) {
   return (
     <div className="mobile-map-empty-card" role="note">

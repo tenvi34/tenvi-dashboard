@@ -19,6 +19,7 @@ export const openPhotoArchiveDatabase = () =>
     request.onupgradeneeded = () => {
       const database = request.result
 
+      // 기존 records store 보존
       // photoRecords 최초 생성
       if (!database.objectStoreNames.contains(PHOTO_RECORD_STORE_NAME)) {
         const store = database.createObjectStore(PHOTO_RECORD_STORE_NAME, {
@@ -29,6 +30,7 @@ export const openPhotoArchiveDatabase = () =>
         store.createIndex('updatedAt', 'updatedAt')
       }
 
+      // 기존 DB 사용자 마이그레이션
       // DB v2 컬렉션 추가
       if (!database.objectStoreNames.contains(PHOTO_COLLECTION_STORE_NAME)) {
         const store = database.createObjectStore(PHOTO_COLLECTION_STORE_NAME, {
@@ -116,7 +118,6 @@ export const createPhotoRecord = async (recordInput) => {
   return record
 }
 
-// 사진 기록 update 계약
 // IndexedDB 일괄 저장 helper
 export const createPhotoRecords = async (recordInputs) => {
   const results = []
@@ -130,6 +131,7 @@ export const createPhotoRecords = async (recordInputs) => {
         status: 'saved',
       })
     } catch (error) {
+      // 일부 실패와 전체 실패 분리
       results.push({
         error,
         fileName: recordInput?.originalFileName ?? '',
@@ -147,6 +149,7 @@ export const updatePhotoRecord = async (id, patch) => {
   )
 
   if (!currentRecord) {
+    // 삭제된 record 방어
     return null
   }
 
@@ -178,6 +181,7 @@ export const replacePhotoArchiveData = async ({ records, collections }) => {
     : [PHOTO_RECORD_STORE_NAME]
 
   return new Promise((resolve, reject) => {
+    // records/collections 동시 교체 원자성
     const transaction = database.transaction(storeNames, 'readwrite')
     const recordStore = transaction.objectStore(PHOTO_RECORD_STORE_NAME)
 

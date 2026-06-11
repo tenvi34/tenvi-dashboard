@@ -14,6 +14,7 @@ const normalizeCollectionId = (collectionId, collections = []) => {
   }
 
   if (collections === null) {
+    // 컬렉션 없는 백업 호환
     return null
   }
 
@@ -40,6 +41,7 @@ export const blobToDataUrl = (blob) =>
 // data URL Blob 복원
 export const dataUrlToBlob = async (dataUrl) => {
   if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+    // 이미지 외 data URL 차단
     throw new Error('Invalid image data URL.')
   }
 
@@ -88,6 +90,7 @@ export const validateMapBackupRecordShape = (record, collections = []) => {
     !isFiniteCoordinate(record.latitude) ||
     !isFiniteCoordinate(record.longitude)
   ) {
+    // 손상 record 제외
     return null
   }
 
@@ -148,6 +151,7 @@ export const preparePhotoCollectionsForRestore = (backupCollections) => {
   let damagedCount = 0
 
   if (!Array.isArray(backupCollections)) {
+    // 구버전 백업 호환
     return {
       damagedCount: 0,
       restoredCollections,
@@ -161,6 +165,7 @@ export const preparePhotoCollectionsForRestore = (backupCollections) => {
       validateMapCollectionBackupRecordShape(collection)
 
     if (!normalizedCollection) {
+      // 유효 항목만 복원 후보
       damagedCount += 1
       return
     }
@@ -186,6 +191,7 @@ export const preparePhotoRecordsForRestore = async (
   let damagedCount = 0
 
   if (!Array.isArray(backupRecords)) {
+    // Map 기록 없는 백업 호환
     return {
       damagedCount: 0,
       restoredRecords,
@@ -198,6 +204,7 @@ export const preparePhotoRecordsForRestore = async (
     const normalizedRecord = validateMapBackupRecordShape(record, collections)
 
     if (!normalizedRecord) {
+      // 손상 record 집계
       damagedCount += 1
       continue
     }

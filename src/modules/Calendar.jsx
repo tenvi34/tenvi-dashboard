@@ -60,6 +60,7 @@ function Calendar({ t }) {
   const [startDate, setStartDate] = useState(initialDate)
   const [endDate, setEndDate] = useState(initialDate)
   const [formMessage, setFormMessage] = useState('')
+  // 모바일 화면 길이 제어
   const [isEventFormOpen, setIsEventFormOpen] = useState(false)
   const selectedEvents = getEventsForDate(events, selectedDate)
   const selectedDueTasks = getTasksDueOnDate(tasks, selectedDate)
@@ -84,6 +85,7 @@ function Calendar({ t }) {
     () =>
       calendarCells.reduce((rangeMetaMap, cell) => {
         if (cell) {
+          // 기간 일정 indicator 계산
           rangeMetaMap[cell.dateKey] = getCalendarDayRangeMeta(
             events,
             cell.dateKey,
@@ -196,6 +198,7 @@ function Calendar({ t }) {
 
     persistEvents([...events, nextEvent])
     resetEventForm()
+    // 저장 후 모바일 폼 접기
     setIsEventFormOpen(false)
   }
 
@@ -209,6 +212,7 @@ function Calendar({ t }) {
 
     setSelectedDate(nextStartDate)
     setStartDate(nextStartDate)
+    // 종료일 역전 방지
     setEndDate((currentEndDate) =>
       currentEndDate < nextStartDate ? nextStartDate : currentEndDate,
     )

@@ -27,6 +27,7 @@ const createInitialBulkUploadState = () => ({
   total: 0,
 })
 
+// bulk 업로드 상태 컨트롤러
 function useMapBulkUploadController({
   createViewportRequest,
   setActiveRecordId,
@@ -37,6 +38,7 @@ function useMapBulkUploadController({
   t,
 }) {
   const bulkCancelRef = useRef(false)
+  // bulk 분석/저장 상태 분리
   const [bulkUpload, setBulkUpload] = useState(() =>
     createInitialBulkUploadState(),
   )
@@ -239,6 +241,7 @@ function useMapBulkUploadController({
     }))
 
     try {
+      // IndexedDB 저장 후 최신 목록 재조회
       const results = await createPhotoRecords(recordInputs)
       const saveResult = createBulkPhotoSaveResult(results)
       const savedRecords = await getPhotoRecords()

@@ -260,6 +260,7 @@ function Settings({
       }
 
       const previousLocalStorageData = {
+        // rollback용 현재 localStorage snapshot
         tasks: localStorage.getItem(STORAGE_KEYS.tasks),
         notes: localStorage.getItem(STORAGE_KEYS.notes),
         timerCompletedSessions: localStorage.getItem(
@@ -280,7 +281,7 @@ function Settings({
         : null
 
       try {
-        // 이전 백업 Map 유지
+        // 백업 종류별 Map 교체 범위
         if (
           validatedBackup.hasMapPhotoRecords &&
           validatedBackup.hasMapPhotoCollections
@@ -299,6 +300,7 @@ function Settings({
           )
 
           await replacePhotoArchiveData({
+            // 사라진 컬렉션 연결 해제
             records: (await getPhotoRecords()).map((record) => ({
               ...record,
               collectionId: restoredCollectionIds.has(record.collectionId)
