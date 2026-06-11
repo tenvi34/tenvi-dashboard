@@ -84,7 +84,6 @@ function Dashboard({
   const mapSummary = mapSummaryState.data
   const hasMapRecords = Number(mapSummary?.totalPhotoRecords) > 0
   const mapPhotoCount = Number(mapSummary?.totalPhotoRecords) || 0
-  const mapCollectionCount = Number(mapSummary?.totalCollections) || 0
   const mapBriefingMessage =
     mapSummaryState.status === MAP_SUMMARY_STATUS.error
       ? t.dashboard.mapSummaryLoadError

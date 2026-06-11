@@ -1666,7 +1666,6 @@ function Map({ t }) {
   // 사진 등록 폼 상태
   const [isAddingPhoto, setIsAddingPhoto] = useState(false)
   // 컬렉션 폼 상태
-  const [isCollectionFormOpen, setIsCollectionFormOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isReading, setIsReading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -2081,7 +2080,6 @@ function Map({ t }) {
   const handleStartCollectionEdit = (collection) => {
     setCollectionDraft(normalizePhotoCollectionInput(collection))
     setEditingCollectionId(collection.id)
-    setIsCollectionFormOpen(true)
   }
 
   const handleSaveCollection = async () => {
@@ -2464,16 +2462,6 @@ function Map({ t }) {
       setError('')
     } else {
       photoInputRef.current?.click()
-    }
-  }
-
-  // 컬렉션 폼 토글
-  const handleToggleCollectionForm = () => {
-    if (isCollectionFormOpen) {
-      setIsCollectionFormOpen(false)
-      resetCollectionDraft()
-    } else {
-      setIsCollectionFormOpen(true)
     }
   }
 
