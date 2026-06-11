@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   MapContainer,
   Marker,
@@ -10,17 +10,10 @@ import {
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
-  createBulkPhotoAnalysisItem,
-  createBulkPhotoRecordInputs,
-  createBulkPhotoSaveResult,
   createBulkUploadSummary,
-  applyLocationToBulkItems,
-  clearBulkMissingLocationSelection,
   getBulkLocationAssignableItems,
   getBulkPhotoSaveCandidates,
   getBulkMissingLocationItems,
-  selectAllBulkLocationAssignableItems,
-  toggleBulkMissingLocationSelection,
 } from './bulkPhotoUploadLogic.js'
 import {
   applyManualLocationToDraft,
@@ -33,31 +26,40 @@ import {
   createPhotoRecordUpdatePatch,
   filterPhotoRecordsByCollection,
   filterPhotoRecordsBySearchAndLocation,
-  isPhotoCollectionInputValid,
   isEditDraftReadyToSave,
   isPhotoDraftReadyToSave,
   LOCATION_SOURCE_FILTER_ALL,
   LOCATION_SOURCE_FILTER_UNKNOWN,
-  normalizePhotoCollectionInput,
   normalizePhotoRecordCollectionId,
   normalizeLocationSource,
   readPhotoLocation,
 } from './mapLogic.js'
 import {
   createPhotoRecord,
-  createPhotoRecords,
   deletePhotoRecord,
   getPhotoRecords,
   updatePhotoRecord,
 } from '../services/photoArchiveRepository.js'
 import {
-  createPhotoCollection,
-  deletePhotoCollection,
   getPhotoCollections,
-  updatePhotoCollection,
 } from '../services/photoCollectionRepository.js'
 import { searchPlaces } from '../services/placeSearchService.js'
 import { createPreviewImageBlob } from '../utils/imageUtils.js'
+import PhotoCollectionSelect from './map/MapCollectionSelect.jsx'
+import {
+  MapModeTabs,
+  MobileMapEmptyCard,
+  MobileMapPreviewCard,
+  MobileMapViewTabs,
+} from './map/MapNavigation.jsx'
+import {
+  PhotoLightbox,
+  PhotoPreview,
+  PhotoPreviewButton,
+} from './map/MapPhotoPreview.jsx'
+import PhotoRecordList from './map/MapRecordList.jsx'
+import useMapBulkUploadController from './map/useMapBulkUploadController.js'
+import useMapCollectionController from './map/useMapCollectionController.js'
 
 const DEFAULT_CENTER = [37.5665, 126.978]
 const DEFAULT_ZOOM = 2
@@ -100,9 +102,6 @@ const getCollectionName = (collectionId, collections, t) => {
 
   return collection?.name ?? t.map.unassignedCollection
 }
-
-const createBulkUploadId = (file, index) =>
-  `${file.name}-${file.lastModified}-${file.size}-${index}`
 
 const getBulkItemStatusLabel = (status, t) => {
   if (status === 'located') {
@@ -182,7 +181,7 @@ function MapViewportController({
     const requestType = request?.type
     const isNavigationRequest = MAP_NAVIGATION_REQUEST_TYPES.has(requestType)
     const isFitAllAuto = requestType === 'fit-all' && shouldFitBounds
-    // 강제 전체 마커 범위
+    // 媛뺤젣 ?꾩껜 留덉빱 踰붿쐞
     const isFitAllForced = requestType === 'fit-all-forced'
     const container = map.getContainer()
     const mapSize = map.getSize()
@@ -245,7 +244,7 @@ function MapViewportController({
         return
       }
 
-      // intent별 zoom 정책
+      // 요청 유형별 줌 정책
       if (requestType === 'manual-click') {
         map.setView(nextCenter, map.getZoom())
         return
@@ -301,80 +300,6 @@ function MapResizeController({ watchValue }) {
   return null
 }
 
-// IndexedDB Blob 미리보기
-function PhotoPreview({ alt, blob, className }) {
-  const [src, setSrc] = useState('')
-
-  useEffect(() => {
-    if (!blob) {
-      setSrc('')
-      return undefined
-    }
-
-    // Blob URL 정리
-    const objectUrl = URL.createObjectURL(blob)
-
-    setSrc(objectUrl)
-
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [blob])
-
-  if (!src) {
-    return null
-  }
-
-  return <img alt={alt} className={className} src={src} />
-}
-
-function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
-  if (!blob) {
-    return <PhotoPreview alt={alt} blob={blob} className={className} />
-  }
-
-  return (
-    <button
-      className="map-photo-preview-button"
-      type="button"
-      aria-label={t.map.openPhotoPreview}
-      onClick={() => onOpen({ alt, blob })}
-    >
-      <PhotoPreview alt={alt} blob={blob} className={className} />
-    </button>
-  )
-}
-
-function PhotoLightbox({ photo, onClose, t }) {
-  if (!photo) {
-    return null
-  }
-
-  return (
-    <div
-      className="map-photo-lightbox"
-      role="dialog"
-      aria-modal="true"
-      aria-label={t.map.photoPreviewLabel}
-      onClick={onClose}
-    >
-      <div className="map-photo-lightbox-body" onClick={(event) => event.stopPropagation()}>
-        <button
-          className="map-photo-lightbox-close"
-          type="button"
-          onClick={onClose}
-        >
-          {t.map.closePhotoPreview}
-        </button>
-        <PhotoPreview
-          alt={photo.alt}
-          blob={photo.blob}
-          className="map-photo-lightbox-image"
-        />
-      </div>
-    </div>
-  )
-}
-
-// 저장 기록 마커
 function PhotoRecordMarker({ icon, isActive, onSelectRecord, record, t }) {
   const markerRef = useRef(null)
 
@@ -510,47 +435,6 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
   )
 }
 
-// 사진 기록 목록
-function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records, t }) {
-  return (
-    <section className="map-list-panel" aria-label={t.map.recordListLabel}>
-      {records.length > 0 ? (
-        <ul className="map-record-list">
-          {records.map((record) => (
-            <li key={record.id}>
-              <button
-                className={`map-record-button ${
-                  activeRecordId === record.id ? 'is-active' : ''
-                }`}
-                type="button"
-                onClick={() => onSelectRecord(record.id)}
-              >
-                <PhotoPreview
-                  alt={record.title}
-                  blob={record.previewImageBlob}
-                  className="map-record-thumb"
-                />
-                <span>
-                  <strong>{record.title}</strong>
-                  <small>
-                    {record.latitude.toFixed(4)}, {record.longitude.toFixed(4)}
-                  </small>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="empty-state compact-empty" role="status">
-          <span>{t.common.systemMessage}</span>
-          <p>{emptyMessage}</p>
-        </div>
-      )}
-    </section>
-  )
-}
-
-// 컬렉션 관리 패널
 function PhotoCollectionPanel({
   collectionDraft,
   collections,
@@ -668,27 +552,6 @@ function PhotoCollectionPanel({
   )
 }
 
-// 컬렉션 선택
-function PhotoCollectionSelect({ collections, onChange, t, value }) {
-  return (
-    <label className="map-field">
-      <span>{t.map.collectionField}</span>
-      <select
-        value={value ?? ''}
-        onChange={(event) => onChange(event.target.value || null)}
-      >
-        <option value="">{t.map.unassignedCollection}</option>
-        {collections.map((collection) => (
-          <option key={collection.id} value={collection.id}>
-            {collection.name}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
-}
-
-// 대량 업로드 목록
 function BulkUploadList({
   emptyMessage,
   items,
@@ -1052,7 +915,7 @@ function PhotoDraftPanel({
   )
 }
 
-// 기록 편집 패널
+// 湲곕줉 ?몄쭛 ?⑤꼸
 function PhotoEditPanel({
   collections,
   editDraft,
@@ -1257,106 +1120,6 @@ function PhotoRecordDetail({
   )
 }
 
-// 모드 전환 탭
-function MapModeTabs({ activeMode, onChangeMode, t }) {
-  return (
-    <div className="map-mode-tabs" role="tablist" aria-label={t.map.modeTabs}>
-      <button
-        className={`map-mode-tab${activeMode === 'explore' ? ' is-active' : ''}`}
-        role="tab"
-        aria-selected={activeMode === 'explore'}
-        type="button"
-        onClick={() => onChangeMode('explore')}
-      >
-        {t.map.modeExplore}
-      </button>
-      <button
-        className={`map-mode-tab${activeMode === 'upload' ? ' is-active' : ''}`}
-        role="tab"
-        aria-selected={activeMode === 'upload'}
-        type="button"
-        onClick={() => onChangeMode('upload')}
-      >
-        {t.map.modeUpload}
-      </button>
-      <button
-        className={`map-mode-tab${activeMode === 'collections' ? ' is-active' : ''}`}
-        role="tab"
-        aria-selected={activeMode === 'collections'}
-        type="button"
-        onClick={() => onChangeMode('collections')}
-      >
-        {t.map.modeCollections}
-      </button>
-    </div>
-  )
-}
-
-// 모바일 Map 보기 탭
-function MobileMapViewTabs({ activeView, onChangeView, t }) {
-  const views = [
-    { id: 'map', label: t.map.mobileMapViewMap },
-    { id: 'list', label: t.map.mobileMapViewList },
-    { id: 'detail', label: t.map.mobileMapViewDetail },
-  ]
-
-  return (
-    <div
-      className="mobile-map-view-tabs"
-      role="tablist"
-      aria-label={t.map.mobileMapViewsLabel}
-    >
-      {views.map((view) => (
-        <button
-          className={`mobile-map-view-tab ${
-            activeView === view.id ? 'is-active' : ''
-          }`}
-          key={view.id}
-          type="button"
-          role="tab"
-          aria-selected={activeView === view.id}
-          onClick={() => onChangeView(view.id)}
-        >
-          {view.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function MobileMapPreviewCard({ collections, onOpenDetail, record, t }) {
-  if (!record) {
-    return null
-  }
-
-  return (
-    <button className="mobile-map-preview-card" type="button" onClick={onOpenDetail}>
-      <PhotoPreview
-        alt={record.title}
-        blob={record.previewImageBlob}
-        className="mobile-map-preview-thumb"
-      />
-      <span>
-        <strong>{record.title}</strong>
-        <small>{getCollectionName(record.collectionId, collections, t)}</small>
-      </span>
-      <em>{t.map.openMapDetail}</em>
-    </button>
-  )
-}
-
-function MobileMapEmptyCard({ onOpenList, t }) {
-  return (
-    <div className="mobile-map-empty-card" role="note">
-      <strong>{t.map.mobileMapEmptyTitle}</strong>
-      <p>{t.map.mobileMapEmptyDescription}</p>
-      <button className="map-secondary-button" type="button" onClick={onOpenList}>
-        {t.map.backToList}
-      </button>
-    </div>
-  )
-}
-
 function MapExplorePanel({
   activeRecordId,
   collections,
@@ -1387,7 +1150,7 @@ function MapExplorePanel({
       <div className="map-left-fixed">
         <label className="map-field map-collection-select-field">
           <span>{t.map.collectionFilter}</span>
-          {/* 컬렉션 select 압축 */}
+          {/* 而щ젆??select ?뺤텞 */}
           <select
             value={selectedCollectionFilter}
             onChange={(event) => onSetCollectionFilter(event.target.value)}
@@ -1604,7 +1367,7 @@ function MapUploadPanel({
   )
 }
 
-// 컬렉션 관리 모드
+// 而щ젆??愿由?紐⑤뱶
 function MapCollectionManagerPanel({
   collectionDraft,
   collections,
@@ -1620,7 +1383,7 @@ function MapCollectionManagerPanel({
   return (
     <>
       <div className="map-left-fixed">
-        {/* 컬렉션 삭제 정책 */}
+        {/* 而щ젆????젣 ?뺤콉 */}
         <div className="map-status" role="note">
           {t.map.collectionDeletePolicy}
         </div>
@@ -1644,10 +1407,9 @@ function MapCollectionManagerPanel({
   )
 }
 
-// TENVI Map 모듈
+// TENVI Map 紐⑤뱢
 function Map({ t }) {
   const photoInputRef = useRef(null)
-  const bulkCancelRef = useRef(false)
   const [records, setRecords] = useState([])
   const [collections, setCollections] = useState([])
   const [selectedCollectionFilter, setSelectedCollectionFilter] = useState(
@@ -1656,16 +1418,12 @@ function Map({ t }) {
   const [mapSearchQuery, setMapSearchQuery] = useState('')
   const [selectedLocationSourceFilter, setSelectedLocationSourceFilter] =
     useState(LOCATION_SOURCE_FILTER_ALL)
-  const [collectionDraft, setCollectionDraft] = useState(() =>
-    normalizePhotoCollectionInput(),
-  )
-  const [editingCollectionId, setEditingCollectionId] = useState('')
   const [draft, setDraft] = useState(null)
   const [editDraft, setEditDraft] = useState(null)
   const [activeRecordId, setActiveRecordId] = useState('')
   // 사진 등록 폼 상태
   const [isAddingPhoto, setIsAddingPhoto] = useState(false)
-  // 컬렉션 폼 상태
+  // 濡쒕뵫 ?곹깭
   const [isLoading, setIsLoading] = useState(true)
   const [isReading, setIsReading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -1675,25 +1433,37 @@ function Map({ t }) {
   )
   const [statusMessage, setStatusMessage] = useState('')
   const [error, setError] = useState('')
-  const [bulkUpload, setBulkUpload] = useState({
-    collectionId: null,
-    items: [],
-    processed: 0,
-    saveResult: null,
-    status: 'idle',
-    total: 0,
-  })
-  const [selectedMissingLocationItemIds, setSelectedMissingLocationItemIds] =
-    useState([])
-  const [bulkAssignedLocation, setBulkAssignedLocation] = useState(null)
-  const [bulkSaveReport, setBulkSaveReport] = useState(null)
   const [photoViewer, setPhotoViewer] = useState(null)
   // 지도 모드 상태
   // 모드 전환 화면 분기
   const [activeMapMode, setActiveMapMode] = useState('explore')
-  // 모바일 Map 보기 상태
+  // 紐⑤컮??Map 蹂닿린 ?곹깭
   const [activeMobileMapView, setActiveMobileMapView] = useState('map')
   const [hasMobileMapViewInteraction, setHasMobileMapViewInteraction] = useState(false)
+  const {
+    analyzeBulkPhotoFiles,
+    applyBulkLocationToSelection,
+    bulkAssignedLocation,
+    bulkSaveReport,
+    bulkUpload,
+    handleCancelBulkAnalysis,
+    handleChangeBulkCollection,
+    handleClearMissingLocationSelection,
+    handleSaveBulkLocatedPhotos,
+    handleSelectAllBulkLocationTargets,
+    handleSelectBulkPlace,
+    handleToggleBulkLocationTarget,
+    resetBulkUpload,
+    selectedMissingLocationItemIds,
+  } = useMapBulkUploadController({
+    createViewportRequest,
+    setActiveRecordId,
+    setError,
+    setRecords,
+    setStatusMessage,
+    setViewportRequest,
+    t,
+  })
   const normalizedRecords = useMemo(
     () =>
       records.map((record) => ({
@@ -1745,6 +1515,23 @@ function Map({ t }) {
   const shouldFitBounds = !activeRecordId && !draft && !editDraft && !isLoading
   const getCollectionRecordCount = (collectionId) =>
     normalizedRecords.filter((record) => record.collectionId === collectionId).length
+  const {
+    collectionDraft,
+    editingCollectionId,
+    handleChangeCollectionDraft,
+    handleDeleteCollection,
+    handleSaveCollection,
+    handleStartCollectionEdit,
+    resetCollectionDraft,
+  } = useMapCollectionController({
+    getCollectionRecordCount,
+    setCollections,
+    setError,
+    setRecords,
+    setSelectedCollectionFilter,
+    setStatusMessage,
+    t,
+  })
   const markerIcon = useMemo(
     () =>
       L.divIcon({
@@ -1817,7 +1604,7 @@ function Map({ t }) {
       activeMobileMapView === 'map' &&
       !hasMobileMapViewInteraction
     ) {
-      // 모바일 빈 상태 보정
+      // 紐⑤컮??鍮??곹깭 蹂댁젙
       setActiveMobileMapView('list')
     }
   }, [
@@ -1830,7 +1617,7 @@ function Map({ t }) {
   useEffect(() => {
     let isMounted = true
 
-    // IndexedDB 초기 조회
+    // IndexedDB 珥덇린 議고쉶
     Promise.all([getPhotoRecords(), getPhotoCollections()])
       .then(([savedRecords, savedCollections]) => {
         if (isMounted) {
@@ -1865,101 +1652,6 @@ function Map({ t }) {
     }
   }, [activeRecordId, filteredRecords])
 
-  const resetBulkUpload = () => {
-    bulkCancelRef.current = false
-    // bulk 임시 상태 정리
-    setBulkAssignedLocation(null)
-    setBulkSaveReport(null)
-    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
-    setBulkUpload({
-      collectionId: null,
-      items: [],
-      processed: 0,
-      saveResult: null,
-      status: 'idle',
-      total: 0,
-    })
-  }
-
-  const analyzeBulkPhotoFiles = async (files) => {
-    bulkCancelRef.current = false
-    setDraft(null)
-    setEditDraft(null)
-    setActiveRecordId('')
-    setIsAddingPhoto(false)
-    setError('')
-    setStatusMessage('')
-    setBulkAssignedLocation(null)
-    setBulkSaveReport(null)
-    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
-    setBulkUpload({
-      collectionId: null,
-      items: [],
-      processed: 0,
-      saveResult: null,
-      status: 'analyzing',
-      total: files.length,
-    })
-
-    // bulk 순차 분석
-    for (const [index, file] of files.entries()) {
-      // 진행률과 취소 확인
-      if (bulkCancelRef.current) {
-        setBulkUpload((currentUpload) => ({
-          ...currentUpload,
-          status: 'cancelled',
-        }))
-        return
-      }
-
-      const id = createBulkUploadId(file, index)
-
-      try {
-        const location = await readPhotoLocation(file)
-        const previewImage =
-          location.status === 'located' ? await createPreviewImageBlob(file) : null
-
-        setBulkUpload((currentUpload) => ({
-          ...currentUpload,
-          items: [
-            ...currentUpload.items,
-            createBulkPhotoAnalysisItem({
-              file,
-              fileName: file.name,
-              fileType: file.type,
-              id,
-              location,
-              previewImage,
-              status: location.status,
-            }),
-          ],
-          processed: currentUpload.processed + 1,
-        }))
-      } catch {
-        setBulkUpload((currentUpload) => ({
-          ...currentUpload,
-          items: [
-            ...currentUpload.items,
-            createBulkPhotoAnalysisItem({
-              errorMessage: t.map.readError,
-              file,
-              fileName: file.name,
-              fileType: file.type,
-              id,
-              status: 'failed',
-            }),
-          ],
-          processed: currentUpload.processed + 1,
-        }))
-      }
-    }
-
-    setBulkUpload((currentUpload) => ({
-      ...currentUpload,
-      status: bulkCancelRef.current ? 'cancelled' : 'completed',
-    }))
-  }
-
   const handlePhotoChange = async (event) => {
     const files = Array.from(event.target.files ?? [])
     const [file] = files
@@ -1973,6 +1665,10 @@ function Map({ t }) {
 
     if (files.length > 1) {
       event.target.value = ''
+      setDraft(null)
+      setEditDraft(null)
+      setActiveRecordId('')
+      setIsAddingPhoto(false)
       await analyzeBulkPhotoFiles(files)
       return
     }
@@ -2068,100 +1764,6 @@ function Map({ t }) {
     setEditDraft((currentDraft) => ({ ...currentDraft, ...patch }))
   }
 
-  const handleChangeCollectionDraft = (patch) => {
-    setCollectionDraft((currentDraft) => ({ ...currentDraft, ...patch }))
-  }
-
-  const resetCollectionDraft = () => {
-    setCollectionDraft(normalizePhotoCollectionInput())
-    setEditingCollectionId('')
-  }
-
-  const handleStartCollectionEdit = (collection) => {
-    setCollectionDraft(normalizePhotoCollectionInput(collection))
-    setEditingCollectionId(collection.id)
-  }
-
-  const handleSaveCollection = async () => {
-    const normalizedInput = normalizePhotoCollectionInput(collectionDraft)
-
-    if (!isPhotoCollectionInputValid(normalizedInput)) {
-      setError(t.map.collectionNameRequired)
-      return
-    }
-
-    setError('')
-
-    try {
-      if (editingCollectionId) {
-        const updatedCollection = await updatePhotoCollection(
-          editingCollectionId,
-          normalizedInput,
-        )
-
-        if (!updatedCollection) {
-          throw new Error('Missing collection.')
-        }
-
-        setCollections((currentCollections) =>
-          currentCollections.map((collection) =>
-            collection.id === updatedCollection.id ? updatedCollection : collection,
-          ),
-        )
-        setStatusMessage(t.map.collectionUpdated)
-      } else {
-        const createdCollection = await createPhotoCollection(normalizedInput)
-
-        setCollections((currentCollections) => [
-          createdCollection,
-          ...currentCollections,
-        ])
-        setStatusMessage(t.map.collectionCreated)
-      }
-
-      resetCollectionDraft()
-    } catch {
-      setError(t.map.collectionSaveError)
-    }
-  }
-
-  const handleDeleteCollection = async (collection) => {
-    const affectedRecordCount = getCollectionRecordCount(collection.id)
-    const confirmed = window.confirm(
-      t.map.deleteCollectionConfirm(collection.name, affectedRecordCount),
-    )
-
-    if (!confirmed) {
-      return
-    }
-
-    setError('')
-
-    try {
-      // 컬렉션 삭제 transaction
-      await deletePhotoCollection(collection.id)
-      setCollections((currentCollections) =>
-        currentCollections.filter((item) => item.id !== collection.id),
-      )
-      setRecords((currentRecords) =>
-        currentRecords.map((record) =>
-          record.collectionId === collection.id
-            ? { ...record, collectionId: null }
-            : record,
-        ),
-      )
-      setSelectedCollectionFilter((currentFilter) =>
-        currentFilter === collection.id ? COLLECTION_FILTER_UNASSIGNED : currentFilter,
-      )
-      if (editingCollectionId === collection.id) {
-        resetCollectionDraft()
-      }
-      setStatusMessage(t.map.collectionDeleted)
-    } catch {
-      setError(t.map.collectionDeleteError)
-    }
-  }
-
   const handleSaveDraft = async () => {
     const recordInput = createPhotoRecordInput(draft)
 
@@ -2186,150 +1788,6 @@ function Map({ t }) {
       setError(t.map.saveError)
     } finally {
       setIsSaving(false)
-    }
-  }
-
-  const handleCancelBulkAnalysis = () => {
-    bulkCancelRef.current = true
-  }
-
-  const handleChangeBulkCollection = (collectionId) => {
-    setBulkUpload((currentUpload) => ({
-      ...currentUpload,
-      collectionId,
-      saveResult: null,
-    }))
-  }
-
-  const handleToggleBulkLocationTarget = (itemId) => {
-    // 같은 위치 적용 대상
-    setSelectedMissingLocationItemIds((currentIds) =>
-      toggleBulkMissingLocationSelection(currentIds, itemId),
-    )
-  }
-
-  const handleSelectAllBulkLocationTargets = () => {
-    // 같은 위치 전체 선택
-    setSelectedMissingLocationItemIds(
-      selectAllBulkLocationAssignableItems(bulkUpload.items),
-    )
-  }
-
-  const handleClearMissingLocationSelection = () => {
-    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
-  }
-
-  const applyBulkLocationToSelection = async (location) => {
-    if (selectedMissingLocationItemIds.length === 0) {
-      setError(t.map.bulkSelectLocationTargetsFirst)
-      return
-    }
-
-    setError('')
-    const selectedIdSet = new Set(selectedMissingLocationItemIds)
-    const successfulIds = []
-
-    const itemsWithPreview = []
-
-    for (const item of bulkUpload.items) {
-      if (!selectedIdSet.has(item.id) || item.status === 'failed') {
-        itemsWithPreview.push(item)
-        continue
-      }
-
-      try {
-        const previewImage =
-          item.previewImage?.blob || !item.file
-            ? item.previewImage
-            : await createPreviewImageBlob(item.file)
-
-        if (!previewImage?.blob) {
-          throw new Error('Missing preview image.')
-        }
-
-        successfulIds.push(item.id)
-        itemsWithPreview.push({
-          ...item,
-          previewImage,
-        })
-      } catch {
-        // 일부 실패 fallback
-        itemsWithPreview.push({
-          ...item,
-          errorMessage: t.map.bulkPreviewCreateError,
-          status: 'failed',
-        })
-      }
-    }
-
-    // 위치 적용 후 저장 후보
-    setBulkUpload((currentUpload) => ({
-      ...currentUpload,
-      items: applyLocationToBulkItems(itemsWithPreview, successfulIds, location),
-      saveResult: null,
-    }))
-    setBulkAssignedLocation({
-      ...location,
-      appliedCount: successfulIds.length,
-    })
-    setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
-  }
-
-  const handleSelectBulkPlace = (place) => {
-    // bulk 장소 검색 위치
-    applyBulkLocationToSelection({
-      latitude: place.latitude,
-      locationSource: 'search',
-      longitude: place.longitude,
-    })
-    setViewportRequest(createViewportRequest('search-select', place))
-  }
-
-  const handleSaveBulkLocatedPhotos = async () => {
-    const recordInputs = createBulkPhotoRecordInputs(
-      bulkUpload.items,
-      bulkUpload.collectionId,
-    )
-
-    if (recordInputs.length === 0) {
-      setError(t.map.bulkNoSaveCandidates)
-      return
-    }
-
-    setError('')
-    setBulkUpload((currentUpload) => ({
-      ...currentUpload,
-      status: 'saving',
-    }))
-
-    try {
-      const results = await createPhotoRecords(recordInputs)
-      const saveResult = createBulkPhotoSaveResult(results)
-      const savedRecords = await getPhotoRecords()
-
-      setRecords(savedRecords)
-      setBulkSaveReport(saveResult)
-      setBulkAssignedLocation(null)
-      setSelectedMissingLocationItemIds(clearBulkMissingLocationSelection())
-      setActiveRecordId(saveResult.savedRecords[0]?.id ?? '')
-      setViewportRequest(createViewportRequest('fit-all'))
-      setBulkUpload({
-        collectionId: null,
-        items: [],
-        processed: 0,
-        saveResult: null,
-        status: 'idle',
-        total: 0,
-      })
-      setStatusMessage(
-        t.map.bulkSaveComplete(saveResult.successCount, saveResult.failedCount),
-      )
-    } catch {
-      setError(t.map.bulkSaveError)
-      setBulkUpload((currentUpload) => ({
-        ...currentUpload,
-        status: 'completed',
-      }))
     }
   }
 
@@ -2435,7 +1893,7 @@ function Map({ t }) {
     setError('')
 
     try {
-      // IndexedDB 삭제 반영
+      // IndexedDB ??젣 諛섏쁺
       await deletePhotoRecord(recordId)
       setRecords((currentRecords) =>
         currentRecords.filter((record) => record.id !== recordId),
@@ -2465,7 +1923,7 @@ function Map({ t }) {
     }
   }
 
-  // 전체 마커 범위
+  // ?꾩껜 留덉빱 踰붿쐞
   const handleFitAllMarkers = () => {
     setViewportRequest(createViewportRequest('fit-all-forced'))
   }
@@ -2512,7 +1970,7 @@ function Map({ t }) {
         </div>
       ) : null}
 
-      {/* Map 패널 레이아웃 */}
+      {/* Map ?⑤꼸 ?덉씠?꾩썐 */}
       <div className="map-mode-body">
         <div
           className="map-archive-layout"
@@ -2520,7 +1978,7 @@ function Map({ t }) {
           data-mode={activeMapMode}
         >
         <aside className="map-control-panel">
-          {/* 탐색 모드 */}
+          {/* ?먯깋 紐⑤뱶 */}
           {activeMapMode === 'explore' ? (
             <MapExplorePanel
               activeRecordId={activeRecordId}
@@ -2568,7 +2026,7 @@ function Map({ t }) {
             />
           ) : null}
 
-          {/* 컬렉션 관리 모드 */}
+          {/* 而щ젆??愿由?紐⑤뱶 */}
           {activeMapMode === 'collections' ? (
             <MapCollectionManagerPanel
               collectionDraft={collectionDraft}
@@ -2593,7 +2051,7 @@ function Map({ t }) {
           }`}
           aria-label={t.map.mapLabel}
         >
-          {/* 전체 위치 보기 */}
+          {/* ?꾩껜 ?꾩튂 蹂닿린 */}
           {filteredRecords.length > 0 && !draft && !editDraft ? (
             <button
               className="map-fit-all-button"
@@ -2676,7 +2134,7 @@ function Map({ t }) {
             ) : null}
 
             {hasBulkAssignedLocation ? (
-              // bulk 임시 위치
+              // bulk ?꾩떆 ?꾩튂
               <Marker
                 icon={bulkMarkerIcon}
                 position={[
@@ -2703,7 +2161,11 @@ function Map({ t }) {
           </MapContainer>
           {activeMapMode === 'explore' && !editDraft ? (
             <MobileMapPreviewCard
-              collections={collections}
+              collectionName={
+                activeRecord
+                  ? getCollectionName(activeRecord.collectionId, collections, t)
+                  : ''
+              }
               onOpenDetail={() => handleChangeMobileMapView('detail')}
               record={activeRecord}
               t={t}
