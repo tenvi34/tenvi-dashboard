@@ -3,6 +3,7 @@ import MobileTabBar from './components/MobileTabBar.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import { STORAGE_KEYS } from './constants/storageKeys.js'
 import { isSupportedLanguage, translations } from './i18n/translations.js'
+import Board from './modules/Board.jsx'
 import Calendar from './modules/Calendar.jsx'
 import Command from './modules/Command.jsx'
 import Dashboard from './modules/Dashboard.jsx'
@@ -23,6 +24,7 @@ const MODULES = [
   { id: 'command' },
   { id: 'tasks' },
   { id: 'notes' },
+  { id: 'board' },
   { id: 'calendar' },
   { id: 'map' },
   { id: 'timer' },
@@ -39,6 +41,7 @@ const MOBILE_TAB_MODULES = [
 
 const MOBILE_MORE_MODULES = [
   { id: 'calendar' },
+  { id: 'board' },
   { id: 'command' },
   { id: 'timer' },
   { id: 'settings' },
@@ -106,6 +109,7 @@ function App() {
       command: <Command onModuleChange={setActiveModule} t={t} />,
       tasks: <Tasks t={t} />,
       notes: <Notes t={t} />,
+      board: <Board t={t} />,
       calendar: <Calendar t={t} />,
       map: <Map t={t} />,
       timer: <Timer t={t} />,

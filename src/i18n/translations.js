@@ -22,6 +22,7 @@ export const translations = {
       command: '커맨드',
       tasks: '태스크',
       notes: '노트',
+      board: '게시판',
       calendar: '캘린더',
       map: '지도',
       timer: '타이머/스톱워치',
@@ -468,6 +469,11 @@ export const translations = {
       untitled: '제목 없는 메모',
       locale: 'ko-KR',
     },
+    board: {
+      label: '게시판 모듈',
+      title: '게시판',
+      message: '게시판 기능은 구현 예정.',
+    },
     timer: {
       label: '타이머 모듈',
       title: '타이머/스톱워치',
@@ -587,6 +593,7 @@ export const translations = {
       command: 'Command',
       tasks: 'Tasks',
       notes: 'Notes',
+      board: 'Board',
       calendar: 'Calendar',
       map: 'Map',
       timer: 'Timer/Stopwatch',
@@ -1043,6 +1050,11 @@ export const translations = {
       emptyMessage: 'No notes stored in memory.',
       untitled: 'Untitled note',
       locale: 'en',
+    },
+    board: {
+      label: 'Board Module',
+      title: 'Board',
+      message: 'Board features will be implemented later.',
     },
     timer: {
       label: 'Timer Module',
