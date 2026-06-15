@@ -1,6 +1,6 @@
 export const START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']
 export const HUD_EFFECTS = ['normal', 'reduced']
-export const THEMES = ['hud', 'standard']
+export const THEMES = ['dark', 'standard']
 export const LANGUAGES = ['ko', 'en']
 export const BACKUP_APP = 'TENVI'
 export const BACKUP_TYPE = 'tenvi-dashboard-backup'
@@ -41,7 +41,7 @@ export const validateBackupPayload = (backupPayload) => {
     notes,
     startModule,
     tasks,
-    theme = 'hud',
+    theme = 'dark',
     timerCompletedSessions,
   } = backupPayload.data
   const hasMapPhotoRecords = Object.prototype.hasOwnProperty.call(
@@ -62,6 +62,11 @@ export const validateBackupPayload = (backupPayload) => {
   )
   const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
 
+  // hudEffect: 구 백업 호환을 위해 존재하면 검증, 없으면 허용
+  const isHudEffectValid = hudEffect === undefined || HUD_EFFECTS.includes(hudEffect)
+  // theme: 구 백업의 'hud' 값을 'dark'로 정규화
+  const normalizedTheme = theme === 'hud' ? 'dark' : theme
+
   if (
     !Array.isArray(tasks) ||
     !Array.isArray(notes) ||
@@ -69,8 +74,8 @@ export const validateBackupPayload = (backupPayload) => {
     normalizedTimerSessions < 0 ||
     !LANGUAGES.includes(language) ||
     !START_MODULES.includes(startModule) ||
-    !HUD_EFFECTS.includes(hudEffect) ||
-    !THEMES.includes(theme)
+    !isHudEffectValid ||
+    !THEMES.includes(normalizedTheme)
   ) {
     return null
   }
@@ -99,7 +104,6 @@ export const validateBackupPayload = (backupPayload) => {
     calendarEvents: hasCalendarEvents ? calendarEvents : undefined,
     hasBoardPosts,
     hasCalendarEvents,
-    hudEffect,
     hasMapPhotoCollections,
     hasMapPhotoRecords,
     language,
@@ -112,7 +116,7 @@ export const validateBackupPayload = (backupPayload) => {
     notes,
     startModule,
     tasks,
-    theme,
+    theme: normalizedTheme,
     timerCompletedSessions: normalizedTimerSessions,
   }
 }

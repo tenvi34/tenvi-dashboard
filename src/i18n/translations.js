@@ -211,7 +211,7 @@ export const translations = {
         system: '시스템',
       },
       overviewMetrics: '핵심 수치',
-      quickStatus: '빠른 상태',
+      quickStatus: '현재 상태',
       priorityItems: '중요 항목',
       recentHighlights: '최근 하이라이트',
       activeTaskList: '진행 중 Task',
@@ -220,7 +220,6 @@ export const translations = {
       timerSessions: '완료 세션',
       currentLanguage: '현재 언어',
       defaultStartModule: '기본 시작 모듈',
-      hudEffect: 'HUD 효과',
       theme: '테마',
       storedData: '저장 데이터',
       storageOverview: '저장 현황',
@@ -551,14 +550,8 @@ export const translations = {
       design: '디자인',
       theme: '디자인 테마',
       themes: {
-        hud: 'HUD',
+        dark: '다크',
         standard: '일반',
-      },
-      visuals: '시각 효과',
-      hudEffect: 'HUD 효과 강도',
-      effects: {
-        normal: '기본',
-        reduced: '줄임',
       },
       dataManagement: '데이터 관리',
       storage: '저장소',
@@ -572,7 +565,7 @@ export const translations = {
       resetWarningLabel: '위험 작업',
       resetWarningTitle: 'Tasks와 Notes 데이터를 초기화할까요?',
       resetWarningMessage:
-        '승인하면 저장된 Tasks와 Notes 데이터가 삭제됩니다. 언어, 시작 모듈, HUD 설정은 유지됩니다.',
+        '승인하면 저장된 Tasks와 Notes 데이터가 삭제됩니다. 언어, 시작 모듈, 테마 설정은 유지됩니다.',
       confirmReset: '초기화 승인',
       cancelReset: '취소',
       backupLabel: '백업/복원',
@@ -581,7 +574,7 @@ export const translations = {
       importBackup: 'JSON 백업 복원',
       mapData: 'Map 사진 기록',
       backupNote:
-        'Tasks, Notes, Board 게시글, Calendar 일정, Timer 세션, 언어, 시작 모듈, HUD 설정, Map 사진 기록을 백업합니다. 복원 전에는 확인 절차가 표시됩니다.',
+        'Tasks, Notes, Board 게시글, Calendar 일정, Timer 세션, 언어, 시작 모듈, 테마 설정, Map 사진 기록을 백업합니다. 복원 전에는 확인 절차가 표시됩니다.',
       mapBackupNote:
         'Map 백업에는 미리보기 이미지와 위치 기록이 포함됩니다. 사진 수가 많으면 JSON 파일 용량이 커질 수 있습니다.',
       backupExported: '백업 파일을 생성했습니다.',
@@ -822,7 +815,7 @@ export const translations = {
         system: 'System',
       },
       overviewMetrics: 'Core Metrics',
-      quickStatus: 'Quick Status',
+      quickStatus: 'Current Status',
       priorityItems: 'Priority Items',
       recentHighlights: 'Recent Highlights',
       activeTaskList: 'Active Tasks',
@@ -831,7 +824,6 @@ export const translations = {
       timerSessions: 'Completed Sessions',
       currentLanguage: 'Current Language',
       defaultStartModule: 'Default Start Module',
-      hudEffect: 'HUD Effect',
       theme: 'Theme',
       storedData: 'Stored Data',
       storageOverview: 'Storage Overview',
@@ -1170,14 +1162,8 @@ export const translations = {
       design: 'Design',
       theme: 'Design Theme',
       themes: {
-        hud: 'HUD',
+        dark: 'Dark',
         standard: 'Standard',
-      },
-      visuals: 'Visuals',
-      hudEffect: 'HUD Effect',
-      effects: {
-        normal: 'Normal',
-        reduced: 'Reduced',
       },
       dataManagement: 'Data Management',
       storage: 'Storage',
@@ -1191,7 +1177,7 @@ export const translations = {
       resetWarningLabel: 'Danger Zone',
       resetWarningTitle: 'Reset Tasks and Notes data?',
       resetWarningMessage:
-        'If approved, stored Tasks and Notes data will be deleted. Language, start module, and HUD settings will remain.',
+        'If approved, stored Tasks and Notes data will be deleted. Language, start module, and theme settings will remain.',
       confirmReset: 'Confirm Reset',
       cancelReset: 'Cancel',
       backupLabel: 'Backup/Restore',
@@ -1200,7 +1186,7 @@ export const translations = {
       importBackup: 'Restore JSON Backup',
       mapData: 'Map photo records',
       backupNote:
-        'Backs up Tasks, Notes, Board posts, Calendar events, Timer sessions, language, start module, HUD settings, and Map photo records. A confirmation step appears before restore.',
+        'Backs up Tasks, Notes, Board posts, Calendar events, Timer sessions, language, start module, theme settings, and Map photo records. A confirmation step appears before restore.',
       mapBackupNote:
         'Map backups include preview images and location records. The JSON file can become large when many photos are stored.',
       backupExported: 'Backup file has been created.',

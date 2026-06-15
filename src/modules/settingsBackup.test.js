@@ -40,9 +40,15 @@ describe('settingsBackup validateBackupPayload', () => {
       timerCompletedSessions: 3,
       language: 'ko',
       startModule: 'tasks',
-      hudEffect: 'normal',
-      theme: 'hud',
+      // 구 백업의 'hud' 테마는 'dark'로 정규화됨
+      theme: 'dark',
     })
+  })
+
+  it('normalizes legacy hud theme to dark', () => {
+    expect(validateBackupPayload(createValidBackup({ theme: 'hud' }))?.theme).toBe('dark')
+    expect(validateBackupPayload(createValidBackup({ theme: 'dark' }))?.theme).toBe('dark')
+    expect(validateBackupPayload(createValidBackup({ theme: 'standard' }))?.theme).toBe('standard')
   })
 
   it('normalizes numeric timer session strings from backup data', () => {

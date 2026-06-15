@@ -18,7 +18,6 @@ import {
   BACKUP_TYPE,
   BACKUP_VERSION,
   createBackupFileName,
-  HUD_EFFECTS,
   LANGUAGES,
   START_MODULES,
   THEMES,
@@ -75,9 +74,7 @@ const readStoredCompletedSessions = () => {
 
 // Settings 컴포넌트
 function Settings({
-  hudEffect,
   language,
-  onHudEffectChange,
   onLanguageChange,
   onStartModuleChange,
   onThemeChange,
@@ -94,7 +91,6 @@ function Settings({
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
   const boardPostCount = readStoredCount(BOARD_POSTS_STORAGE_KEY)
   const calendarEventCount = readStoredCount(CALENDAR_EVENTS_STORAGE_KEY)
-  const isHudTheme = theme === 'hud'
 
   useEffect(() => {
     let isMounted = true
@@ -151,7 +147,6 @@ function Settings({
           timerCompletedSessions: readStoredCompletedSessions(),
           language,
           startModule,
-          hudEffect,
           theme,
           mapPhotoCollections,
           mapPhotoRecords,
@@ -196,7 +191,6 @@ function Settings({
     )
     localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
     localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
-    localStorage.setItem(STORAGE_KEYS.hudEffect, validatedBackup.hudEffect)
     localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
   }
 
@@ -289,7 +283,6 @@ function Settings({
         ),
         language: localStorage.getItem(STORAGE_KEYS.language),
         startModule: localStorage.getItem(STORAGE_KEYS.startModule),
-        hudEffect: localStorage.getItem(STORAGE_KEYS.hudEffect),
         theme: localStorage.getItem(STORAGE_KEYS.theme),
       }
       const shouldTouchMapArchive =
@@ -367,7 +360,6 @@ function Settings({
 
       onLanguageChange(validatedBackup.language)
       onStartModuleChange(validatedBackup.startModule)
-      onHudEffectChange(validatedBackup.hudEffect)
       onThemeChange(validatedBackup.theme)
       setDataVersion((currentVersion) => currentVersion + 1)
 
@@ -490,30 +482,6 @@ function Settings({
                 onClick={() => onThemeChange(themeId)}
               >
                 {t.settings.themes[themeId]}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* HUD 효과 강도 */}
-        <section className="settings-panel settings-preference-panel">
-          <div className="settings-panel-header">
-            <p className="module-label">{t.settings.hudEffect}</p>
-            <h3>{t.settings.visuals}</h3>
-          </div>
-          <div className="settings-options" aria-label={t.settings.hudEffect}>
-            {HUD_EFFECTS.map((effectId) => (
-              <button
-                className={`settings-option ${
-                  hudEffect === effectId ? 'is-active' : ''
-                }`}
-                key={effectId}
-                disabled={!isHudTheme}
-                type="button"
-                // HUD CSS 클래스 반영
-                onClick={() => onHudEffectChange(effectId)}
-              >
-                {t.settings.effects[effectId]}
               </button>
             ))}
           </div>

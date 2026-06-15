@@ -201,25 +201,6 @@ body.tenvi-modal-open .tenvi-dashboard {
   box-shadow: 0 0 12px var(--neon);
 }
 
-.tenvi-dashboard.hud-reduced .tenvi-grid {
-  opacity: 0.08;
-}
-
-.tenvi-dashboard.hud-reduced .tenvi-header,
-.tenvi-dashboard.hud-reduced .module-panel,
-.tenvi-dashboard.hud-reduced .tenvi-sidebar {
-  box-shadow: 0 0 12px rgba(45, 125, 255, 0.08);
-  backdrop-filter: blur(8px);
-}
-
-.tenvi-dashboard.hud-reduced .tenvi-header h1,
-.tenvi-dashboard.hud-reduced .status-dot,
-.tenvi-dashboard.hud-reduced .sidebar-button.is-active::after,
-.tenvi-dashboard.hud-reduced .timer-time {
-  text-shadow: none;
-  box-shadow: none;
-}
-
 /* 사이드바와 모듈 전환 */
 .tenvi-workspace {
   display: grid;
@@ -2325,14 +2306,6 @@ body.tenvi-modal-open .tenvi-dashboard {
   color: var(--neon-strong);
   font-size: 28px;
   line-height: 1;
-}
-
-.tenvi-dashboard.hud-reduced .timer-display-panel {
-  background: rgba(2, 9, 18, 0.46);
-}
-
-.tenvi-dashboard.hud-reduced .timer-button:hover {
-  box-shadow: 0 0 8px rgba(90, 212, 255, 0.1);
 }
 
 .lap-panel {
@@ -6094,4 +6067,929 @@ body.tenvi-modal-open .tenvi-dashboard {
   color: #245bdb;
   border-color: #b9c9ff;
   background: #eef3ff;
+}
+
+/* ─── 다크 테마 ─────────────────────────────────────────────── */
+.tenvi-dashboard.theme-dark {
+  --panel-bg: #1e293b;
+  --panel-bg-strong: #0f172a;
+  --line: rgba(148, 163, 184, 0.15);
+  --line-strong: #60a5fa;
+  --neon: #60a5fa;
+  --neon-strong: #93c5fd;
+  --blue: #3b82f6;
+  --muted-cyan: #94a3b8;
+  --danger: #f87171;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-soft: rgba(255, 255, 255, 0.02);
+  --focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.2);
+  --hover-glow: none;
+  --panel-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+
+  color: #e2e8f0;
+  background: #0f172a;
+  overflow: auto;
+}
+
+.tenvi-dashboard.theme-dark * {
+  scrollbar-color: rgba(148, 163, 184, 0.3) rgba(15, 23, 42, 0.8);
+}
+
+.tenvi-dashboard.theme-dark *::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.tenvi-dashboard.theme-dark *::-webkit-scrollbar-thumb {
+  border-color: rgba(15, 23, 42, 0.8);
+  background: rgba(148, 163, 184, 0.3);
+}
+
+.tenvi-dashboard.theme-dark .tenvi-grid {
+  display: none;
+}
+
+.tenvi-dashboard.theme-dark .tenvi-header,
+.tenvi-dashboard.theme-dark .module-panel,
+.tenvi-dashboard.theme-dark .tenvi-sidebar {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #1e293b;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(30, 41, 59, 0.96);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #1e293b;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-button.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-menu {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(30, 41, 59, 0.98);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-menu-button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #1e293b;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-menu-button.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.tenvi-dashboard.theme-dark .tenvi-header h1,
+.tenvi-dashboard.theme-dark .sidebar-header h2,
+.tenvi-dashboard.theme-dark .module-header h2,
+.tenvi-dashboard.theme-dark .summary-panel-header h3,
+.tenvi-dashboard.theme-dark .analysis-header h3,
+.tenvi-dashboard.theme-dark .settings-panel-header h3,
+.tenvi-dashboard.theme-dark .calendar-events-header h3,
+.tenvi-dashboard.theme-dark .note-header h3,
+.tenvi-dashboard.theme-dark .calendar-event-item h3,
+.tenvi-dashboard.theme-dark .timer-time {
+  color: #f1f5f9;
+  text-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .tenvi-kicker,
+.tenvi-dashboard.theme-dark .module-label,
+.tenvi-dashboard.theme-dark .module-meta,
+.tenvi-dashboard.theme-dark .system-status,
+.tenvi-dashboard.theme-dark .empty-state span,
+.tenvi-dashboard.theme-dark .timer-mode,
+.tenvi-dashboard.theme-dark .recent-notes-title,
+.tenvi-dashboard.theme-dark .analysis-section h4,
+.tenvi-dashboard.theme-dark .calendar-weekdays span,
+.tenvi-dashboard.theme-dark .note-header time,
+.tenvi-dashboard.theme-dark .todo-check small {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .system-status,
+.tenvi-dashboard.theme-dark .language-switch,
+.tenvi-dashboard.theme-dark .timer-tabs,
+.tenvi-dashboard.theme-dark .todo-filters {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.tenvi-dashboard.theme-dark .status-dot {
+  background: #4ade80;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .language-button,
+.tenvi-dashboard.theme-dark .sidebar-button,
+.tenvi-dashboard.theme-dark .filter-button,
+.tenvi-dashboard.theme-dark .timer-tab,
+.tenvi-dashboard.theme-dark .settings-option,
+.tenvi-dashboard.theme-dark .calendar-nav-button,
+.tenvi-dashboard.theme-dark .command-link-button,
+.tenvi-dashboard.theme-dark .timer-button.secondary,
+.tenvi-dashboard.theme-dark .map-secondary-button {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .language-button:hover,
+.tenvi-dashboard.theme-dark .sidebar-button:hover,
+.tenvi-dashboard.theme-dark .filter-button:hover,
+.tenvi-dashboard.theme-dark .timer-tab:hover,
+.tenvi-dashboard.theme-dark .settings-option:hover:not(:disabled),
+.tenvi-dashboard.theme-dark .calendar-nav-button:hover,
+.tenvi-dashboard.theme-dark .command-link-button:hover {
+  color: #f1f5f9;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .language-button.is-active,
+.tenvi-dashboard.theme-dark .sidebar-button.is-active,
+.tenvi-dashboard.theme-dark .filter-button.is-active,
+.tenvi-dashboard.theme-dark .timer-tab.is-active,
+.tenvi-dashboard.theme-dark .settings-option.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.4);
+  background: rgba(96, 165, 250, 0.12);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .sidebar-button::before,
+.tenvi-dashboard.theme-dark .sidebar-button.is-active::before {
+  background: #60a5fa;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .sidebar-button::after,
+.tenvi-dashboard.theme-dark .sidebar-button.is-active::after {
+  background: #93c5fd;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .module-header {
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+}
+
+.tenvi-dashboard.theme-dark .status-card,
+.tenvi-dashboard.theme-dark .summary-panel,
+.tenvi-dashboard.theme-dark .analysis-panel,
+.tenvi-dashboard.theme-dark .analysis-section,
+.tenvi-dashboard.theme-dark .command-history,
+.tenvi-dashboard.theme-dark .timer-duration-settings label,
+.tenvi-dashboard.theme-dark .timer-display-panel,
+.tenvi-dashboard.theme-dark .timer-stat,
+.tenvi-dashboard.theme-dark .lap-panel,
+.tenvi-dashboard.theme-dark .settings-panel,
+.tenvi-dashboard.theme-dark .data-metric,
+.tenvi-dashboard.theme-dark .calendar-events-panel,
+.tenvi-dashboard.theme-dark .calendar-month-panel,
+.tenvi-dashboard.theme-dark .calendar-day,
+.tenvi-dashboard.theme-dark .map-bulk-panel,
+.tenvi-dashboard.theme-dark .map-bulk-file-list li,
+.tenvi-dashboard.theme-dark .map-view-panel,
+.tenvi-dashboard.theme-dark .map-upload-box,
+.tenvi-dashboard.theme-dark .map-coordinate-panel div,
+.tenvi-dashboard.theme-dark .map-collection-item,
+.tenvi-dashboard.theme-dark .map-filter-button,
+.tenvi-dashboard.theme-dark .map-record-button,
+.tenvi-dashboard.theme-dark .map-search-results button,
+.tenvi-dashboard.theme-dark .todo-item,
+.tenvi-dashboard.theme-dark .note-item,
+.tenvi-dashboard.theme-dark .recent-note,
+.tenvi-dashboard.theme-dark .calendar-event-item,
+.tenvi-dashboard.theme-dark .summary-metric,
+.tenvi-dashboard.theme-dark .analysis-metric,
+.tenvi-dashboard.theme-dark .empty-state {
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .todo-item,
+.tenvi-dashboard.theme-dark .note-item,
+.tenvi-dashboard.theme-dark .recent-note,
+.tenvi-dashboard.theme-dark .calendar-event-item,
+.tenvi-dashboard.theme-dark .map-coordinate-panel div,
+.tenvi-dashboard.theme-dark .map-collection-item,
+.tenvi-dashboard.theme-dark .map-filter-button,
+.tenvi-dashboard.theme-dark .map-record-button,
+.tenvi-dashboard.theme-dark .map-search-results button,
+.tenvi-dashboard.theme-dark .analysis-section,
+.tenvi-dashboard.theme-dark .lap-panel li {
+  border-left-color: #60a5fa;
+}
+
+.tenvi-dashboard.theme-dark .summary-metric,
+.tenvi-dashboard.theme-dark .analysis-metric,
+.tenvi-dashboard.theme-dark .timer-stat,
+.tenvi-dashboard.theme-dark .data-metric {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tenvi-dashboard.theme-dark .status-card span,
+.tenvi-dashboard.theme-dark .summary-metric span,
+.tenvi-dashboard.theme-dark .recent-note span,
+.tenvi-dashboard.theme-dark .analysis-metric span,
+.tenvi-dashboard.theme-dark .analysis-section li,
+.tenvi-dashboard.theme-dark .command-history li,
+.tenvi-dashboard.theme-dark .command-history-empty,
+.tenvi-dashboard.theme-dark .timer-duration-settings span,
+.tenvi-dashboard.theme-dark .timer-caption,
+.tenvi-dashboard.theme-dark .timer-stat span,
+.tenvi-dashboard.theme-dark .lap-panel span,
+.tenvi-dashboard.theme-dark .data-metric span,
+.tenvi-dashboard.theme-dark .settings-note,
+.tenvi-dashboard.theme-dark .note-body p,
+.tenvi-dashboard.theme-dark .empty-state p,
+.tenvi-dashboard.theme-dark .calendar-event-item p,
+.tenvi-dashboard.theme-dark .map-record-button small,
+.tenvi-dashboard.theme-dark .map-collection-item p,
+.tenvi-dashboard.theme-dark .map-search-attribution,
+.tenvi-dashboard.theme-dark .map-search-results em,
+.tenvi-dashboard.theme-dark .map-search-results span,
+.tenvi-dashboard.theme-dark .map-detail-copy p {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .map-coordinate-panel dd,
+.tenvi-dashboard.theme-dark .map-collection-item,
+.tenvi-dashboard.theme-dark .map-filter-button,
+.tenvi-dashboard.theme-dark .map-detail-copy h3,
+.tenvi-dashboard.theme-dark .map-record-button,
+.tenvi-dashboard.theme-dark .map-search-results button {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .map-search-results small,
+.tenvi-dashboard.theme-dark .map-collection-item span {
+  color: #93c5fd;
+}
+
+.tenvi-dashboard.theme-dark .map-upload-box strong {
+  color: #ffffff;
+  background: #2563eb;
+}
+
+.tenvi-dashboard.theme-dark .map-photo-lightbox {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.tenvi-dashboard.theme-dark .map-photo-lightbox-image {
+  border-color: rgba(148, 163, 184, 0.15);
+  background: #1e293b;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.tenvi-dashboard.theme-dark .map-photo-lightbox-close {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.tenvi-dashboard.theme-dark .photo-map {
+  background: #0f172a;
+}
+
+.tenvi-dashboard.theme-dark .leaflet-popup-content-wrapper,
+.tenvi-dashboard.theme-dark .leaflet-popup-tip {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.15);
+  background: #1e293b;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4);
+}
+
+.tenvi-dashboard.theme-dark .status-card strong,
+.tenvi-dashboard.theme-dark .summary-metric strong,
+.tenvi-dashboard.theme-dark .recent-note strong,
+.tenvi-dashboard.theme-dark .analysis-metric strong,
+.tenvi-dashboard.theme-dark .timer-stat strong,
+.tenvi-dashboard.theme-dark .lap-panel strong,
+.tenvi-dashboard.theme-dark .data-metric strong,
+.tenvi-dashboard.theme-dark .module-meta span,
+.tenvi-dashboard.theme-dark .calendar-events-header strong {
+  color: #93c5fd;
+}
+
+.tenvi-dashboard.theme-dark .todo-form input,
+.tenvi-dashboard.theme-dark .command-form input,
+.tenvi-dashboard.theme-dark .notes-form input,
+.tenvi-dashboard.theme-dark .notes-form textarea,
+.tenvi-dashboard.theme-dark .calendar-form input,
+.tenvi-dashboard.theme-dark .calendar-form textarea,
+.tenvi-dashboard.theme-dark .calendar-month-selectors select,
+.tenvi-dashboard.theme-dark .timer-duration-settings input,
+.tenvi-dashboard.theme-dark .map-field input,
+.tenvi-dashboard.theme-dark .map-field select,
+.tenvi-dashboard.theme-dark .map-field textarea,
+.tenvi-dashboard.theme-dark .map-search-form input,
+.tenvi-dashboard.theme-dark .map-search-form select {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.tenvi-dashboard.theme-dark .todo-form input::placeholder,
+.tenvi-dashboard.theme-dark .command-form input::placeholder,
+.tenvi-dashboard.theme-dark .notes-form input::placeholder,
+.tenvi-dashboard.theme-dark .notes-form textarea::placeholder,
+.tenvi-dashboard.theme-dark .calendar-form input::placeholder,
+.tenvi-dashboard.theme-dark .calendar-form textarea::placeholder,
+.tenvi-dashboard.theme-dark .map-field input::placeholder,
+.tenvi-dashboard.theme-dark .map-field textarea::placeholder,
+.tenvi-dashboard.theme-dark .map-search-form input::placeholder {
+  color: #475569;
+}
+
+.tenvi-dashboard.theme-dark .todo-form input:focus,
+.tenvi-dashboard.theme-dark .command-form input:focus,
+.tenvi-dashboard.theme-dark .notes-form input:focus,
+.tenvi-dashboard.theme-dark .notes-form textarea:focus,
+.tenvi-dashboard.theme-dark .calendar-form input:focus,
+.tenvi-dashboard.theme-dark .calendar-form textarea:focus,
+.tenvi-dashboard.theme-dark .calendar-month-selectors select:focus,
+.tenvi-dashboard.theme-dark .timer-duration-settings input:focus,
+.tenvi-dashboard.theme-dark .map-field input:focus,
+.tenvi-dashboard.theme-dark .map-field textarea:focus,
+.tenvi-dashboard.theme-dark .map-search-form input:focus,
+.tenvi-dashboard.theme-dark .map-search-form select:focus {
+  border-color: #60a5fa;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.tenvi-dashboard.theme-dark .todo-form button,
+.tenvi-dashboard.theme-dark .command-form button,
+.tenvi-dashboard.theme-dark .notes-form button,
+.tenvi-dashboard.theme-dark .calendar-form button,
+.tenvi-dashboard.theme-dark .calendar-form-toggle,
+.tenvi-dashboard.theme-dark .timer-button,
+.tenvi-dashboard.theme-dark .map-primary-button,
+.tenvi-dashboard.theme-dark .map-search-form button {
+  color: #ffffff;
+  border-color: #2563eb;
+  background: #2563eb;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .todo-form button:hover,
+.tenvi-dashboard.theme-dark .command-form button:hover,
+.tenvi-dashboard.theme-dark .notes-form button:hover,
+.tenvi-dashboard.theme-dark .calendar-form button:hover,
+.tenvi-dashboard.theme-dark .calendar-form-toggle:hover,
+.tenvi-dashboard.theme-dark .timer-button:hover,
+.tenvi-dashboard.theme-dark .map-primary-button:hover:not(:disabled),
+.tenvi-dashboard.theme-dark .map-search-form button:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .calendar-form-cancel {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tenvi-dashboard.theme-dark .calendar-form-cancel:hover {
+  color: #e2e8f0;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .delete-button,
+.tenvi-dashboard.theme-dark .reset-button {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .delete-button:hover,
+.tenvi-dashboard.theme-dark .reset-button:hover {
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.14);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .reset-confirm-panel {
+  border-color: rgba(248, 113, 113, 0.25);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .reset-confirm-panel h4,
+.tenvi-dashboard.theme-dark .reset-confirm-panel p:not(.module-label) {
+  color: #fca5a5;
+}
+
+.tenvi-dashboard.theme-dark .backup-status {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .backup-status.is-success {
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .backup-status.is-error {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .backup-status.is-info {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .calendar-day:hover,
+.tenvi-dashboard.theme-dark .calendar-day.is-today {
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.07);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .calendar-day.is-selected {
+  color: #ffffff;
+  border-color: #2563eb;
+  background: #2563eb;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .calendar-day strong {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.tenvi-dashboard.theme-dark .calendar-day.has-events::after {
+  background: #4ade80;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .calendar-date-range,
+.tenvi-dashboard.theme-dark .calendar-legend {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tenvi-dashboard.theme-dark .calendar-form-hint,
+.tenvi-dashboard.theme-dark .calendar-legend,
+.tenvi-dashboard.theme-dark .calendar-event-date {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .calendar-form-message {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .calendar-event-badge {
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .calendar-event-item-range {
+  border-left-color: #4ade80;
+  background: rgba(74, 222, 128, 0.06);
+}
+
+.tenvi-dashboard.theme-dark .calendar-day.has-range-events {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.06);
+}
+
+.tenvi-dashboard.theme-dark .calendar-day.is-selected.has-range-events {
+  color: #ffffff;
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.tenvi-dashboard.theme-dark .calendar-range-indicator,
+.tenvi-dashboard.theme-dark .calendar-legend-bar {
+  background: #4ade80;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .calendar-day.is-selected .calendar-range-indicator {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.tenvi-dashboard.theme-dark .calendar-moon {
+  filter: brightness(0.85);
+}
+
+.tenvi-dashboard.theme-dark .todo-check,
+.tenvi-dashboard.theme-dark .calendar-day,
+.tenvi-dashboard.theme-dark .filter-button.is-active,
+.tenvi-dashboard.theme-dark .timer-button.secondary {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .todo-check input {
+  accent-color: #3b82f6;
+}
+
+.tenvi-dashboard.theme-dark .todo-item.is-completed {
+  border-color: rgba(148, 163, 184, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tenvi-dashboard.theme-dark .todo-item.is-completed .todo-check span {
+  color: #475569;
+}
+
+.tenvi-dashboard.theme-dark .map-mode-tab {
+  color: #94a3b8;
+  border-color: transparent;
+  background: transparent;
+}
+
+.tenvi-dashboard.theme-dark .map-mode-tab:hover {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tenvi-dashboard.theme-dark .map-mode-tab.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.tenvi-dashboard.theme-dark .dashboard-tab {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .dashboard-tab:hover {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tenvi-dashboard.theme-dark .dashboard-tab.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.tenvi-dashboard.theme-dark .dashboard-tabs {
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+}
+
+.tenvi-dashboard.theme-dark .map-mode-tabs {
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+}
+
+.tenvi-dashboard.theme-dark .map-add-toggle-button,
+.tenvi-dashboard.theme-dark .map-collection-toggle {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .map-add-toggle-button:hover,
+.tenvi-dashboard.theme-dark .map-collection-toggle:hover {
+  color: #f1f5f9;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .map-add-toggle-button.is-open {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tenvi-dashboard.theme-dark .map-fit-all-button {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(30, 41, 59, 0.9);
+  backdrop-filter: none;
+}
+
+.tenvi-dashboard.theme-dark .map-fit-all-button:hover {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(30, 41, 59, 0.95);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-map-view-tabs,
+.tenvi-dashboard.theme-dark .mobile-map-preview-card,
+.tenvi-dashboard.theme-dark .mobile-map-empty-card {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #1e293b;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.tenvi-dashboard.theme-dark .mobile-map-view-tab {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .mobile-map-view-tab.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-map-preview-card,
+.tenvi-dashboard.theme-dark .mobile-map-preview-card strong,
+.tenvi-dashboard.theme-dark .mobile-map-empty-card strong {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .mobile-map-preview-card small,
+.tenvi-dashboard.theme-dark .mobile-map-empty-card p {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .mobile-map-preview-card em {
+  color: #93c5fd;
+}
+
+.tenvi-dashboard.theme-dark .map-record-filter-bar,
+.tenvi-dashboard.theme-dark .map-record-search-panel,
+.tenvi-dashboard.theme-dark .map-filter-summary-card,
+.tenvi-dashboard.theme-dark .map-filter-summary-grid div {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tenvi-dashboard.theme-dark .map-filter-badge {
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .map-filter-badge:hover {
+  border-color: rgba(74, 222, 128, 0.5);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .map-record-filter-heading strong,
+.tenvi-dashboard.theme-dark .map-filter-summary-count strong {
+  color: #93c5fd;
+}
+
+.tenvi-dashboard.theme-dark .map-filter-summary-card h3,
+.tenvi-dashboard.theme-dark .map-filter-summary-grid dd {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .map-filter-summary-card p,
+.tenvi-dashboard.theme-dark .map-filter-summary-count span,
+.tenvi-dashboard.theme-dark .map-filter-summary-grid dt {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .map-filter-summary-count {
+  border-block-color: rgba(148, 163, 184, 0.12);
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-panel {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-file-list li {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-file-list li.is-selected {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-file-list strong {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-file-list span,
+.tenvi-dashboard.theme-dark .map-bulk-file-list small,
+.tenvi-dashboard.theme-dark .map-bulk-note,
+.tenvi-dashboard.theme-dark .map-bulk-failed-report li {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-assignment-panel {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-panel .map-status {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-panel .map-status.is-error {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .map-bulk-progress {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.tenvi-dashboard.theme-dark .map-filter-result-count {
+  color: #94a3b8;
+}
+
+/* 다크 테마 Board */
+.tenvi-dashboard.theme-dark .board-section {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-compose-panel {
+  background: #1e293b;
+}
+
+.tenvi-dashboard.theme-dark .board-toolbar h3,
+.tenvi-dashboard.theme-dark .board-section-header h3,
+.tenvi-dashboard.theme-dark .board-title-text,
+.tenvi-dashboard.theme-dark .board-detail h3,
+.tenvi-dashboard.theme-dark .board-post-card h4 {
+  color: #f1f5f9;
+}
+
+.tenvi-dashboard.theme-dark .board-field,
+.tenvi-dashboard.theme-dark .board-detail-meta dd,
+.tenvi-dashboard.theme-dark .board-detail-content p,
+.tenvi-dashboard.theme-dark .board-post-card p,
+.tenvi-dashboard.theme-dark .board-post-number,
+.tenvi-dashboard.theme-dark .board-title-date,
+.tenvi-dashboard.theme-dark .board-post-card time {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .board-status-chip,
+.tenvi-dashboard.theme-dark .board-count,
+.tenvi-dashboard.theme-dark .board-post-category {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .board-field input,
+.tenvi-dashboard.theme-dark .board-field textarea {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.tenvi-dashboard.theme-dark .board-field input::placeholder,
+.tenvi-dashboard.theme-dark .board-field textarea::placeholder {
+  color: #475569;
+}
+
+.tenvi-dashboard.theme-dark .board-field input:focus,
+.tenvi-dashboard.theme-dark .board-field textarea:focus {
+  border-color: #60a5fa;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.tenvi-dashboard.theme-dark .board-form-message {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .board-post-card {
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-title-row,
+.tenvi-dashboard.theme-dark .board-detail-meta div,
+.tenvi-dashboard.theme-dark .board-detail-content {
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-title-row:hover {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.06);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-detail-meta dt {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .board-secondary-button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-secondary-button:hover {
+  color: #e2e8f0;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-delete-button {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-delete-button:hover {
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.12);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .dashboard-briefing,
+.tenvi-dashboard.theme-dark .calendar-events-header,
+.tenvi-dashboard.theme-dark .calendar-form {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .dashboard-briefing::before {
+  background: #3b82f6;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .calendar-events-header strong {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .calendar-task-item {
+  border-color: rgba(148, 163, 184, 0.1);
+  border-left-color: #4ade80;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tenvi-dashboard.theme-dark .calendar-task-item h3 {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .calendar-task-item p {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .calendar-form::before {
+  background: #3b82f6;
+}
+
+.tenvi-dashboard.theme-dark .settings-backup-panel {
+  border-color: rgba(74, 222, 128, 0.25);
+  background: rgba(74, 222, 128, 0.05);
+}
+
+.tenvi-dashboard.theme-dark .settings-danger-panel {
+  border-color: rgba(248, 113, 113, 0.25);
+  background: rgba(248, 113, 113, 0.05);
+}
+
+.tenvi-dashboard.theme-dark .settings-danger-panel .module-label,
+.tenvi-dashboard.theme-dark .settings-danger-panel .settings-panel-header h3,
+.tenvi-dashboard.theme-dark .settings-danger-panel .settings-note {
+  color: #fca5a5;
 }

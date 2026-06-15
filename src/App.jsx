@@ -15,8 +15,7 @@ import Timer from './modules/Timer.jsx'
 import './App.css'
 
 const START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']
-const HUD_EFFECTS = ['normal', 'reduced']
-const THEMES = ['hud', 'standard']
+const THEMES = ['dark', 'standard']
 
 // 모듈 목록과 매핑
 const MODULES = [
@@ -56,17 +55,13 @@ function App() {
     return START_MODULES.includes(savedStartModule) ? savedStartModule : 'tasks'
   })
   const [activeModule, setActiveModule] = useState(startModule)
-  const [hudEffect, setHudEffect] = useState(() => {
-    const savedHudEffect = localStorage.getItem(STORAGE_KEYS.hudEffect)
-
-    // HUD 효과 검증
-    return HUD_EFFECTS.includes(savedHudEffect) ? savedHudEffect : 'normal'
-  })
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem(STORAGE_KEYS.theme)
 
-    // 테마 값 검증
-    return THEMES.includes(savedTheme) ? savedTheme : 'hud'
+    // 구 HUD 테마를 다크 테마로 마이그레이션
+    if (savedTheme === 'hud') return 'dark'
+
+    return THEMES.includes(savedTheme) ? savedTheme : 'dark'
   })
   const [language, setLanguage] = useState(() => {
     const savedLanguage = localStorage.getItem(STORAGE_KEYS.language)
@@ -85,10 +80,6 @@ function App() {
   }, [startModule])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.hudEffect, hudEffect)
-  }, [hudEffect])
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.theme, theme)
   }, [theme])
 
@@ -99,7 +90,6 @@ function App() {
     () => ({
       dashboard: (
         <Dashboard
-          hudEffect={hudEffect}
           language={language}
           startModule={startModule}
           t={t}
@@ -115,10 +105,8 @@ function App() {
       timer: <Timer t={t} />,
       settings: (
         <Settings
-          hudEffect={hudEffect}
           language={language}
           // Settings 전역 setter
-          onHudEffectChange={setHudEffect}
           onLanguageChange={setLanguage}
           onStartModuleChange={setStartModule}
           onThemeChange={setTheme}
@@ -128,11 +116,11 @@ function App() {
         />
       ),
     }),
-    [hudEffect, language, startModule, t, theme],
+    [language, startModule, t, theme],
   )
 
   return (
-    <main className={`tenvi-dashboard theme-${theme} hud-${hudEffect}`}>
+    <main className={`tenvi-dashboard theme-${theme}`}>
       <div className="tenvi-grid" aria-hidden="true"></div>
 
       {/* TENVI 화면 프레임 */}

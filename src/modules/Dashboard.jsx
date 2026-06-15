@@ -54,11 +54,10 @@ const MAP_SUMMARY_STATUS = {
 }
 
 function Dashboard({
-  hudEffect = 'normal',
   language = 'ko',
   startModule = 'tasks',
   t,
-  theme = 'hud',
+  theme = 'dark',
 }) {
   const [activeDashboardTab, setActiveDashboardTab] = useState('overview')
   const [mapSummaryState, setMapSummaryState] = useState({
@@ -457,10 +456,6 @@ function Dashboard({
             <div className="summary-metric">
               <span>{t.dashboard.defaultStartModule}</span>
               <strong>{t.modules[startModule] ?? startModule}</strong>
-            </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.hudEffect}</span>
-              <strong>{t.settings.effects[hudEffect] ?? hudEffect}</strong>
             </div>
             <div className="summary-metric">
               <span>{t.dashboard.theme}</span>

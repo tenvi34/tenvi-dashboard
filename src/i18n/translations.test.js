@@ -112,7 +112,6 @@ const requiredDashboardKeys = [
   'timerSessions',
   'currentLanguage',
   'defaultStartModule',
-  'hudEffect',
   'theme',
   'storedData',
   'storageOverview',
