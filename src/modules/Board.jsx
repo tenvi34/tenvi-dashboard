@@ -9,8 +9,9 @@ import {
 } from './boardLogic.js'
 
 const STORAGE_KEY = STORAGE_KEYS.boardPosts
+const SEARCH_SCOPES = ['title', 'content', 'author']
 
-// 게시글 목록 불러오기
+// Board localStorage 게시글 복원
 const loadBoardPosts = () => {
   try {
     const rawPosts = localStorage.getItem(STORAGE_KEY)
@@ -25,7 +26,7 @@ const loadBoardPosts = () => {
   }
 }
 
-// 게시글 저장
+// 기존 Board 저장 키 유지
 const saveBoardPosts = (posts) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(posts))
 }
@@ -37,9 +38,27 @@ function Board({ t }) {
   const [formError, setFormError] = useState('')
   const [view, setView] = useState('list')
   const [selectedPostId, setSelectedPostId] = useState('')
-
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchScope, setSearchScope] = useState('title')
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const selectedPost = posts.find((post) => post.id === selectedPostId)
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase()
+  const hasSearchQuery = normalizedSearchQuery.length > 0
+
+  // 선택한 검색 범위만 비교해서 기존 게시글 데이터 구조 보존
+  const filteredPosts = posts.filter((post) => {
+    if (!normalizedSearchQuery) {
+      return true
+    }
+
+    const targetValue = {
+      title: post.title,
+      content: post.content,
+      author: post.author ?? '',
+    }[searchScope]
+
+    return targetValue.toLowerCase().includes(normalizedSearchQuery)
+  })
 
   const formatPostDate = (value, options) => {
     const date = new Date(value)
@@ -51,7 +70,7 @@ function Board({ t }) {
     return new Intl.DateTimeFormat(t.board.locale, options).format(date)
   }
 
-  // 게시글 초기화
+  // 게시글 입력 상태 초기화
   const resetWriteForm = () => {
     setAuthor('')
     setTitle('')
@@ -83,7 +102,6 @@ function Board({ t }) {
       return nextPosts
     })
 
-    // 저장 후 입력 폼 초기화
     resetWriteForm()
     setView('list')
   }
@@ -150,7 +168,7 @@ function Board({ t }) {
     setView('detail')
   }
 
-  // 게시글 내용 화면 열기
+  // 상세 화면 열 때 조회 수 증가 유지
   const handleOpenDetail = (postId) => {
     setSelectedPostId(postId)
     setPosts((currentPosts) => {
@@ -362,62 +380,60 @@ function Board({ t }) {
       {view === 'detail' ? (
         <section className="board-cafe-panel board-screen">
           {selectedPost ? (
-            <>
-              <article className="board-cafe-article">
-                <h3>{selectedPost.title}</h3>
+            <article className="board-cafe-article">
+              <h3>{selectedPost.title}</h3>
 
-                <div className="board-cafe-meta-row">
-                  <div className="board-cafe-avatar" aria-hidden="true">
-                    {(selectedPost.author ?? t.board.unknownAuthor)
-                      .slice(0, 1)
-                      .toUpperCase()}
+              <div className="board-cafe-meta-row">
+                <div className="board-cafe-avatar" aria-hidden="true">
+                  {(selectedPost.author ?? t.board.unknownAuthor)
+                    .slice(0, 1)
+                    .toUpperCase()}
+                </div>
+
+                <div className="board-cafe-author">
+                  <div className="board-cafe-author-line">
+                    <strong>{selectedPost.author ?? t.board.unknownAuthor}</strong>
                   </div>
-
-                  <div className="board-cafe-author">
-                    <div className="board-cafe-author-line">
-                      <strong>{selectedPost.author ?? t.board.unknownAuthor}</strong>
-                    </div>
-                    <div className="board-cafe-post-info">
-                      <time dateTime={selectedPost.createdAt}>
-                        {formatPostDate(selectedPost.createdAt, {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                        })}
-                      </time>
-                      <span>{t.board.views(selectedPost.views ?? 0)}</span>
-                    </div>
-                  </div>
-
-                  <div className="board-detail-actions">
-                    <button
-                      type="button"
-                      className="board-secondary-button"
-                      onClick={handleBackToList}
-                    >
-                      {t.board.backToList}
-                    </button>
-                    <button
-                      type="button"
-                      className="board-secondary-button"
-                      onClick={handleOpenEdit}
-                    >
-                      {t.board.edit}
-                    </button>
-                    <button
-                      type="button"
-                      className="board-delete-button"
-                      onClick={() => handleDeletePost(selectedPost.id)}
-                    >
-                      {t.board.delete}
-                    </button>
+                  <div className="board-cafe-post-info">
+                    <time dateTime={selectedPost.createdAt}>
+                      {formatPostDate(selectedPost.createdAt, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
+                    </time>
+                    <span>{t.board.views(selectedPost.views ?? 0)}</span>
                   </div>
                 </div>
 
-                <div className="board-cafe-content">
-                  <p>{selectedPost.content}</p>
+                <div className="board-detail-actions">
+                  <button
+                    type="button"
+                    className="board-secondary-button"
+                    onClick={handleBackToList}
+                  >
+                    {t.board.backToList}
+                  </button>
+                  <button
+                    type="button"
+                    className="board-secondary-button"
+                    onClick={handleOpenEdit}
+                  >
+                    {t.board.edit}
+                  </button>
+                  <button
+                    type="button"
+                    className="board-delete-button"
+                    onClick={() => handleDeletePost(selectedPost.id)}
+                  >
+                    {t.board.delete}
+                  </button>
                 </div>
-              </article>
-            </>
+              </div>
+
+              <div className="board-cafe-content">
+                <p>{selectedPost.content}</p>
+              </div>
+            </article>
           ) : (
             <div className="empty-state" role="status">
               <span>{t.common.systemMessage}</span>
@@ -445,13 +461,57 @@ function Board({ t }) {
           </div>
 
           <section className="board-section board-list-panel">
-            <div className="board-list-summary">
-              <span className="board-count">{t.board.totalCount(posts.length)}</span>
+            <div className="board-search-panel" role="search">
+              <label className="board-search-field">
+                <span>{t.board.searchLabel}</span>
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder={t.board.searchPlaceholder}
+                />
+              </label>
+
+              <div
+                className="board-search-scope"
+                aria-label={t.board.searchScopeLabel}
+              >
+                {SEARCH_SCOPES.map((scope) => (
+                  <button
+                    type="button"
+                    className={`board-scope-button ${
+                      searchScope === scope ? 'is-active' : ''
+                    }`}
+                    key={scope}
+                    onClick={() => setSearchScope(scope)}
+                  >
+                    {t.board.searchScopes[scope]}
+                  </button>
+                ))}
+              </div>
+
+              {hasSearchQuery ? (
+                <button
+                  type="button"
+                  className="board-secondary-button board-search-clear"
+                  onClick={() => setSearchQuery('')}
+                >
+                  {t.board.clearSearch}
+                </button>
+              ) : null}
             </div>
 
-            {posts.length > 0 ? (
+            <div className="board-list-summary">
+              <span className="board-count">
+                {hasSearchQuery
+                  ? t.board.searchResultCount(filteredPosts.length)
+                  : t.board.totalCount(posts.length)}
+              </span>
+            </div>
+
+            {filteredPosts.length > 0 ? (
               <div className="board-title-list">
-                {posts.map((post, index) => (
+                {filteredPosts.map((post, index) => (
                   <button
                     type="button"
                     className="board-title-row"
@@ -459,7 +519,7 @@ function Board({ t }) {
                     onClick={() => handleOpenDetail(post.id)}
                   >
                     <span className="board-post-number">
-                      {posts.length - index}
+                      {filteredPosts.length - index}
                     </span>
                     <span className="board-title-text">{post.title}</span>
                     <time className="board-title-date" dateTime={post.createdAt}>
@@ -473,7 +533,11 @@ function Board({ t }) {
             ) : (
               <div className="empty-state" role="status">
                 <span>{t.common.systemMessage}</span>
-                <p>{t.board.emptyMessage}</p>
+                <p>
+                  {posts.length > 0 && hasSearchQuery
+                    ? t.board.noSearchResults
+                    : t.board.emptyMessage}
+                </p>
               </div>
             )}
           </section>
