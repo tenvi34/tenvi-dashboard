@@ -4,6 +4,7 @@ import { STORAGE_KEYS } from './storageKeys.js'
 describe('STORAGE_KEYS', () => {
   it('keeps existing localStorage key strings stable', () => {
     expect(STORAGE_KEYS).toEqual({
+      boardPosts: 'tenvi.board.posts',
       calendarEvents: 'tenvi.calendar.events',
       hudEffect: 'tenvi.hudEffect',
       language: 'tenvi.language',
