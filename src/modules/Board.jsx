@@ -1,5 +1,10 @@
 import { useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import {
+  createBoardPost,
+  deleteBoardPost,
+  parseBoardPosts,
+} from './boardLogic.js'
 
 const STORAGE_KEY = STORAGE_KEYS.boardPosts
 
@@ -9,21 +14,10 @@ const loadBoardPosts = () => {
     const rawPosts = localStorage.getItem(STORAGE_KEY)
 
     if (!rawPosts) {
-      return [
-        {
-          id: 'post-1',
-          title: '첫 게시글',
-          content: '게시판 기능을 만드는 중',
-          category: 'general',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ]
+      return []
     }
 
-    const parsedPosts = JSON.parse(rawPosts)
-
-    return Array.isArray(parsedPosts) ? parsedPosts : []
+    return parseBoardPosts(rawPosts)
   } catch {
     return []
   }
@@ -50,16 +44,10 @@ function Board({ t }) {
       return
     }
 
-    const now = new Date().toISOString()
-
-    const newPost = {
-      id: `post-${crypto.randomUUID()}`,
+    const newPost = createBoardPost({
       title: trimmedTitle,
       content: trimmedContent,
-      category: 'general',
-      createdAt: now,
-      updatedAt: now,
-    }
+    })
 
     setPosts((currentPosts) => {
       const nextPosts = [newPost, ...currentPosts]
@@ -83,10 +71,12 @@ function Board({ t }) {
 
   // 게시글 삭제
   const handleDeletePost = (postId) => {
-    const nextPosts = posts.filter((post) => post.id !== postId)
+    setPosts((currentPosts) => {
+      const nextPosts = deleteBoardPost(currentPosts, postId)
+      saveBoardPosts(nextPosts)
 
-    setPosts(nextPosts)
-    saveBoardPosts(nextPosts)
+      return nextPosts
+    })
   }
 
   return (
@@ -97,21 +87,21 @@ function Board({ t }) {
           <h2 id="board-title">{t.board.title}</h2>
         </div>
         <p className="module-meta">
-          준비중 <span>{posts.length}</span>
+          {t.board.status} <span>{posts.length}</span>
         </p>
       </div>
 
       <div className="board-toolbar">
         <div>
-          <p className="module-label">Archive</p>
-          <h3>게시글 목록</h3>
+          <p className="module-label">{t.board.archiveLabel}</p>
+          <h3>{t.board.listTitle}</h3>
         </div>
         <button
           type="button"
-          className="board-primary-button"
+          className="board-primary-button board-write-button"
           onClick={() => setIsWriting((currentValue) => !currentValue)}
         >
-          {isWriting ? '작성 닫기' : '글쓰기'}
+          {isWriting ? t.board.closeWrite : t.board.write}
         </button>
       </div>
 
@@ -119,46 +109,52 @@ function Board({ t }) {
         <section className="board-section board-compose-panel">
           <div className="board-section-header board-compose-header">
             <div>
-              <p className="module-label">Compose</p>
-              <h3>게시글 작성</h3>
+              <p className="module-label">{t.board.composeLabel}</p>
+              <h3>{t.board.composeTitle}</h3>
             </div>
-            <span className="board-status-chip">Draft</span>
+            <span className="board-status-chip">{t.board.draft}</span>
           </div>
 
-          <form className="board-form" onSubmit={(event) => {
-            event.preventDefault()
-            handleCreatePost()
-          }}>
+          <form
+            className="board-form"
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleCreatePost()
+            }}
+          >
             <label className="board-field">
-              <span>제목</span>
+              <span>{t.board.titleField}</span>
               <input
                 type="text"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="게시글 제목"
+                placeholder={t.board.titlePlaceholder}
               />
             </label>
 
             <label className="board-field">
-              <span>내용</span>
+              <span>{t.board.contentField}</span>
               <textarea
                 value={content}
                 onChange={(event) => setContent(event.target.value)}
-                placeholder="게시글 내용"
+                placeholder={t.board.contentPlaceholder}
                 rows={5}
               />
             </label>
 
             <div className="board-form-actions">
-              <button type="submit" className="board-primary-button">
-                작성
+              <button
+                type="submit"
+                className="board-primary-button board-submit-button"
+              >
+                {t.board.submit}
               </button>
               <button
                 type="button"
                 className="board-secondary-button"
                 onClick={handleCancelWrite}
               >
-                취소
+                {t.board.cancel}
               </button>
             </div>
           </form>
@@ -168,29 +164,44 @@ function Board({ t }) {
       {/* 게시판 기본 목록 */}
       <section className="board-section board-list-panel">
         <div className="board-list-summary">
-          <span className="board-count">전체 {posts.length}개</span>
+          <span className="board-count">{t.board.totalCount(posts.length)}</span>
         </div>
 
-        <div className="board-post-list">
-          {posts.map((post, index) => (
-            <article className="board-post-card" key={post.id}>
-              <span className="board-post-number">{posts.length - index}</span>
-              <div className="board-post-main">
-                <span className="board-post-category">{post.category}</span>
-                <h4>{post.title}</h4>
-                <p>{post.content}</p>
-              </div>
-              <div className="board-post-meta">
-                <time dateTime={post.createdAt}>
-                  {new Date(post.createdAt).toLocaleDateString()}
-                </time>
-                <button type="button" className="board-delete-button" onClick={() => handleDeletePost(post.id)}>
-                  삭제
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+        {posts.length > 0 ? (
+          <div className="board-post-list">
+            {posts.map((post, index) => (
+              <article className="board-post-card" key={post.id}>
+                <span className="board-post-number">{posts.length - index}</span>
+                <div className="board-post-main">
+                  <span className="board-post-category">
+                    {t.board.categories[post.category] ?? post.category}
+                  </span>
+                  <h4>{post.title}</h4>
+                  <p>{post.content}</p>
+                </div>
+                <div className="board-post-meta">
+                  <time dateTime={post.createdAt}>
+                    {new Intl.DateTimeFormat(t.board.locale).format(
+                      new Date(post.createdAt),
+                    )}
+                  </time>
+                  <button
+                    type="button"
+                    className="board-delete-button"
+                    onClick={() => handleDeletePost(post.id)}
+                  >
+                    {t.board.delete}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state" role="status">
+            <span>{t.common.systemMessage}</span>
+            <p>{t.board.emptyMessage}</p>
+          </div>
+        )}
       </section>
     </section>
   )
