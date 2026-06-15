@@ -81,6 +81,14 @@ function Board({ t }) {
     setIsWriting(false)
   }
 
+  // 게시글 삭제
+  const handleDeletePost = (postId) => {
+    const nextPosts = posts.filter((post) => post.id !== postId)
+
+    setPosts(nextPosts)
+    saveBoardPosts(nextPosts)
+  }
+
   return (
     <section className="module-panel board-module" aria-labelledby="board-title">
       <div className="module-header">
@@ -176,6 +184,9 @@ function Board({ t }) {
                 <time dateTime={post.createdAt}>
                   {new Date(post.createdAt).toLocaleDateString()}
                 </time>
+                <button type="button" className="board-delete-button" onClick={() => handleDeletePost(post.id)}>
+                  삭제
+                </button>
               </div>
             </article>
           ))}
