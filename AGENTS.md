@@ -14,6 +14,9 @@
   - Command
   - Tasks
   - Notes
+  - Board
+  - Calendar
+  - Map
   - Timer
   - Settings
 - Prefer module-level changes over placing unrelated feature logic in `App.jsx`.
@@ -49,6 +52,26 @@
   - Add note
   - Delete note
   - Persist notes in localStorage
+- Do not break existing Board behavior:
+  - Show post list
+  - Open post detail from the title list
+  - Add post
+  - Edit post
+  - Delete post
+  - Increment and persist view count when opening detail
+  - Persist posts in localStorage using `tenvi.board.posts`
+  - Keep Board logic helpers in `src/modules/boardLogic.js`
+- Do not break existing Calendar behavior:
+  - Add single-day event
+  - Add date-range event
+  - Delete event
+  - Preserve date-only event fallback
+  - Persist calendar events in localStorage
+- Do not break existing Map behavior:
+  - Read, create, edit, and delete photo records
+  - Preserve photo record IndexedDB storage
+  - Preserve collection IndexedDB storage
+  - Do not store original high-resolution photos
 - Do not break existing Command Console behavior:
   - Analyze stored Tasks and Notes data
   - Execute supported rule-based commands
@@ -83,6 +106,7 @@
   - Command Console command analysis and result generation
   - Timer intervals and `useEffect` handling
   - Settings save flows, data count display, and reset logic
+  - Board localStorage save/restore, view switching, and post mutation logic
   - The `translations` object structure and language key consistency rules
 - Do not add unnecessary comments to simple JSX, obvious UI markup, or code whose meaning is clear from variable names.
 - Place comments close to constants or state update logic when the code could risk breaking existing behavior, such as localStorage key preservation, existing user data, or shared state across modules.
@@ -114,6 +138,8 @@
 - Inspect translation-related code only when UI text, language settings, or translated labels change.
 - Inspect persistence-related logic only when stored data, reset behavior, or existing localStorage-backed behavior may be affected.
 - For styling-only requests, inspect the requested module and directly connected style files first.
+- For Board UI requests, start with `src/modules/Board.jsx` and `src/App.css`.
+- For Board behavior requests, inspect `src/modules/Board.jsx`, `src/modules/boardLogic.js`, `src/modules/boardLogic.test.js`, and `src/constants/storageKeys.js` as needed.
 
 ## Environment and Sensitive Files
 

@@ -50,6 +50,7 @@ function Board({ t }) {
     return new Intl.DateTimeFormat(t.board.locale, options).format(date)
   }
 
+  // 게시글 초기화
   const resetWriteForm = () => {
     setAuthor('')
     setTitle('')
