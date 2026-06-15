@@ -1,11 +1,17 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createBoardPost, deleteBoardPost, parseBoardPosts } from './boardLogic.js'
+import {
+  createBoardPost,
+  deleteBoardPost,
+  increaseBoardPostViews,
+  parseBoardPosts,
+} from './boardLogic.js'
 
 describe('boardLogic', () => {
   it('creates a normalized board post', () => {
     expect(
       createBoardPost({
         id: 'post-1',
+        author: '  TENVI  ',
         title: '  제목  ',
         content: '  내용  ',
         createdAt: '2026-06-15T00:00:00.000Z',
@@ -14,9 +20,11 @@ describe('boardLogic', () => {
       id: 'post-1',
       title: '제목',
       content: '내용',
+      author: 'TENVI',
       category: 'general',
       createdAt: '2026-06-15T00:00:00.000Z',
       updatedAt: '2026-06-15T00:00:00.000Z',
+      views: 0,
     })
   })
 
@@ -30,6 +38,7 @@ describe('boardLogic', () => {
 
     expect(createBoardPost({ title: '제목', content: '내용' })).toMatchObject({
       id: 'generated-id',
+      author: 'TENVI',
     })
 
     vi.unstubAllGlobals()
@@ -54,5 +63,21 @@ describe('boardLogic', () => {
       { id: 'post-2', title: '둘째 글' },
     ])
     expect(posts).toHaveLength(2)
+  })
+
+  it('increases a post view count while tolerating old posts', () => {
+    const posts = [
+      { id: 'post-1', title: '첫 글', views: 2 },
+      { id: 'post-2', title: '둘째 글' },
+    ]
+
+    expect(increaseBoardPostViews(posts, 'post-1')).toEqual([
+      { id: 'post-1', title: '첫 글', views: 3 },
+      { id: 'post-2', title: '둘째 글' },
+    ])
+    expect(increaseBoardPostViews(posts, 'post-2')).toEqual([
+      { id: 'post-1', title: '첫 글', views: 2 },
+      { id: 'post-2', title: '둘째 글', views: 1 },
+    ])
   })
 })

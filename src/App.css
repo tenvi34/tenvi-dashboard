@@ -3440,6 +3440,10 @@ body.tenvi-modal-open .tenvi-dashboard {
   background: var(--surface-soft);
 }
 
+.board-screen {
+  min-height: 420px;
+}
+
 .board-compose-panel {
   margin-bottom: var(--module-gap);
   background:
@@ -3589,6 +3593,57 @@ body.tenvi-modal-open .tenvi-dashboard {
   margin-bottom: 12px;
 }
 
+.board-title-list {
+  display: grid;
+  gap: 8px;
+}
+
+.board-title-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 128px;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: 8px;
+  padding: 0 16px;
+  color: inherit;
+  background: var(--surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.board-title-row:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.08);
+  box-shadow: 0 0 16px rgba(90, 212, 255, 0.1);
+}
+
+.board-title-text {
+  min-width: 0;
+  color: #f4fdff;
+  font-size: 17px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-title-date {
+  color: rgba(190, 229, 240, 0.64);
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .board-post-list {
   display: grid;
   gap: 8px;
@@ -3665,9 +3720,25 @@ body.tenvi-modal-open .tenvi-dashboard {
   box-shadow: 0 0 18px rgba(18, 183, 106, 0.18);
 }
 
+.board-detail-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.board-detail-actions .board-secondary-button,
+.board-detail-actions .board-delete-button {
+  min-height: 32px;
+  min-width: auto;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
 .board-delete-button {
   min-height: 32px;
-  min-width: 52px;
+  min-width: 64px;
   white-space: nowrap;
   border: 1px solid rgba(255, 102, 134, 0.42);
   border-radius: 8px;
@@ -3675,7 +3746,6 @@ body.tenvi-modal-open .tenvi-dashboard {
   color: #ffd8df;
   background: rgba(255, 102, 134, 0.08);
   font: inherit;
-  font-size: 12px;
   font-weight: 800;
   cursor: pointer;
   transition:
@@ -3694,7 +3764,156 @@ body.tenvi-modal-open .tenvi-dashboard {
   box-shadow: 0 0 16px rgba(255, 102, 134, 0.12);
 }
 
+.board-cafe-panel {
+  min-width: 0;
+  min-height: 560px;
+  padding: 28px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #111827;
+}
+
+.board-cafe-article {
+  display: grid;
+  gap: 0;
+}
+
+.board-cafe-article h3 {
+  margin: 0 0 14px;
+  color: #111827;
+  font-size: 30px;
+  line-height: 1.25;
+  letter-spacing: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.board-cafe-meta-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.board-cafe-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(135deg, #111827, #5b6474);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.board-cafe-author {
+  min-width: 0;
+}
+
+.board-cafe-author-line,
+.board-cafe-post-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-cafe-author-line strong {
+  color: #111827;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.board-cafe-post-info {
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.board-cafe-content {
+  min-height: 280px;
+  padding: 26px 0;
+}
+
+.board-cafe-content p {
+  max-width: 760px;
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.board-detail {
+  display: grid;
+  gap: 20px;
+}
+
+.board-detail h3 {
+  margin: 0;
+  color: #f4fdff;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.board-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.board-detail-meta div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.board-detail-meta dt {
+  margin-bottom: 6px;
+  color: var(--muted-cyan);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.board-detail-meta dd {
+  margin: 0;
+  color: #dff8ff;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.board-detail-content {
+  min-height: 220px;
+  padding: 18px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.36);
+}
+
+.board-detail-content p {
+  margin: 0;
+  color: #dff8ff;
+  font-size: 16px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 900px) {
+  .board-title-row {
+    grid-template-columns: 42px minmax(0, 1fr) 112px;
+  }
+
   .board-post-card {
     grid-template-columns: 42px minmax(0, 1fr);
   }
@@ -3720,6 +3939,14 @@ body.tenvi-modal-open .tenvi-dashboard {
     grid-template-columns: 1fr;
   }
 
+  .board-title-row {
+    grid-template-columns: 1fr;
+  }
+
+  .board-title-date {
+    text-align: left;
+  }
+
   .board-post-number {
     display: none;
   }
@@ -3727,6 +3954,33 @@ body.tenvi-modal-open .tenvi-dashboard {
   .board-post-meta {
     justify-content: space-between;
   }
+
+  .board-detail-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .board-detail-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .board-detail-actions button {
+    width: auto;
+  }
+
+  .board-cafe-panel {
+    padding: 18px;
+  }
+
+  .board-cafe-article h3 {
+    font-size: 24px;
+  }
+
+  .board-cafe-meta-row {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
 }
 
 /* 공통 입력 스타일 */
@@ -5070,13 +5324,18 @@ body.tenvi-modal-open .tenvi-dashboard {
 
 .tenvi-dashboard.theme-standard .board-toolbar h3,
 .tenvi-dashboard.theme-standard .board-section-header h3,
+.tenvi-dashboard.theme-standard .board-title-text,
+.tenvi-dashboard.theme-standard .board-detail h3,
 .tenvi-dashboard.theme-standard .board-post-card h4 {
   color: #172033;
 }
 
 .tenvi-dashboard.theme-standard .board-field,
+.tenvi-dashboard.theme-standard .board-detail-meta dd,
+.tenvi-dashboard.theme-standard .board-detail-content p,
 .tenvi-dashboard.theme-standard .board-post-card p,
 .tenvi-dashboard.theme-standard .board-post-number,
+.tenvi-dashboard.theme-standard .board-title-date,
 .tenvi-dashboard.theme-standard .board-post-card time {
   color: #475467;
 }
@@ -5112,6 +5371,24 @@ body.tenvi-modal-open .tenvi-dashboard {
   border-color: #d9e2ec;
   background: #ffffff;
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .board-title-row,
+.tenvi-dashboard.theme-standard .board-detail-meta div,
+.tenvi-dashboard.theme-standard .board-detail-content {
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .board-title-row:hover {
+  border-color: #9db5ff;
+  background: #f4f7ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .board-detail-meta dt {
+  color: #667085;
 }
 
 .tenvi-dashboard.theme-standard .board-secondary-button {
