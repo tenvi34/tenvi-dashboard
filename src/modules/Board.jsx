@@ -74,6 +74,7 @@ function Board({ t }) {
     setIsWriting(false)
   }
 
+  // 게시글 작성 취소
   const handleCancelWrite = () => {
     setTitle('')
     setContent('')
