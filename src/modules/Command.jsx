@@ -6,6 +6,7 @@ import {
   readCommandDataStatus,
   readStoredList,
   CALENDAR_STORAGE_KEY,
+  BOARD_POSTS_STORAGE_KEY,
   TASKS_STORAGE_KEY,
   NOTES_STORAGE_KEY,
 } from './commandLogic.js'
@@ -29,9 +30,11 @@ function Command({ onModuleChange, t }) {
     // 실행 시점 데이터 반영
     const tasks = readStoredList(TASKS_STORAGE_KEY)
     const notes = readStoredList(NOTES_STORAGE_KEY)
+    const boardPosts = readStoredList(BOARD_POSTS_STORAGE_KEY)
     const calendarEvents = readStoredList(CALENDAR_STORAGE_KEY)
     const parsedCommand = parseCommand(trimmedCommand)
     const nextResult = createResult({
+      boardPosts,
       calendarEvents,
       command: trimmedCommand,
       dataStatus: readCommandDataStatus(),

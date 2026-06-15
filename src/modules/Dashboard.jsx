@@ -42,6 +42,11 @@ const getNoteTime = (note) => {
   return Number.isNaN(time) ? 0 : time
 }
 
+const getBoardPostTime = (post) => {
+  const time = new Date(post.createdAt).getTime()
+  return Number.isNaN(time) ? 0 : time
+}
+
 const MAP_SUMMARY_STATUS = {
   error: 'error',
   loading: 'loading',
@@ -62,6 +67,7 @@ function Dashboard({
   })
   const tasks = readStoredList(STORAGE_KEYS.tasks)
   const notes = readStoredList(STORAGE_KEYS.notes)
+  const boardPosts = readStoredList(STORAGE_KEYS.boardPosts)
   const calendarEvents = readStoredList(STORAGE_KEYS.calendarEvents)
   const completedTasks = tasks.filter((task) => task.completed).length
   const activeTasks = tasks.length - completedTasks
@@ -81,17 +87,15 @@ function Dashboard({
   const recentNotes = [...notes]
     .sort((firstNote, secondNote) => getNoteTime(secondNote) - getNoteTime(firstNote))
     .slice(0, 3)
+  const recentBoardPosts = [...boardPosts]
+    .sort(
+      (firstPost, secondPost) =>
+        getBoardPostTime(secondPost) - getBoardPostTime(firstPost),
+    )
+    .slice(0, 3)
   const mapSummary = mapSummaryState.data
   const hasMapRecords = Number(mapSummary?.totalPhotoRecords) > 0
   const mapPhotoCount = Number(mapSummary?.totalPhotoRecords) || 0
-  const mapBriefingMessage =
-    mapSummaryState.status === MAP_SUMMARY_STATUS.error
-      ? t.dashboard.mapSummaryLoadError
-      : mapSummaryState.status === MAP_SUMMARY_STATUS.loading
-        ? t.dashboard.mapSummaryLoading
-        : hasMapRecords
-          ? t.dashboard.mapBriefing(mapSummary.totalPhotoRecords)
-          : t.dashboard.mapBriefingEmpty
 
   useEffect(() => {
     let isMounted = true
@@ -148,6 +152,20 @@ function Dashboard({
       </ul>
     ) : (
       renderEmptyState(t.dashboard.noRecentNotes)
+    )
+
+  const renderBoardPostList = () =>
+    recentBoardPosts.length > 0 ? (
+      <ul>
+        {recentBoardPosts.map((post) => (
+          <li className="recent-note" key={post.id}>
+            <strong>{post.title}</strong>
+            {post.author ? <span>{post.author}</span> : null}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      renderEmptyState(t.dashboard.noBoardPosts)
     )
 
   const renderTodayScheduleList = () =>
@@ -257,11 +275,6 @@ function Dashboard({
   const renderOverviewTab = () => (
     <>
       {/* 개요 탭 */}
-      <div className="status-card dashboard-briefing" role="status">
-        <span>{t.dashboard.todayBriefing}</span>
-        <strong>{mapBriefingMessage}</strong>
-      </div>
-
       <div className="dashboard-tab-grid dashboard-overview-grid">
         <section className="summary-panel dashboard-overview-panel">
           <div className="summary-panel-header">
@@ -290,24 +303,13 @@ function Dashboard({
               <strong>{notes.length}</strong>
             </div>
             <div className="summary-metric">
+              <span>{t.dashboard.totalBoardPosts}</span>
+              <strong>{boardPosts.length}</strong>
+            </div>
+            <div className="summary-metric">
               <span>{t.dashboard.totalMapRecords}</span>
               <strong>{mapPhotoCount}</strong>
             </div>
-          </div>
-        </section>
-
-        <section className="summary-panel dashboard-priority-panel">
-          <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.priorityItems}</p>
-            <h3>{t.dashboard.recentHighlights}</h3>
-          </div>
-          <div className="recent-notes">
-            <p className="recent-notes-title">{t.dashboard.nextEvent}</p>
-            {renderNextEvent()}
-          </div>
-          <div className="recent-notes">
-            <p className="recent-notes-title">{t.dashboard.recentNotes}</p>
-            {renderNoteList(recentNotes.slice(0, 1))}
           </div>
         </section>
       </div>
@@ -410,6 +412,21 @@ function Dashboard({
 
         <section className="summary-panel">
           <div className="summary-panel-header">
+            <p className="module-label">{t.dashboard.boardSummary}</p>
+            <h3>{t.modules.board}</h3>
+          </div>
+          <div className="summary-metric summary-metric-wide">
+            <span>{t.dashboard.totalBoardPosts}</span>
+            <strong>{boardPosts.length}</strong>
+          </div>
+          <div className="recent-notes" aria-label={t.dashboard.recentBoardPosts}>
+            <p className="recent-notes-title">{t.dashboard.recentBoardPosts}</p>
+            {renderBoardPostList()}
+          </div>
+        </section>
+
+        <section className="summary-panel">
+          <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.mapSummary}</p>
             <h3>{t.modules.map}</h3>
           </div>
@@ -465,6 +482,10 @@ function Dashboard({
             <div className="summary-metric">
               <span>{t.dashboard.totalNotes}</span>
               <strong>{notes.length}</strong>
+            </div>
+            <div className="summary-metric">
+              <span>{t.dashboard.totalBoardPosts}</span>
+              <strong>{boardPosts.length}</strong>
             </div>
             <div className="summary-metric">
               <span>{t.dashboard.totalSchedules}</span>

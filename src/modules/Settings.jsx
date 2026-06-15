@@ -28,6 +28,8 @@ import {
 // Settings 저장 key
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
+const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
+const CALENDAR_EVENTS_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 
 // 저장 목록 개수 읽기
 const readStoredCount = (storageKey) => {
@@ -90,6 +92,8 @@ function Settings({
   const backupFileInputRef = useRef(null)
   const taskCount = readStoredCount(TASKS_STORAGE_KEY)
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
+  const boardPostCount = readStoredCount(BOARD_POSTS_STORAGE_KEY)
+  const calendarEventCount = readStoredCount(CALENDAR_EVENTS_STORAGE_KEY)
   const isHudTheme = theme === 'hud'
 
   useEffect(() => {
@@ -142,6 +146,8 @@ function Settings({
         data: {
           tasks: readStoredList(STORAGE_KEYS.tasks),
           notes: readStoredList(STORAGE_KEYS.notes),
+          boardPosts: readStoredList(STORAGE_KEYS.boardPosts),
+          calendarEvents: readStoredList(STORAGE_KEYS.calendarEvents),
           timerCompletedSessions: readStoredCompletedSessions(),
           language,
           startModule,
@@ -172,6 +178,18 @@ function Settings({
     // 기존 key 구조 유지
     localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(validatedBackup.tasks))
     localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(validatedBackup.notes))
+    if (validatedBackup.hasBoardPosts) {
+      localStorage.setItem(
+        STORAGE_KEYS.boardPosts,
+        JSON.stringify(validatedBackup.boardPosts),
+      )
+    }
+    if (validatedBackup.hasCalendarEvents) {
+      localStorage.setItem(
+        STORAGE_KEYS.calendarEvents,
+        JSON.stringify(validatedBackup.calendarEvents),
+      )
+    }
     localStorage.setItem(
       STORAGE_KEYS.timerCompletedSessions,
       String(validatedBackup.timerCompletedSessions),
@@ -264,6 +282,8 @@ function Settings({
         // rollback용 현재 localStorage snapshot
         tasks: localStorage.getItem(STORAGE_KEYS.tasks),
         notes: localStorage.getItem(STORAGE_KEYS.notes),
+        boardPosts: localStorage.getItem(STORAGE_KEYS.boardPosts),
+        calendarEvents: localStorage.getItem(STORAGE_KEYS.calendarEvents),
         timerCompletedSessions: localStorage.getItem(
           STORAGE_KEYS.timerCompletedSessions,
         ),
@@ -513,6 +533,14 @@ function Settings({
             <div className="data-metric">
               <span>{t.settings.notesData}</span>
               <strong>{noteCount}</strong>
+            </div>
+            <div className="data-metric">
+              <span>{t.settings.boardData}</span>
+              <strong>{boardPostCount}</strong>
+            </div>
+            <div className="data-metric">
+              <span>{t.settings.calendarData}</span>
+              <strong>{calendarEventCount}</strong>
             </div>
             <div className="data-metric">
               <span>{t.settings.mapData}</span>

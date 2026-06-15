@@ -1,4 +1,4 @@
-export const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
+export const START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']
 export const HUD_EFFECTS = ['normal', 'reduced']
 export const THEMES = ['hud', 'standard']
 export const LANGUAGES = ['ko', 'en']
@@ -36,6 +36,8 @@ export const validateBackupPayload = (backupPayload) => {
   const {
     hudEffect,
     language,
+    boardPosts,
+    calendarEvents,
     notes,
     startModule,
     tasks,
@@ -49,6 +51,14 @@ export const validateBackupPayload = (backupPayload) => {
   const hasMapPhotoCollections = Object.prototype.hasOwnProperty.call(
     backupPayload.data,
     'mapPhotoCollections',
+  )
+  const hasBoardPosts = Object.prototype.hasOwnProperty.call(
+    backupPayload.data,
+    'boardPosts',
+  )
+  const hasCalendarEvents = Object.prototype.hasOwnProperty.call(
+    backupPayload.data,
+    'calendarEvents',
   )
   const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
 
@@ -69,6 +79,14 @@ export const validateBackupPayload = (backupPayload) => {
     return null
   }
 
+  if (hasBoardPosts && !Array.isArray(boardPosts)) {
+    return null
+  }
+
+  if (hasCalendarEvents && !Array.isArray(calendarEvents)) {
+    return null
+  }
+
   if (
     hasMapPhotoCollections &&
     !Array.isArray(backupPayload.data.mapPhotoCollections)
@@ -77,6 +95,10 @@ export const validateBackupPayload = (backupPayload) => {
   }
 
   return {
+    boardPosts: hasBoardPosts ? boardPosts : undefined,
+    calendarEvents: hasCalendarEvents ? calendarEvents : undefined,
+    hasBoardPosts,
+    hasCalendarEvents,
     hudEffect,
     hasMapPhotoCollections,
     hasMapPhotoRecords,

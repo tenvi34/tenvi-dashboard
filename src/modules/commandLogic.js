@@ -10,12 +10,13 @@ import { getTodayDueTasks } from './tasksLogic.js'
 
 export const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 export const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
+export const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 export const CALENDAR_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 export const TIMER_SESSIONS_STORAGE_KEY = STORAGE_KEYS.timerCompletedSessions
 export const START_MODULE_STORAGE_KEY = STORAGE_KEYS.startModule
 export const LANGUAGE_STORAGE_KEY = STORAGE_KEYS.language
 
-export const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
+export const START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']
 export const LANGUAGES = ['ko', 'en']
 
 // Command 저장 목록 읽기
@@ -145,6 +146,10 @@ export const parseCommand = (command) => {
     return { targetModule: 'settings', type: 'openModule' }
   }
 
+  if (matchesCommand(normalizedCommand, ['게시판 열기', 'open board'])) {
+    return { targetModule: 'board', type: 'openModule' }
+  }
+
   if (matchesCommand(normalizedCommand, ['집중 모드', 'focus mode'])) {
     return { targetModule: 'timer', type: 'focusMode' }
   }
@@ -243,6 +248,7 @@ const createCommandListItem = (t) => ({
 
 // Command 결과 생성
 export const createResult = ({
+  boardPosts = [],
   calendarEvents = [],
   command,
   currentDate = new Date(),
@@ -294,6 +300,7 @@ export const createResult = ({
         createMetric(t.command.completedTasks, stats.completed),
         createMetric(t.command.completionRate, `${stats.completionRate}%`),
         createMetric(t.command.totalNotes, notes.length),
+        createMetric(t.command.totalBoardPosts, boardPosts.length),
       ],
       title: t.command.analysisTitle,
       type: 'analysis',
@@ -558,6 +565,8 @@ export const createResult = ({
       metrics: [
         createMetric(t.command.totalTasks, stats.total),
         createMetric(t.command.totalNotes, notes.length),
+        createMetric(t.command.totalBoardPosts, boardPosts.length),
+        createMetric(t.command.totalSchedules, calendarEvents.length),
         createMetric(t.command.timerSessions, timerSessions),
       ],
       title: t.command.dataStatusResult,

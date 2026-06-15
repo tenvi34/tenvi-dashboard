@@ -29,6 +29,10 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(validateBackupPayload(createValidBackup())).toEqual({
       tasks: [{ id: 1, title: 'Task', completed: false }],
       notes: [{ id: 1, title: 'Note', content: 'Memo' }],
+      boardPosts: undefined,
+      calendarEvents: undefined,
+      hasBoardPosts: false,
+      hasCalendarEvents: false,
       hasMapPhotoCollections: false,
       hasMapPhotoRecords: false,
       mapPhotoCollections: undefined,
@@ -49,9 +53,17 @@ describe('settingsBackup validateBackupPayload', () => {
     ).toBe(5)
   })
 
-  it('ignores fields that are not part of the current restore format', () => {
+  it('accepts Board and Calendar backup data as optional v1 fields', () => {
     const restoredData = validateBackupPayload(
       createValidBackup({
+        boardPosts: [
+          {
+            id: 'board-1',
+            title: 'Board post',
+            content: 'Memo',
+            createdAt: '2026-05-14T00:00:00.000Z',
+          },
+        ],
         calendarEvents: [
           {
             id: 'calendar-1',
@@ -64,7 +76,10 @@ describe('settingsBackup validateBackupPayload', () => {
       }),
     )
 
-    expect(restoredData).not.toHaveProperty('calendarEvents')
+    expect(restoredData.hasBoardPosts).toBe(true)
+    expect(restoredData.hasCalendarEvents).toBe(true)
+    expect(restoredData.boardPosts).toHaveLength(1)
+    expect(restoredData.calendarEvents).toHaveLength(1)
   })
 
   it('distinguishes missing Map backup data from an explicit empty Map backup', () => {
@@ -123,6 +138,10 @@ describe('settingsBackup validateBackupPayload', () => {
   it('rejects payloads with invalid data shapes', () => {
     expect(validateBackupPayload(createValidBackup({ tasks: {} }))).toBe(null)
     expect(validateBackupPayload(createValidBackup({ notes: {} }))).toBe(null)
+    expect(validateBackupPayload(createValidBackup({ boardPosts: {} }))).toBe(null)
+    expect(validateBackupPayload(createValidBackup({ calendarEvents: {} }))).toBe(
+      null,
+    )
     expect(validateBackupPayload(createValidBackup({ mapPhotoRecords: {} }))).toBe(
       null,
     )
@@ -151,7 +170,7 @@ describe('settingsBackup validateBackupPayload', () => {
   })
 
   it('keeps the supported default start modules explicit', () => {
-    expect(START_MODULES).toEqual(['dashboard', 'tasks', 'notes', 'command'])
+    expect(START_MODULES).toEqual(['dashboard', 'tasks', 'notes', 'board', 'command'])
     expect(START_MODULES).not.toContain('calendar')
   })
 })

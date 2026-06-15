@@ -78,6 +78,10 @@ describe('commandLogic parseCommand', () => {
       targetModule: 'timer',
       type: 'focusMode',
     })
+    expect(parseCommand('open board')).toEqual({
+      targetModule: 'board',
+      type: 'openModule',
+    })
   })
 
   it('supports calendar command aliases', () => {
@@ -139,6 +143,8 @@ describe('commandLogic createResult', () => {
     const result = createResult({
       command: 'data status',
       dataStatus: { language: 'en', startModule: 'command', timerSessions: 7 },
+      boardPosts: [{ id: 'board-1', title: 'Board post' }],
+      calendarEvents,
       notes,
       parsedCommand: parseCommand('data status'),
       tasks,
@@ -146,7 +152,7 @@ describe('commandLogic createResult', () => {
     })
 
     expect(result.title).toBe(t.command.dataStatusResult)
-    expect(result.metrics.map((metric) => metric.value)).toEqual([4, 1, 7])
+    expect(result.metrics.map((metric) => metric.value)).toEqual([4, 1, 1, 3, 7])
   })
 
   it('returns navigation target for open timer', () => {

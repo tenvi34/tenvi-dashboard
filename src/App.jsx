@@ -14,7 +14,7 @@ import Tasks from './modules/Tasks.jsx'
 import Timer from './modules/Timer.jsx'
 import './App.css'
 
-const START_MODULES = ['dashboard', 'tasks', 'notes', 'command']
+const START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']
 const HUD_EFFECTS = ['normal', 'reduced']
 const THEMES = ['hud', 'standard']
 

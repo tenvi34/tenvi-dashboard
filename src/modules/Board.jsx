@@ -34,6 +34,7 @@ function Board({ t }) {
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [formError, setFormError] = useState('')
   const [view, setView] = useState('list')
   const [selectedPostId, setSelectedPostId] = useState('')
 
@@ -55,6 +56,7 @@ function Board({ t }) {
     setAuthor('')
     setTitle('')
     setContent('')
+    setFormError('')
   }
 
   // 게시글 작성
@@ -64,6 +66,7 @@ function Board({ t }) {
     const trimmedContent = content.trim()
 
     if (!trimmedTitle || !trimmedContent) {
+      setFormError(t.board.formRequiredMessage)
       return
     }
 
@@ -107,6 +110,7 @@ function Board({ t }) {
     setAuthor(selectedPost.author ?? '')
     setTitle(selectedPost.title)
     setContent(selectedPost.content)
+    setFormError('')
     setView('edit')
   }
 
@@ -126,6 +130,7 @@ function Board({ t }) {
     const trimmedContent = content.trim()
 
     if (!trimmedTitle || !trimmedContent) {
+      setFormError(t.board.formRequiredMessage)
       return
     }
 
@@ -165,6 +170,10 @@ function Board({ t }) {
 
   // 게시글 삭제
   const handleDeletePost = (postId) => {
+    if (!window.confirm(t.board.deleteConfirm)) {
+      return
+    }
+
     setPosts((currentPosts) => {
       const nextPosts = deleteBoardPost(currentPosts, postId)
       saveBoardPosts(nextPosts)
@@ -209,7 +218,10 @@ function Board({ t }) {
               <input
                 type="text"
                 value={author}
-                onChange={(event) => setAuthor(event.target.value)}
+                onChange={(event) => {
+                  setAuthor(event.target.value)
+                  setFormError('')
+                }}
                 placeholder={t.board.authorPlaceholder}
               />
             </label>
@@ -219,7 +231,10 @@ function Board({ t }) {
               <input
                 type="text"
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) => {
+                  setTitle(event.target.value)
+                  setFormError('')
+                }}
                 placeholder={t.board.titlePlaceholder}
               />
             </label>
@@ -228,11 +243,20 @@ function Board({ t }) {
               <span>{t.board.contentField}</span>
               <textarea
                 value={content}
-                onChange={(event) => setContent(event.target.value)}
+                onChange={(event) => {
+                  setContent(event.target.value)
+                  setFormError('')
+                }}
                 placeholder={t.board.contentPlaceholder}
                 rows={5}
               />
             </label>
+
+            {formError ? (
+              <p className="board-form-message" role="alert">
+                {formError}
+              </p>
+            ) : null}
 
             <div className="board-form-actions">
               <button
@@ -275,7 +299,10 @@ function Board({ t }) {
               <input
                 type="text"
                 value={author}
-                onChange={(event) => setAuthor(event.target.value)}
+                onChange={(event) => {
+                  setAuthor(event.target.value)
+                  setFormError('')
+                }}
                 placeholder={t.board.authorPlaceholder}
               />
             </label>
@@ -285,7 +312,10 @@ function Board({ t }) {
               <input
                 type="text"
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) => {
+                  setTitle(event.target.value)
+                  setFormError('')
+                }}
                 placeholder={t.board.titlePlaceholder}
               />
             </label>
@@ -294,11 +324,20 @@ function Board({ t }) {
               <span>{t.board.contentField}</span>
               <textarea
                 value={content}
-                onChange={(event) => setContent(event.target.value)}
+                onChange={(event) => {
+                  setContent(event.target.value)
+                  setFormError('')
+                }}
                 placeholder={t.board.contentPlaceholder}
                 rows={8}
               />
             </label>
+
+            {formError ? (
+              <p className="board-form-message" role="alert">
+                {formError}
+              </p>
+            ) : null}
 
             <div className="board-form-actions">
               <button

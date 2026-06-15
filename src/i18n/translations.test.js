@@ -69,9 +69,12 @@ const requiredCalendarKeys = [
 
 const requiredDashboardKeys = [
   'todayBriefing',
+  'boardSummary',
   'mapSummary',
+  'totalBoardPosts',
   'totalMapRecords',
   'totalMapCollections',
+  'recentBoardPosts',
   'recentMapRecords',
   'representativeCollection',
   'mapLocationSources',
@@ -88,6 +91,7 @@ const requiredDashboardKeys = [
   'mapBriefingEmpty',
   'mapLocationSourceValue',
   'collectionPhotoCount',
+  'noBoardPosts',
   'todayEvents',
   'nextEvent',
   'monthEvents',
