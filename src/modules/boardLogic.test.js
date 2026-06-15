@@ -4,6 +4,7 @@ import {
   deleteBoardPost,
   increaseBoardPostViews,
   parseBoardPosts,
+  updateBoardPost,
 } from './boardLogic.js'
 
 describe('boardLogic', () => {
@@ -79,5 +80,41 @@ describe('boardLogic', () => {
       { id: 'post-1', title: '첫 글', views: 2 },
       { id: 'post-2', title: '둘째 글', views: 1 },
     ])
+  })
+
+  it('updates a post while preserving stable fields', () => {
+    const posts = [
+      {
+        id: 'post-1',
+        title: 'Before',
+        content: 'Old',
+        author: 'Old Author',
+        createdAt: '2026-06-15T00:00:00.000Z',
+        views: 3,
+      },
+    ]
+
+    const updatedPosts = updateBoardPost(posts, 'post-1', {
+      author: ' New Author ',
+      title: ' After ',
+      content: ' New content ',
+    })
+
+    expect(updatedPosts[0]).toMatchObject({
+      id: 'post-1',
+      title: 'After',
+      content: 'New content',
+      author: 'New Author',
+      createdAt: '2026-06-15T00:00:00.000Z',
+      views: 3,
+    })
+    expect(updatedPosts[0].updatedAt).toEqual(expect.any(String))
+  })
+
+  it('does not update when title or content is empty', () => {
+    const posts = [{ id: 'post-1', title: 'Before', content: 'Old' }]
+
+    expect(updateBoardPost(posts, 'post-1', { title: '', content: 'New' })).toBe(posts)
+    expect(updateBoardPost(posts, 'post-1', { title: 'New', content: '' })).toBe(posts)
   })
 })

@@ -58,3 +58,30 @@ export const increaseBoardPostViews = (posts, postId) =>
       views: Number.isFinite(post.views) ? post.views + 1 : 1,
     }
   })
+
+// Board 게시글 수정
+export const updateBoardPost = (posts, postId, input) => {
+  const normalizedAuthor = (input.author ?? '').trim() || 'TENVI'
+  const normalizedTitle = (input.title ?? '').trim()
+  const normalizedContent = (input.content ?? '').trim()
+
+  if (!normalizedTitle || !normalizedContent) {
+    return posts
+  }
+
+  const updatedAt = new Date().toISOString()
+
+  return posts.map((post) => {
+    if (post.id !== postId) {
+      return post
+    }
+
+    return {
+      ...post,
+      author: normalizedAuthor,
+      title: normalizedTitle,
+      content: normalizedContent,
+      updatedAt,
+    }
+  })
+}

@@ -5,6 +5,7 @@ import {
   deleteBoardPost,
   increaseBoardPostViews,
   parseBoardPosts,
+  updateBoardPost,
 } from './boardLogic.js'
 
 const STORAGE_KEY = STORAGE_KEYS.boardPosts
@@ -89,12 +90,61 @@ function Board({ t }) {
     setView('list')
   }
 
+  // 게시글 작성 화면 열기
   const handleOpenWrite = () => {
     resetWriteForm()
     setSelectedPostId('')
     setView('write')
   }
 
+  // 게시글 수정 화면 열기
+  const handleOpenEdit = () => {
+    if (!selectedPost) {
+      return
+    }
+
+    setAuthor(selectedPost.author ?? '')
+    setTitle(selectedPost.title)
+    setContent(selectedPost.content)
+    setView('edit')
+  }
+
+  // 게시글 수정 취소
+  const handleCancelEdit = () => {
+    resetWriteForm()
+    setView('detail')
+  }
+
+  // 게시글 수정 저장
+  const handleUpdatePost = () => {
+    if (!selectedPost) {
+      return
+    }
+
+    const trimmedTitle = title.trim()
+    const trimmedContent = content.trim()
+
+    if (!trimmedTitle || !trimmedContent) {
+      return
+    }
+
+    setPosts((currentPosts) => {
+      const nextPosts = updateBoardPost(currentPosts, selectedPost.id, {
+        author,
+        title,
+        content,
+      })
+
+      saveBoardPosts(nextPosts)
+
+      return nextPosts
+    })
+
+    resetWriteForm()
+    setView('detail')
+  }
+
+  // 게시글 내용 화면 열기
   const handleOpenDetail = (postId) => {
     setSelectedPostId(postId)
     setPosts((currentPosts) => {
@@ -106,6 +156,7 @@ function Board({ t }) {
     setView('detail')
   }
 
+  // 게시글 목록으로 이동
   const handleBackToList = () => {
     setSelectedPostId('')
     setView('list')
@@ -201,6 +252,72 @@ function Board({ t }) {
         </section>
       ) : null}
 
+      {/* 수정 화면 */}
+      {view === 'edit' ? (
+        <section className="board-section board-compose-panel board-screen">
+          <div className="board-section-header board-compose-header">
+            <div>
+              <p className="module-label">{t.board.editLabel}</p>
+              <h3>{t.board.editTitle}</h3>
+            </div>
+          </div>
+
+          <form
+            className="board-form"
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleUpdatePost()
+            }}
+          >
+            <label className="board-field">
+              <span>{t.board.authorField}</span>
+              <input
+                type="text"
+                value={author}
+                onChange={(event) => setAuthor(event.target.value)}
+                placeholder={t.board.authorPlaceholder}
+              />
+            </label>
+
+            <label className="board-field">
+              <span>{t.board.titleField}</span>
+              <input
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder={t.board.titlePlaceholder}
+              />
+            </label>
+
+            <label className="board-field">
+              <span>{t.board.contentField}</span>
+              <textarea
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+                placeholder={t.board.contentPlaceholder}
+                rows={8}
+              />
+            </label>
+
+            <div className="board-form-actions">
+              <button
+                type="submit"
+                className="board-primary-button board-submit-button"
+              >
+                {t.board.saveEdit}
+              </button>
+              <button
+                type="button"
+                className="board-secondary-button"
+                onClick={handleCancelEdit}
+              >
+                {t.board.cancel}
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
       {/* 상세 화면 */}
       {view === 'detail' ? (
         <section className="board-cafe-panel board-screen">
@@ -238,6 +355,13 @@ function Board({ t }) {
                       onClick={handleBackToList}
                     >
                       {t.board.backToList}
+                    </button>
+                    <button
+                      type="button"
+                      className="board-secondary-button"
+                      onClick={handleOpenEdit}
+                    >
+                      {t.board.edit}
                     </button>
                     <button
                       type="button"
