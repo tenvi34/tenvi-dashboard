@@ -2345,9 +2345,9 @@ body.tenvi-modal-open .tenvi-dashboard {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* Settings 설정 그룹 */
@@ -2377,7 +2377,7 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .settings-options-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .settings-option {
@@ -2572,7 +2572,7 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .settings-data-panel {
-  grid-column: span 2;
+  grid-column: 1 / -1;
 }
 
 .settings-data-panel .data-metrics {
@@ -2582,6 +2582,7 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .settings-backup-panel {
+  grid-column: span 2;
   border-color: rgba(101, 255, 188, 0.22);
   background:
     linear-gradient(135deg, rgba(101, 255, 188, 0.06), rgba(2, 9, 18, 0.4)),
@@ -4850,6 +4851,11 @@ body.tenvi-modal-open .tenvi-dashboard {
   .task-stats,
   .settings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .settings-data-panel,
+  .settings-backup-panel {
+    grid-column: auto;
   }
 
   .status-card,
