@@ -3,14 +3,17 @@ import { getPhotoCollections } from './photoCollectionRepository.js'
 
 const LOCATION_SOURCE_KEYS = ['exif', 'manual', 'search']
 
+// 날짜 정렬용 timestamp fallback
 const getTimestamp = (value) => {
   const timestamp = new Date(value).getTime()
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
+// Dashboard 표시용 위치 출처 정규화
 const getSummaryLocationSource = (source) =>
   LOCATION_SOURCE_KEYS.includes(source) ? source : 'unknown'
 
+// 위치 출처별 초기 카운트
 const createEmptyLocationSourceCounts = () => ({
   exif: 0,
   manual: 0,
@@ -28,6 +31,7 @@ export const createMapArchiveSummary = (records = [], collections = []) => {
   const collectionPhotoCounts = new Map()
   const locationSourceCounts = createEmptyLocationSourceCounts()
 
+  // 컬렉션별 사진 수와 위치 출처 집계
   records.forEach((record) => {
     const source = getSummaryLocationSource(record?.locationSource)
     locationSourceCounts[source] += 1
@@ -40,6 +44,7 @@ export const createMapArchiveSummary = (records = [], collections = []) => {
     }
   })
 
+  // 최근 사진 3개만 Dashboard에 노출
   const recentPhotoRecords = [...records]
     .sort(
       (firstRecord, secondRecord) =>
@@ -58,6 +63,7 @@ export const createMapArchiveSummary = (records = [], collections = []) => {
       }
     })
 
+  // 대표 컬렉션: 사진 수 우선, 동률이면 최신 수정일
   const representativeCollection = collections.reduce((selected, collection) => {
     const photoCount = collectionPhotoCounts.get(collection.id) ?? 0
 

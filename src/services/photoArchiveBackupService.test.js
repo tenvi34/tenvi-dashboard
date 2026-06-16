@@ -8,6 +8,7 @@ import {
   validateMapBackupRecordShape,
 } from './photoArchiveBackupService.js'
 
+// Map 백업 record 검증 fixture
 const createMapBackupRecord = (overrides = {}) => ({
   id: 'photo-1',
   previewImageDataUrl: 'data:image/jpeg;base64,cHJldmlldw==',

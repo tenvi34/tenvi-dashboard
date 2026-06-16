@@ -1,13 +1,16 @@
 import { useRef, useState } from 'react'
 
+// 에디터 블록 고유 ID 생성
 const createEditorBlockId = () => {
   if (globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID()
   }
 
+  // randomUUID 미지원 환경 fallback
   return `block-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+// 기본 텍스트 블록 생성
 const createTextBlock = () => ({
   id: createEditorBlockId(),
   type: 'text',
@@ -19,6 +22,7 @@ function BoardEditor({ blocks, onChange, t }) {
   const [activeBlockId, setActiveBlockId] = useState(blocks[0]?.id ?? '')
   const textBlockCount = blocks.filter((block) => block.type === 'text').length
 
+  // 현재 선택된 블록 기준 삽입 위치 계산
   const getInsertIndex = () => {
     const activeIndex = blocks.findIndex((block) => block.id === activeBlockId)
 
@@ -26,6 +30,7 @@ function BoardEditor({ blocks, onChange, t }) {
     return activeIndex >= 0 ? activeIndex + 1 : blocks.length
   }
 
+  // 활성 블록 다음 위치에 삽입
   const insertBlocks = (newBlocks) => {
     const insertIndex = getInsertIndex()
     onChange([
@@ -35,6 +40,7 @@ function BoardEditor({ blocks, onChange, t }) {
     ])
   }
 
+  // 단일 블록 내용 갱신
   const updateBlock = (blockId, patch) => {
     onChange(
       blocks.map((block) =>
@@ -48,6 +54,7 @@ function BoardEditor({ blocks, onChange, t }) {
     )
   }
 
+  // 새 텍스트 블록 추가 후 포커스 이동
   const addTextBlock = () => {
     const nextBlock = createTextBlock()
 
@@ -55,6 +62,7 @@ function BoardEditor({ blocks, onChange, t }) {
     setActiveBlockId(nextBlock.id)
   }
 
+  // 이미지 파일을 에디터 블록으로 변환
   const addImageBlock = (file) => {
     if (!file) {
       return
@@ -62,10 +70,11 @@ function BoardEditor({ blocks, onChange, t }) {
 
     const reader = new FileReader()
 
+    // 이미지 뒤에 바로 입력 가능한 텍스트 블록 유지
     reader.onload = () => {
       const nextTextBlock = createTextBlock()
 
-      // Board 이미지: data URL 저장, 많으면 IndexedDB 권장
+      // Board 이미지: data URL 저장 증가 시 IndexedDB 전환 고려
       insertBlocks([
         {
           id: createEditorBlockId(),
@@ -81,6 +90,7 @@ function BoardEditor({ blocks, onChange, t }) {
     reader.readAsDataURL(file)
   }
 
+  // 최소 1개 텍스트 블록 보존 삭제
   const removeBlock = (blockId) => {
     const targetBlock = blocks.find((block) => block.id === blockId)
 
@@ -91,6 +101,7 @@ function BoardEditor({ blocks, onChange, t }) {
     onChange(blocks.filter((block) => block.id !== blockId))
   }
 
+  // 블록 순서 이동
   const moveBlock = (blockId, direction) => {
     const blockIndex = blocks.findIndex((block) => block.id === blockId)
     const nextIndex = blockIndex + direction

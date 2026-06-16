@@ -7,6 +7,7 @@ import {
   searchPlaces,
 } from './placeSearchService.js'
 
+// 무료 Nominatim 검색 계약 검증
 describe('placeSearchService', () => {
   it('normalizes a Nominatim result into TENVI place data', () => {
     expect(

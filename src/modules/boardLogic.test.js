@@ -9,6 +9,7 @@ import {
   updateBoardPost,
 } from './boardLogic.js'
 
+// Board 저장 구조와 legacy 호환성 검증
 describe('boardLogic', () => {
   it('creates a normalized board post', () => {
     vi.stubGlobal('crypto', { randomUUID: () => 'generated-block-id' })

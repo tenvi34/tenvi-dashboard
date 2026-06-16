@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { calculatePreviewSize } from './imageUtils.js'
 
+// 미리보기 리사이즈 규칙 검증
 describe('imageUtils', () => {
   it('keeps small images at their original size', () => {
     expect(calculatePreviewSize(800, 600, 1200)).toEqual({

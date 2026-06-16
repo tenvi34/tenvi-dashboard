@@ -18,6 +18,7 @@ import {
   normalizePhotoLocation,
 } from './mapLogic.js'
 
+// Map 순수 로직 회귀 검증
 describe('mapLogic', () => {
   it('normalizes GPS metadata into a map marker payload', () => {
     expect(

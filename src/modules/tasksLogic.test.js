@@ -8,6 +8,7 @@ import {
   normalizeDueDate,
 } from './tasksLogic.js'
 
+// dueDate 호환성 검증 fixture
 const tasks = [
   { id: 'a', title: 'Plan release', completed: false, dueDate: '2026-05-14' },
   { id: 'b', title: 'Done task', completed: true, dueDate: '2026-05-14' },

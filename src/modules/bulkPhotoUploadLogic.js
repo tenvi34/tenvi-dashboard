@@ -1,10 +1,13 @@
 const BULK_ITEM_STATUSES = ['located', 'missing-location', 'failed']
 
+// 좌표 저장 가능 여부 확인
 const isValidCoordinate = (value) => Number.isFinite(Number(value))
 
+// bulk 항목 상태 fallback
 export const normalizeBulkUploadItemStatus = (status) =>
   BULK_ITEM_STATUSES.includes(status) ? status : 'failed'
 
+// 파일 분석 결과를 UI 항목으로 정규화
 export const createBulkPhotoAnalysisItem = ({
   errorMessage = '',
   file = null,
@@ -35,15 +38,18 @@ export const createBulkPhotoAnalysisItem = ({
   }
 }
 
+// 원래 위치가 없던 항목만 추출
 export const getBulkMissingLocationItems = (items = []) =>
   items.filter(
     (item) =>
       item?.originalStatus === 'missing-location' && item.status !== 'failed',
   )
 
+// 위치 일괄 적용 가능 항목
 export const getBulkLocationAssignableItems = (items = []) =>
   items.filter((item) => item?.status !== 'failed')
 
+// 위치 누락 항목 선택 토글
 export const toggleBulkMissingLocationSelection = (
   selectedIds = [],
   itemId,
@@ -55,14 +61,18 @@ export const toggleBulkMissingLocationSelection = (
   return [...selectedIds, itemId]
 }
 
+// 위치 누락 항목 전체 선택
 export const selectAllBulkMissingLocationItems = (items = []) =>
   getBulkMissingLocationItems(items).map((item) => item.id)
 
+// 실패 제외 항목 전체 선택
 export const selectAllBulkLocationAssignableItems = (items = []) =>
   getBulkLocationAssignableItems(items).map((item) => item.id)
 
+// bulk 선택 상태 초기화
 export const clearBulkMissingLocationSelection = () => []
 
+// 선택 항목에 수동/검색 위치 적용
 export const applyLocationToBulkItems = (
   items = [],
   selectedIds = [],
@@ -89,6 +99,7 @@ export const applyLocationToBulkItems = (
   })
 }
 
+// bulk 분석 결과 요약
 export const createBulkUploadSummary = (items = []) =>
   items.reduce(
     (summary, item) => {
@@ -109,7 +120,7 @@ export const createBulkUploadSummary = (items = []) =>
     },
   )
 
-// bulk 저장 후보 정책
+// bulk 저장 후보 정제
 export const getBulkPhotoSaveCandidates = (items = []) =>
   items.filter(
     (item) =>
@@ -119,6 +130,7 @@ export const getBulkPhotoSaveCandidates = (items = []) =>
       Boolean(item.previewImage?.blob),
   )
 
+// bulk 항목을 IndexedDB 저장 입력으로 변환
 export const createBulkPhotoRecordInput = (item, collectionId = null) => {
   if (!getBulkPhotoSaveCandidates([item]).length) {
     return null
@@ -141,6 +153,7 @@ export const createBulkPhotoRecordInput = (item, collectionId = null) => {
   }
 }
 
+// 저장 가능한 bulk 입력 목록 생성
 export const createBulkPhotoRecordInputs = (items = [], collectionId = null) =>
   getBulkPhotoSaveCandidates(items)
     .map((item) => createBulkPhotoRecordInput(item, collectionId))

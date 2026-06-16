@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { translations } from './translations.js'
 
+// 번역 최상위 key 동기화 목록
 const requiredTopLevelKeys = [
   'app',
   'languages',
@@ -17,6 +18,7 @@ const requiredTopLevelKeys = [
   'settings',
 ]
 
+// Command 번역 key 동기화 목록
 const requiredCommandKeys = [
   'helpTitle',
   'recommendTaskResult',
@@ -35,6 +37,7 @@ const requiredCommandKeys = [
   'examples',
 ]
 
+// Calendar 번역 key 동기화 목록
 const requiredCalendarKeys = [
   'label',
   'title',
@@ -67,6 +70,7 @@ const requiredCalendarKeys = [
   'deleteEvent',
 ]
 
+// Dashboard 번역 key 동기화 목록
 const requiredDashboardKeys = [
   'todayBriefing',
   'boardSummary',
@@ -118,11 +122,13 @@ const requiredDashboardKeys = [
   'totalSchedules',
 ]
 
+// Tasks 번역 key 동기화 목록
 const requiredTasksKeys = [
   'dueDateLabel',
   'dueDateValue',
 ]
 
+// Map 번역 key 동기화 목록
 const requiredMapKeys = [
   'label',
   'title',

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { STORAGE_KEYS } from './storageKeys.js'
 
+// 기존 localStorage key 회귀 방지
 describe('STORAGE_KEYS', () => {
   it('keeps existing localStorage key strings stable', () => {
     expect(STORAGE_KEYS).toEqual({

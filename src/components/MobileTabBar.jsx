@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+// 모바일 하단 모듈 전환
 function MobileTabBar({
   activeModule,
   moreModules = [],
@@ -9,6 +10,8 @@ function MobileTabBar({
 }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const isMoreActive = moreModules.some((module) => module.id === activeModule)
+
+  // 모듈 이동 후 더보기 닫기
   const handleModuleChange = (moduleId) => {
     onModuleChange(moduleId)
     setIsMoreOpen(false)

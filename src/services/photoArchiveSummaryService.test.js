@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createMapArchiveSummary } from './photoArchiveSummaryService.js'
 
+// Dashboard Map 요약용 record fixture
 const createRecord = (overrides = {}) => ({
   id: `record-${Math.random()}`,
   title: 'Photo record',
@@ -10,6 +11,7 @@ const createRecord = (overrides = {}) => ({
   ...overrides,
 })
 
+// Dashboard Map 요약용 collection fixture
 const createCollection = (overrides = {}) => ({
   id: `collection-${Math.random()}`,
   name: 'Collection',

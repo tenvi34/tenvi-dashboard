@@ -28,6 +28,7 @@ import {
   removeCalendarEvent,
 } from './calendarLogic.js'
 
+// 단일 날짜 일정 fixture
 const events = [
   {
     id: 'a',
@@ -45,6 +46,7 @@ const events = [
   },
 ]
 
+// 기간 일정 fixture
 const rangedEvent = {
   id: 'trip',
   date: '2026-05-14',
@@ -55,6 +57,7 @@ const rangedEvent = {
   createdAt: '2026-05-14T00:00:00.000Z',
 }
 
+// startDate 없는 기존 기간 일정 호환 fixture
 const legacyRangedEvent = {
   id: 'legacy-trip',
   date: '2026-05-14',

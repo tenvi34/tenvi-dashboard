@@ -3,15 +3,21 @@ import { translations } from '../i18n/translations.js'
 import { createResult, parseCommand } from './commandLogic.js'
 
 const t = translations.en
+
+// Command 분석용 저장 데이터 fixture
 const tasks = [
   { id: 1, title: 'Write project plan', completed: false, dueDate: '2026-05-14' },
   { id: 2, title: 'Review backup flow', completed: true },
   { id: 3, title: 'Prepare focus session', completed: false },
   { id: 4, title: 'Completed due task', completed: true, dueDate: '2026-05-14' },
 ]
+
+// Command 검색용 Note fixture
 const notes = [
   { id: 1, title: 'Project note', content: 'TENVI command ideas' },
 ]
+
+// Calendar 명령 결과 fixture
 const calendarEvents = [
   {
     id: 'schedule-1',

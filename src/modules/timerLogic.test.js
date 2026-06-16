@@ -6,6 +6,7 @@ import {
   normalizeMinutes,
 } from './timerLogic.js'
 
+// Timer 표시 포맷 회귀 방지
 describe('timerLogic', () => {
   it('formats countdown seconds as mm:ss', () => {
     expect(formatTime(0)).toBe('00:00')

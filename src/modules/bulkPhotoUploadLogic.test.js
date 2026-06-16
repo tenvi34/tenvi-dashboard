@@ -13,6 +13,7 @@ import {
   toggleBulkMissingLocationSelection,
 } from './bulkPhotoUploadLogic.js'
 
+// bulk 미리보기 Blob fixture
 const previewImage = {
   blob: new Blob(['preview'], { type: 'image/jpeg' }),
   height: 600,
@@ -20,6 +21,7 @@ const previewImage = {
   width: 900,
 }
 
+// 위치가 확정된 bulk 항목 생성
 const createLocatedItem = (overrides = {}) => ({
   id: 'located-1',
   fileName: 'located.jpg',
