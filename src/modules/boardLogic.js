@@ -1,6 +1,75 @@
+const createBoardBlockId = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID()
+  }
+
+  return `block-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+// Board 블록 저장 구조 정규화
+export const normalizeBoardBlocks = (blocks, fallbackContent = '') => {
+  if (!Array.isArray(blocks)) {
+    const normalizedContent = String(fallbackContent ?? '').trim()
+
+    return normalizedContent
+      ? [
+          {
+            id: createBoardBlockId(),
+            type: 'text',
+            content: normalizedContent,
+          },
+        ]
+      : []
+  }
+
+  return blocks
+    .map((block) => {
+      if (block?.type === 'image') {
+        const src = String(block.src ?? '').trim()
+
+        if (!src) {
+          return null
+        }
+
+        return {
+          id: block.id || createBoardBlockId(),
+          type: 'image',
+          src,
+          name: String(block.name ?? 'image').trim() || 'image',
+        }
+      }
+
+      const content = String(block?.content ?? '')
+
+      return {
+        id: block?.id || createBoardBlockId(),
+        type: 'text',
+        content,
+      }
+    })
+    .filter(Boolean)
+}
+
+export const getBoardPostTextContent = (blocks = []) =>
+  normalizeBoardBlocks(blocks)
+    .filter((block) => block.type === 'text')
+    .map((block) => block.content.trim())
+    .filter(Boolean)
+    .join('\n\n')
+
+const hasBoardPostBody = (content, blocks) => {
+  const normalizedContent = String(content ?? '').trim()
+  const normalizedBlocks = normalizeBoardBlocks(blocks)
+  const hasTextBlock = getBoardPostTextContent(normalizedBlocks).length > 0
+  const hasImageBlock = normalizedBlocks.some((block) => block.type === 'image')
+
+  return normalizedContent.length > 0 || hasTextBlock || hasImageBlock
+}
+
 // Board 게시글 생성 규칙
 export const createBoardPost = ({
   author = 'TENVI',
+  blocks,
   category = 'general',
   content = '',
   createdAt = new Date().toISOString(),
@@ -9,9 +78,12 @@ export const createBoardPost = ({
 }) => {
   const normalizedAuthor = author.trim() || 'TENVI'
   const normalizedTitle = title.trim()
-  const normalizedContent = content.trim()
+  const normalizedBlocks = normalizeBoardBlocks(blocks, content)
+  const normalizedContent = Array.isArray(blocks)
+    ? getBoardPostTextContent(normalizedBlocks)
+    : content.trim()
 
-  if (!normalizedTitle || !normalizedContent) {
+  if (!normalizedTitle || !hasBoardPostBody(normalizedContent, normalizedBlocks)) {
     return null
   }
 
@@ -19,6 +91,7 @@ export const createBoardPost = ({
     id: id ?? crypto.randomUUID(),
     title: normalizedTitle,
     content: normalizedContent,
+    blocks: normalizedBlocks,
     author: normalizedAuthor,
     category,
     createdAt,
@@ -63,9 +136,12 @@ export const increaseBoardPostViews = (posts, postId) =>
 export const updateBoardPost = (posts, postId, input) => {
   const normalizedAuthor = (input.author ?? '').trim() || 'TENVI'
   const normalizedTitle = (input.title ?? '').trim()
-  const normalizedContent = (input.content ?? '').trim()
+  const normalizedBlocks = normalizeBoardBlocks(input.blocks, input.content)
+  const normalizedContent = Array.isArray(input.blocks)
+    ? getBoardPostTextContent(normalizedBlocks)
+    : (input.content ?? '').trim()
 
-  if (!normalizedTitle || !normalizedContent) {
+  if (!normalizedTitle || !hasBoardPostBody(normalizedContent, normalizedBlocks)) {
     return posts
   }
 
@@ -81,6 +157,7 @@ export const updateBoardPost = (posts, postId, input) => {
       author: normalizedAuthor,
       title: normalizedTitle,
       content: normalizedContent,
+      blocks: normalizedBlocks,
       updatedAt,
     }
   })

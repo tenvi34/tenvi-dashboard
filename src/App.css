@@ -3527,6 +3527,147 @@ body.tenvi-modal-open .tenvi-dashboard {
   resize: vertical;
 }
 
+.board-editor {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.board-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.board-editor-toolbar .board-secondary-button {
+  min-height: 40px;
+  padding-inline: 14px;
+}
+
+.board-editor-file-input {
+  display: none;
+}
+
+.board-editor-canvas {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  min-height: 360px;
+  padding: 22px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(5, 16, 31, 0.1)),
+    rgba(2, 10, 22, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.board-editor-block {
+  position: relative;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.board-editor-text-block {
+  display: grid;
+}
+
+.board-editor-image-block {
+  display: grid;
+  gap: 8px;
+  max-width: 680px;
+  margin: 12px 0;
+}
+
+.board-editor-floating-actions {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+
+.board-editor-block:hover .board-editor-floating-actions,
+.board-editor-block:focus-within .board-editor-floating-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.board-editor-action-button {
+  min-height: 26px;
+  padding: 0 8px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 999px;
+  color: #b8dbe7;
+  background: rgba(5, 16, 31, 0.88);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.board-editor-action-button:hover:not(:disabled) {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.1);
+}
+
+.board-editor-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.board-editor-action-button.is-danger {
+  color: #ff9bad;
+  border-color: rgba(255, 102, 134, 0.28);
+}
+
+.board-field .board-editor-textarea {
+  min-width: 0;
+  width: 100%;
+  min-height: 84px;
+  box-sizing: border-box;
+  resize: none;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 10px 8px;
+  color: #dff8ff;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+.board-field .board-editor-textarea:focus {
+  outline: none;
+  border-color: rgba(90, 212, 255, 0.18);
+  background: rgba(90, 212, 255, 0.035);
+  box-shadow: none;
+}
+
+.board-editor-image {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.board-editor-image-block figcaption {
+  min-width: 0;
+  color: rgba(190, 229, 240, 0.72);
+  font-size: 12px;
+  padding: 0 2px;
+  overflow-wrap: anywhere;
+}
+
 .board-field input::placeholder,
 .board-field textarea::placeholder {
   color: rgba(190, 229, 240, 0.48);
@@ -3938,6 +4079,8 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .board-cafe-content {
+  display: grid;
+  gap: 18px;
   min-height: 280px;
   padding: 26px 0;
 }
@@ -3949,6 +4092,28 @@ body.tenvi-modal-open .tenvi-dashboard {
   font-size: 16px;
   line-height: 1.9;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.board-cafe-image-block {
+  display: grid;
+  gap: 8px;
+  max-width: 760px;
+  margin: 0;
+}
+
+.board-cafe-image-block img {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f3f4f6;
+}
+
+.board-cafe-image-block figcaption {
+  color: #6b7280;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
@@ -4055,6 +4220,28 @@ body.tenvi-modal-open .tenvi-dashboard {
   .board-toolbar,
   .board-form-actions {
     flex-direction: column;
+  }
+
+  .board-editor-canvas {
+    min-height: 300px;
+    padding: 14px;
+  }
+
+  .board-editor-toolbar .board-secondary-button {
+    flex: 1 1 140px;
+  }
+
+  .board-editor-floating-actions {
+    position: static;
+    justify-content: flex-end;
+    margin-bottom: 2px;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .board-field .board-editor-textarea {
+    min-height: 96px;
+    padding-inline: 4px;
   }
 
   .board-toolbar .board-primary-button,
@@ -5614,6 +5801,36 @@ body.tenvi-modal-open .tenvi-dashboard {
   box-shadow: none;
 }
 
+.tenvi-dashboard.theme-standard .board-editor-canvas {
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .board-editor-block {
+  color: #172033;
+}
+
+.tenvi-dashboard.theme-standard .board-field .board-editor-textarea {
+  color: #172033;
+  border-color: transparent;
+  background: transparent;
+}
+
+.tenvi-dashboard.theme-standard .board-field .board-editor-textarea:focus {
+  border-color: #c7d7fe;
+  background: #f8fbff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .board-editor-image {
+  background: #f3f6fb;
+}
+
+.tenvi-dashboard.theme-standard .board-editor-image-block figcaption {
+  color: #667085;
+}
+
 .tenvi-dashboard.theme-standard .map-bulk-panel {
   color: #172033;
   border-color: #d9e2ec;
@@ -7080,6 +7297,23 @@ body.tenvi-modal-open .tenvi-dashboard {
   color: #fecaca;
   border-color: rgba(248, 113, 113, 0.5);
   background: rgba(248, 113, 113, 0.12);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-editor-canvas {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.68);
+}
+
+.tenvi-dashboard.theme-dark .board-field .board-editor-textarea {
+  color: #e2e8f0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.tenvi-dashboard.theme-dark .board-field .board-editor-textarea:focus {
+  border-color: rgba(96, 165, 250, 0.22);
+  background: rgba(96, 165, 250, 0.06);
   box-shadow: none;
 }
 

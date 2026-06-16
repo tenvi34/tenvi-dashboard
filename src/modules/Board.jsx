@@ -1,15 +1,39 @@
 import { useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import BoardEditor from './BoardEditor.jsx'
 import {
   createBoardPost,
   deleteBoardPost,
+  getBoardPostTextContent,
   increaseBoardPostViews,
+  normalizeBoardBlocks,
   parseBoardPosts,
   updateBoardPost,
 } from './boardLogic.js'
 
 const STORAGE_KEY = STORAGE_KEYS.boardPosts
 const SEARCH_SCOPES = ['title', 'content', 'author']
+
+const createEmptyTextBlock = () => ({
+  id: crypto.randomUUID(),
+  type: 'text',
+  content: '',
+})
+
+const createEditableBlocks = (post) => {
+  const normalizedBlocks = normalizeBoardBlocks(post?.blocks, post?.content)
+
+  return normalizedBlocks.length > 0 ? normalizedBlocks : [createEmptyTextBlock()]
+}
+
+const hasWritableBody = (blocks) =>
+  normalizeBoardBlocks(blocks).some((block) => {
+    if (block.type === 'image') {
+      return Boolean(block.src)
+    }
+
+    return block.content.trim().length > 0
+  })
 
 // Board localStorage 게시글 복원
 const loadBoardPosts = () => {
@@ -26,7 +50,7 @@ const loadBoardPosts = () => {
   }
 }
 
-// 기존 Board 저장 키 유지
+// 기존 Board localStorage key 보존
 const saveBoardPosts = (posts) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(posts))
 }
@@ -34,7 +58,7 @@ const saveBoardPosts = (posts) => {
 function Board({ t }) {
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [blocks, setBlocks] = useState(() => [createEmptyTextBlock()])
   const [formError, setFormError] = useState('')
   const [view, setView] = useState('list')
   const [selectedPostId, setSelectedPostId] = useState('')
@@ -42,10 +66,11 @@ function Board({ t }) {
   const [searchScope, setSearchScope] = useState('title')
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const selectedPost = posts.find((post) => post.id === selectedPostId)
+  const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
   const hasSearchQuery = normalizedSearchQuery.length > 0
 
-  // 선택한 검색 범위만 비교해서 기존 게시글 데이터 구조 보존
+  // blocks 기반 글도 content 문자열을 통해 기존 검색 흐름 유지
   const filteredPosts = posts.filter((post) => {
     if (!normalizedSearchQuery) {
       return true
@@ -53,7 +78,7 @@ function Board({ t }) {
 
     const targetValue = {
       title: post.title,
-      content: post.content,
+      content: [post.content ?? '', getBoardPostTextContent(post.blocks)].join(' '),
       author: post.author ?? '',
     }[searchScope]
 
@@ -74,7 +99,12 @@ function Board({ t }) {
   const resetWriteForm = () => {
     setAuthor('')
     setTitle('')
-    setContent('')
+    setBlocks([createEmptyTextBlock()])
+    setFormError('')
+  }
+
+  const handleBlocksChange = (nextBlocks) => {
+    setBlocks(nextBlocks)
     setFormError('')
   }
 
@@ -82,9 +112,8 @@ function Board({ t }) {
   const handleCreatePost = () => {
     const trimmedAuthor = author.trim()
     const trimmedTitle = title.trim()
-    const trimmedContent = content.trim()
 
-    if (!trimmedTitle || !trimmedContent) {
+    if (!trimmedTitle || !hasWritableBody(blocks)) {
       setFormError(t.board.formRequiredMessage)
       return
     }
@@ -92,8 +121,13 @@ function Board({ t }) {
     const newPost = createBoardPost({
       author: trimmedAuthor,
       title: trimmedTitle,
-      content: trimmedContent,
+      blocks,
     })
+
+    if (!newPost) {
+      setFormError(t.board.formRequiredMessage)
+      return
+    }
 
     setPosts((currentPosts) => {
       const nextPosts = [newPost, ...currentPosts]
@@ -127,7 +161,7 @@ function Board({ t }) {
 
     setAuthor(selectedPost.author ?? '')
     setTitle(selectedPost.title)
-    setContent(selectedPost.content)
+    setBlocks(createEditableBlocks(selectedPost))
     setFormError('')
     setView('edit')
   }
@@ -145,9 +179,8 @@ function Board({ t }) {
     }
 
     const trimmedTitle = title.trim()
-    const trimmedContent = content.trim()
 
-    if (!trimmedTitle || !trimmedContent) {
+    if (!trimmedTitle || !hasWritableBody(blocks)) {
       setFormError(t.board.formRequiredMessage)
       return
     }
@@ -156,7 +189,7 @@ function Board({ t }) {
       const nextPosts = updateBoardPost(currentPosts, selectedPost.id, {
         author,
         title,
-        content,
+        blocks,
       })
 
       saveBoardPosts(nextPosts)
@@ -168,7 +201,7 @@ function Board({ t }) {
     setView('detail')
   }
 
-  // 상세 화면 열 때 조회 수 증가 유지
+  // 상세 화면 진입 시 조회수 증가 유지
   const handleOpenDetail = (postId) => {
     setSelectedPostId(postId)
     setPosts((currentPosts) => {
@@ -201,6 +234,92 @@ function Board({ t }) {
     handleBackToList()
   }
 
+  const renderBoardForm = ({ mode }) => {
+    const isEditMode = mode === 'edit'
+
+    return (
+      <section className="board-section board-compose-panel board-screen">
+        <div className="board-section-header board-compose-header">
+          <div>
+            <p className="module-label">
+              {isEditMode ? t.board.editLabel : t.board.composeLabel}
+            </p>
+            <h3>{isEditMode ? t.board.editTitle : t.board.composeTitle}</h3>
+          </div>
+          {!isEditMode ? (
+            <span className="board-status-chip">{t.board.draft}</span>
+          ) : null}
+        </div>
+
+        <form
+          className="board-form"
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (isEditMode) {
+              handleUpdatePost()
+              return
+            }
+
+            handleCreatePost()
+          }}
+        >
+          <label className="board-field">
+            <span>{t.board.authorField}</span>
+            <input
+              type="text"
+              value={author}
+              onChange={(event) => {
+                setAuthor(event.target.value)
+                setFormError('')
+              }}
+              placeholder={t.board.authorPlaceholder}
+            />
+          </label>
+
+          <label className="board-field">
+            <span>{t.board.titleField}</span>
+            <input
+              type="text"
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value)
+                setFormError('')
+              }}
+              placeholder={t.board.titlePlaceholder}
+            />
+          </label>
+
+          <div className="board-field">
+            <span>{t.board.contentField}</span>
+            <BoardEditor blocks={blocks} onChange={handleBlocksChange} t={t} />
+          </div>
+
+          {formError ? (
+            <p className="board-form-message" role="alert">
+              {formError}
+            </p>
+          ) : null}
+
+          <div className="board-form-actions">
+            <button
+              type="submit"
+              className="board-primary-button board-submit-button"
+            >
+              {isEditMode ? t.board.saveEdit : t.board.submit}
+            </button>
+            <button
+              type="button"
+              className="board-secondary-button"
+              onClick={isEditMode ? handleCancelEdit : handleCancelWrite}
+            >
+              {t.board.cancel}
+            </button>
+          </div>
+        </form>
+      </section>
+    )
+  }
+
   return (
     <section className="module-panel board-module" aria-labelledby="board-title">
       <div className="module-header">
@@ -208,175 +327,13 @@ function Board({ t }) {
           <p className="module-label">{t.board.label}</p>
           <h2 id="board-title">{t.board.title}</h2>
         </div>
-        <p className="module-meta">
-          {t.board.totalCount(posts.length)}
-        </p>
+        <p className="module-meta">{t.board.totalCount(posts.length)}</p>
       </div>
 
-      {/* 작성 화면 */}
-      {view === 'write' ? (
-        <section className="board-section board-compose-panel board-screen">
-          <div className="board-section-header board-compose-header">
-            <div>
-              <p className="module-label">{t.board.composeLabel}</p>
-              <h3>{t.board.composeTitle}</h3>
-            </div>
-            <span className="board-status-chip">{t.board.draft}</span>
-          </div>
+      {view === 'write' ? renderBoardForm({ mode: 'write' }) : null}
 
-          <form
-            className="board-form"
-            onSubmit={(event) => {
-              event.preventDefault()
-              handleCreatePost()
-            }}
-          >
-            <label className="board-field">
-              <span>{t.board.authorField}</span>
-              <input
-                type="text"
-                value={author}
-                onChange={(event) => {
-                  setAuthor(event.target.value)
-                  setFormError('')
-                }}
-                placeholder={t.board.authorPlaceholder}
-              />
-            </label>
+      {view === 'edit' ? renderBoardForm({ mode: 'edit' }) : null}
 
-            <label className="board-field">
-              <span>{t.board.titleField}</span>
-              <input
-                type="text"
-                value={title}
-                onChange={(event) => {
-                  setTitle(event.target.value)
-                  setFormError('')
-                }}
-                placeholder={t.board.titlePlaceholder}
-              />
-            </label>
-
-            <label className="board-field">
-              <span>{t.board.contentField}</span>
-              <textarea
-                value={content}
-                onChange={(event) => {
-                  setContent(event.target.value)
-                  setFormError('')
-                }}
-                placeholder={t.board.contentPlaceholder}
-                rows={5}
-              />
-            </label>
-
-            {formError ? (
-              <p className="board-form-message" role="alert">
-                {formError}
-              </p>
-            ) : null}
-
-            <div className="board-form-actions">
-              <button
-                type="submit"
-                className="board-primary-button board-submit-button"
-              >
-                {t.board.submit}
-              </button>
-              <button
-                type="button"
-                className="board-secondary-button"
-                onClick={handleCancelWrite}
-              >
-                {t.board.cancel}
-              </button>
-            </div>
-          </form>
-        </section>
-      ) : null}
-
-      {/* 수정 화면 */}
-      {view === 'edit' ? (
-        <section className="board-section board-compose-panel board-screen">
-          <div className="board-section-header board-compose-header">
-            <div>
-              <p className="module-label">{t.board.editLabel}</p>
-              <h3>{t.board.editTitle}</h3>
-            </div>
-          </div>
-
-          <form
-            className="board-form"
-            onSubmit={(event) => {
-              event.preventDefault()
-              handleUpdatePost()
-            }}
-          >
-            <label className="board-field">
-              <span>{t.board.authorField}</span>
-              <input
-                type="text"
-                value={author}
-                onChange={(event) => {
-                  setAuthor(event.target.value)
-                  setFormError('')
-                }}
-                placeholder={t.board.authorPlaceholder}
-              />
-            </label>
-
-            <label className="board-field">
-              <span>{t.board.titleField}</span>
-              <input
-                type="text"
-                value={title}
-                onChange={(event) => {
-                  setTitle(event.target.value)
-                  setFormError('')
-                }}
-                placeholder={t.board.titlePlaceholder}
-              />
-            </label>
-
-            <label className="board-field">
-              <span>{t.board.contentField}</span>
-              <textarea
-                value={content}
-                onChange={(event) => {
-                  setContent(event.target.value)
-                  setFormError('')
-                }}
-                placeholder={t.board.contentPlaceholder}
-                rows={8}
-              />
-            </label>
-
-            {formError ? (
-              <p className="board-form-message" role="alert">
-                {formError}
-              </p>
-            ) : null}
-
-            <div className="board-form-actions">
-              <button
-                type="submit"
-                className="board-primary-button board-submit-button"
-              >
-                {t.board.saveEdit}
-              </button>
-              <button
-                type="button"
-                className="board-secondary-button"
-                onClick={handleCancelEdit}
-              >
-                {t.board.cancel}
-              </button>
-            </div>
-          </form>
-        </section>
-      ) : null}
-
-      {/* 상세 화면 */}
       {view === 'detail' ? (
         <section className="board-cafe-panel board-screen">
           {selectedPost ? (
@@ -431,7 +388,17 @@ function Board({ t }) {
               </div>
 
               <div className="board-cafe-content">
-                <p>{selectedPost.content}</p>
+                {selectedPostBlocks.map((block) =>
+                  block.type === 'image' ? (
+                    <figure className="board-cafe-image-block" key={block.id}>
+                      <img src={block.src} alt={block.name} />
+                    </figure>
+                  ) : (
+                    <p className="board-cafe-text-block" key={block.id}>
+                      {block.content}
+                    </p>
+                  ),
+                )}
               </div>
             </article>
           ) : (
@@ -443,7 +410,6 @@ function Board({ t }) {
         </section>
       ) : null}
 
-      {/* 목록 화면 */}
       {view === 'list' ? (
         <>
           <div className="board-toolbar">
