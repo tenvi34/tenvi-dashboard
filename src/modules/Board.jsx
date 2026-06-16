@@ -427,46 +427,6 @@ function Board({ t }) {
           </div>
 
           <section className="board-section board-list-panel">
-            <div className="board-search-panel" role="search">
-              <label className="board-search-field">
-                <span>{t.board.searchLabel}</span>
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder={t.board.searchPlaceholder}
-                />
-              </label>
-
-              <div
-                className="board-search-scope"
-                aria-label={t.board.searchScopeLabel}
-              >
-                {SEARCH_SCOPES.map((scope) => (
-                  <button
-                    type="button"
-                    className={`board-scope-button ${
-                      searchScope === scope ? 'is-active' : ''
-                    }`}
-                    key={scope}
-                    onClick={() => setSearchScope(scope)}
-                  >
-                    {t.board.searchScopes[scope]}
-                  </button>
-                ))}
-              </div>
-
-              {hasSearchQuery ? (
-                <button
-                  type="button"
-                  className="board-secondary-button board-search-clear"
-                  onClick={() => setSearchQuery('')}
-                >
-                  {t.board.clearSearch}
-                </button>
-              ) : null}
-            </div>
-
             <div className="board-list-summary">
               <span className="board-count">
                 {hasSearchQuery
@@ -506,6 +466,46 @@ function Board({ t }) {
                 </p>
               </div>
             )}
+
+            <div className="board-search-panel board-search-panel-bottom" role="search">
+              <label className="board-search-field">
+                <span>{t.board.searchLabel}</span>
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder={t.board.searchPlaceholder}
+                />
+              </label>
+
+              <div
+                className="board-search-scope"
+                aria-label={t.board.searchScopeLabel}
+              >
+                {SEARCH_SCOPES.map((scope) => (
+                  <button
+                    type="button"
+                    className={`board-scope-button ${
+                      searchScope === scope ? 'is-active' : ''
+                    }`}
+                    key={scope}
+                    onClick={() => setSearchScope(scope)}
+                  >
+                    {t.board.searchScopes[scope]}
+                  </button>
+                ))}
+              </div>
+
+              {hasSearchQuery ? (
+                <button
+                  type="button"
+                  className="board-secondary-button board-search-clear"
+                  onClick={() => setSearchQuery('')}
+                >
+                  {t.board.clearSearch}
+                </button>
+              ) : null}
+            </div>
           </section>
         </>
       ) : null}
