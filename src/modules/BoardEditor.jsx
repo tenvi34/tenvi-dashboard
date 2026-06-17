@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { getBoardImages, saveBoardImage } from './boardImageStore.js'
 
 // 에디터 블록 고유 ID 생성
 const createEditorBlockId = () => {
@@ -19,12 +20,64 @@ const createTextBlock = () => ({
 
 function BoardEditor({ blocks, onChange, t }) {
   const fileInputRef = useRef(null)
-  const [activeBlockId, setActiveBlockId] = useState(blocks[0]?.id ?? '')
+  const activeBlockIdRef = useRef('')
+  const [, setActiveBlockId] = useState('')
+  const [imagePreviews, setImagePreviews] = useState({})
   const textBlockCount = blocks.filter((block) => block.type === 'text').length
+
+  // 실제 선택된 블록 기준 유지
+  const selectActiveBlock = (blockId) => {
+    activeBlockIdRef.current = blockId
+    setActiveBlockId(blockId)
+  }
+
+  // imageId 기반 preview 복원
+  useEffect(() => {
+    const imageIds = blocks
+      .filter((block) => block.type === 'image' && block.imageId)
+      .map((block) => block.imageId)
+    const missingImageIds = imageIds.filter((imageId) => !imagePreviews[imageId])
+
+    if (missingImageIds.length === 0) {
+      return
+    }
+
+    let isMounted = true
+
+    getBoardImages(missingImageIds)
+      .then((imagesById) => {
+        if (!isMounted) {
+          return
+        }
+
+        if (Object.keys(imagesById).length === 0) {
+          return
+        }
+
+        setImagePreviews((currentPreviews) => {
+          const nextPreviews = { ...currentPreviews }
+
+          Object.entries(imagesById).forEach(([imageId, image]) => {
+            nextPreviews[imageId] = image.dataUrl
+          })
+
+          return nextPreviews
+        })
+      })
+      .catch(() => {
+        // preview 실패 시 legacy src fallback만 사용
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [blocks, imagePreviews])
 
   // 현재 선택된 블록 기준 삽입 위치 계산
   const getInsertIndex = () => {
-    const activeIndex = blocks.findIndex((block) => block.id === activeBlockId)
+    const activeIndex = blocks.findIndex(
+      (block) => block.id === activeBlockIdRef.current,
+    )
 
     // 포커스 블록 아래 삽입
     return activeIndex >= 0 ? activeIndex + 1 : blocks.length
@@ -59,35 +112,36 @@ function BoardEditor({ blocks, onChange, t }) {
     const nextBlock = createTextBlock()
 
     insertBlocks([nextBlock])
-    setActiveBlockId(nextBlock.id)
+    selectActiveBlock(nextBlock.id)
   }
 
-  // 이미지 파일을 에디터 블록으로 변환
-  const addImageBlock = (file) => {
+  // 이미지 파일을 IndexedDB 이미지 블록으로 변환
+  const addImageBlock = async (file) => {
     if (!file) {
       return
     }
 
-    const reader = new FileReader()
-
-    // 이미지 뒤에 바로 입력 가능한 텍스트 블록 유지
-    reader.onload = () => {
-      const nextTextBlock = createTextBlock()
-
-      // Board 이미지: data URL 저장 증가 시 IndexedDB 전환 고려
-      insertBlocks([
-        {
-          id: createEditorBlockId(),
-          type: 'image',
-          src: String(reader.result ?? ''),
-          name: file.name,
-        },
-        nextTextBlock,
-      ])
-      setActiveBlockId(nextTextBlock.id)
+    const savedImage = await saveBoardImage(file)
+    const nextImageBlock = {
+      id: createEditorBlockId(),
+      type: 'image',
+      imageId: savedImage.imageId,
+      name: savedImage.name,
     }
 
-    reader.readAsDataURL(file)
+    insertBlocks([nextImageBlock])
+    selectActiveBlock(nextImageBlock.id)
+
+    // 새 이미지도 저장소 조회를 통해 즉시 preview 연결
+    const imagesById = await getBoardImages([savedImage.imageId])
+    const savedImageRecord = imagesById[savedImage.imageId]
+
+    if (savedImageRecord?.dataUrl) {
+      setImagePreviews((currentPreviews) => ({
+        ...currentPreviews,
+        [savedImage.imageId]: savedImageRecord.dataUrl,
+      }))
+    }
   }
 
   // 최소 1개 텍스트 블록 보존 삭제
@@ -146,61 +200,70 @@ function BoardEditor({ blocks, onChange, t }) {
       </div>
 
       <div className="board-editor-canvas">
-        {blocks.map((block, index) => (
-          <div
-            className={`board-editor-block board-editor-${block.type}-block`}
-            key={block.id}
-            onFocus={() => setActiveBlockId(block.id)}
-            onMouseEnter={() => setActiveBlockId(block.id)}
-          >
-            <div className="board-editor-floating-actions">
-              <button
-                type="button"
-                className="board-editor-action-button"
-                onClick={() => moveBlock(block.id, -1)}
-                disabled={index === 0}
-              >
-                {t.board.moveBlockUp}
-              </button>
-              <button
-                type="button"
-                className="board-editor-action-button"
-                onClick={() => moveBlock(block.id, 1)}
-                disabled={index === blocks.length - 1}
-              >
-                {t.board.moveBlockDown}
-              </button>
-              <button
-                type="button"
-                className="board-editor-action-button is-danger"
-                onClick={() => removeBlock(block.id)}
-                disabled={block.type === 'text' && textBlockCount <= 1}
-              >
-                {t.board.deleteBlock}
-              </button>
-            </div>
+        {blocks.map((block, index) => {
+          const imageSource =
+            block.type === 'image'
+              ? block.src || imagePreviews[block.imageId] || ''
+              : ''
 
-            {block.type === 'image' ? (
-              <figure className="board-editor-image-block">
-                <img
-                  className="board-editor-image"
-                  src={block.src}
-                  alt={block.name}
+          return (
+            <div
+              className={`board-editor-block board-editor-${block.type}-block`}
+              key={block.id}
+              onClick={() => selectActiveBlock(block.id)}
+              onFocus={() => selectActiveBlock(block.id)}
+            >
+              <div className="board-editor-floating-actions">
+                <button
+                  type="button"
+                  className="board-editor-action-button"
+                  onClick={() => moveBlock(block.id, -1)}
+                  disabled={index === 0}
+                >
+                  {t.board.moveBlockUp}
+                </button>
+                <button
+                  type="button"
+                  className="board-editor-action-button"
+                  onClick={() => moveBlock(block.id, 1)}
+                  disabled={index === blocks.length - 1}
+                >
+                  {t.board.moveBlockDown}
+                </button>
+                <button
+                  type="button"
+                  className="board-editor-action-button is-danger"
+                  onClick={() => removeBlock(block.id)}
+                  disabled={block.type === 'text' && textBlockCount <= 1}
+                >
+                  {t.board.deleteBlock}
+                </button>
+              </div>
+
+              {block.type === 'image' ? (
+                <figure className="board-editor-image-block">
+                  {imageSource ? (
+                    <img
+                      className="board-editor-image"
+                      src={imageSource}
+                      alt={block.name}
+                    />
+                  ) : null}
+                </figure>
+              ) : (
+                <textarea
+                  className="board-editor-textarea"
+                  value={block.content}
+                  onChange={(event) =>
+                    updateBlock(block.id, { content: event.target.value })
+                  }
+                  placeholder={t.board.contentPlaceholder}
+                  rows={5}
                 />
-              </figure>
-            ) : (
-              <textarea
-                className="board-editor-textarea"
-                value={block.content}
-                onChange={(event) =>
-                  updateBlock(block.id, { content: event.target.value })
-                }
-                placeholder={t.board.contentPlaceholder}
-                rows={5}
-              />
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

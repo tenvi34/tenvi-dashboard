@@ -3,7 +3,9 @@ import {
   createBoardDraft,
   createBoardPost,
   deleteBoardPost,
+  getBoardImageIds,
   getBoardPostTextContent,
+  getRemovedBoardImageIds,
   increaseBoardPostViews,
   normalizeBoardBlocks,
   parseBoardDraft,
@@ -121,6 +123,58 @@ describe('boardLogic', () => {
         name: 'dessert.jpg',
       },
     ])
+  })
+
+  it('preserves imageId based image blocks', () => {
+    expect(
+      normalizeBoardBlocks([
+        {
+          id: 'block-1',
+          type: 'image',
+          imageId: 'board-image-1',
+          name: 'stored.jpg',
+        },
+      ]),
+    ).toEqual([
+      {
+        id: 'block-1',
+        type: 'image',
+        imageId: 'board-image-1',
+        name: 'stored.jpg',
+      },
+    ])
+  })
+
+  it('ignores imageId blocks when building text content', () => {
+    expect(
+      getBoardPostTextContent([
+        { id: 'block-1', type: 'text', content: 'Alpha' },
+        {
+          id: 'block-2',
+          type: 'image',
+          imageId: 'board-image-1',
+          name: 'stored.jpg',
+        },
+        { id: 'block-3', type: 'text', content: 'Beta' },
+      ]),
+    ).toBe('Alpha\n\nBeta')
+  })
+
+  it('extracts removed imageIds for edit cleanup', () => {
+    expect(
+      getRemovedBoardImageIds(
+        [
+          { id: 'block-1', type: 'image', imageId: 'board-image-1' },
+          { id: 'block-2', type: 'image', imageId: 'board-image-2' },
+        ],
+        [{ id: 'block-2', type: 'image', imageId: 'board-image-2' }],
+      ),
+    ).toEqual(['board-image-1'])
+    expect(
+      getBoardImageIds([
+        { id: 'block-1', type: 'image', src: 'data:image/png;base64,abc' },
+      ]),
+    ).toEqual([])
   })
 
   it('does not create posts with an empty title', () => {
@@ -336,6 +390,40 @@ describe('boardLogic', () => {
         },
       ],
     })
+  })
+
+  it('keeps imageId blocks when updating posts', () => {
+    const posts = [
+      {
+        id: 'post-1',
+        title: 'Before',
+        content: 'Old',
+        blocks: [{ id: 'block-1', type: 'text', content: 'Old' }],
+      },
+    ]
+
+    const updatedPosts = updateBoardPost(posts, 'post-1', {
+      title: 'After',
+      blocks: [
+        { id: 'block-2', type: 'text', content: 'New text' },
+        {
+          id: 'block-3',
+          type: 'image',
+          imageId: 'board-image-1',
+          name: 'stored.png',
+        },
+      ],
+    })
+
+    expect(updatedPosts[0].blocks).toEqual([
+      { id: 'block-2', type: 'text', content: 'New text' },
+      {
+        id: 'block-3',
+        type: 'image',
+        imageId: 'board-image-1',
+        name: 'stored.png',
+      },
+    ])
   })
 
   it('does not update when title or body is empty', () => {

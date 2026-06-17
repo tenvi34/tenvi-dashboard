@@ -6,6 +6,24 @@ const createBoardBlockId = () => {
   return `block-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+// Board 이미지 블록 정규화
+const normalizeBoardImageBlock = (block) => {
+  const imageId = String(block?.imageId ?? '').trim()
+  const src = String(block?.src ?? '').trim()
+
+  if (!imageId && !src) {
+    return null
+  }
+
+  return {
+    id: block.id || createBoardBlockId(),
+    type: 'image',
+    ...(imageId ? { imageId } : {}),
+    ...(src ? { src } : {}),
+    name: String(block.name ?? 'image').trim() || 'image',
+  }
+}
+
 // Board 블록 저장 구조 정규화
 export const normalizeBoardBlocks = (blocks, fallbackContent = '') => {
   if (!Array.isArray(blocks)) {
@@ -25,18 +43,7 @@ export const normalizeBoardBlocks = (blocks, fallbackContent = '') => {
   return blocks
     .map((block) => {
       if (block?.type === 'image') {
-        const src = String(block.src ?? '').trim()
-
-        if (!src) {
-          return null
-        }
-
-        return {
-          id: block.id || createBoardBlockId(),
-          type: 'image',
-          src,
-          name: String(block.name ?? 'image').trim() || 'image',
-        }
+        return normalizeBoardImageBlock(block)
       }
 
       const content = String(block?.content ?? '')
@@ -48,6 +55,19 @@ export const normalizeBoardBlocks = (blocks, fallbackContent = '') => {
       }
     })
     .filter(Boolean)
+}
+
+// Board imageId 목록 추출
+export const getBoardImageIds = (blocks = []) =>
+  normalizeBoardBlocks(blocks)
+    .filter((block) => block.type === 'image' && block.imageId)
+    .map((block) => block.imageId)
+
+// 수정 중 제거된 Board imageId 계산
+export const getRemovedBoardImageIds = (beforeBlocks = [], afterBlocks = []) => {
+  const afterImageIds = new Set(getBoardImageIds(afterBlocks))
+
+  return getBoardImageIds(beforeBlocks).filter((imageId) => !afterImageIds.has(imageId))
 }
 
 // Board draft 저장 payload 생성

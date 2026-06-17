@@ -1,17 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardEditor from './BoardEditor.jsx'
 import {
   createBoardDraft,
   createBoardPost,
   deleteBoardPost,
+  getBoardImageIds,
   getBoardPostTextContent,
+  getRemovedBoardImageIds,
   increaseBoardPostViews,
   normalizeBoardBlocks,
   parseBoardDraft,
   parseBoardPosts,
   updateBoardPost,
 } from './boardLogic.js'
+import { deleteBoardImages, getBoardImages } from './boardImageStore.js'
 
 const POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const DRAFT_STORAGE_KEY = STORAGE_KEYS.boardDraft
@@ -23,7 +26,8 @@ const createEmptyTextBlock = () => ({
   content: '',
 })
 
-const getEditableBlocks = (blocks) => (blocks.length > 0 ? blocks : [createEmptyTextBlock()])
+const getEditableBlocks = (blocks) =>
+  blocks.length > 0 ? blocks : [createEmptyTextBlock()]
 
 const createEditableBlocks = (post) => {
   const normalizedBlocks = normalizeBoardBlocks(post?.blocks, post?.content)
@@ -34,7 +38,7 @@ const createEditableBlocks = (post) => {
 const hasWritableBody = (blocks) =>
   normalizeBoardBlocks(blocks).some((block) => {
     if (block.type === 'image') {
-      return Boolean(block.src)
+      return Boolean(block.imageId || block.src)
     }
 
     return block.content.trim().length > 0
@@ -83,6 +87,7 @@ function Board({ t }) {
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
   const [blocks, setBlocks] = useState(() => [createEmptyTextBlock()])
+  const [detailImagePreviews, setDetailImagePreviews] = useState({})
   const [formError, setFormError] = useState('')
   const [view, setView] = useState('list')
   const [selectedPostId, setSelectedPostId] = useState('')
@@ -94,6 +99,48 @@ function Board({ t }) {
   const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
   const hasSearchQuery = normalizedSearchQuery.length > 0
+
+  // 상세 화면 imageId preview 복원
+  useEffect(() => {
+    if (!selectedPost) {
+      setDetailImagePreviews({})
+      return
+    }
+
+    const imageIds = getBoardImageIds(selectedPost.blocks)
+
+    if (imageIds.length === 0) {
+      setDetailImagePreviews({})
+      return
+    }
+
+    let isMounted = true
+
+    getBoardImages(imageIds)
+      .then((imagesById) => {
+        if (!isMounted) {
+          return
+        }
+
+        setDetailImagePreviews(
+          Object.fromEntries(
+            Object.entries(imagesById).map(([imageId, image]) => [
+              imageId,
+              image.dataUrl,
+            ]),
+          ),
+        )
+      })
+      .catch(() => {
+        if (isMounted) {
+          setDetailImagePreviews({})
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [selectedPost])
 
   // blocks 기반 글도 content 문자열을 통해 기존 검색 흐름 유지
   const filteredPosts = posts.filter((post) => {
@@ -239,6 +286,8 @@ function Board({ t }) {
       return
     }
 
+    const removedImageIds = getRemovedBoardImageIds(selectedPost.blocks, blocks)
+
     setPosts((currentPosts) => {
       const nextPosts = updateBoardPost(currentPosts, selectedPost.id, {
         author,
@@ -251,6 +300,9 @@ function Board({ t }) {
       return nextPosts
     })
 
+    deleteBoardImages(removedImageIds).catch(() => {
+      // 이미지 정리는 실패해도 게시글 수정 흐름 유지
+    })
     resetWriteForm()
     setView('detail')
   }
@@ -279,18 +331,29 @@ function Board({ t }) {
       return
     }
 
+    const targetPost = posts.find((post) => post.id === postId)
+    const imageIds = getBoardImageIds(targetPost?.blocks)
+
     setPosts((currentPosts) => {
       const nextPosts = deleteBoardPost(currentPosts, postId)
       saveBoardPosts(nextPosts)
 
       return nextPosts
     })
+    deleteBoardImages(imageIds).catch(() => {
+      // legacy src 이미지는 삭제 대상 아님
+    })
     handleBackToList()
   }
 
   // 새 글 draft 수동 삭제
   const handleDeleteDraft = () => {
+    const imageIds = getBoardImageIds(blocks)
+
     deleteBoardDraft()
+    deleteBoardImages(imageIds).catch(() => {
+      // draft 삭제는 localStorage 정리를 우선
+    })
     setDraftSaved(false)
     resetWriteForm()
   }
@@ -475,17 +538,22 @@ function Board({ t }) {
               </div>
 
               <div className="board-cafe-content">
-                {selectedPostBlocks.map((block) =>
-                  block.type === 'image' ? (
+                {selectedPostBlocks.map((block) => {
+                  const imageSource =
+                    block.type === 'image'
+                      ? block.src || detailImagePreviews[block.imageId] || ''
+                      : ''
+
+                  return block.type === 'image' ? (
                     <figure className="board-cafe-image-block" key={block.id}>
-                      <img src={block.src} alt={block.name} />
+                      {imageSource ? <img src={imageSource} alt={block.name} /> : null}
                     </figure>
                   ) : (
                     <p className="board-cafe-text-block" key={block.id}>
                       {block.content}
                     </p>
-                  ),
-                )}
+                  )
+                })}
               </div>
             </article>
           ) : (
