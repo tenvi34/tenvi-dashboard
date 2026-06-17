@@ -21,6 +21,10 @@ const createTextBlock = () => ({
 function BoardEditor({ blocks, onChange, t }) {
   const fileInputRef = useRef(null)
   const activeBlockIdRef = useRef('')
+  const pendingImageInsertRef = useRef({
+    appendTextBlock: false,
+    targetBlockId: '',
+  })
   const [, setActiveBlockId] = useState('')
   const [imagePreviews, setImagePreviews] = useState({})
   const textBlockCount = blocks.filter((block) => block.type === 'text').length
@@ -46,11 +50,7 @@ function BoardEditor({ blocks, onChange, t }) {
 
     getBoardImages(missingImageIds)
       .then((imagesById) => {
-        if (!isMounted) {
-          return
-        }
-
-        if (Object.keys(imagesById).length === 0) {
+        if (!isMounted || Object.keys(imagesById).length === 0) {
           return
         }
 
@@ -73,19 +73,16 @@ function BoardEditor({ blocks, onChange, t }) {
     }
   }, [blocks, imagePreviews])
 
-  // 현재 선택된 블록 기준 삽입 위치 계산
-  const getInsertIndex = () => {
-    const activeIndex = blocks.findIndex(
-      (block) => block.id === activeBlockIdRef.current,
-    )
+  // 기준 블록 바로 아래 삽입 위치 계산
+  const getInsertIndex = (targetBlockId = activeBlockIdRef.current) => {
+    const activeIndex = blocks.findIndex((block) => block.id === targetBlockId)
 
-    // 포커스 블록 아래 삽입
     return activeIndex >= 0 ? activeIndex + 1 : blocks.length
   }
 
-  // 활성 블록 다음 위치에 삽입
-  const insertBlocks = (newBlocks) => {
-    const insertIndex = getInsertIndex()
+  // 기준 블록 다음 위치에 삽입
+  const insertBlocks = (newBlocks, targetBlockId) => {
+    const insertIndex = getInsertIndex(targetBlockId)
     onChange([
       ...blocks.slice(0, insertIndex),
       ...newBlocks,
@@ -107,16 +104,28 @@ function BoardEditor({ blocks, onChange, t }) {
     )
   }
 
-  // 새 텍스트 블록 추가 후 포커스 이동
-  const addTextBlock = () => {
+  // 텍스트 블록 추가 후 포커스 이동
+  const addTextBlock = (targetBlockId) => {
     const nextBlock = createTextBlock()
 
-    insertBlocks([nextBlock])
+    insertBlocks([nextBlock], targetBlockId)
     selectActiveBlock(nextBlock.id)
   }
 
+  // 이미지 선택 위치 예약
+  const openImagePicker = (
+    targetBlockId = activeBlockIdRef.current,
+    appendTextBlock = false,
+  ) => {
+    pendingImageInsertRef.current = {
+      appendTextBlock,
+      targetBlockId,
+    }
+    fileInputRef.current?.click()
+  }
+
   // 이미지 파일을 IndexedDB 이미지 블록으로 변환
-  const addImageBlock = async (file) => {
+  const addImageBlock = async (file, options = {}) => {
     if (!file) {
       return
     }
@@ -128,9 +137,12 @@ function BoardEditor({ blocks, onChange, t }) {
       imageId: savedImage.imageId,
       name: savedImage.name,
     }
+    const insertedBlocks = options.appendTextBlock
+      ? [nextImageBlock, createTextBlock()]
+      : [nextImageBlock]
 
-    insertBlocks([nextImageBlock])
-    selectActiveBlock(nextImageBlock.id)
+    insertBlocks(insertedBlocks, options.targetBlockId)
+    selectActiveBlock(insertedBlocks[insertedBlocks.length - 1].id)
 
     // 새 이미지도 저장소 조회를 통해 즉시 preview 연결
     const imagesById = await getBoardImages([savedImage.imageId])
@@ -176,14 +188,14 @@ function BoardEditor({ blocks, onChange, t }) {
         <button
           type="button"
           className="board-secondary-button"
-          onClick={addTextBlock}
+          onClick={() => addTextBlock()}
         >
           {t.board.addTextBlock}
         </button>
         <button
           type="button"
           className="board-secondary-button"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => openImagePicker()}
         >
           {t.board.addImageBlock}
         </button>
@@ -193,7 +205,11 @@ function BoardEditor({ blocks, onChange, t }) {
           accept="image/*"
           className="board-editor-file-input"
           onChange={(event) => {
-            addImageBlock(event.target.files?.[0])
+            addImageBlock(event.target.files?.[0], pendingImageInsertRef.current)
+            pendingImageInsertRef.current = {
+              appendTextBlock: false,
+              targetBlockId: '',
+            }
             event.target.value = ''
           }}
         />
@@ -261,6 +277,29 @@ function BoardEditor({ blocks, onChange, t }) {
                   rows={5}
                 />
               )}
+
+              <div className="board-editor-insert-row">
+                <button
+                  type="button"
+                  className="board-editor-insert-button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    addTextBlock(block.id)
+                  }}
+                >
+                  {t.board.addTextBlock}
+                </button>
+                <button
+                  type="button"
+                  className="board-editor-insert-button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    openImagePicker(block.id, true)
+                  }}
+                >
+                  {t.board.addImageBlock}
+                </button>
+              </div>
             </div>
           )
         })}

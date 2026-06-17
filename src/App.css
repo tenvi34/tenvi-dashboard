@@ -3628,6 +3628,51 @@ body.tenvi-modal-open .tenvi-dashboard {
   border-color: rgba(255, 102, 134, 0.28);
 }
 
+.board-editor-insert-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 28px;
+  margin: 2px 0 4px;
+  opacity: 0.2;
+  transition: opacity 0.16s ease;
+}
+
+.board-editor-block:hover .board-editor-insert-row,
+.board-editor-block:focus-within .board-editor-insert-row {
+  opacity: 1;
+}
+
+.board-editor-insert-row::before,
+.board-editor-insert-row::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(90, 212, 255, 0.14);
+}
+
+.board-editor-insert-button {
+  min-height: 28px;
+  border: 1px solid rgba(43, 120, 255, 0.58);
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #12315c;
+  background: rgba(214, 236, 255, 0.94);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(8, 23, 43, 0.12);
+  cursor: pointer;
+}
+
+.board-editor-insert-button:hover {
+  color: #00131c;
+  border-color: rgba(90, 212, 255, 0.92);
+  background: #5ad4ff;
+  box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.18);
+}
+
 .board-field .board-editor-textarea {
   min-width: 0;
   width: 100%;
@@ -4245,6 +4290,17 @@ body.tenvi-modal-open .tenvi-dashboard {
     margin-bottom: 2px;
     opacity: 1;
     pointer-events: auto;
+  }
+
+  .board-editor-insert-row {
+    opacity: 1;
+  }
+
+  .board-editor-insert-button {
+    flex: 0 1 auto;
+    min-height: 34px;
+    padding-inline: 12px;
+    font-size: 12px;
   }
 
   .board-field .board-editor-textarea {
