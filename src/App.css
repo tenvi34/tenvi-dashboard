@@ -3569,6 +3569,31 @@ body.tenvi-modal-open .tenvi-dashboard {
   padding: 2px 0;
 }
 
+.board-editor-block.is-dragging {
+  opacity: 0.42;
+}
+
+.board-editor-block.is-drop-before::before,
+.board-editor-block.is-drop-after::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--neon-strong);
+  box-shadow: 0 0 14px rgba(90, 212, 255, 0.42);
+}
+
+.board-editor-block.is-drop-before::before {
+  top: -3px;
+}
+
+.board-editor-block.is-drop-after::after {
+  bottom: -3px;
+}
+
 .board-editor-text-block {
   display: grid;
 }
@@ -3626,6 +3651,16 @@ body.tenvi-modal-open .tenvi-dashboard {
 .board-editor-action-button.is-danger {
   color: #ff9bad;
   border-color: rgba(255, 102, 134, 0.28);
+}
+
+.board-editor-drag-handle {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.board-editor-drag-handle:active {
+  cursor: grabbing;
 }
 
 .board-editor-insert-row {

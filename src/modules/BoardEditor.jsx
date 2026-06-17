@@ -25,7 +25,17 @@ function BoardEditor({ blocks, onChange, t }) {
     appendTextBlock: false,
     targetBlockId: '',
   })
+  const dragStateRef = useRef({
+    blockId: '',
+    position: '',
+    targetId: '',
+  })
   const [, setActiveBlockId] = useState('')
+  const [dragState, setDragState] = useState({
+    blockId: '',
+    position: '',
+    targetId: '',
+  })
   const [imagePreviews, setImagePreviews] = useState({})
   const textBlockCount = blocks.filter((block) => block.type === 'text').length
 
@@ -33,6 +43,12 @@ function BoardEditor({ blocks, onChange, t }) {
   const selectActiveBlock = (blockId) => {
     activeBlockIdRef.current = blockId
     setActiveBlockId(blockId)
+  }
+
+  // 드래그 상태 ref/state 동기화
+  const updateDragState = (nextState) => {
+    dragStateRef.current = nextState
+    setDragState(nextState)
   }
 
   // imageId 기반 preview 복원
@@ -182,6 +198,57 @@ function BoardEditor({ blocks, onChange, t }) {
     onChange(nextBlocks)
   }
 
+  // 드롭 위치 기준 블록 재정렬
+  const reorderBlock = (draggedBlockId, targetBlockId, position) => {
+    if (!draggedBlockId || draggedBlockId === targetBlockId) {
+      return
+    }
+
+    const draggedIndex = blocks.findIndex((block) => block.id === draggedBlockId)
+    const targetIndex = blocks.findIndex((block) => block.id === targetBlockId)
+
+    if (draggedIndex < 0 || targetIndex < 0) {
+      return
+    }
+
+    const nextBlocks = [...blocks]
+    const [draggedBlock] = nextBlocks.splice(draggedIndex, 1)
+    const adjustedTargetIndex =
+      draggedIndex < targetIndex ? targetIndex - 1 : targetIndex
+    const insertIndex =
+      position === 'after' ? adjustedTargetIndex + 1 : adjustedTargetIndex
+
+    nextBlocks.splice(insertIndex, 0, draggedBlock)
+    onChange(nextBlocks)
+    selectActiveBlock(draggedBlock.id)
+  }
+
+  // 블록 위/아래 절반으로 드롭 위치 계산
+  const getDropPosition = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+
+    return event.clientY > rect.top + rect.height / 2 ? 'after' : 'before'
+  }
+
+  // 포인터 위치의 대상 블록과 삽입 방향 계산
+  const getPointerDropTarget = (event) => {
+    const targetElement = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest('[data-board-block-id]')
+
+    if (!targetElement) {
+      return { position: '', targetId: '' }
+    }
+
+    const rect = targetElement.getBoundingClientRect()
+    const position = event.clientY > rect.top + rect.height / 2 ? 'after' : 'before'
+
+    return {
+      position,
+      targetId: targetElement.dataset.boardBlockId,
+    }
+  }
+
   return (
     <div className="board-editor">
       <div className="board-editor-toolbar">
@@ -221,15 +288,83 @@ function BoardEditor({ blocks, onChange, t }) {
             block.type === 'image'
               ? block.src || imagePreviews[block.imageId] || ''
               : ''
+          const dropClass =
+            dragState.targetId === block.id && dragState.position
+              ? ` is-drop-${dragState.position}`
+              : ''
+          const dragClass = dragState.blockId === block.id ? ' is-dragging' : ''
 
           return (
             <div
-              className={`board-editor-block board-editor-${block.type}-block`}
+              className={`board-editor-block board-editor-${block.type}-block${dropClass}${dragClass}`}
               key={block.id}
+              data-board-block-id={block.id}
               onClick={() => selectActiveBlock(block.id)}
               onFocus={() => selectActiveBlock(block.id)}
             >
               <div className="board-editor-floating-actions">
+                <button
+                  type="button"
+                  className="board-editor-action-button board-editor-drag-handle"
+                  onPointerCancel={() =>
+                    updateDragState({ blockId: '', position: '', targetId: '' })
+                  }
+                  onPointerDown={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    selectActiveBlock(block.id)
+                    event.currentTarget.setPointerCapture?.(event.pointerId)
+                    updateDragState({
+                      blockId: block.id,
+                      position: '',
+                      targetId: '',
+                    })
+                  }}
+                  onPointerMove={(event) => {
+                    const currentDragState = dragStateRef.current
+
+                    if (!currentDragState.blockId) {
+                      return
+                    }
+
+                    const dropTarget = getPointerDropTarget(event)
+
+                    if (
+                      !dropTarget.targetId ||
+                      dropTarget.targetId === currentDragState.blockId
+                    ) {
+                      updateDragState({
+                        ...currentDragState,
+                        position: '',
+                        targetId: '',
+                      })
+                      return
+                    }
+
+                    updateDragState({
+                      ...currentDragState,
+                      position: dropTarget.position,
+                      targetId: dropTarget.targetId,
+                    })
+                  }}
+                  onPointerUp={(event) => {
+                    const currentDragState = dragStateRef.current
+
+                    event.currentTarget.releasePointerCapture?.(event.pointerId)
+
+                    if (currentDragState.targetId && currentDragState.position) {
+                      reorderBlock(
+                        currentDragState.blockId,
+                        currentDragState.targetId,
+                        currentDragState.position,
+                      )
+                    }
+
+                    updateDragState({ blockId: '', position: '', targetId: '' })
+                  }}
+                >
+                  이동
+                </button>
                 <button
                   type="button"
                   className="board-editor-action-button"
