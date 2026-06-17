@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  createBoardDraft,
   createBoardPost,
   deleteBoardPost,
   getBoardPostTextContent,
   increaseBoardPostViews,
   normalizeBoardBlocks,
+  parseBoardDraft,
   parseBoardPosts,
   updateBoardPost,
 } from './boardLogic.js'
@@ -191,6 +193,50 @@ describe('boardLogic', () => {
     expect(parseBoardPosts('[{"id":"post-1"}]')).toEqual([{ id: 'post-1' }])
     expect(parseBoardPosts('{"id":"not-array"}')).toEqual([])
     expect(parseBoardPosts('broken-json')).toEqual([])
+  })
+
+  it('creates and parses board draft data without changing block shape', () => {
+    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue(
+      '2026-06-17T00:00:00.000Z',
+    )
+
+    const draft = createBoardDraft({
+      author: 'TENVI',
+      title: 'Draft title',
+      blocks: [
+        { id: 'block-1', type: 'text', content: 'Draft body' },
+        {
+          id: 'block-2',
+          type: 'image',
+          src: 'data:image/png;base64,abc',
+          name: 'draft.png',
+        },
+      ],
+    })
+
+    expect(draft).toEqual({
+      author: 'TENVI',
+      blocks: [
+        { id: 'block-1', type: 'text', content: 'Draft body' },
+        {
+          id: 'block-2',
+          type: 'image',
+          src: 'data:image/png;base64,abc',
+          name: 'draft.png',
+        },
+      ],
+      savedAt: '2026-06-17T00:00:00.000Z',
+      title: 'Draft title',
+    })
+    expect(parseBoardDraft(JSON.stringify(draft))).toEqual(draft)
+
+    vi.restoreAllMocks()
+  })
+
+  it('parses damaged board draft data safely', () => {
+    expect(parseBoardDraft('')).toBeNull()
+    expect(parseBoardDraft('broken-json')).toBeNull()
+    expect(parseBoardDraft('[]')).toBeNull()
   })
 
   it('deletes a post by id without mutating the original list', () => {

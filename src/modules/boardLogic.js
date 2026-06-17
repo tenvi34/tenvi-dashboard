@@ -50,6 +50,38 @@ export const normalizeBoardBlocks = (blocks, fallbackContent = '') => {
     .filter(Boolean)
 }
 
+// Board draft 저장 payload 생성
+export const createBoardDraft = ({ author = '', blocks = [], title = '' }) => ({
+  author: String(author ?? ''),
+  blocks: normalizeBoardBlocks(blocks),
+  savedAt: new Date().toISOString(),
+  title: String(title ?? ''),
+})
+
+// Board draft localStorage JSON 복원
+export const parseBoardDraft = (rawDraft) => {
+  if (!rawDraft) {
+    return null
+  }
+
+  try {
+    const parsedDraft = JSON.parse(rawDraft)
+
+    if (!parsedDraft || typeof parsedDraft !== 'object' || Array.isArray(parsedDraft)) {
+      return null
+    }
+
+    return {
+      author: String(parsedDraft.author ?? ''),
+      blocks: normalizeBoardBlocks(parsedDraft.blocks, parsedDraft.content),
+      savedAt: String(parsedDraft.savedAt ?? ''),
+      title: String(parsedDraft.title ?? ''),
+    }
+  } catch {
+    return null
+  }
+}
+
 export const getBoardPostTextContent = (blocks = []) =>
   normalizeBoardBlocks(blocks)
     .filter((block) => block.type === 'text')

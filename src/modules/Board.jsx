@@ -2,16 +2,19 @@ import { useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardEditor from './BoardEditor.jsx'
 import {
+  createBoardDraft,
   createBoardPost,
   deleteBoardPost,
   getBoardPostTextContent,
   increaseBoardPostViews,
   normalizeBoardBlocks,
+  parseBoardDraft,
   parseBoardPosts,
   updateBoardPost,
 } from './boardLogic.js'
 
-const STORAGE_KEY = STORAGE_KEYS.boardPosts
+const POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
+const DRAFT_STORAGE_KEY = STORAGE_KEYS.boardDraft
 const SEARCH_SCOPES = ['title', 'content', 'author']
 
 const createEmptyTextBlock = () => ({
@@ -20,10 +23,12 @@ const createEmptyTextBlock = () => ({
   content: '',
 })
 
+const getEditableBlocks = (blocks) => (blocks.length > 0 ? blocks : [createEmptyTextBlock()])
+
 const createEditableBlocks = (post) => {
   const normalizedBlocks = normalizeBoardBlocks(post?.blocks, post?.content)
 
-  return normalizedBlocks.length > 0 ? normalizedBlocks : [createEmptyTextBlock()]
+  return getEditableBlocks(normalizedBlocks)
 }
 
 const hasWritableBody = (blocks) =>
@@ -38,7 +43,7 @@ const hasWritableBody = (blocks) =>
 // Board localStorage 게시글 복원
 const loadBoardPosts = () => {
   try {
-    const rawPosts = localStorage.getItem(STORAGE_KEY)
+    const rawPosts = localStorage.getItem(POSTS_STORAGE_KEY)
 
     if (!rawPosts) {
       return []
@@ -52,7 +57,26 @@ const loadBoardPosts = () => {
 
 // 기존 Board localStorage key 보존
 const saveBoardPosts = (posts) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts))
+  localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts))
+}
+
+// Board 새 글 draft 복원
+const loadBoardDraft = () => {
+  try {
+    return parseBoardDraft(localStorage.getItem(DRAFT_STORAGE_KEY))
+  } catch {
+    return null
+  }
+}
+
+// Board 새 글 draft 자동저장
+const saveBoardDraft = (input) => {
+  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(createBoardDraft(input)))
+}
+
+// Board 새 글 draft 삭제
+const deleteBoardDraft = () => {
+  localStorage.removeItem(DRAFT_STORAGE_KEY)
 }
 
 function Board({ t }) {
@@ -64,6 +88,7 @@ function Board({ t }) {
   const [selectedPostId, setSelectedPostId] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchScope, setSearchScope] = useState('title')
+  const [draftSaved, setDraftSaved] = useState(() => Boolean(loadBoardDraft()))
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const selectedPost = posts.find((post) => post.id === selectedPostId)
   const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
@@ -103,9 +128,24 @@ function Board({ t }) {
     setFormError('')
   }
 
-  const handleBlocksChange = (nextBlocks) => {
+  // 새 글 작성 화면 변경사항 draft 저장
+  const saveCurrentDraft = (nextValues) => {
+    saveBoardDraft({
+      author,
+      title,
+      blocks,
+      ...nextValues,
+    })
+    setDraftSaved(true)
+  }
+
+  const handleBlocksChange = (nextBlocks, shouldSaveDraft = false) => {
     setBlocks(nextBlocks)
     setFormError('')
+
+    if (shouldSaveDraft) {
+      saveCurrentDraft({ blocks: nextBlocks })
+    }
   }
 
   // 게시글 작성
@@ -136,6 +176,8 @@ function Board({ t }) {
       return nextPosts
     })
 
+    deleteBoardDraft()
+    setDraftSaved(false)
     resetWriteForm()
     setView('list')
   }
@@ -148,7 +190,19 @@ function Board({ t }) {
 
   // 게시글 작성 화면 열기
   const handleOpenWrite = () => {
-    resetWriteForm()
+    const savedDraft = loadBoardDraft()
+
+    if (savedDraft) {
+      setAuthor(savedDraft.author)
+      setTitle(savedDraft.title)
+      setBlocks(getEditableBlocks(savedDraft.blocks))
+      setFormError('')
+      setDraftSaved(true)
+    } else {
+      resetWriteForm()
+      setDraftSaved(false)
+    }
+
     setSelectedPostId('')
     setView('write')
   }
@@ -234,6 +288,13 @@ function Board({ t }) {
     handleBackToList()
   }
 
+  // 새 글 draft 수동 삭제
+  const handleDeleteDraft = () => {
+    deleteBoardDraft()
+    setDraftSaved(false)
+    resetWriteForm()
+  }
+
   const renderBoardForm = ({ mode }) => {
     const isEditMode = mode === 'edit'
 
@@ -247,7 +308,9 @@ function Board({ t }) {
             <h3>{isEditMode ? t.board.editTitle : t.board.composeTitle}</h3>
           </div>
           {!isEditMode ? (
-            <span className="board-status-chip">{t.board.draft}</span>
+            <span className="board-status-chip">
+              {draftSaved ? t.board.draftSaved : t.board.draft}
+            </span>
           ) : null}
         </div>
 
@@ -269,8 +332,13 @@ function Board({ t }) {
               type="text"
               value={author}
               onChange={(event) => {
-                setAuthor(event.target.value)
+                const nextAuthor = event.target.value
+                setAuthor(nextAuthor)
                 setFormError('')
+
+                if (!isEditMode) {
+                  saveCurrentDraft({ author: nextAuthor })
+                }
               }}
               placeholder={t.board.authorPlaceholder}
             />
@@ -282,8 +350,13 @@ function Board({ t }) {
               type="text"
               value={title}
               onChange={(event) => {
-                setTitle(event.target.value)
+                const nextTitle = event.target.value
+                setTitle(nextTitle)
                 setFormError('')
+
+                if (!isEditMode) {
+                  saveCurrentDraft({ title: nextTitle })
+                }
               }}
               placeholder={t.board.titlePlaceholder}
             />
@@ -291,7 +364,11 @@ function Board({ t }) {
 
           <div className="board-field">
             <span>{t.board.contentField}</span>
-            <BoardEditor blocks={blocks} onChange={handleBlocksChange} t={t} />
+            <BoardEditor
+              blocks={blocks}
+              onChange={(nextBlocks) => handleBlocksChange(nextBlocks, !isEditMode)}
+              t={t}
+            />
           </div>
 
           {formError ? (
@@ -301,6 +378,16 @@ function Board({ t }) {
           ) : null}
 
           <div className="board-form-actions">
+            {!isEditMode ? (
+              <button
+                type="button"
+                className="board-secondary-button"
+                onClick={handleDeleteDraft}
+                disabled={!draftSaved}
+              >
+                {t.board.deleteDraft}
+              </button>
+            ) : null}
             <button
               type="submit"
               className="board-primary-button board-submit-button"

@@ -92,6 +92,7 @@
 ## Commenting Guidelines
 
 - When writing new code or modifying existing core logic, add concise Korean comments where they are useful for maintenance.
+- Keep adding concise Korean comments to meaningful declarations such as `const` values, helper functions, state groups, and handlers when they explain role, persistence, or flow.
 - Do not comment every line. Focus on core logic that would be expensive to understand later when reading the code alone.
 - Comments should not merely repeat what the code does. Explain why the logic is needed, what to be careful about, or how it relates to existing data and behavior.
 - Write Korean comments in a concise noun-phrase style when possible.
@@ -107,6 +108,8 @@
   - Timer intervals and `useEffect` handling
   - Settings save flows, data count display, and reset logic
   - Board localStorage save/restore, view switching, and post mutation logic
+  - Board draft save/restore flows and draft localStorage key usage
+  - Module-level constants, helper functions, derived values, and handler groups whose purpose is not obvious from the name alone
   - The `translations` object structure and language key consistency rules
 - Do not add unnecessary comments to simple JSX, obvious UI markup, or code whose meaning is clear from variable names.
 - Place comments close to constants or state update logic when the code could risk breaking existing behavior, such as localStorage key preservation, existing user data, or shared state across modules.
