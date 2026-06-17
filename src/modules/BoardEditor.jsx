@@ -18,6 +18,10 @@ const createTextBlock = () => ({
   content: '',
 })
 
+// 텍스트 내용 길이에 따른 textarea 높이
+const getTextBlockRows = (content = '') =>
+  Math.max(String(content).split('\n').length, 2)
+
 function BoardEditor({ blocks, onChange, t }) {
   const fileInputRef = useRef(null)
   const activeBlockIdRef = useRef('')
@@ -409,7 +413,7 @@ function BoardEditor({ blocks, onChange, t }) {
                     updateBlock(block.id, { content: event.target.value })
                   }
                   placeholder={t.board.contentPlaceholder}
-                  rows={5}
+                  rows={getTextBlockRows(block.content)}
                 />
               )}
 

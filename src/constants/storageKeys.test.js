@@ -6,6 +6,7 @@ describe('STORAGE_KEYS', () => {
   it('keeps existing localStorage key strings stable', () => {
     expect(STORAGE_KEYS).toEqual({
       boardDraft: 'tenvi.board.draft',
+      boardCategories: 'tenvi.board.categories',
       boardPosts: 'tenvi.board.posts',
       calendarEvents: 'tenvi.calendar.events',
       hudEffect: 'tenvi.hudEffect',

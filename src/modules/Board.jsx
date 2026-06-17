@@ -2,22 +2,32 @@ import { useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardEditor from './BoardEditor.jsx'
 import {
+  DEFAULT_BOARD_CATEGORY_ID,
+  addBoardCategory,
   createBoardDraft,
   createBoardPost,
+  deleteBoardCategory,
   deleteBoardPost,
+  getBoardCategoryName,
   getBoardImageIds,
   getBoardPostTextContent,
+  getPostCategoryId,
   getRemovedBoardImageIds,
   increaseBoardPostViews,
+  movePostsToDefaultCategory,
   normalizeBoardBlocks,
+  parseBoardCategories,
   parseBoardDraft,
   parseBoardPosts,
+  updateBoardCategory,
   updateBoardPost,
 } from './boardLogic.js'
 import { deleteBoardImages, getBoardImages } from './boardImageStore.js'
 
 const POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const DRAFT_STORAGE_KEY = STORAGE_KEYS.boardDraft
+const CATEGORIES_STORAGE_KEY = STORAGE_KEYS.boardCategories
+const CATEGORY_FILTER_ALL = 'all'
 const SEARCH_SCOPES = ['title', 'content', 'author']
 
 const createEmptyTextBlock = () => ({
@@ -49,11 +59,7 @@ const loadBoardPosts = () => {
   try {
     const rawPosts = localStorage.getItem(POSTS_STORAGE_KEY)
 
-    if (!rawPosts) {
-      return []
-    }
-
-    return parseBoardPosts(rawPosts)
+    return rawPosts ? parseBoardPosts(rawPosts) : []
   } catch {
     return []
   }
@@ -62,6 +68,20 @@ const loadBoardPosts = () => {
 // 기존 Board localStorage key 보존
 const saveBoardPosts = (posts) => {
   localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts))
+}
+
+// Board 카테고리 localStorage 복원
+const loadBoardCategories = () => {
+  try {
+    return parseBoardCategories(localStorage.getItem(CATEGORIES_STORAGE_KEY))
+  } catch {
+    return parseBoardCategories()
+  }
+}
+
+// Board 카테고리 저장
+const saveBoardCategories = (categories) => {
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories))
 }
 
 // Board 새 글 draft 복원
@@ -86,7 +106,15 @@ const deleteBoardDraft = () => {
 function Board({ t }) {
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
+  const [categoryId, setCategoryId] = useState(DEFAULT_BOARD_CATEGORY_ID)
   const [blocks, setBlocks] = useState(() => [createEmptyTextBlock()])
+  const [categories, setCategories] = useState(() => loadBoardCategories())
+  const [categoryFilter, setCategoryFilter] = useState(CATEGORY_FILTER_ALL)
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
+  const [categoryNameInput, setCategoryNameInput] = useState('')
+  const [editingCategoryId, setEditingCategoryId] = useState('')
+  const [editingCategoryName, setEditingCategoryName] = useState('')
+  const [categoryError, setCategoryError] = useState('')
   const [detailImagePreviews, setDetailImagePreviews] = useState({})
   const [formError, setFormError] = useState('')
   const [view, setView] = useState('list')
@@ -142,8 +170,14 @@ function Board({ t }) {
     }
   }, [selectedPost])
 
-  // blocks 기반 글도 content 문자열을 통해 기존 검색 흐름 유지
+  // 카테고리 필터와 검색 동시 적용
   const filteredPosts = posts.filter((post) => {
+    const postCategoryId = getPostCategoryId(post, categories)
+
+    if (categoryFilter !== CATEGORY_FILTER_ALL && postCategoryId !== categoryFilter) {
+      return false
+    }
+
     if (!normalizedSearchQuery) {
       return true
     }
@@ -171,6 +205,7 @@ function Board({ t }) {
   const resetWriteForm = () => {
     setAuthor('')
     setTitle('')
+    setCategoryId(DEFAULT_BOARD_CATEGORY_ID)
     setBlocks([createEmptyTextBlock()])
     setFormError('')
   }
@@ -180,6 +215,7 @@ function Board({ t }) {
     saveBoardDraft({
       author,
       title,
+      categoryId,
       blocks,
       ...nextValues,
     })
@@ -192,6 +228,16 @@ function Board({ t }) {
 
     if (shouldSaveDraft) {
       saveCurrentDraft({ blocks: nextBlocks })
+    }
+  }
+
+  // 카테고리 선택 변경
+  const handleCategoryChange = (nextCategoryId, shouldSaveDraft = false) => {
+    setCategoryId(nextCategoryId)
+    setFormError('')
+
+    if (shouldSaveDraft) {
+      saveCurrentDraft({ categoryId: nextCategoryId })
     }
   }
 
@@ -208,6 +254,7 @@ function Board({ t }) {
     const newPost = createBoardPost({
       author: trimmedAuthor,
       title: trimmedTitle,
+      categoryId,
       blocks,
     })
 
@@ -242,6 +289,7 @@ function Board({ t }) {
     if (savedDraft) {
       setAuthor(savedDraft.author)
       setTitle(savedDraft.title)
+      setCategoryId(getPostCategoryId(savedDraft, categories))
       setBlocks(getEditableBlocks(savedDraft.blocks))
       setFormError('')
       setDraftSaved(true)
@@ -262,6 +310,7 @@ function Board({ t }) {
 
     setAuthor(selectedPost.author ?? '')
     setTitle(selectedPost.title)
+    setCategoryId(getPostCategoryId(selectedPost, categories))
     setBlocks(createEditableBlocks(selectedPost))
     setFormError('')
     setView('edit')
@@ -292,6 +341,7 @@ function Board({ t }) {
       const nextPosts = updateBoardPost(currentPosts, selectedPost.id, {
         author,
         title,
+        categoryId,
         blocks,
       })
 
@@ -358,26 +408,84 @@ function Board({ t }) {
     resetWriteForm()
   }
 
+  // 카테고리 추가
+  const handleAddCategory = () => {
+    const nextCategories = addBoardCategory(categories, categoryNameInput)
+
+    if (nextCategories.length === categories.length) {
+      setCategoryError(t.board.categoryInvalidMessage)
+      return
+    }
+
+    setCategories(nextCategories)
+    saveBoardCategories(nextCategories)
+    setCategoryNameInput('')
+    setCategoryError('')
+  }
+
+  // 카테고리 수정
+  const handleUpdateCategory = (targetCategoryId) => {
+    const nextCategories = updateBoardCategory(
+      categories,
+      targetCategoryId,
+      editingCategoryName,
+    )
+
+    if (nextCategories === categories || nextCategories.length !== categories.length) {
+      setCategoryError(t.board.categoryInvalidMessage)
+      return
+    }
+
+    setCategories(nextCategories)
+    saveBoardCategories(nextCategories)
+    setEditingCategoryId('')
+    setEditingCategoryName('')
+    setCategoryError('')
+  }
+
+  // 카테고리 삭제 후 게시글 general 이동
+  const handleDeleteCategory = (targetCategoryId) => {
+    if (targetCategoryId === DEFAULT_BOARD_CATEGORY_ID) {
+      return
+    }
+
+    const nextCategories = deleteBoardCategory(categories, targetCategoryId)
+    const nextPosts = movePostsToDefaultCategory(posts, targetCategoryId, categories)
+
+    setCategories(nextCategories)
+    saveBoardCategories(nextCategories)
+    setPosts(nextPosts)
+    saveBoardPosts(nextPosts)
+    setCategoryFilter((currentFilter) =>
+      currentFilter === targetCategoryId ? CATEGORY_FILTER_ALL : currentFilter,
+    )
+    setCategoryError('')
+  }
+
+  const renderCategorySelect = ({ isEditMode }) => (
+    <label className="board-field">
+      <span>{t.board.categoryField}</span>
+      <select
+        value={categoryId}
+        onChange={(event) => handleCategoryChange(event.target.value, !isEditMode)}
+      >
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+
   const renderBoardForm = ({ mode }) => {
     const isEditMode = mode === 'edit'
+    const boardFormId = isEditMode ? 'board-edit-form' : 'board-write-form'
 
     return (
       <section className="board-section board-compose-panel board-screen">
-        <div className="board-section-header board-compose-header">
-          <div>
-            <p className="module-label">
-              {isEditMode ? t.board.editLabel : t.board.composeLabel}
-            </p>
-            <h3>{isEditMode ? t.board.editTitle : t.board.composeTitle}</h3>
-          </div>
-          {!isEditMode ? (
-            <span className="board-status-chip">
-              {draftSaved ? t.board.draftSaved : t.board.draft}
-            </span>
-          ) : null}
-        </div>
-
         <form
+          id={boardFormId}
           className="board-form"
           onSubmit={(event) => {
             event.preventDefault()
@@ -389,81 +497,102 @@ function Board({ t }) {
             handleCreatePost()
           }}
         >
-          <label className="board-field">
-            <span>{t.board.authorField}</span>
-            <input
-              type="text"
-              value={author}
-              onChange={(event) => {
-                const nextAuthor = event.target.value
-                setAuthor(nextAuthor)
-                setFormError('')
+          <div className="board-compose-fixed">
+            <div className="board-section-header board-compose-header">
+              <div>
+                <p className="module-label">
+                  {isEditMode ? t.board.editLabel : t.board.composeLabel}
+                </p>
+                <h3>{isEditMode ? t.board.editTitle : t.board.composeTitle}</h3>
+              </div>
+              <div className="board-compose-header-actions">
+                {!isEditMode ? (
+                  <span className="board-status-chip">
+                    {draftSaved ? t.board.draftSaved : t.board.draft}
+                  </span>
+                ) : null}
+                {!isEditMode ? (
+                  <button
+                    type="button"
+                    className="board-secondary-button"
+                    onClick={handleDeleteDraft}
+                    disabled={!draftSaved}
+                  >
+                    {t.board.deleteDraft}
+                  </button>
+                ) : null}
+                <button
+                  type="submit"
+                  className="board-primary-button board-submit-button"
+                >
+                  {isEditMode ? t.board.saveEdit : t.board.submit}
+                </button>
+                <button
+                  type="button"
+                  className="board-secondary-button"
+                  onClick={isEditMode ? handleCancelEdit : handleCancelWrite}
+                >
+                  {t.board.cancel}
+                </button>
+              </div>
+            </div>
 
-                if (!isEditMode) {
-                  saveCurrentDraft({ author: nextAuthor })
-                }
-              }}
-              placeholder={t.board.authorPlaceholder}
-            />
-          </label>
+            <div className="board-compose-meta">
+              {renderCategorySelect({ isEditMode })}
 
-          <label className="board-field">
-            <span>{t.board.titleField}</span>
-            <input
-              type="text"
-              value={title}
-              onChange={(event) => {
-                const nextTitle = event.target.value
-                setTitle(nextTitle)
-                setFormError('')
+              <label className="board-field">
+                <span>{t.board.authorField}</span>
+                <input
+                  type="text"
+                  value={author}
+                  onChange={(event) => {
+                    const nextAuthor = event.target.value
+                    setAuthor(nextAuthor)
+                    setFormError('')
 
-                if (!isEditMode) {
-                  saveCurrentDraft({ title: nextTitle })
-                }
-              }}
-              placeholder={t.board.titlePlaceholder}
-            />
-          </label>
+                    if (!isEditMode) {
+                      saveCurrentDraft({ author: nextAuthor })
+                    }
+                  }}
+                  placeholder={t.board.authorPlaceholder}
+                />
+              </label>
 
-          <div className="board-field">
-            <span>{t.board.contentField}</span>
-            <BoardEditor
-              blocks={blocks}
-              onChange={(nextBlocks) => handleBlocksChange(nextBlocks, !isEditMode)}
-              t={t}
-            />
+              <label className="board-field">
+                <span>{t.board.titleField}</span>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(event) => {
+                    const nextTitle = event.target.value
+                    setTitle(nextTitle)
+                    setFormError('')
+
+                    if (!isEditMode) {
+                      saveCurrentDraft({ title: nextTitle })
+                    }
+                  }}
+                  placeholder={t.board.titlePlaceholder}
+                />
+              </label>
+            </div>
           </div>
 
-          {formError ? (
-            <p className="board-form-message" role="alert">
-              {formError}
-            </p>
-          ) : null}
+          <div className="board-compose-scroll">
+            <div className="board-field">
+              <span>{t.board.contentField}</span>
+              <BoardEditor
+                blocks={blocks}
+                onChange={(nextBlocks) => handleBlocksChange(nextBlocks, !isEditMode)}
+                t={t}
+              />
+            </div>
 
-          <div className="board-form-actions">
-            {!isEditMode ? (
-              <button
-                type="button"
-                className="board-secondary-button"
-                onClick={handleDeleteDraft}
-                disabled={!draftSaved}
-              >
-                {t.board.deleteDraft}
-              </button>
+            {formError ? (
+              <p className="board-form-message" role="alert">
+                {formError}
+              </p>
             ) : null}
-            <button
-              type="submit"
-              className="board-primary-button board-submit-button"
-            >
-              {isEditMode ? t.board.saveEdit : t.board.submit}
-            </button>
-            <button
-              type="button"
-              className="board-secondary-button"
-              onClick={isEditMode ? handleCancelEdit : handleCancelWrite}
-            >
-              {t.board.cancel}
-            </button>
           </div>
         </form>
       </section>
@@ -488,6 +617,9 @@ function Board({ t }) {
         <section className="board-cafe-panel board-screen">
           {selectedPost ? (
             <article className="board-cafe-article">
+              <span className="board-category-badge">
+                {getBoardCategoryName(getPostCategoryId(selectedPost, categories), categories)}
+              </span>
               <h3>{selectedPost.title}</h3>
 
               <div className="board-cafe-meta-row">
@@ -582,9 +714,126 @@ function Board({ t }) {
           </div>
 
           <section className="board-section board-list-panel">
+            <div className="board-category-filter" aria-label={t.board.categoryFilterLabel}>
+              <button
+                type="button"
+                className={`board-category-chip ${
+                  categoryFilter === CATEGORY_FILTER_ALL ? 'is-active' : ''
+                }`}
+                onClick={() => setCategoryFilter(CATEGORY_FILTER_ALL)}
+              >
+                {t.board.allCategories}
+              </button>
+              {categories.map((category) => (
+                <button
+                  type="button"
+                  className={`board-category-chip ${
+                    categoryFilter === category.id ? 'is-active' : ''
+                  }`}
+                  key={category.id}
+                  onClick={() => setCategoryFilter(category.id)}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+
+            <div className="board-category-panel">
+              <button
+                type="button"
+                className="board-secondary-button board-category-toggle"
+                onClick={() => setCategoryManagerOpen((isOpen) => !isOpen)}
+              >
+                {t.board.categoryManage}
+              </button>
+
+              {categoryManagerOpen ? (
+                <div className="board-category-manager">
+                  <div className="board-category-form">
+                    <input
+                      type="text"
+                      value={categoryNameInput}
+                      onChange={(event) => {
+                        setCategoryNameInput(event.target.value)
+                        setCategoryError('')
+                      }}
+                      placeholder={t.board.categoryNamePlaceholder}
+                    />
+                    <button
+                      type="button"
+                      className="board-secondary-button"
+                      onClick={handleAddCategory}
+                    >
+                      {t.board.categoryAdd}
+                    </button>
+                  </div>
+
+                  {categoryError ? (
+                    <p className="board-form-message" role="alert">
+                      {categoryError}
+                    </p>
+                  ) : null}
+
+                  <div className="board-category-list">
+                    {categories.map((category) => {
+                      const isEditing = editingCategoryId === category.id
+                      const isGeneral = category.id === DEFAULT_BOARD_CATEGORY_ID
+
+                      return (
+                        <div className="board-category-item" key={category.id}>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editingCategoryName}
+                              onChange={(event) =>
+                                setEditingCategoryName(event.target.value)
+                              }
+                            />
+                          ) : (
+                            <span>{category.name}</span>
+                          )}
+                          <div className="board-category-actions">
+                            {isEditing ? (
+                              <button
+                                type="button"
+                                className="board-secondary-button"
+                                onClick={() => handleUpdateCategory(category.id)}
+                              >
+                                {t.board.categorySave}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="board-secondary-button"
+                                onClick={() => {
+                                  setEditingCategoryId(category.id)
+                                  setEditingCategoryName(category.name)
+                                  setCategoryError('')
+                                }}
+                              >
+                                {t.board.categoryEdit}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="board-delete-button"
+                              onClick={() => handleDeleteCategory(category.id)}
+                              disabled={isGeneral}
+                            >
+                              {t.board.categoryDelete}
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
             <div className="board-list-summary">
               <span className="board-count">
-                {hasSearchQuery
+                {hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL
                   ? t.board.searchResultCount(filteredPosts.length)
                   : t.board.totalCount(posts.length)}
               </span>
@@ -592,30 +841,37 @@ function Board({ t }) {
 
             {filteredPosts.length > 0 ? (
               <div className="board-title-list">
-                {filteredPosts.map((post, index) => (
-                  <button
-                    type="button"
-                    className="board-title-row"
-                    key={post.id}
-                    onClick={() => handleOpenDetail(post.id)}
-                  >
-                    <span className="board-post-number">
-                      {filteredPosts.length - index}
-                    </span>
-                    <span className="board-title-text">{post.title}</span>
-                    <time className="board-title-date" dateTime={post.createdAt}>
-                      {formatPostDate(post.createdAt, {
-                        dateStyle: 'medium',
-                      })}
-                    </time>
-                  </button>
-                ))}
+                {filteredPosts.map((post, index) => {
+                  const postCategoryId = getPostCategoryId(post, categories)
+
+                  return (
+                    <button
+                      type="button"
+                      className="board-title-row"
+                      key={post.id}
+                      onClick={() => handleOpenDetail(post.id)}
+                    >
+                      <span className="board-post-number">
+                        {filteredPosts.length - index}
+                      </span>
+                      <span className="board-title-text">{post.title}</span>
+                      <span className="board-category-badge">
+                        {getBoardCategoryName(postCategoryId, categories)}
+                      </span>
+                      <time className="board-title-date" dateTime={post.createdAt}>
+                        {formatPostDate(post.createdAt, {
+                          dateStyle: 'medium',
+                        })}
+                      </time>
+                    </button>
+                  )
+                })}
               </div>
             ) : (
               <div className="empty-state" role="status">
                 <span>{t.common.systemMessage}</span>
                 <p>
-                  {posts.length > 0 && hasSearchQuery
+                  {posts.length > 0 && (hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL)
                     ? t.board.noSearchResults
                     : t.board.emptyMessage}
                 </p>

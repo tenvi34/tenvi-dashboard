@@ -1,6 +1,7 @@
 // localStorage key 보존
 export const STORAGE_KEYS = {
   boardDraft: 'tenvi.board.draft',
+  boardCategories: 'tenvi.board.categories',
   boardPosts: 'tenvi.board.posts',
   calendarEvents: 'tenvi.calendar.events',
   hudEffect: 'tenvi.hudEffect',
