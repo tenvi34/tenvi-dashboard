@@ -4038,8 +4038,11 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .board-write-button {
+  min-height: 36px;
+  padding: 0 16px;
   background: #12b76a;
   color: #ffffff;
+  font-size: 14px;
 }
 
 .board-submit-button {
