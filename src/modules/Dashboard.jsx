@@ -280,36 +280,32 @@ function Dashboard({
             <p className="module-label">{t.dashboard.overviewMetrics}</p>
             <h3>{t.dashboard.quickStatus}</h3>
           </div>
-          <div className="summary-metrics dashboard-overview-metrics">
-            <div className="summary-metric">
-              <span>{t.dashboard.totalTasks}</span>
-              <strong>{tasks.length}</strong>
+          <dl className="dashboard-compact-list dashboard-overview-list">
+            <div>
+              <dt>{t.dashboard.activeTasks}</dt>
+              <dd>{activeTasks}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.activeTasks}</span>
-              <strong>{activeTasks}</strong>
+            <div>
+              <dt>{t.dashboard.completedTasks}</dt>
+              <dd>{completedTasks}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.completedTasks}</span>
-              <strong>{completedTasks}</strong>
+            <div>
+              <dt>{t.dashboard.todayEvents}</dt>
+              <dd>{allTodayEvents.length || (nextEvent ? 1 : 0)}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.todayEvents}</span>
-              <strong>{allTodayEvents.length || (nextEvent ? 1 : 0)}</strong>
+            <div>
+              <dt>{t.dashboard.totalNotes}</dt>
+              <dd>{notes.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.totalNotes}</span>
-              <strong>{notes.length}</strong>
+            <div>
+              <dt>{t.dashboard.totalBoardPosts}</dt>
+              <dd>{boardPosts.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.totalBoardPosts}</span>
-              <strong>{boardPosts.length}</strong>
+            <div>
+              <dt>{t.dashboard.totalMapRecords}</dt>
+              <dd>{mapPhotoCount}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.totalMapRecords}</span>
-              <strong>{mapPhotoCount}</strong>
-            </div>
-          </div>
+          </dl>
         </section>
       </div>
     </>
@@ -324,20 +320,20 @@ function Dashboard({
             <p className="module-label">{t.dashboard.tasksSummary}</p>
             <h3>{t.modules.tasks}</h3>
           </div>
-          <div className="summary-metrics">
-            <div className="summary-metric">
-              <span>{t.dashboard.totalTasks}</span>
-              <strong>{tasks.length}</strong>
+          <dl className="dashboard-compact-list dashboard-work-list">
+            <div>
+              <dt>{t.dashboard.totalTasks}</dt>
+              <dd>{tasks.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.activeTasks}</span>
-              <strong>{activeTasks}</strong>
+            <div>
+              <dt>{t.dashboard.activeTasks}</dt>
+              <dd>{activeTasks}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.completedTasks}</span>
-              <strong>{completedTasks}</strong>
+            <div>
+              <dt>{t.dashboard.completedTasks}</dt>
+              <dd>{completedTasks}</dd>
             </div>
-          </div>
+          </dl>
           <div className="recent-notes">
             <p className="recent-notes-title">{t.dashboard.activeTaskList}</p>
             {activeTaskList.length > 0 ? (
@@ -363,20 +359,20 @@ function Dashboard({
             <p className="module-label">{t.dashboard.calendarSummary}</p>
             <h3>{t.modules.calendar}</h3>
           </div>
-          <div className="summary-metrics">
-            <div className="summary-metric">
-              <span>{t.dashboard.todayEvents}</span>
-              <strong>{allTodayEvents.length}</strong>
+          <dl className="dashboard-compact-list dashboard-work-list">
+            <div>
+              <dt>{t.dashboard.todayEvents}</dt>
+              <dd>{allTodayEvents.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.monthEvents}</span>
-              <strong>{monthEvents.length}</strong>
+            <div>
+              <dt>{t.dashboard.monthEvents}</dt>
+              <dd>{monthEvents.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.scheduledDays}</span>
-              <strong>{scheduledDateCount}</strong>
+            <div>
+              <dt>{t.dashboard.scheduledDays}</dt>
+              <dd>{scheduledDateCount}</dd>
             </div>
-          </div>
+          </dl>
           <div className="recent-notes">
             <p className="recent-notes-title">{t.dashboard.todayEvents}</p>
             {renderTodayScheduleList()}
@@ -393,15 +389,16 @@ function Dashboard({
   const renderArchiveTab = () => (
     <>
       {/* 기록 탭 */}
-      <div className="dashboard-tab-grid">
+      <div className="dashboard-tab-grid dashboard-archive-grid">
         <section className="summary-panel">
           <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.notesSummary}</p>
-            <h3>{t.modules.notes}</h3>
-          </div>
-          <div className="summary-metric summary-metric-wide">
-            <span>{t.dashboard.totalNotes}</span>
-            <strong>{notes.length}</strong>
+            <div>
+              <p className="module-label">{t.dashboard.notesSummary}</p>
+              <h3>{t.modules.notes}</h3>
+            </div>
+            <span className="dashboard-count-chip">
+              {t.dashboard.totalNotes} {notes.length}
+            </span>
           </div>
           <div className="recent-notes" aria-label={t.dashboard.recentNotes}>
             <p className="recent-notes-title">{t.dashboard.recentNotes}</p>
@@ -411,12 +408,13 @@ function Dashboard({
 
         <section className="summary-panel">
           <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.boardSummary}</p>
-            <h3>{t.modules.board}</h3>
-          </div>
-          <div className="summary-metric summary-metric-wide">
-            <span>{t.dashboard.totalBoardPosts}</span>
-            <strong>{boardPosts.length}</strong>
+            <div>
+              <p className="module-label">{t.dashboard.boardSummary}</p>
+              <h3>{t.modules.board}</h3>
+            </div>
+            <span className="dashboard-count-chip">
+              {t.dashboard.totalBoardPosts} {boardPosts.length}
+            </span>
           </div>
           <div className="recent-notes" aria-label={t.dashboard.recentBoardPosts}>
             <p className="recent-notes-title">{t.dashboard.recentBoardPosts}</p>
@@ -439,58 +437,64 @@ function Dashboard({
     <>
       {/* 시스템 탭 */}
       <div className="dashboard-tab-grid dashboard-system-grid">
-        <section className="summary-panel">
+        <section className="summary-panel dashboard-system-panel">
           <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.systemSummary}</p>
-            <h3>{t.dashboard.currentSettings}</h3>
+            <div>
+              <p className="module-label">{t.dashboard.systemSummary}</p>
+              <h3>{t.dashboard.currentSettings}</h3>
+            </div>
+            <span className="dashboard-system-tag">CONFIG</span>
           </div>
-          <div className="summary-metrics dashboard-system-metrics">
-            <div className="summary-metric">
-              <span>{t.dashboard.timerSessions}</span>
-              <strong>{timerCompletedSessions}</strong>
+          <dl className="dashboard-compact-list dashboard-system-list">
+            <div>
+              <dt>{t.dashboard.timerSessions}</dt>
+              <dd>{timerCompletedSessions}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.currentLanguage}</span>
-              <strong>{t.languages[language] ?? language}</strong>
+            <div>
+              <dt>{t.dashboard.currentLanguage}</dt>
+              <dd>{t.languages[language] ?? language}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.defaultStartModule}</span>
-              <strong>{t.modules[startModule] ?? startModule}</strong>
+            <div>
+              <dt>{t.dashboard.defaultStartModule}</dt>
+              <dd>{t.modules[startModule] ?? startModule}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.theme}</span>
-              <strong>{t.settings.themes[theme] ?? theme}</strong>
+            <div>
+              <dt>{t.dashboard.theme}</dt>
+              <dd>{t.settings.themes[theme] ?? theme}</dd>
             </div>
-          </div>
+          </dl>
         </section>
 
-        <section className="summary-panel">
+        <section className="summary-panel dashboard-system-panel">
           <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.storedData}</p>
-            <h3>{t.dashboard.storageOverview}</h3>
+            <div>
+              <p className="module-label">{t.dashboard.storedData}</p>
+              <h3>{t.dashboard.storageOverview}</h3>
+            </div>
+            <span className="dashboard-system-tag">STORE</span>
           </div>
-          <div className="summary-metrics dashboard-system-metrics">
-            <div className="summary-metric">
-              <span>{t.dashboard.totalTasks}</span>
-              <strong>{tasks.length}</strong>
+          <dl className="dashboard-compact-list dashboard-system-list">
+            <div>
+              <dt>{t.dashboard.totalTasks}</dt>
+              <dd>{tasks.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.totalNotes}</span>
-              <strong>{notes.length}</strong>
+            <div>
+              <dt>{t.dashboard.totalNotes}</dt>
+              <dd>{notes.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.totalBoardPosts}</span>
-              <strong>{boardPosts.length}</strong>
+            <div>
+              <dt>{t.dashboard.totalBoardPosts}</dt>
+              <dd>{boardPosts.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.totalSchedules}</span>
-              <strong>{calendarEvents.length}</strong>
+            <div>
+              <dt>{t.dashboard.totalSchedules}</dt>
+              <dd>{calendarEvents.length}</dd>
             </div>
-            <div className="summary-metric">
-              <span>{t.dashboard.totalMapRecords}</span>
-              <strong>{mapPhotoCount}</strong>
+            <div>
+              <dt>{t.dashboard.totalMapRecords}</dt>
+              <dd>{mapPhotoCount}</dd>
             </div>
-          </div>
+          </dl>
         </section>
       </div>
     </>
