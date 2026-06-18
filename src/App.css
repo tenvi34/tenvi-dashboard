@@ -4295,13 +4295,15 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .board-submit-button {
-  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
-  color: #00131c;
+  color: #dff8ff;
+  border-color: var(--line);
+  background: rgba(5, 16, 31, 0.5);
 }
 
 .board-submit-button:hover {
   border-color: var(--line-strong);
-  box-shadow: 0 0 18px rgba(90, 212, 255, 0.18);
+  background: rgba(90, 212, 255, 0.08);
+  box-shadow: 0 0 16px rgba(90, 212, 255, 0.12);
 }
 
 .board-write-button:hover {
@@ -6289,6 +6291,13 @@ body.tenvi-modal-open .tenvi-dashboard {
   box-shadow: none;
 }
 
+.tenvi-dashboard.theme-standard .board-submit-button {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
 .tenvi-dashboard.theme-standard .board-search-scope {
   border-color: #d9e2ec;
   background: #f8fbff;
@@ -6314,6 +6323,13 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .tenvi-dashboard.theme-standard .board-write-button:hover {
+  color: #172033;
+  border-color: #9db5ff;
+  background: #f4f7ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .board-submit-button:hover {
   color: #172033;
   border-color: #9db5ff;
   background: #f4f7ff;
@@ -7832,6 +7848,13 @@ body.tenvi-modal-open .tenvi-dashboard {
   box-shadow: none;
 }
 
+.tenvi-dashboard.theme-dark .board-submit-button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
 .tenvi-dashboard.theme-dark .board-search-scope {
   border-color: rgba(148, 163, 184, 0.18);
   background: rgba(15, 23, 42, 0.5);
@@ -7857,6 +7880,13 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .tenvi-dashboard.theme-dark .board-write-button:hover {
+  color: #e2e8f0;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-submit-button:hover {
   color: #e2e8f0;
   border-color: rgba(96, 165, 250, 0.35);
   background: rgba(96, 165, 250, 0.08);
