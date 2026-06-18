@@ -403,6 +403,20 @@ export const increaseBoardPostViews = (posts, postId) =>
     }
   })
 
+// Board 게시글 고정 상태 전환
+export const toggleBoardPostPinned = (posts, postId) =>
+  posts.map((post) => {
+    if (post.id !== postId) {
+      return post
+    }
+
+    return {
+      ...post,
+      pinned: post.pinned !== true,
+      updatedAt: new Date().toISOString(),
+    }
+  })
+
 // Board 게시글 수정
 export const updateBoardPost = (posts, postId, input) => {
   const normalizedAuthor = (input.author ?? '').trim() || 'TENVI'
@@ -438,33 +452,48 @@ export const updateBoardPost = (posts, postId, input) => {
   })
 }
 
+// 고정 게시글 우선순위
+const compareBoardPostPinned = (a, b) => {
+  if (a.pinned === true && b.pinned !== true) {
+    return -1
+  }
+
+  if (a.pinned !== true && b.pinned === true) {
+    return 1
+  }
+
+  return 0
+}
+
 // 게시글 정렬
 export const sortBoardPosts = (posts = [], sortMode = 'latest') => {
   const copiedPosts = [...posts]
+  const withPinnedFirst = (comparePosts) =>
+    copiedPosts.sort((a, b) => compareBoardPostPinned(a, b) || comparePosts(a, b))
 
   // 오래된순
   if (sortMode === 'oldest') {
-    return copiedPosts.sort(
+    return withPinnedFirst(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     )
   }
 
   // 조회수순
   if (sortMode === 'views') {
-    return copiedPosts.sort(
+    return withPinnedFirst(
       (a, b) => (b.views ?? 0) - (a.views ?? 0),
     )
   }
 
   // 제목순
   if (sortMode === 'title') {
-    return copiedPosts.sort(
+    return withPinnedFirst(
       (a, b) => String(a.title ?? '').localeCompare(String(b.title ?? ''), 'ko'),
     )
   }
 
   // 최신순
-  return copiedPosts.sort(
+  return withPinnedFirst(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   )
 }

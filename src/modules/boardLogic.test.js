@@ -20,6 +20,7 @@ import {
   parseBoardDraft,
   parseBoardPosts,
   sortBoardPosts,
+  toggleBoardPostPinned,
   updateBoardCategory,
   updateBoardPost,
 } from './boardLogic.js'
@@ -401,6 +402,76 @@ describe('boardLogic', () => {
       'post-3',
     ])
     expect(posts.map((post) => post.id)).toEqual(['post-1', 'post-2', 'post-3'])
+  })
+
+  it('toggles board post pinned state without changing other posts', () => {
+    const posts = [
+      { id: 'post-1', title: 'First' },
+      { id: 'post-2', title: 'Second', pinned: true },
+    ]
+
+    const pinnedPosts = toggleBoardPostPinned(posts, 'post-1')
+    const unpinnedPosts = toggleBoardPostPinned(posts, 'post-2')
+
+    expect(pinnedPosts[0]).toMatchObject({
+      id: 'post-1',
+      pinned: true,
+      updatedAt: expect.any(String),
+    })
+    expect(pinnedPosts[1]).toBe(posts[1])
+    expect(unpinnedPosts[1]).toMatchObject({
+      id: 'post-2',
+      pinned: false,
+      updatedAt: expect.any(String),
+    })
+    expect(posts[0].pinned).toBeUndefined()
+    expect(posts[1].pinned).toBe(true)
+  })
+
+  it('keeps pinned posts first inside each sort mode', () => {
+    const posts = [
+      {
+        id: 'post-1',
+        title: 'Alpha',
+        createdAt: '2026-06-17T00:00:00.000Z',
+        views: 10,
+      },
+      {
+        id: 'post-2',
+        title: 'Gamma',
+        createdAt: '2026-06-15T00:00:00.000Z',
+        pinned: true,
+        views: 1,
+      },
+      {
+        id: 'post-3',
+        title: 'Beta',
+        createdAt: '2026-06-16T00:00:00.000Z',
+        pinned: true,
+        views: 7,
+      },
+    ]
+
+    expect(sortBoardPosts(posts).map((post) => post.id)).toEqual([
+      'post-3',
+      'post-2',
+      'post-1',
+    ])
+    expect(sortBoardPosts(posts, 'oldest').map((post) => post.id)).toEqual([
+      'post-2',
+      'post-3',
+      'post-1',
+    ])
+    expect(sortBoardPosts(posts, 'views').map((post) => post.id)).toEqual([
+      'post-3',
+      'post-2',
+      'post-1',
+    ])
+    expect(sortBoardPosts(posts, 'title').map((post) => post.id)).toEqual([
+      'post-3',
+      'post-2',
+      'post-1',
+    ])
   })
 
   it('creates and parses board draft data without changing block shape', () => {

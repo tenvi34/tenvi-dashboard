@@ -60,8 +60,6 @@ function Calendar({ t }) {
   const [startDate, setStartDate] = useState(initialDate)
   const [endDate, setEndDate] = useState(initialDate)
   const [formMessage, setFormMessage] = useState('')
-  // 모바일 화면 길이 제어
-  const [isEventFormOpen, setIsEventFormOpen] = useState(false)
   const selectedEvents = getEventsForDate(events, selectedDate)
   const selectedDueTasks = getTasksDueOnDate(tasks, selectedDate)
   const eventCounts = useMemo(() => {
@@ -198,8 +196,6 @@ function Calendar({ t }) {
 
     persistEvents([...events, nextEvent])
     resetEventForm()
-    // 저장 후 모바일 폼 접기
-    setIsEventFormOpen(false)
   }
 
   // Calendar 이벤트 삭제
@@ -227,7 +223,6 @@ function Calendar({ t }) {
 
   const handleCancelEventForm = () => {
     resetEventForm()
-    setIsEventFormOpen(false)
   }
 
   return (
@@ -331,20 +326,9 @@ function Calendar({ t }) {
           </div>
 
           {/* 일정 추가 폼 */}
-          {/* 모바일 폼 접힘 상태 */}
-          <button
-            className="calendar-form-toggle"
-            type="button"
-            aria-expanded={isEventFormOpen}
-            aria-controls="calendar-event-form"
-            onClick={() => setIsEventFormOpen((isOpen) => !isOpen)}
-          >
-            {isEventFormOpen ? t.calendar.closeEventForm : t.calendar.openEventForm}
-          </button>
-
           <form
             id="calendar-event-form"
-            className={`calendar-form ${isEventFormOpen ? 'is-open' : ''}`}
+            className="calendar-form"
             onSubmit={handleAddEvent}
           >
             <label className="sr-only" htmlFor="calendar-title-input">

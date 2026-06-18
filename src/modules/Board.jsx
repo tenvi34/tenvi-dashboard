@@ -21,6 +21,7 @@ import {
   parseBoardDraft,
   parseBoardPosts,
   sortBoardPosts,
+  toggleBoardPostPinned,
   updateBoardCategory,
   updateBoardPost,
 } from './boardLogic.js'
@@ -401,6 +402,16 @@ function Board({ t }) {
     handleBackToList()
   }
 
+  // 고정 상태만 전환해 기존 게시글 내용과 저장 key 보존
+  const handleTogglePinned = (postId) => {
+    setPosts((currentPosts) => {
+      const nextPosts = toggleBoardPostPinned(currentPosts, postId)
+      saveBoardPosts(nextPosts)
+
+      return nextPosts
+    })
+  }
+
   // 새 글 draft 수동 삭제
   const handleDeleteDraft = () => {
     const imageIds = getBoardImageIds(blocks)
@@ -622,10 +633,20 @@ function Board({ t }) {
         <section className="board-cafe-panel board-screen">
           {selectedPost ? (
             <article className="board-cafe-article">
-              <span className="board-category-badge">
-                {getBoardCategoryName(getPostCategoryId(selectedPost, categories), categories)}
-              </span>
-              <h3>{selectedPost.title}</h3>
+              <div className="board-cafe-title-row">
+                <h3>{selectedPost.title}</h3>
+                <div className="board-cafe-badges">
+                  <span className="board-category-badge">
+                    {getBoardCategoryName(
+                      getPostCategoryId(selectedPost, categories),
+                      categories,
+                    )}
+                  </span>
+                  {selectedPost.pinned === true ? (
+                    <span className="board-pinned-badge">{t.board.pinned}</span>
+                  ) : null}
+                </div>
+              </div>
 
               <div className="board-cafe-meta-row">
                 <div className="board-cafe-avatar" aria-hidden="true">
@@ -650,6 +671,15 @@ function Board({ t }) {
                 </div>
 
                 <div className="board-detail-actions">
+                  <button
+                    type="button"
+                    className={`board-secondary-button board-pin-button ${
+                      selectedPost.pinned === true ? 'is-active' : ''
+                    }`}
+                    onClick={() => handleTogglePinned(selectedPost.id)}
+                  >
+                    {selectedPost.pinned === true ? t.board.unpin : t.board.pin}
+                  </button>
                   <button
                     type="button"
                     className="board-secondary-button"
@@ -719,31 +749,30 @@ function Board({ t }) {
           </div>
 
           <section className="board-section board-list-panel">
-            <div className="board-category-filter" aria-label={t.board.categoryFilterLabel}>
-              <button
-                type="button"
-                className={`board-category-chip ${
-                  categoryFilter === CATEGORY_FILTER_ALL ? 'is-active' : ''
-                }`}
-                onClick={() => setCategoryFilter(CATEGORY_FILTER_ALL)}
-              >
-                {t.board.allCategories}
-              </button>
-              {categories.map((category) => (
+            <div className="board-list-controls">
+              <div className="board-category-filter" aria-label={t.board.categoryFilterLabel}>
                 <button
                   type="button"
                   className={`board-category-chip ${
-                    categoryFilter === category.id ? 'is-active' : ''
+                    categoryFilter === CATEGORY_FILTER_ALL ? 'is-active' : ''
                   }`}
-                  key={category.id}
-                  onClick={() => setCategoryFilter(category.id)}
+                  onClick={() => setCategoryFilter(CATEGORY_FILTER_ALL)}
                 >
-                  {category.name}
+                  {t.board.allCategories}
                 </button>
-              ))}
-            </div>
-
-            <div className="board-category-panel">
+                {categories.map((category) => (
+                  <button
+                    type="button"
+                    className={`board-category-chip ${
+                      categoryFilter === category.id ? 'is-active' : ''
+                    }`}
+                    key={category.id}
+                    onClick={() => setCategoryFilter(category.id)}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
                 className="board-secondary-button board-category-toggle"
@@ -752,110 +781,110 @@ function Board({ t }) {
                 {t.board.categoryManage}
               </button>
 
-              {categoryManagerOpen ? (
-                <div className="board-category-manager">
-                  <div className="board-category-form">
-                    <input
-                      type="text"
-                      value={categoryNameInput}
-                      onChange={(event) => {
-                        setCategoryNameInput(event.target.value)
-                        setCategoryError('')
-                      }}
-                      placeholder={t.board.categoryNamePlaceholder}
-                    />
-                    <button
-                      type="button"
-                      className="board-secondary-button"
-                      onClick={handleAddCategory}
-                    >
-                      {t.board.categoryAdd}
-                    </button>
-                  </div>
+              <div className="board-list-summary">
+                <span className="board-count">
+                  {hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL
+                    ? t.board.searchResultCount(sortedPosts.length)
+                    : t.board.totalCount(posts.length)}
+                </span>
+                <label className="board-sort-field">
+                  <span>{t.board.sortLabel}</span>
+                  <select
+                    value={sortMode}
+                    onChange={(event) => setSortMode(event.target.value)}
+                  >
+                    {BOARD_SORT_OPTIONS.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {t.board.sortOptions[option.id]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
 
-                  {categoryError ? (
-                    <p className="board-form-message" role="alert">
-                      {categoryError}
-                    </p>
-                  ) : null}
+            {categoryManagerOpen ? (
+              <div className="board-category-manager">
+                <div className="board-category-form">
+                  <input
+                    type="text"
+                    value={categoryNameInput}
+                    onChange={(event) => {
+                      setCategoryNameInput(event.target.value)
+                      setCategoryError('')
+                    }}
+                    placeholder={t.board.categoryNamePlaceholder}
+                  />
+                  <button
+                    type="button"
+                    className="board-secondary-button"
+                    onClick={handleAddCategory}
+                  >
+                    {t.board.categoryAdd}
+                  </button>
+                </div>
 
-                  <div className="board-category-list">
-                    {categories.map((category) => {
-                      const isEditing = editingCategoryId === category.id
-                      const isGeneral = category.id === DEFAULT_BOARD_CATEGORY_ID
+                {categoryError ? (
+                  <p className="board-form-message" role="alert">
+                    {categoryError}
+                  </p>
+                ) : null}
 
-                      return (
-                        <div className="board-category-item" key={category.id}>
+                <div className="board-category-list">
+                  {categories.map((category) => {
+                    const isEditing = editingCategoryId === category.id
+                    const isGeneral = category.id === DEFAULT_BOARD_CATEGORY_ID
+
+                    return (
+                      <div className="board-category-item" key={category.id}>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={editingCategoryName}
+                            onChange={(event) =>
+                              setEditingCategoryName(event.target.value)
+                            }
+                          />
+                        ) : (
+                          <span>{category.name}</span>
+                        )}
+                        <div className="board-category-actions">
                           {isEditing ? (
-                            <input
-                              type="text"
-                              value={editingCategoryName}
-                              onChange={(event) =>
-                                setEditingCategoryName(event.target.value)
-                              }
-                            />
-                          ) : (
-                            <span>{category.name}</span>
-                          )}
-                          <div className="board-category-actions">
-                            {isEditing ? (
-                              <button
-                                type="button"
-                                className="board-secondary-button"
-                                onClick={() => handleUpdateCategory(category.id)}
-                              >
-                                {t.board.categorySave}
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className="board-secondary-button"
-                                onClick={() => {
-                                  setEditingCategoryId(category.id)
-                                  setEditingCategoryName(category.name)
-                                  setCategoryError('')
-                                }}
-                              >
-                                {t.board.categoryEdit}
-                              </button>
-                            )}
                             <button
                               type="button"
-                              className="board-delete-button"
-                              onClick={() => handleDeleteCategory(category.id)}
-                              disabled={isGeneral}
+                              className="board-secondary-button"
+                              onClick={() => handleUpdateCategory(category.id)}
                             >
-                              {t.board.categoryDelete}
+                              {t.board.categorySave}
                             </button>
-                          </div>
+                          ) : (
+                            <button
+                              type="button"
+                              className="board-secondary-button"
+                              onClick={() => {
+                                setEditingCategoryId(category.id)
+                                setEditingCategoryName(category.name)
+                                setCategoryError('')
+                              }}
+                            >
+                              {t.board.categoryEdit}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="board-delete-button"
+                            onClick={() => handleDeleteCategory(category.id)}
+                            disabled={isGeneral}
+                          >
+                            {t.board.categoryDelete}
+                          </button>
                         </div>
-                      )
-                    })}
-                  </div>
+                      </div>
+                    )
+                  })}
                 </div>
-              ) : null}
-            </div>
-
-            <div className="board-list-summary">
-              <span className="board-count">
-                {hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL
-                  ? t.board.searchResultCount(sortedPosts.length)
-                  : t.board.totalCount(posts.length)}
-              </span>
-              <label className="board-sort-field">
-                <span>{t.board.sortLabel}</span>
-                <select
-                  value={sortMode}
-                  onChange={(event) => setSortMode(event.target.value)}
-                >
-                  {BOARD_SORT_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {t.board.sortOptions[option.id]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+              </div>
+            ) : null}
 
             {sortedPosts.length > 0 ? (
               <div className="board-title-list">
@@ -872,7 +901,12 @@ function Board({ t }) {
                       <span className="board-post-number">
                         {sortedPosts.length - index}
                       </span>
-                      <span className="board-title-text">{post.title}</span>
+                      <span className="board-title-text">
+                        {post.pinned === true ? (
+                          <span className="board-pinned-badge">{t.board.pinned}</span>
+                        ) : null}
+                        <span className="board-title-label">{post.title}</span>
+                      </span>
                       <span className="board-category-badge">
                         {getBoardCategoryName(postCategoryId, categories)}
                       </span>
