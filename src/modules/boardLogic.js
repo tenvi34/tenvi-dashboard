@@ -1,5 +1,6 @@
 export const DEFAULT_BOARD_CATEGORY_ID = 'general'
 
+// 디폴트 카테고리 상수
 export const DEFAULT_BOARD_CATEGORIES = [
   { id: 'general', name: '일반', isDefault: true },
   { id: 'notice', name: '공지', isDefault: true },
@@ -7,6 +8,14 @@ export const DEFAULT_BOARD_CATEGORIES = [
   { id: 'daily', name: '일상', isDefault: true },
   { id: 'question', name: '질문', isDefault: true },
   { id: 'image', name: '이미지', isDefault: true },
+]
+
+// 게시글 정렬 상수
+export const BOARD_SORT_OPTIONS = [
+  { id: 'latest', name: '최신순' },
+  { id: 'oldest', name: '오래된순' },
+  { id: 'views', name: '조회수순' },
+  { id: 'title', name: '제목순' },
 ]
 
 const createBoardBlockId = () => {
@@ -427,4 +436,35 @@ export const updateBoardPost = (posts, postId, input) => {
       updatedAt,
     }
   })
+}
+
+// 게시글 정렬
+export const sortBoardPosts = (posts = [], sortMode = 'latest') => {
+  const copiedPosts = [...posts]
+
+  // 오래된순
+  if (sortMode === 'oldest') {
+    return copiedPosts.sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    )
+  }
+
+  // 조회수순
+  if (sortMode === 'views') {
+    return copiedPosts.sort(
+      (a, b) => (b.views ?? 0) - (a.views ?? 0),
+    )
+  }
+
+  // 제목순
+  if (sortMode === 'title') {
+    return copiedPosts.sort(
+      (a, b) => String(a.title ?? '').localeCompare(String(b.title ?? ''), 'ko'),
+    )
+  }
+
+  // 최신순
+  return copiedPosts.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )
 }

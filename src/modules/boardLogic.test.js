@@ -19,6 +19,7 @@ import {
   parseBoardCategories,
   parseBoardDraft,
   parseBoardPosts,
+  sortBoardPosts,
   updateBoardCategory,
   updateBoardPost,
 } from './boardLogic.js'
@@ -355,6 +356,51 @@ describe('boardLogic', () => {
     expect(parseBoardPosts('[{"id":"post-1"}]')).toEqual([{ id: 'post-1' }])
     expect(parseBoardPosts('{"id":"not-array"}')).toEqual([])
     expect(parseBoardPosts('broken-json')).toEqual([])
+  })
+
+  it('sorts board posts without mutating the source list', () => {
+    const posts = [
+      {
+        id: 'post-1',
+        title: 'Beta',
+        createdAt: '2026-06-15T00:00:00.000Z',
+        views: 3,
+      },
+      {
+        id: 'post-2',
+        title: 'Alpha',
+        createdAt: '2026-06-17T00:00:00.000Z',
+        views: 1,
+      },
+      {
+        id: 'post-3',
+        title: 'Gamma',
+        createdAt: '2026-06-16T00:00:00.000Z',
+        views: 7,
+      },
+    ]
+
+    expect(sortBoardPosts(posts).map((post) => post.id)).toEqual([
+      'post-2',
+      'post-3',
+      'post-1',
+    ])
+    expect(sortBoardPosts(posts, 'oldest').map((post) => post.id)).toEqual([
+      'post-1',
+      'post-3',
+      'post-2',
+    ])
+    expect(sortBoardPosts(posts, 'views').map((post) => post.id)).toEqual([
+      'post-3',
+      'post-1',
+      'post-2',
+    ])
+    expect(sortBoardPosts(posts, 'title').map((post) => post.id)).toEqual([
+      'post-2',
+      'post-1',
+      'post-3',
+    ])
+    expect(posts.map((post) => post.id)).toEqual(['post-1', 'post-2', 'post-3'])
   })
 
   it('creates and parses board draft data without changing block shape', () => {

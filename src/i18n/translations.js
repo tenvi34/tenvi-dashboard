@@ -528,6 +528,13 @@ export const translations = {
         content: '내용',
         author: '작성자',
       },
+      sortLabel: '정렬',
+      sortOptions: {
+        latest: '최신순',
+        oldest: '오래된순',
+        views: '조회수순',
+        title: '제목순',
+      },
       searchResultCount: (count) => `검색 결과 ${count}개`,
       noSearchResults: '검색 결과가 없습니다.',
       clearSearch: '초기화',
@@ -1169,6 +1176,13 @@ export const translations = {
         title: 'Title',
         content: 'Content',
         author: 'Author',
+      },
+      sortLabel: 'Sort',
+      sortOptions: {
+        latest: 'Latest',
+        oldest: 'Oldest',
+        views: 'Most viewed',
+        title: 'Title',
       },
       searchResultCount: (count) =>
         `${count} ${count === 1 ? 'result' : 'results'}`,

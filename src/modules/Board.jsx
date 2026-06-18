@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardEditor from './BoardEditor.jsx'
 import {
+  BOARD_SORT_OPTIONS,
   DEFAULT_BOARD_CATEGORY_ID,
   addBoardCategory,
   createBoardDraft,
@@ -19,6 +20,7 @@ import {
   parseBoardCategories,
   parseBoardDraft,
   parseBoardPosts,
+  sortBoardPosts,
   updateBoardCategory,
   updateBoardPost,
 } from './boardLogic.js'
@@ -121,6 +123,7 @@ function Board({ t }) {
   const [selectedPostId, setSelectedPostId] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchScope, setSearchScope] = useState('title')
+  const [sortMode, setSortMode] = useState('latest')
   const [draftSaved, setDraftSaved] = useState(() => Boolean(loadBoardDraft()))
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const selectedPost = posts.find((post) => post.id === selectedPostId)
@@ -190,6 +193,8 @@ function Board({ t }) {
 
     return targetValue.toLowerCase().includes(normalizedSearchQuery)
   })
+  // 필터 결과만 정렬해 원본 저장 순서와 localStorage 데이터 보존
+  const sortedPosts = sortBoardPosts(filteredPosts, sortMode)
 
   const formatPostDate = (value, options) => {
     const date = new Date(value)
@@ -834,14 +839,27 @@ function Board({ t }) {
             <div className="board-list-summary">
               <span className="board-count">
                 {hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL
-                  ? t.board.searchResultCount(filteredPosts.length)
+                  ? t.board.searchResultCount(sortedPosts.length)
                   : t.board.totalCount(posts.length)}
               </span>
+              <label className="board-sort-field">
+                <span>{t.board.sortLabel}</span>
+                <select
+                  value={sortMode}
+                  onChange={(event) => setSortMode(event.target.value)}
+                >
+                  {BOARD_SORT_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {t.board.sortOptions[option.id]}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
-            {filteredPosts.length > 0 ? (
+            {sortedPosts.length > 0 ? (
               <div className="board-title-list">
-                {filteredPosts.map((post, index) => {
+                {sortedPosts.map((post, index) => {
                   const postCategoryId = getPostCategoryId(post, categories)
 
                   return (
@@ -852,11 +870,14 @@ function Board({ t }) {
                       onClick={() => handleOpenDetail(post.id)}
                     >
                       <span className="board-post-number">
-                        {filteredPosts.length - index}
+                        {sortedPosts.length - index}
                       </span>
                       <span className="board-title-text">{post.title}</span>
                       <span className="board-category-badge">
                         {getBoardCategoryName(postCategoryId, categories)}
+                      </span>
+                      <span className="board-title-views">
+                        {t.board.views(post.views ?? 0)}
                       </span>
                       <time className="board-title-date" dateTime={post.createdAt}>
                         {formatPostDate(post.createdAt, {
