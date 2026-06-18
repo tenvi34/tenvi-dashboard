@@ -417,9 +417,9 @@ function Settings({
       {/* Settings 그리드 */}
       <div className="settings-grid">
         {/* 언어 선택 */}
-        <section className="settings-panel settings-preference-panel">
+        <section className="settings-panel settings-preference-panel settings-interface-panel">
           <div className="settings-panel-header">
-            <p className="module-label">{t.settings.language}</p>
+            <p className="module-label">{t.settings.language} / {t.settings.theme}</p>
             <h3>{t.settings.interface}</h3>
           </div>
           <div className="settings-options" aria-label={t.settings.language}>
@@ -437,10 +437,27 @@ function Settings({
               </button>
             ))}
           </div>
+          <div className="settings-combined-group">
+            <p className="settings-group-label">{t.settings.theme}</p>
+            <div className="settings-options" aria-label={t.settings.theme}>
+              {THEMES.map((themeId) => (
+                <button
+                  className={`settings-option ${
+                    theme === themeId ? 'is-active' : ''
+                  }`}
+                  key={themeId}
+                  type="button"
+                  onClick={() => onThemeChange(themeId)}
+                >
+                  {t.settings.themes[themeId]}
+                </button>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* 기본 시작 모듈 */}
-        <section className="settings-panel settings-preference-panel">
+        <section className="settings-panel settings-preference-panel settings-start-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.defaultStartModule}</p>
             <h3>{t.settings.startup}</h3>
@@ -460,28 +477,6 @@ function Settings({
                 onClick={() => onStartModuleChange(moduleId)}
               >
                 {t.modules[moduleId]}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 디자인 테마 */}
-        <section className="settings-panel settings-preference-panel">
-          <div className="settings-panel-header">
-            <p className="module-label">{t.settings.theme}</p>
-            <h3>{t.settings.design}</h3>
-          </div>
-          <div className="settings-options" aria-label={t.settings.theme}>
-            {THEMES.map((themeId) => (
-              <button
-                className={`settings-option ${
-                  theme === themeId ? 'is-active' : ''
-                }`}
-                key={themeId}
-                type="button"
-                onClick={() => onThemeChange(themeId)}
-              >
-                {t.settings.themes[themeId]}
               </button>
             ))}
           </div>
@@ -518,6 +513,7 @@ function Settings({
         </section>
 
         {/* 백업/복원 */}
+        <div className="settings-action-stack">
         <section className="settings-panel settings-backup-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.backupLabel}</p>
@@ -596,6 +592,7 @@ function Settings({
             </div>
           ) : null}
         </section>
+        </div>
       </div>
     </section>
   )

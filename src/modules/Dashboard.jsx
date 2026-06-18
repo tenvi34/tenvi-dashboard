@@ -314,8 +314,8 @@ function Dashboard({
   const renderWorkTab = () => (
     <>
       {/* 작업 탭 */}
-      <div className="dashboard-tab-grid">
-        <section className="summary-panel">
+      <div className="dashboard-tab-grid dashboard-work-grid">
+        <section className="summary-panel dashboard-work-panel">
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.tasksSummary}</p>
             <h3>{t.modules.tasks}</h3>
@@ -354,7 +354,7 @@ function Dashboard({
           </div>
         </section>
 
-        <section className="summary-panel">
+        <section className="summary-panel dashboard-work-panel">
           <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.calendarSummary}</p>
             <h3>{t.modules.calendar}</h3>
