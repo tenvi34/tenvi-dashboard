@@ -4810,6 +4810,20 @@ body.tenvi-modal-open .tenvi-dashboard {
   margin: 0;
 }
 
+.board-image-preview-button {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.board-image-preview-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 3px;
+}
+
 .board-cafe-image-block img {
   display: block;
   width: 100%;
@@ -4823,6 +4837,68 @@ body.tenvi-modal-open .tenvi-dashboard {
   color: #6b7280;
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+.board-image-lightbox {
+  position: fixed;
+  z-index: 4300;
+  inset: 0;
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  padding:
+    calc(18px + env(safe-area-inset-top))
+    18px
+    calc(18px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgba(0, 5, 12, 0.88);
+  backdrop-filter: blur(12px);
+}
+
+.board-image-lightbox-body {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+  width: min(100%, 1100px);
+  min-height: 100%;
+}
+
+.board-image-lightbox-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border: 1px solid rgba(90, 212, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(2, 9, 18, 0.76);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.board-image-lightbox-close {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  justify-self: end;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(90, 212, 255, 0.32);
+  border-radius: var(--radius-control);
+  color: #dff8ff;
+  background: rgba(3, 8, 16, 0.86);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.board-image-lightbox-close:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
 }
 
 .board-detail {
@@ -6616,6 +6692,22 @@ body.tenvi-modal-open .tenvi-dashboard {
   background: #eef3ff;
 }
 
+.tenvi-dashboard.theme-standard .board-image-lightbox {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.tenvi-dashboard.theme-standard .board-image-lightbox-image {
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(31, 42, 68, 0.28);
+}
+
+.tenvi-dashboard.theme-standard .board-image-lightbox-close {
+  color: #172033;
+  border-color: #d9e2ec;
+  background: rgba(255, 255, 255, 0.9);
+}
+
 .tenvi-dashboard.theme-standard .board-post-card {
   border-color: #d9e2ec;
   background: #ffffff;
@@ -8250,6 +8342,22 @@ body.tenvi-modal-open .tenvi-dashboard {
   color: #93c5fd;
   border-color: rgba(96, 165, 250, 0.3);
   background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .board-image-lightbox {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.tenvi-dashboard.theme-dark .board-image-lightbox-image {
+  border-color: rgba(148, 163, 184, 0.15);
+  background: #1e293b;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.tenvi-dashboard.theme-dark .board-image-lightbox-close {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(30, 41, 59, 0.9);
 }
 
 .tenvi-dashboard.theme-dark .board-field input,

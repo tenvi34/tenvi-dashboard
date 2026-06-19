@@ -231,6 +231,7 @@ function Board({ t }) {
   const [editingCategoryName, setEditingCategoryName] = useState('')
   const [categoryError, setCategoryError] = useState('')
   const [detailImagePreviews, setDetailImagePreviews] = useState({})
+  const [imageViewer, setImageViewer] = useState(null)
   const [formError, setFormError] = useState('')
   const [view, setView] = useState('list')
   const [selectedPostId, setSelectedPostId] = useState('')
@@ -252,6 +253,7 @@ function Board({ t }) {
   useEffect(() => {
     if (!selectedPost) {
       setDetailImagePreviews({})
+      setImageViewer(null)
       return
     }
 
@@ -289,6 +291,28 @@ function Board({ t }) {
       isMounted = false
     }
   }, [selectedPost])
+
+  // 상세 이미지 확대 보기와 스크롤 잠금
+  useEffect(() => {
+    if (!imageViewer) {
+      return undefined
+    }
+
+    document.body.classList.add('tenvi-modal-open')
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setImageViewer(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.classList.remove('tenvi-modal-open')
+    }
+  }, [imageViewer])
 
   // 카테고리 필터와 검색 동시 적용
   const filteredPosts = posts.filter((post) => {
@@ -991,7 +1015,21 @@ function Board({ t }) {
 
                   return block.type === 'image' ? (
                     <figure className="board-cafe-image-block" key={block.id}>
-                      {imageSource ? <img src={imageSource} alt={block.name} /> : null}
+                      {imageSource ? (
+                        <button
+                          type="button"
+                          className="board-image-preview-button"
+                          aria-label={t.board.openImagePreview}
+                          onClick={() =>
+                            setImageViewer({
+                              alt: block.name,
+                              src: imageSource,
+                            })
+                          }
+                        >
+                          <img src={imageSource} alt={block.name} />
+                        </button>
+                      ) : null}
                     </figure>
                   ) : (
                     <p className="board-cafe-text-block" key={block.id}>
@@ -1008,6 +1046,34 @@ function Board({ t }) {
             </div>
           )}
         </section>
+      ) : null}
+
+      {imageViewer ? (
+        <div
+          className="board-image-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t.board.imagePreviewLabel}
+          onClick={() => setImageViewer(null)}
+        >
+          <div
+            className="board-image-lightbox-body"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="board-image-lightbox-close"
+              onClick={() => setImageViewer(null)}
+            >
+              {t.board.closeImagePreview}
+            </button>
+            <img
+              className="board-image-lightbox-image"
+              src={imageViewer.src}
+              alt={imageViewer.alt}
+            />
+          </div>
+        </div>
       ) : null}
 
       {view === 'list' ? (
