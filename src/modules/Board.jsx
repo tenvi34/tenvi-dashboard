@@ -29,9 +29,11 @@ import { deleteBoardImages, getBoardImages } from './boardImageStore.js'
 
 const POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const DRAFT_STORAGE_KEY = STORAGE_KEYS.boardDraft
+const DRAFTS_STORAGE_KEY = STORAGE_KEYS.boardDrafts
 const CATEGORIES_STORAGE_KEY = STORAGE_KEYS.boardCategories
 const CATEGORY_FILTER_ALL = 'all'
 const SEARCH_SCOPES = ['title', 'content', 'author']
+const LEGACY_DRAFT_ID = 'legacy-board-draft'
 
 const createEmptyTextBlock = () => ({
   id: crypto.randomUUID(),
@@ -47,6 +49,32 @@ const createEditableBlocks = (post) => {
 
   return getEditableBlocks(normalizedBlocks)
 }
+
+// 임시저장 목록 본문 단서
+const getDraftPreviewText = (draft) => {
+  const textContent = getBoardPostTextContent(draft?.blocks)
+
+  if (textContent) {
+    return textContent
+  }
+
+  return ''
+}
+
+// draft 목록 식별자 생성
+const createBoardDraftId = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID()
+  }
+
+  return `draft-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+// 다중 draft record 정규화
+const createBoardDraftRecord = (input, draftId) => ({
+  ...createBoardDraft(input),
+  id: draftId || createBoardDraftId(),
+})
 
 const hasWritableBody = (blocks) =>
   normalizeBoardBlocks(blocks).some((block) => {
@@ -96,9 +124,78 @@ const loadBoardDraft = () => {
   }
 }
 
-// Board 새 글 draft 자동저장
-const saveBoardDraft = (input) => {
-  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(createBoardDraft(input)))
+// Board 다중 draft 복원과 legacy draft 병합
+const loadBoardDrafts = () => {
+  try {
+    const rawDrafts = localStorage.getItem(DRAFTS_STORAGE_KEY)
+    const parsedDrafts = rawDrafts ? JSON.parse(rawDrafts) : []
+    const draftRecords = Array.isArray(parsedDrafts)
+      ? parsedDrafts
+          .map((draft) => {
+            const parsedDraft = parseBoardDraft(JSON.stringify(draft))
+
+            return parsedDraft
+              ? {
+                  ...parsedDraft,
+                  id: String(draft?.id || createBoardDraftId()),
+                }
+              : null
+          })
+          .filter(Boolean)
+      : []
+    const rawLegacyDraft = localStorage.getItem(DRAFT_STORAGE_KEY)
+    const legacyDraft = rawLegacyDraft ? parseBoardDraft(rawLegacyDraft) : null
+
+    if (legacyDraft) {
+      let legacyDraftId = LEGACY_DRAFT_ID
+
+      try {
+        const parsedLegacyDraft = JSON.parse(rawLegacyDraft)
+
+        legacyDraftId = String(parsedLegacyDraft?.id || LEGACY_DRAFT_ID)
+      } catch {
+        legacyDraftId = LEGACY_DRAFT_ID
+      }
+
+      const hasLegacyDraft = draftRecords.some((draft) => draft.id === legacyDraftId)
+
+      if (!hasLegacyDraft) {
+        draftRecords.push({
+          ...legacyDraft,
+          id: legacyDraftId,
+        })
+      }
+    }
+
+    return draftRecords.sort(
+      (firstDraft, secondDraft) =>
+        new Date(secondDraft.savedAt).getTime() - new Date(firstDraft.savedAt).getTime(),
+    )
+  } catch {
+    const legacyDraft = loadBoardDraft()
+
+    return legacyDraft
+      ? [
+          {
+            ...legacyDraft,
+            id: LEGACY_DRAFT_ID,
+          },
+        ]
+      : []
+  }
+}
+
+// Board draft 목록 저장
+const saveBoardDrafts = (drafts) => {
+  localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts))
+}
+
+const saveBoardDraft = (input, draftId) => {
+  const nextDraft = createBoardDraftRecord(input, draftId)
+
+  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(nextDraft))
+
+  return nextDraft
 }
 
 // Board 새 글 draft 삭제
@@ -125,12 +222,16 @@ function Board({ t }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchScope, setSearchScope] = useState('title')
   const [sortMode, setSortMode] = useState('latest')
-  const [draftSaved, setDraftSaved] = useState(() => Boolean(loadBoardDraft()))
+  const [draftList, setDraftList] = useState(() => loadBoardDrafts())
+  const [activeDraftId, setActiveDraftId] = useState('')
+  const [draftPickerOpen, setDraftPickerOpen] = useState(false)
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const selectedPost = posts.find((post) => post.id === selectedPostId)
   const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
   const hasSearchQuery = normalizedSearchQuery.length > 0
+  const activeDraft = draftList.find((draft) => draft.id === activeDraftId)
+  const draftSaved = Boolean(activeDraft)
 
   // 상세 화면 imageId preview 복원
   useEffect(() => {
@@ -207,6 +308,14 @@ function Board({ t }) {
     return new Intl.DateTimeFormat(t.board.locale, options).format(date)
   }
 
+  const formatDraftSavedAt = (value) =>
+    value
+      ? formatPostDate(value, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })
+      : ''
+
   // 게시글 입력 상태 초기화
   const resetWriteForm = () => {
     setAuthor('')
@@ -217,15 +326,36 @@ function Board({ t }) {
   }
 
   // 새 글 작성 화면 변경사항 draft 저장
+  const removeDraftFromList = (draftId) => {
+    if (!draftId) {
+      return draftList
+    }
+
+    const nextDrafts = draftList.filter((draft) => draft.id !== draftId)
+
+    saveBoardDrafts(nextDrafts)
+    setDraftList(nextDrafts)
+
+    return nextDrafts
+  }
+
   const saveCurrentDraft = (nextValues) => {
-    saveBoardDraft({
+    const nextDraftId = activeDraftId || createBoardDraftId()
+    const nextDraft = saveBoardDraft({
       author,
       title,
       categoryId,
       blocks,
       ...nextValues,
-    })
-    setDraftSaved(true)
+    }, nextDraftId)
+    const nextDrafts = [
+      nextDraft,
+      ...draftList.filter((draft) => draft.id !== nextDraft.id),
+    ]
+
+    saveBoardDrafts(nextDrafts)
+    setActiveDraftId(nextDraft.id)
+    setDraftList(nextDrafts)
   }
 
   const handleBlocksChange = (nextBlocks, shouldSaveDraft = false) => {
@@ -277,7 +407,9 @@ function Board({ t }) {
     })
 
     deleteBoardDraft()
-    setDraftSaved(false)
+    removeDraftFromList(activeDraftId)
+    setActiveDraftId('')
+    setDraftPickerOpen(false)
     resetWriteForm()
     setView('list')
   }
@@ -285,25 +417,28 @@ function Board({ t }) {
   // 게시글 작성 취소
   const handleCancelWrite = () => {
     resetWriteForm()
+    setActiveDraftId('')
+    setDraftPickerOpen(false)
     setView('list')
   }
 
   // 게시글 작성 화면 열기
+  const restoreDraftToForm = (savedDraft) => {
+    setAuthor(savedDraft.author)
+    setTitle(savedDraft.title)
+    setCategoryId(getPostCategoryId(savedDraft, categories))
+    setBlocks(getEditableBlocks(savedDraft.blocks))
+    setFormError('')
+    setActiveDraftId(savedDraft.id)
+    setDraftPickerOpen(false)
+  }
+
+  // 저장된 draft가 있을 때 이어쓰기와 새 글 시작을 분리
   const handleOpenWrite = () => {
-    const savedDraft = loadBoardDraft()
-
-    if (savedDraft) {
-      setAuthor(savedDraft.author)
-      setTitle(savedDraft.title)
-      setCategoryId(getPostCategoryId(savedDraft, categories))
-      setBlocks(getEditableBlocks(savedDraft.blocks))
-      setFormError('')
-      setDraftSaved(true)
-    } else {
-      resetWriteForm()
-      setDraftSaved(false)
-    }
-
+    resetWriteForm()
+    setDraftList(loadBoardDrafts())
+    setActiveDraftId('')
+    setDraftPickerOpen(false)
     setSelectedPostId('')
     setView('write')
   }
@@ -413,15 +548,19 @@ function Board({ t }) {
   }
 
   // 새 글 draft 수동 삭제
-  const handleDeleteDraft = () => {
-    const imageIds = getBoardImageIds(blocks)
+  const handleDeleteDraft = (targetDraft = activeDraft) => {
+    const imageIds = getBoardImageIds(targetDraft?.blocks ?? blocks)
 
     deleteBoardDraft()
     deleteBoardImages(imageIds).catch(() => {
       // draft 삭제는 localStorage 정리를 우선
     })
-    setDraftSaved(false)
-    resetWriteForm()
+    removeDraftFromList(targetDraft?.id)
+
+    if (!targetDraft || targetDraft.id === activeDraftId) {
+      setActiveDraftId('')
+      resetWriteForm()
+    }
   }
 
   // 카테고리 추가
@@ -524,14 +663,28 @@ function Board({ t }) {
               <div className="board-compose-header-actions">
                 {!isEditMode ? (
                   <span className="board-status-chip">
-                    {draftSaved ? t.board.draftSaved : t.board.draft}
+                    {draftSaved && formatDraftSavedAt(activeDraft.savedAt)
+                      ? t.board.draftSavedAt(formatDraftSavedAt(activeDraft.savedAt))
+                      : draftSaved
+                        ? t.board.draftSaved
+                        : t.board.draft}
                   </span>
                 ) : null}
                 {!isEditMode ? (
                   <button
                     type="button"
                     className="board-secondary-button"
-                    onClick={handleDeleteDraft}
+                    onClick={() => setDraftPickerOpen((isOpen) => !isOpen)}
+                    disabled={draftList.length === 0}
+                  >
+                    {t.board.loadDraft}
+                  </button>
+                ) : null}
+                {!isEditMode ? (
+                  <button
+                    type="button"
+                    className="board-secondary-button"
+                    onClick={() => handleDeleteDraft()}
                     disabled={!draftSaved}
                   >
                     {t.board.deleteDraft}
@@ -552,6 +705,57 @@ function Board({ t }) {
                 </button>
               </div>
             </div>
+
+            {!isEditMode && draftPickerOpen ? (
+              <div className="board-draft-picker" aria-label={t.board.draftPickerLabel}>
+                <div className="board-draft-picker-header">
+                  <p className="module-label">{t.board.draftPickerLabel}</p>
+                  <span className="board-count">
+                    {t.board.draftCount(draftList.length)}
+                  </span>
+                </div>
+                {draftList.length > 0 ? (
+                  <div className="board-draft-list">
+                    {draftList.map((draft) => {
+                      const previewText = getDraftPreviewText(draft)
+                      const hasImages = getBoardImageIds(draft.blocks).length > 0
+                      const savedAt = formatDraftSavedAt(draft.savedAt)
+
+                      return (
+                        <div className="board-draft-item" key={draft.id}>
+                          <button
+                            type="button"
+                            className={`board-draft-load-button ${
+                              draft.id === activeDraftId ? 'is-active' : ''
+                            }`}
+                            onClick={() => restoreDraftToForm(draft)}
+                          >
+                            <strong>{draft.title.trim() || t.board.untitledDraft}</strong>
+                            <span>
+                              {previewText
+                                ? t.board.draftPreview(previewText)
+                                : hasImages
+                                  ? t.board.imageDraftPreview
+                                  : t.board.emptyDraftPreview}
+                            </span>
+                            {savedAt ? <small>{t.board.draftSavedAt(savedAt)}</small> : null}
+                          </button>
+                          <button
+                            type="button"
+                            className="board-delete-button"
+                            onClick={() => handleDeleteDraft(draft)}
+                          >
+                            {t.board.deleteDraft}
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="board-draft-empty">{t.board.noDrafts}</p>
+                )}
+              </div>
+            ) : null}
 
             <div className="board-compose-meta">
               {renderCategorySelect({ isEditMode })}
