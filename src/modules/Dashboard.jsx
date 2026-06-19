@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import './Dashboard.css'
 
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import { getMapArchiveSummary } from '../services/photoArchiveSummaryService.js'

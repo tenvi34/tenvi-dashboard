@@ -1,0 +1,477 @@
+.settings-grid {
+  display: grid;
+  grid-template-areas:
+    'interface startup actions'
+    'data data actions';
+  grid-template-columns: minmax(240px, 1fr) minmax(260px, 1fr) minmax(260px, 0.95fr);
+  gap: 12px;
+  align-items: start;
+}
+
+/* Settings 설정 그룹 */
+.settings-panel {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.42);
+}
+
+.settings-panel-header {
+  margin-bottom: 10px;
+}
+
+.settings-panel-header h3 {
+  margin: 4px 0 0;
+  color: #f4fdff;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.settings-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.settings-options-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-option {
+  min-height: 36px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #aacbd8;
+  background: rgba(5, 16, 31, 0.5);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.settings-option:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.settings-option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.settings-option.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.14);
+  box-shadow: inset 0 0 18px rgba(90, 212, 255, 0.1);
+}
+
+.settings-option:focus-visible,
+.reset-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+}
+
+.data-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.data-metric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(90, 212, 255, 0.08), rgba(90, 212, 255, 0.02)),
+    rgba(5, 16, 31, 0.36);
+}
+
+.data-metric span {
+  color: #a8c7d6;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.data-metric strong {
+  color: var(--neon-strong);
+  font-size: 15px;
+  line-height: 1;
+  text-align: right;
+}
+
+.reset-button {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255, 102, 134, 0.28);
+  border-radius: 8px;
+  color: #ffd7df;
+  background: rgba(255, 102, 134, 0.1);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.reset-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 102, 134, 0.5);
+  box-shadow: 0 0 18px rgba(255, 102, 134, 0.12);
+}
+
+.reset-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.reset-button:disabled:hover {
+  transform: none;
+  border-color: rgba(255, 102, 134, 0.28);
+  box-shadow: none;
+}
+
+.settings-note {
+  margin-top: 8px;
+  color: #b8dbe7;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.reset-confirm-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 102, 134, 0.34);
+  border-radius: 8px;
+  background: rgba(255, 102, 134, 0.08);
+}
+
+.reset-confirm-panel h4 {
+  margin: 5px 0 8px;
+  color: #ffd7df;
+  font-size: 16px;
+}
+
+.reset-confirm-panel p:not(.module-label) {
+  color: #f1c6cf;
+}
+
+.reset-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.confirm-reset-button {
+  background: rgba(255, 102, 134, 0.18);
+}
+
+.backup-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.backup-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.backup-status {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 8px;
+  color: #cceef8;
+  background: rgba(90, 212, 255, 0.08);
+}
+
+.backup-status.is-success {
+  border-color: rgba(101, 255, 188, 0.28);
+  color: #d7ffef;
+  background: rgba(101, 255, 188, 0.08);
+}
+
+.backup-status.is-error {
+  border-color: rgba(255, 102, 134, 0.34);
+  color: #ffd7df;
+  background: rgba(255, 102, 134, 0.08);
+}
+
+/* Settings 위험 액션 구분 */
+.settings-preference-panel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.settings-interface-panel {
+  grid-area: interface;
+  gap: 8px;
+}
+
+.settings-start-panel {
+  grid-area: startup;
+}
+
+.settings-combined-group {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-group-label {
+  margin: 0;
+  color: #a8c7d6;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.settings-preference-panel .settings-panel-header,
+.settings-data-panel .settings-panel-header,
+.settings-backup-panel .settings-panel-header,
+.settings-danger-panel .settings-panel-header {
+  margin-bottom: 0;
+}
+
+.settings-data-panel {
+  grid-area: data;
+}
+
+.settings-data-panel .data-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.settings-backup-panel {
+  border-color: rgba(101, 255, 188, 0.22);
+  background:
+    linear-gradient(135deg, rgba(101, 255, 188, 0.06), rgba(2, 9, 18, 0.4)),
+    rgba(2, 9, 18, 0.42);
+}
+
+.settings-backup-panel .backup-actions {
+  margin-top: 8px;
+}
+
+.settings-backup-panel .settings-note + .settings-note {
+  margin-top: 4px;
+}
+
+.settings-danger-panel {
+  border-color: rgba(255, 102, 134, 0.34);
+  background:
+    linear-gradient(135deg, rgba(255, 102, 134, 0.1), rgba(2, 9, 18, 0.44)),
+    rgba(2, 9, 18, 0.42);
+}
+
+.settings-danger-panel > .reset-button {
+  margin-top: 8px;
+}
+
+.settings-action-stack {
+  grid-area: actions;
+  display: grid;
+  gap: 0;
+  align-content: start;
+}
+
+.settings-action-stack .settings-backup-panel {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.settings-action-stack .settings-danger-panel {
+  border-top: 0;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+}
+
+.settings-danger-panel .module-label,
+.settings-danger-panel .settings-panel-header h3 {
+  color: #ffd7df;
+}
+
+.settings-danger-panel .settings-note {
+  color: #f1c6cf;
+}
+
+.reset-confirm-panel {
+  padding: 12px;
+  border-left-width: 3px;
+}
+
+.backup-status {
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.backup-status.is-info {
+  color: #cceef8;
+  border-color: rgba(90, 212, 255, 0.24);
+  background: rgba(90, 212, 255, 0.08);
+}
+
+/* PC/모바일 분기 */
+@media (max-width: 860px) {
+  .settings-grid {
+      grid-template-areas:
+        'interface'
+        'startup'
+        'data'
+        'actions';
+    }
+
+  .settings-data-panel,
+    .settings-backup-panel {
+      grid-column: auto;
+    }
+}
+
+@media (max-width: 560px) {
+  .settings-options,
+    .settings-options-grid,
+    .data-metrics,
+    .settings-data-panel .data-metrics,
+    .backup-actions,
+    .reset-actions {
+      grid-template-columns: 1fr;
+    }
+
+  .settings-data-panel {
+      grid-column: auto;
+    }
+}
+
+.tenvi-dashboard.theme-standard .reset-confirm-panel {
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-standard .reset-confirm-panel h4,
+.tenvi-dashboard.theme-standard .reset-confirm-panel p:not(.module-label) {
+  color: #912018;
+}
+
+.tenvi-dashboard.theme-standard .backup-status {
+  color: #245bdb;
+  border-color: #b9c9ff;
+  background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-standard .backup-status.is-success {
+  color: #067647;
+  border-color: #a6f4c5;
+  background: #ecfdf3;
+}
+
+.tenvi-dashboard.theme-standard .backup-status.is-error {
+  color: #b42318;
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-standard .settings-group-label {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .settings-backup-panel {
+  border-color: #a6f4c5;
+  background: #f6fef9;
+}
+
+.tenvi-dashboard.theme-standard .settings-danger-panel {
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-standard .settings-danger-panel .module-label,
+.tenvi-dashboard.theme-standard .settings-danger-panel .settings-panel-header h3,
+.tenvi-dashboard.theme-standard .settings-danger-panel .settings-note {
+  color: #912018;
+}
+
+.tenvi-dashboard.theme-standard .backup-status.is-info {
+  color: #245bdb;
+  border-color: #b9c9ff;
+  background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-dark .reset-confirm-panel {
+  border-color: rgba(248, 113, 113, 0.25);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .reset-confirm-panel h4,
+.tenvi-dashboard.theme-dark .reset-confirm-panel p:not(.module-label) {
+  color: #fca5a5;
+}
+
+.tenvi-dashboard.theme-dark .backup-status {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .backup-status.is-success {
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .backup-status.is-error {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .backup-status.is-info {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .settings-group-label {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .settings-backup-panel {
+  border-color: rgba(74, 222, 128, 0.25);
+  background: rgba(74, 222, 128, 0.05);
+}
+
+.tenvi-dashboard.theme-dark .settings-danger-panel {
+  border-color: rgba(248, 113, 113, 0.25);
+  background: rgba(248, 113, 113, 0.05);
+}
+
+.tenvi-dashboard.theme-dark .settings-danger-panel .module-label,
+.tenvi-dashboard.theme-dark .settings-danger-panel .settings-panel-header h3,
+.tenvi-dashboard.theme-dark .settings-danger-panel .settings-note {
+  color: #fca5a5;
+}

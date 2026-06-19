@@ -1,0 +1,113 @@
+.todo-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, auto) auto;
+  gap: 10px;
+  margin-bottom: var(--module-gap);
+}
+
+.todo-form button {
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  padding: 0 24px;
+  font-weight: 800;
+}
+
+.todo-filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 6px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(2, 9, 18, 0.45);
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.todo-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(90, 212, 255, 0.09), rgba(5, 16, 31, 0.72));
+}
+
+.todo-check {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f4fdff;
+}
+
+.todo-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--neon);
+  flex: 0 0 auto;
+}
+
+.todo-check span {
+  display: grid;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+
+.todo-check small {
+  color: var(--muted-cyan);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.todo-item.is-completed {
+  border-color: rgba(90, 212, 255, 0.14);
+  background: rgba(5, 16, 31, 0.48);
+}
+
+.todo-item.is-completed .todo-check span {
+  color: rgba(190, 229, 240, 0.58);
+  text-decoration: line-through;
+}
+
+@media (max-width: 560px) {
+  .todo-filters {
+      grid-template-columns: 1fr;
+    }
+}
+
+.tenvi-dashboard.theme-standard .todo-check input {
+  accent-color: #245bdb;
+}
+
+.tenvi-dashboard.theme-standard .todo-item.is-completed {
+  border-color: #e4eaf2;
+  background: #f4f7fb;
+}
+
+.tenvi-dashboard.theme-standard .todo-item.is-completed .todo-check span {
+  color: #98a2b3;
+}
+
+.tenvi-dashboard.theme-dark .todo-check input {
+  accent-color: #3b82f6;
+}
+
+.tenvi-dashboard.theme-dark .todo-item.is-completed {
+  border-color: rgba(148, 163, 184, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tenvi-dashboard.theme-dark .todo-item.is-completed .todo-check span {
+  color: #475569;
+}

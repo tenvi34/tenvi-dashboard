@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import './Timer.css'
 import {
   formatStopwatchTime,
   formatTime,

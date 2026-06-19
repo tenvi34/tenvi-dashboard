@@ -1,0 +1,229 @@
+.timer-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 6px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(2, 9, 18, 0.45);
+}
+
+/* Timer 화면 */
+.timer-tab {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #aacbd8;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.timer-tab:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+}
+
+.timer-tab.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.14);
+  box-shadow: inset 0 0 18px rgba(90, 212, 255, 0.1);
+}
+
+.timer-duration-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.timer-duration-settings label {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(5, 16, 31, 0.5);
+}
+
+.timer-duration-settings span {
+  color: #a8c7d6;
+  font-size: 14px;
+}
+
+.timer-duration-settings input {
+  width: 100%;
+  min-width: 0;
+  color: #f4fdff;
+  background: rgba(2, 9, 18, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.timer-duration-settings input:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
+}
+
+.timer-display-panel {
+  display: grid;
+  place-items: center;
+  min-height: 300px;
+  padding: 30px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at center, rgba(90, 212, 255, 0.12), transparent 58%),
+    rgba(2, 9, 18, 0.46);
+}
+
+.timer-mode {
+  color: var(--muted-cyan);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.timer-time {
+  color: #f4fdff;
+  font-size: clamp(60px, 9vw, 128px);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 26px rgba(90, 212, 255, 0.32);
+  word-break: keep-all;
+}
+
+.timer-caption {
+  color: #b8dbe7;
+}
+
+.timer-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stopwatch-panel {
+  margin-top: 0;
+}
+
+.timer-button {
+  min-height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.timer-button.secondary {
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+}
+
+.timer-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.18);
+}
+
+.timer-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+}
+
+.timer-button:active {
+  transform: translateY(0);
+}
+
+.timer-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.timer-stat {
+  display: grid;
+  gap: 10px;
+  min-height: 92px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(90, 212, 255, 0.09), rgba(5, 16, 31, 0.72));
+}
+
+.timer-stat span {
+  color: #a8c7d6;
+  font-size: 14px;
+}
+
+.timer-stat strong {
+  align-self: end;
+  color: var(--neon-strong);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.lap-panel {
+  padding: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.38);
+}
+
+.lap-panel ol {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.lap-panel li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  background: rgba(5, 16, 31, 0.5);
+}
+
+.lap-panel span {
+  color: #b8dbe7;
+}
+
+.lap-panel strong {
+  color: var(--neon-strong);
+}
+
+/* PC/모바일 분기 */
+@media (max-width: 860px) {
+  .timer-time {
+      font-size: clamp(48px, 18vw, 88px);
+    }
+}

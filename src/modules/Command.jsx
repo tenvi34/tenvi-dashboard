@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import './Command.css'
 import {
   createResult,
   normalizeCommand,

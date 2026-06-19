@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardEditor from './BoardEditor.jsx'
+import './Board.css'
 import {
   BOARD_SORT_OPTIONS,
   DEFAULT_BOARD_CATEGORY_ID,

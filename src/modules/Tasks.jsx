@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import { createTask, normalizeDueDate } from './tasksLogic.js'
+import './Tasks.css'
 
 // 기존 Tasks key 보존
 const STORAGE_KEY = STORAGE_KEYS.tasks

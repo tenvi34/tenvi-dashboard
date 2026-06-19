@@ -1,0 +1,145 @@
+/* TENVI forms styles */
+
+.todo-form input,
+.command-form input,
+.notes-form input,
+.notes-form textarea,
+.calendar-form input,
+.calendar-form textarea,
+.calendar-month-selectors select {
+  min-width: 0;
+  color: #f4fdff;
+  background: rgba(2, 9, 18, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font: inherit;
+  line-height: 1.4;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.todo-form input::placeholder,
+.command-form input::placeholder,
+.notes-form input::placeholder,
+.notes-form textarea::placeholder,
+.calendar-form input::placeholder,
+.calendar-form textarea::placeholder {
+  color: rgba(190, 229, 240, 0.48);
+}
+
+.todo-form input:focus,
+.command-form input:focus,
+.notes-form input:focus,
+.notes-form textarea:focus,
+.calendar-form input:focus,
+.calendar-form textarea:focus,
+.calendar-month-selectors select:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
+  background: rgba(4, 14, 28, 0.95);
+}
+
+.todo-form input,
+.command-form input,
+.notes-form input,
+.notes-form textarea,
+.calendar-form input,
+.calendar-form textarea,
+.calendar-month-selectors select,
+.timer-duration-settings input,
+.map-field input,
+.map-field select,
+.map-field textarea,
+.map-search-form input,
+.map-search-form select {
+  min-height: 40px;
+  border-color: var(--line);
+  border-radius: var(--radius-control);
+  padding: 10px 12px;
+  color: #f4fdff;
+  background: rgba(2, 9, 18, 0.76);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.todo-form input::placeholder,
+.command-form input::placeholder,
+.notes-form input::placeholder,
+.notes-form textarea::placeholder,
+.calendar-form input::placeholder,
+.calendar-form textarea::placeholder,
+.map-field input::placeholder,
+.map-field textarea::placeholder,
+.map-search-form input::placeholder {
+  color: rgba(190, 229, 240, 0.5);
+}
+
+.todo-form input:focus,
+.command-form input:focus,
+.notes-form input:focus,
+.notes-form textarea:focus,
+.calendar-form input:focus,
+.calendar-form textarea:focus,
+.calendar-month-selectors select:focus,
+.timer-duration-settings input:focus,
+.map-field input:focus,
+.map-field select:focus,
+.map-field textarea:focus,
+.map-search-form input:focus,
+.map-search-form select:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: var(--focus-ring);
+  background: rgba(4, 14, 28, 0.96);
+}
+
+/* PC/모바일 분기 */
+@media (max-width: 860px) {
+  .todo-form,
+    .command-form {
+      grid-template-columns: 1fr;
+    }
+
+  .todo-form input,
+    .command-form input,
+    .notes-form input,
+    .notes-form textarea,
+    .calendar-form input,
+    .calendar-form textarea,
+    .calendar-month-selectors select,
+    .timer-duration-settings input,
+    .map-field input,
+    .map-field select,
+    .map-field textarea,
+    .map-search-form input,
+    .map-search-form select {
+      min-height: 42px;
+      font-size: 16px;
+    }
+}
+
+@media (max-width: 560px) {
+  .todo-form,
+    .command-form,
+    .calendar-layout,
+    .calendar-date-range,
+    .map-layout,
+    .map-archive-layout,
+    .map-bulk-actions,
+    .map-bulk-summary-grid,
+    .map-date-row,
+    .map-collection-actions,
+    .map-search-controls,
+    .map-search-form,
+    .todo-item,
+    .calendar-event-item,
+    .note-item {
+      grid-template-columns: 1fr;
+    }
+}

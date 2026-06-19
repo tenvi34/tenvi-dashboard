@@ -9,6 +9,7 @@ import {
 } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import './Map.css'
 import {
   createBulkUploadSummary,
   getBulkLocationAssignableItems,

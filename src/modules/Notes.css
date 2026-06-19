@@ -1,0 +1,74 @@
+.notes-form textarea {
+  resize: vertical;
+}
+
+.notes-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.notes-form button {
+  min-height: 46px;
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  font-weight: 800;
+}
+
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.note-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(90, 212, 255, 0.08), rgba(5, 16, 31, 0.72));
+}
+
+.note-body {
+  min-width: 0;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.note-header h3 {
+  margin: 0;
+  color: #f4fdff;
+  font-size: 18px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.note-header time {
+  flex: 0 0 auto;
+  color: var(--muted-cyan);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.note-body p {
+  color: #b8dbe7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .note-header {
+      flex-direction: column;
+    }
+}

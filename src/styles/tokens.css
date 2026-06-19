@@ -1,0 +1,89 @@
+/* TENVI tokens styles */
+
+body {
+  background: #03060d;
+}
+
+body.tenvi-modal-open {
+  overflow: hidden;
+}
+
+body.tenvi-modal-open .tenvi-dashboard {
+  overflow: hidden;
+}
+
+/* 앱 배경과 HUD 변수 */
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-inline: 0;
+  text-align: initial;
+}
+
+.tenvi-dashboard {
+  --panel-bg: rgba(8, 18, 32, 0.78);
+  --panel-bg-strong: rgba(10, 28, 48, 0.92);
+  --line: rgba(90, 212, 255, 0.28);
+  --line-strong: rgba(90, 212, 255, 0.55);
+  --neon: #5ad4ff;
+  --neon-strong: #86ecff;
+  --blue: #2d7dff;
+  --muted-cyan: #9edff2;
+  --danger: #ff6686;
+  --surface: rgba(5, 16, 31, 0.58);
+  --surface-soft: rgba(2, 9, 18, 0.42);
+  --radius-panel: 10px;
+  --radius-control: 8px;
+  --control-height: 46px;
+  --mobile-tabbar-height: 72px;
+  --panel-padding: 18px;
+  --module-gap: 12px;
+  --focus-ring: 0 0 0 3px rgba(90, 212, 255, 0.14);
+  --hover-glow: 0 0 18px rgba(90, 212, 255, 0.14);
+  --panel-shadow: 0 0 30px rgba(45, 125, 255, 0.12);
+
+  position: relative;
+  min-height: 100svh;
+  padding: 34px 22px;
+  box-sizing: border-box;
+  color: #dff8ff;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(45, 125, 255, 0.22), transparent 28%),
+    radial-gradient(circle at 82% 0%, rgba(90, 212, 255, 0.14), transparent 26%),
+    linear-gradient(135deg, #050913 0%, #081527 48%, #03060d 100%);
+  /* HUD 가로 넘침 차단 */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* shell 스크롤 기준 */
+.tenvi-dashboard * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90, 212, 255, 0.42) rgba(2, 9, 18, 0.34);
+}
+
+.tenvi-dashboard *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.tenvi-dashboard *::-webkit-scrollbar-track {
+  background: rgba(2, 9, 18, 0.34);
+  border-radius: 999px;
+}
+
+.tenvi-dashboard *::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(2, 9, 18, 0.34);
+  border-radius: 999px;
+  background: rgba(90, 212, 255, 0.42);
+}
+
+/* PC/모바일 분기 */
+@media (max-width: 860px) {
+  .tenvi-dashboard {
+      min-height: 100dvh;
+      /* iPhone safe-area 여백 */
+      padding: 18px 12px calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom) + 18px);
+    }
+}

@@ -1,0 +1,162 @@
+/* 입력 폼과 버튼 상태 */
+.command-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-bottom: var(--module-gap);
+}
+
+.command-form button {
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  padding: 0 24px;
+  font-weight: 800;
+}
+
+.analysis-panel {
+  padding: 20px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.46);
+  margin-bottom: 16px;
+}
+
+/* Command 결과와 히스토리 */
+.analysis-header {
+  margin-bottom: 16px;
+}
+
+.analysis-header h3 {
+  margin: 5px 0 0;
+  color: #f4fdff;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.analysis-metric {
+  display: grid;
+  gap: 10px;
+  min-height: 86px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(90, 212, 255, 0.09), rgba(5, 16, 31, 0.72));
+}
+
+.analysis-metric span {
+  color: #a8c7d6;
+  font-size: 14px;
+}
+
+.analysis-metric strong {
+  align-self: end;
+  color: var(--neon-strong);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.analysis-sections {
+  display: grid;
+  gap: 12px;
+}
+
+.analysis-section {
+  padding: 16px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-left-color: var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.analysis-section h4 {
+  margin: 0 0 10px;
+  color: var(--muted-cyan);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.analysis-section ul,
+.command-history ol {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.analysis-section li,
+.command-history li,
+.command-history-empty {
+  color: #b8dbe7;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.analysis-section li {
+  padding-left: 12px;
+  border-left: 2px solid rgba(90, 212, 255, 0.26);
+}
+
+.analysis-section .command-list li {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.command-link-button {
+  width: 100%;
+  min-height: 38px;
+  display: block;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 7px;
+  padding: 9px 10px;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.command-link-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.1);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.command-link-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+}
+
+.command-history {
+  padding: 18px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(2, 9, 18, 0.38);
+}
+
+.command-history li {
+  padding: 0;
+}
+
+/* PC/모바일 분기 */
+@media (max-width: 860px) {
+  .analysis-grid {
+      grid-template-columns: 1fr;
+    }
+}

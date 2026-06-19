@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import './Calendar.css'
 import {
   countEventsByDate,
   createCalendarEvent,

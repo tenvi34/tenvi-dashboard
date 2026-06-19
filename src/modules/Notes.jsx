@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import './Notes.css'
 
 // Notes key 공유
 const STORAGE_KEY = STORAGE_KEYS.notes

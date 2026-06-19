@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import './Settings.css'
 import {
   getPhotoRecordCount,
   getPhotoRecords,

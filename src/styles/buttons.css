@@ -1,0 +1,514 @@
+/* TENVI buttons styles */
+
+.language-button {
+  min-height: 30px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #aacbd8;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.language-button:hover {
+  color: #f4fdff;
+  border-color: rgba(90, 212, 255, 0.32);
+}
+
+.language-button.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.16);
+  box-shadow: inset 0 0 14px rgba(90, 212, 255, 0.1);
+}
+
+.sidebar-button {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #aacbd8;
+  background: rgba(2, 9, 18, 0.42);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.sidebar-button::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(90, 212, 255, 0.24);
+}
+
+.sidebar-button::before {
+  content: '';
+  position: absolute;
+  inset: 8px auto 8px 0;
+  width: 3px;
+  border-radius: 999px;
+  background: transparent;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.sidebar-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  color: #f4fdff;
+  background: rgba(90, 212, 255, 0.08);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.sidebar-button.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background:
+    linear-gradient(90deg, rgba(90, 212, 255, 0.2), rgba(45, 125, 255, 0.08)),
+    rgba(90, 212, 255, 0.08);
+  box-shadow:
+    inset 0 0 18px rgba(90, 212, 255, 0.12),
+    0 0 20px rgba(90, 212, 255, 0.1);
+}
+
+.sidebar-button.is-active::after {
+  background: var(--neon);
+  box-shadow: 0 0 12px var(--neon);
+}
+
+.sidebar-button.is-active::before {
+  background: var(--neon);
+  box-shadow: 0 0 12px var(--neon);
+}
+
+.todo-form button,
+.command-form button,
+.notes-form button,
+.calendar-form button,
+.filter-button,
+.delete-button,
+.calendar-nav-button,
+.sidebar-button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.todo-form button,
+.command-form button,
+.notes-form button,
+.calendar-form button {
+  min-height: 48px;
+}
+
+/* Tasks 필터와 목록 */
+.filter-button {
+  min-height: 40px;
+  color: #aacbd8;
+  background: transparent;
+}
+
+.filter-button.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.16);
+  box-shadow: inset 0 0 18px rgba(90, 212, 255, 0.1);
+}
+
+.delete-button {
+  color: #ffd7df;
+  background: rgba(255, 102, 134, 0.1);
+  border-color: rgba(255, 102, 134, 0.28);
+  padding: 8px 12px;
+}
+
+.todo-form button:hover,
+.command-form button:hover,
+.notes-form button:hover,
+.calendar-form button:hover,
+.calendar-nav-button:hover,
+.filter-button:hover,
+.delete-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.18);
+}
+
+.delete-button:hover {
+  border-color: rgba(255, 102, 134, 0.5);
+  box-shadow: 0 0 18px rgba(255, 102, 134, 0.12);
+}
+
+.todo-form button:focus-visible,
+.command-form button:focus-visible,
+.notes-form button:focus-visible,
+.calendar-form button:focus-visible,
+.calendar-nav-button:focus-visible,
+.language-button:focus-visible,
+.filter-button:focus-visible,
+.delete-button:focus-visible,
+.sidebar-button:focus-visible,
+.board-scope-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+}
+
+.todo-form button:active,
+.command-form button:active,
+.notes-form button:active,
+.calendar-form button:active,
+.filter-button:active,
+.delete-button:active,
+.sidebar-button:active {
+  transform: translateY(0);
+}
+
+/* 공통 버튼 계층 */
+.command-form button,
+.timer-button,
+.map-primary-button,
+.map-search-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 40px;
+  border-radius: var(--radius-control);
+  padding: 0 12px;
+  color: #00131c;
+  background: linear-gradient(135deg, var(--neon-strong), var(--blue));
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.todo-form button,
+.notes-form button,
+.calendar-form button,
+.timer-button.secondary,
+.settings-option,
+.calendar-nav-button,
+.command-link-button,
+.map-secondary-button,
+.map-add-toggle-button,
+.map-collection-toggle,
+.map-fit-all-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 40px;
+  border-radius: var(--radius-control);
+  padding: 0 12px;
+  color: #dff8ff;
+  background: rgba(5, 16, 31, 0.5);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.filter-button,
+.timer-tab,
+.map-mode-tab,
+.language-button,
+.sidebar-button {
+  border-radius: var(--radius-control);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.filter-button,
+.timer-tab,
+.map-mode-tab {
+  color: #aacbd8;
+  background: transparent;
+}
+
+.filter-button.is-active,
+.timer-tab.is-active,
+.map-mode-tab.is-active,
+.settings-option.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.14);
+  box-shadow: inset 0 0 16px rgba(90, 212, 255, 0.1);
+}
+
+.delete-button,
+.reset-button,
+.map-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 0 12px;
+  border-color: rgba(255, 102, 134, 0.3);
+  color: #ffd7df;
+  background: rgba(255, 102, 134, 0.1);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.todo-form button:hover,
+.command-form button:hover,
+.notes-form button:hover,
+.calendar-form button:hover,
+.timer-button:hover,
+.settings-option:hover,
+.calendar-nav-button:hover,
+.command-link-button:hover,
+.map-primary-button:hover:not(:disabled),
+.map-secondary-button:hover:not(:disabled),
+.map-search-form button:hover:not(:disabled),
+.map-add-toggle-button:hover,
+.map-collection-toggle:hover,
+.map-fit-all-button:hover,
+.filter-button:hover,
+.timer-tab:hover,
+.map-mode-tab:hover,
+.delete-button:hover,
+.reset-button:hover,
+.sidebar-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  box-shadow: var(--hover-glow);
+}
+
+.delete-button:hover,
+.reset-button:hover,
+.map-delete-button:hover {
+  border-color: rgba(255, 102, 134, 0.5);
+  box-shadow: 0 0 18px rgba(255, 102, 134, 0.12);
+}
+
+.todo-form button:focus-visible,
+.command-form button:focus-visible,
+.notes-form button:focus-visible,
+.calendar-form button:focus-visible,
+.timer-button:focus-visible,
+.settings-option:focus-visible,
+.calendar-nav-button:focus-visible,
+.command-link-button:focus-visible,
+.map-primary-button:focus-visible,
+.map-secondary-button:focus-visible,
+.map-search-form button:focus-visible,
+.filter-button:focus-visible,
+.timer-tab:focus-visible,
+.map-mode-tab:focus-visible,
+.delete-button:focus-visible,
+.reset-button:focus-visible,
+.sidebar-button:focus-visible,
+.language-button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+}
+
+.todo-form button:active,
+.command-form button:active,
+.notes-form button:active,
+.calendar-form button:active,
+.timer-button:active,
+.settings-option:active,
+.calendar-nav-button:active,
+.command-link-button:active,
+.map-primary-button:active,
+.map-secondary-button:active,
+.filter-button:active,
+.timer-tab:active,
+.map-mode-tab:active,
+.delete-button:active,
+.reset-button:active,
+.sidebar-button:active {
+  transform: translateY(0);
+}
+
+/* PC/모바일 분기 */
+@media (max-width: 860px) {
+  .language-button,
+    .filter-button,
+    .dashboard-tab,
+    .timer-tab,
+    .map-mode-tab,
+    .settings-option,
+    .calendar-nav-button,
+    .command-link-button {
+      min-height: 42px;
+    }
+
+  .mobile-tabbar-button {
+      min-width: 0;
+      min-height: 52px;
+      border: 1px solid rgba(90, 212, 255, 0.18);
+      border-radius: 8px;
+      padding: 6px 5px;
+      color: #aacbd8;
+      background: rgba(2, 9, 18, 0.64);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.15;
+      cursor: pointer;
+      transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        color 0.18s ease;
+    }
+
+  .mobile-tabbar-button span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+  .mobile-tabbar-button.is-active {
+      color: #f4fdff;
+      border-color: var(--line-strong);
+      background:
+        linear-gradient(180deg, rgba(90, 212, 255, 0.2), rgba(45, 125, 255, 0.1)),
+        rgba(90, 212, 255, 0.08);
+      box-shadow: inset 0 0 16px rgba(90, 212, 255, 0.12);
+    }
+
+  .mobile-tabbar-button:focus-visible {
+      outline: 2px solid var(--neon);
+      outline-offset: 2px;
+    }
+
+  .mobile-tabbar-more-button {
+      width: 100%;
+    }
+
+  .mobile-tabbar-menu-button {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid rgba(90, 212, 255, 0.18);
+      border-radius: 7px;
+      padding: 0 12px;
+      color: #dff8ff;
+      background: rgba(2, 9, 18, 0.64);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+      cursor: pointer;
+    }
+
+  .mobile-tabbar-menu-button.is-active {
+      color: #f4fdff;
+      border-color: var(--line-strong);
+      background: rgba(90, 212, 255, 0.14);
+    }
+
+  .mobile-tabbar-menu-button:focus-visible {
+      outline: 2px solid var(--neon);
+      outline-offset: 2px;
+    }
+
+  .dashboard-tabs,
+    .map-mode-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+  .dashboard-tab,
+    .map-mode-tab {
+      flex: 0 0 auto;
+      border-bottom: 1px solid transparent;
+      border-radius: var(--radius-control);
+      white-space: nowrap;
+    }
+
+  .todo-form button,
+    .command-form button,
+    .notes-form button,
+    .calendar-form button,
+    .timer-button,
+    .map-primary-button,
+    .map-secondary-button,
+    .map-search-form button,
+    .delete-button,
+    .reset-button {
+      min-height: 42px;
+    }
+
+  .todo-filters,
+    .timer-controls,
+    .timer-stats,
+    .settings-options,
+    .settings-options-grid,
+    .data-metrics,
+    .settings-data-panel .data-metrics,
+    .backup-actions,
+    .reset-actions {
+      gap: 8px;
+    }
+
+  .sidebar-button {
+      justify-content: center;
+    }
+
+  .sidebar-button::before,
+    .sidebar-button::after {
+      display: none;
+    }
+}
+
+@media (max-width: 560px) {
+  .task-stats,
+    .dashboard-summary-grid,
+    .dashboard-archive-grid,
+    .dashboard-overview-list,
+    .map-source-grid,
+    .settings-grid,
+    .summary-metrics,
+    .timer-duration-settings,
+    .timer-tabs,
+    .timer-controls,
+    .timer-stats,
+    .sidebar-nav {
+      grid-template-columns: 1fr;
+    }
+
+  .todo-form button,
+    .command-form button,
+    .calendar-form button,
+    .map-primary-button,
+    .map-add-toggle-button,
+    .delete-button {
+      width: 100%;
+      min-height: 42px;
+    }
+}

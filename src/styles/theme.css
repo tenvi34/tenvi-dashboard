@@ -1,0 +1,777 @@
+/* TENVI theme styles */
+
+.tenvi-dashboard.theme-standard {
+  --panel-bg: #ffffff;
+  --panel-bg-strong: #ffffff;
+  --line: #d9e2ec;
+  --line-strong: #4f7cff;
+  --neon: #4f7cff;
+  --neon-strong: #245bdb;
+  --blue: #4f7cff;
+  --muted-cyan: #667085;
+  --danger: #d92d20;
+  --surface: #f8fafc;
+  --surface-soft: #f4f7fb;
+  --focus-ring: 0 0 0 3px rgba(79, 124, 255, 0.14);
+  --hover-glow: none;
+  --panel-shadow: 0 12px 36px rgba(28, 39, 62, 0.07);
+
+  color: #172033;
+  background: #eef3f8;
+  overflow: auto;
+}
+
+/* 일반 모드 대비 */
+.tenvi-dashboard.theme-standard * {
+  scrollbar-color: #b8c7dc #eef3f8;
+}
+
+.tenvi-dashboard.theme-standard *::-webkit-scrollbar-track {
+  background: #eef3f8;
+}
+
+.tenvi-dashboard.theme-standard *::-webkit-scrollbar-thumb {
+  border-color: #eef3f8;
+  background: #b8c7dc;
+}
+
+.tenvi-dashboard.theme-standard .tenvi-grid {
+  display: none;
+}
+
+.tenvi-dashboard.theme-standard .tenvi-header,
+.tenvi-dashboard.theme-standard .module-panel,
+.tenvi-dashboard.theme-standard .tenvi-sidebar {
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: none;
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar {
+  border-color: #d9e2ec;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -12px 28px rgba(28, 39, 62, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-button {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-button.is-active {
+  color: #245bdb;
+  border-color: #9db5ff;
+  background: #eef3ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-menu {
+  border-color: #d9e2ec;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -10px 30px rgba(28, 39, 62, 0.12);
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-menu-button {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .mobile-tabbar-menu-button.is-active {
+  color: #245bdb;
+  border-color: #9db5ff;
+  background: #eef3ff;
+}
+
+.tenvi-dashboard.theme-standard .tenvi-header h1,
+.tenvi-dashboard.theme-standard .sidebar-header h2,
+.tenvi-dashboard.theme-standard .module-header h2,
+.tenvi-dashboard.theme-standard .summary-panel-header h3,
+.tenvi-dashboard.theme-standard .analysis-header h3,
+.tenvi-dashboard.theme-standard .settings-panel-header h3,
+.tenvi-dashboard.theme-standard .calendar-events-header h3,
+.tenvi-dashboard.theme-standard .note-header h3,
+.tenvi-dashboard.theme-standard .calendar-event-item h3,
+.tenvi-dashboard.theme-standard .timer-time {
+  color: #172033;
+  text-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .tenvi-kicker,
+.tenvi-dashboard.theme-standard .module-label,
+.tenvi-dashboard.theme-standard .module-meta,
+.tenvi-dashboard.theme-standard .system-status,
+.tenvi-dashboard.theme-standard .empty-state span,
+.tenvi-dashboard.theme-standard .timer-mode,
+.tenvi-dashboard.theme-standard .recent-notes-title,
+.tenvi-dashboard.theme-standard .analysis-section h4,
+.tenvi-dashboard.theme-standard .calendar-weekdays span,
+.tenvi-dashboard.theme-standard .note-header time,
+.tenvi-dashboard.theme-standard .todo-check small {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .system-status,
+.tenvi-dashboard.theme-standard .language-switch,
+.tenvi-dashboard.theme-standard .timer-tabs,
+.tenvi-dashboard.theme-standard .todo-filters {
+  border-color: #d9e2ec;
+  background: #f8fafc;
+}
+
+.tenvi-dashboard.theme-standard .status-dot {
+  background: #12b76a;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .language-button,
+.tenvi-dashboard.theme-standard .sidebar-button,
+.tenvi-dashboard.theme-standard .filter-button,
+.tenvi-dashboard.theme-standard .timer-tab,
+.tenvi-dashboard.theme-standard .settings-option,
+.tenvi-dashboard.theme-standard .calendar-nav-button,
+.tenvi-dashboard.theme-standard .command-link-button,
+.tenvi-dashboard.theme-standard .timer-button.secondary,
+.tenvi-dashboard.theme-standard .map-secondary-button {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .language-button:hover,
+.tenvi-dashboard.theme-standard .sidebar-button:hover,
+.tenvi-dashboard.theme-standard .filter-button:hover,
+.tenvi-dashboard.theme-standard .timer-tab:hover,
+.tenvi-dashboard.theme-standard .settings-option:hover:not(:disabled),
+.tenvi-dashboard.theme-standard .calendar-nav-button:hover,
+.tenvi-dashboard.theme-standard .command-link-button:hover {
+  color: #172033;
+  border-color: #9db5ff;
+  background: #f4f7ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .language-button.is-active,
+.tenvi-dashboard.theme-standard .sidebar-button.is-active,
+.tenvi-dashboard.theme-standard .filter-button.is-active,
+.tenvi-dashboard.theme-standard .timer-tab.is-active,
+.tenvi-dashboard.theme-standard .settings-option.is-active {
+  color: #245bdb;
+  border-color: #9db5ff;
+  background: #eef3ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .sidebar-button::before,
+.tenvi-dashboard.theme-standard .sidebar-button.is-active::before {
+  background: #4f7cff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .sidebar-button::after,
+.tenvi-dashboard.theme-standard .sidebar-button.is-active::after {
+  background: #9db5ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .module-header {
+  border-bottom-color: #e4eaf2;
+}
+
+.tenvi-dashboard.theme-standard .status-card,
+.tenvi-dashboard.theme-standard .summary-panel,
+.tenvi-dashboard.theme-standard .analysis-panel,
+.tenvi-dashboard.theme-standard .analysis-section,
+.tenvi-dashboard.theme-standard .command-history,
+.tenvi-dashboard.theme-standard .timer-duration-settings label,
+.tenvi-dashboard.theme-standard .timer-display-panel,
+.tenvi-dashboard.theme-standard .timer-stat,
+.tenvi-dashboard.theme-standard .lap-panel,
+.tenvi-dashboard.theme-standard .settings-panel,
+.tenvi-dashboard.theme-standard .data-metric,
+.tenvi-dashboard.theme-standard .calendar-events-panel,
+.tenvi-dashboard.theme-standard .calendar-month-panel,
+.tenvi-dashboard.theme-standard .calendar-day,
+.tenvi-dashboard.theme-standard .map-bulk-panel,
+.tenvi-dashboard.theme-standard .map-bulk-file-list li,
+.tenvi-dashboard.theme-standard .map-view-panel,
+.tenvi-dashboard.theme-standard .map-upload-box,
+.tenvi-dashboard.theme-standard .map-coordinate-panel div,
+.tenvi-dashboard.theme-standard .map-collection-item,
+.tenvi-dashboard.theme-standard .map-filter-button,
+.tenvi-dashboard.theme-standard .map-record-button,
+.tenvi-dashboard.theme-standard .map-search-results button,
+.tenvi-dashboard.theme-standard .todo-item,
+.tenvi-dashboard.theme-standard .note-item,
+.tenvi-dashboard.theme-standard .recent-note,
+.tenvi-dashboard.theme-standard .calendar-event-item,
+.tenvi-dashboard.theme-standard .summary-metric,
+.tenvi-dashboard.theme-standard .analysis-metric,
+.tenvi-dashboard.theme-standard .empty-state {
+  border-color: #d9e2ec;
+  background: #f8fafc;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .todo-item,
+.tenvi-dashboard.theme-standard .note-item,
+.tenvi-dashboard.theme-standard .recent-note,
+.tenvi-dashboard.theme-standard .calendar-event-item,
+.tenvi-dashboard.theme-standard .map-coordinate-panel div,
+.tenvi-dashboard.theme-standard .map-collection-item,
+.tenvi-dashboard.theme-standard .map-filter-button,
+.tenvi-dashboard.theme-standard .map-record-button,
+.tenvi-dashboard.theme-standard .map-search-results button,
+.tenvi-dashboard.theme-standard .analysis-section,
+.tenvi-dashboard.theme-standard .lap-panel li {
+  border-left-color: #4f7cff;
+}
+
+.tenvi-dashboard.theme-standard .summary-metric,
+.tenvi-dashboard.theme-standard .analysis-metric,
+.tenvi-dashboard.theme-standard .timer-stat,
+.tenvi-dashboard.theme-standard .data-metric {
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .status-card span,
+.tenvi-dashboard.theme-standard .summary-metric span,
+.tenvi-dashboard.theme-standard .recent-note span,
+.tenvi-dashboard.theme-standard .analysis-metric span,
+.tenvi-dashboard.theme-standard .analysis-section li,
+.tenvi-dashboard.theme-standard .command-history li,
+.tenvi-dashboard.theme-standard .command-history-empty,
+.tenvi-dashboard.theme-standard .timer-duration-settings span,
+.tenvi-dashboard.theme-standard .timer-caption,
+.tenvi-dashboard.theme-standard .timer-stat span,
+.tenvi-dashboard.theme-standard .lap-panel span,
+.tenvi-dashboard.theme-standard .data-metric span,
+.tenvi-dashboard.theme-standard .settings-note,
+.tenvi-dashboard.theme-standard .note-body p,
+.tenvi-dashboard.theme-standard .empty-state p,
+.tenvi-dashboard.theme-standard .calendar-event-item p,
+.tenvi-dashboard.theme-standard .map-record-button small,
+.tenvi-dashboard.theme-standard .map-collection-item p,
+.tenvi-dashboard.theme-standard .map-search-attribution,
+.tenvi-dashboard.theme-standard .map-search-results em,
+.tenvi-dashboard.theme-standard .map-search-results span,
+.tenvi-dashboard.theme-standard .map-detail-copy p {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .status-card strong,
+.tenvi-dashboard.theme-standard .summary-metric strong,
+.tenvi-dashboard.theme-standard .recent-note strong,
+.tenvi-dashboard.theme-standard .analysis-metric strong,
+.tenvi-dashboard.theme-standard .timer-stat strong,
+.tenvi-dashboard.theme-standard .lap-panel strong,
+.tenvi-dashboard.theme-standard .data-metric strong,
+.tenvi-dashboard.theme-standard .module-meta span,
+.tenvi-dashboard.theme-standard .calendar-events-header strong {
+  color: #245bdb;
+}
+
+.tenvi-dashboard.theme-standard .todo-form input,
+.tenvi-dashboard.theme-standard .command-form input,
+.tenvi-dashboard.theme-standard .notes-form input,
+.tenvi-dashboard.theme-standard .notes-form textarea,
+.tenvi-dashboard.theme-standard .calendar-form input,
+.tenvi-dashboard.theme-standard .calendar-form textarea,
+.tenvi-dashboard.theme-standard .calendar-month-selectors select,
+.tenvi-dashboard.theme-standard .timer-duration-settings input,
+.tenvi-dashboard.theme-standard .map-field input,
+.tenvi-dashboard.theme-standard .map-field select,
+.tenvi-dashboard.theme-standard .map-field textarea,
+.tenvi-dashboard.theme-standard .map-search-form input,
+.tenvi-dashboard.theme-standard .map-search-form select {
+  color: #172033;
+  border-color: #cfd8e3;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .todo-form input::placeholder,
+.tenvi-dashboard.theme-standard .command-form input::placeholder,
+.tenvi-dashboard.theme-standard .notes-form input::placeholder,
+.tenvi-dashboard.theme-standard .notes-form textarea::placeholder,
+.tenvi-dashboard.theme-standard .calendar-form input::placeholder,
+.tenvi-dashboard.theme-standard .calendar-form textarea::placeholder,
+.tenvi-dashboard.theme-standard .map-field input::placeholder,
+.tenvi-dashboard.theme-standard .map-field textarea::placeholder,
+.tenvi-dashboard.theme-standard .map-search-form input::placeholder {
+  color: #98a2b3;
+}
+
+.tenvi-dashboard.theme-standard .todo-form input:focus,
+.tenvi-dashboard.theme-standard .command-form input:focus,
+.tenvi-dashboard.theme-standard .notes-form input:focus,
+.tenvi-dashboard.theme-standard .notes-form textarea:focus,
+.tenvi-dashboard.theme-standard .calendar-form input:focus,
+.tenvi-dashboard.theme-standard .calendar-form textarea:focus,
+.tenvi-dashboard.theme-standard .calendar-month-selectors select:focus,
+.tenvi-dashboard.theme-standard .timer-duration-settings input:focus,
+.tenvi-dashboard.theme-standard .map-field input:focus,
+.tenvi-dashboard.theme-standard .map-field textarea:focus,
+.tenvi-dashboard.theme-standard .map-search-form input:focus,
+.tenvi-dashboard.theme-standard .map-search-form select:focus {
+  border-color: #4f7cff;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.14);
+}
+
+.tenvi-dashboard.theme-standard .command-form button,
+.tenvi-dashboard.theme-standard .timer-button,
+.tenvi-dashboard.theme-standard .map-primary-button,
+.tenvi-dashboard.theme-standard .map-search-form button {
+  color: #ffffff;
+  border-color: #245bdb;
+  background: #245bdb;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .command-form button:hover,
+.tenvi-dashboard.theme-standard .timer-button:hover,
+.tenvi-dashboard.theme-standard .map-primary-button:hover:not(:disabled),
+.tenvi-dashboard.theme-standard .map-search-form button:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .todo-form button,
+.tenvi-dashboard.theme-standard .notes-form button,
+.tenvi-dashboard.theme-standard .calendar-form button {
+  color: #344054;
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .todo-form button:hover,
+.tenvi-dashboard.theme-standard .notes-form button:hover,
+.tenvi-dashboard.theme-standard .calendar-form button:hover {
+  color: #172033;
+  border-color: #9db5ff;
+  background: #f4f7ff;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .delete-button,
+.tenvi-dashboard.theme-standard .reset-button {
+  color: #b42318;
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-standard .delete-button:hover,
+.tenvi-dashboard.theme-standard .reset-button:hover {
+  border-color: #f97066;
+  background: #ffeceb;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .todo-check,
+.tenvi-dashboard.theme-standard .calendar-day,
+.tenvi-dashboard.theme-standard .filter-button.is-active,
+.tenvi-dashboard.theme-standard .timer-button.secondary {
+  color: #172033;
+}
+
+.tenvi-dashboard.theme-standard .dashboard-briefing,
+.tenvi-dashboard.theme-standard .calendar-events-header,
+.tenvi-dashboard.theme-standard .calendar-form {
+  border-color: #d9e2ec;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+/* ─── 다크 테마 ─────────────────────────────────────────────── */
+.tenvi-dashboard.theme-dark {
+  --panel-bg: #1e293b;
+  --panel-bg-strong: #0f172a;
+  --line: rgba(148, 163, 184, 0.15);
+  --line-strong: #60a5fa;
+  --neon: #60a5fa;
+  --neon-strong: #93c5fd;
+  --blue: #3b82f6;
+  --muted-cyan: #94a3b8;
+  --danger: #f87171;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-soft: rgba(255, 255, 255, 0.02);
+  --focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.2);
+  --hover-glow: none;
+  --panel-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+
+  color: #e2e8f0;
+  background: #0f172a;
+  overflow: auto;
+}
+
+.tenvi-dashboard.theme-dark * {
+  scrollbar-color: rgba(148, 163, 184, 0.3) rgba(15, 23, 42, 0.8);
+}
+
+.tenvi-dashboard.theme-dark *::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.tenvi-dashboard.theme-dark *::-webkit-scrollbar-thumb {
+  border-color: rgba(15, 23, 42, 0.8);
+  background: rgba(148, 163, 184, 0.3);
+}
+
+.tenvi-dashboard.theme-dark .tenvi-grid {
+  display: none;
+}
+
+.tenvi-dashboard.theme-dark .tenvi-header,
+.tenvi-dashboard.theme-dark .module-panel,
+.tenvi-dashboard.theme-dark .tenvi-sidebar {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #1e293b;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(30, 41, 59, 0.96);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #1e293b;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-button.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-menu {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(30, 41, 59, 0.98);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-menu-button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.12);
+  background: #1e293b;
+}
+
+.tenvi-dashboard.theme-dark .mobile-tabbar-menu-button.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.tenvi-dashboard.theme-dark .tenvi-header h1,
+.tenvi-dashboard.theme-dark .sidebar-header h2,
+.tenvi-dashboard.theme-dark .module-header h2,
+.tenvi-dashboard.theme-dark .summary-panel-header h3,
+.tenvi-dashboard.theme-dark .analysis-header h3,
+.tenvi-dashboard.theme-dark .settings-panel-header h3,
+.tenvi-dashboard.theme-dark .calendar-events-header h3,
+.tenvi-dashboard.theme-dark .note-header h3,
+.tenvi-dashboard.theme-dark .calendar-event-item h3,
+.tenvi-dashboard.theme-dark .timer-time {
+  color: #f1f5f9;
+  text-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .tenvi-kicker,
+.tenvi-dashboard.theme-dark .module-label,
+.tenvi-dashboard.theme-dark .module-meta,
+.tenvi-dashboard.theme-dark .system-status,
+.tenvi-dashboard.theme-dark .empty-state span,
+.tenvi-dashboard.theme-dark .timer-mode,
+.tenvi-dashboard.theme-dark .recent-notes-title,
+.tenvi-dashboard.theme-dark .analysis-section h4,
+.tenvi-dashboard.theme-dark .calendar-weekdays span,
+.tenvi-dashboard.theme-dark .note-header time,
+.tenvi-dashboard.theme-dark .todo-check small {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .system-status,
+.tenvi-dashboard.theme-dark .language-switch,
+.tenvi-dashboard.theme-dark .timer-tabs,
+.tenvi-dashboard.theme-dark .todo-filters {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.tenvi-dashboard.theme-dark .status-dot {
+  background: #4ade80;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .language-button,
+.tenvi-dashboard.theme-dark .sidebar-button,
+.tenvi-dashboard.theme-dark .filter-button,
+.tenvi-dashboard.theme-dark .timer-tab,
+.tenvi-dashboard.theme-dark .settings-option,
+.tenvi-dashboard.theme-dark .calendar-nav-button,
+.tenvi-dashboard.theme-dark .command-link-button,
+.tenvi-dashboard.theme-dark .timer-button.secondary,
+.tenvi-dashboard.theme-dark .map-secondary-button {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .language-button:hover,
+.tenvi-dashboard.theme-dark .sidebar-button:hover,
+.tenvi-dashboard.theme-dark .filter-button:hover,
+.tenvi-dashboard.theme-dark .timer-tab:hover,
+.tenvi-dashboard.theme-dark .settings-option:hover:not(:disabled),
+.tenvi-dashboard.theme-dark .calendar-nav-button:hover,
+.tenvi-dashboard.theme-dark .command-link-button:hover {
+  color: #f1f5f9;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .language-button.is-active,
+.tenvi-dashboard.theme-dark .sidebar-button.is-active,
+.tenvi-dashboard.theme-dark .filter-button.is-active,
+.tenvi-dashboard.theme-dark .timer-tab.is-active,
+.tenvi-dashboard.theme-dark .settings-option.is-active {
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.4);
+  background: rgba(96, 165, 250, 0.12);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .sidebar-button::before,
+.tenvi-dashboard.theme-dark .sidebar-button.is-active::before {
+  background: #60a5fa;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .sidebar-button::after,
+.tenvi-dashboard.theme-dark .sidebar-button.is-active::after {
+  background: #93c5fd;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .module-header {
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+}
+
+.tenvi-dashboard.theme-dark .status-card,
+.tenvi-dashboard.theme-dark .summary-panel,
+.tenvi-dashboard.theme-dark .analysis-panel,
+.tenvi-dashboard.theme-dark .analysis-section,
+.tenvi-dashboard.theme-dark .command-history,
+.tenvi-dashboard.theme-dark .timer-duration-settings label,
+.tenvi-dashboard.theme-dark .timer-display-panel,
+.tenvi-dashboard.theme-dark .timer-stat,
+.tenvi-dashboard.theme-dark .lap-panel,
+.tenvi-dashboard.theme-dark .settings-panel,
+.tenvi-dashboard.theme-dark .data-metric,
+.tenvi-dashboard.theme-dark .calendar-events-panel,
+.tenvi-dashboard.theme-dark .calendar-month-panel,
+.tenvi-dashboard.theme-dark .calendar-day,
+.tenvi-dashboard.theme-dark .map-bulk-panel,
+.tenvi-dashboard.theme-dark .map-bulk-file-list li,
+.tenvi-dashboard.theme-dark .map-view-panel,
+.tenvi-dashboard.theme-dark .map-upload-box,
+.tenvi-dashboard.theme-dark .map-coordinate-panel div,
+.tenvi-dashboard.theme-dark .map-collection-item,
+.tenvi-dashboard.theme-dark .map-filter-button,
+.tenvi-dashboard.theme-dark .map-record-button,
+.tenvi-dashboard.theme-dark .map-search-results button,
+.tenvi-dashboard.theme-dark .todo-item,
+.tenvi-dashboard.theme-dark .note-item,
+.tenvi-dashboard.theme-dark .recent-note,
+.tenvi-dashboard.theme-dark .calendar-event-item,
+.tenvi-dashboard.theme-dark .summary-metric,
+.tenvi-dashboard.theme-dark .analysis-metric,
+.tenvi-dashboard.theme-dark .empty-state {
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .todo-item,
+.tenvi-dashboard.theme-dark .note-item,
+.tenvi-dashboard.theme-dark .recent-note,
+.tenvi-dashboard.theme-dark .calendar-event-item,
+.tenvi-dashboard.theme-dark .map-coordinate-panel div,
+.tenvi-dashboard.theme-dark .map-collection-item,
+.tenvi-dashboard.theme-dark .map-filter-button,
+.tenvi-dashboard.theme-dark .map-record-button,
+.tenvi-dashboard.theme-dark .map-search-results button,
+.tenvi-dashboard.theme-dark .analysis-section,
+.tenvi-dashboard.theme-dark .lap-panel li {
+  border-left-color: #60a5fa;
+}
+
+.tenvi-dashboard.theme-dark .summary-metric,
+.tenvi-dashboard.theme-dark .analysis-metric,
+.tenvi-dashboard.theme-dark .timer-stat,
+.tenvi-dashboard.theme-dark .data-metric {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tenvi-dashboard.theme-dark .status-card span,
+.tenvi-dashboard.theme-dark .summary-metric span,
+.tenvi-dashboard.theme-dark .recent-note span,
+.tenvi-dashboard.theme-dark .analysis-metric span,
+.tenvi-dashboard.theme-dark .analysis-section li,
+.tenvi-dashboard.theme-dark .command-history li,
+.tenvi-dashboard.theme-dark .command-history-empty,
+.tenvi-dashboard.theme-dark .timer-duration-settings span,
+.tenvi-dashboard.theme-dark .timer-caption,
+.tenvi-dashboard.theme-dark .timer-stat span,
+.tenvi-dashboard.theme-dark .lap-panel span,
+.tenvi-dashboard.theme-dark .data-metric span,
+.tenvi-dashboard.theme-dark .settings-note,
+.tenvi-dashboard.theme-dark .note-body p,
+.tenvi-dashboard.theme-dark .empty-state p,
+.tenvi-dashboard.theme-dark .calendar-event-item p,
+.tenvi-dashboard.theme-dark .map-record-button small,
+.tenvi-dashboard.theme-dark .map-collection-item p,
+.tenvi-dashboard.theme-dark .map-search-attribution,
+.tenvi-dashboard.theme-dark .map-search-results em,
+.tenvi-dashboard.theme-dark .map-search-results span,
+.tenvi-dashboard.theme-dark .map-detail-copy p {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .status-card strong,
+.tenvi-dashboard.theme-dark .summary-metric strong,
+.tenvi-dashboard.theme-dark .recent-note strong,
+.tenvi-dashboard.theme-dark .analysis-metric strong,
+.tenvi-dashboard.theme-dark .timer-stat strong,
+.tenvi-dashboard.theme-dark .lap-panel strong,
+.tenvi-dashboard.theme-dark .data-metric strong,
+.tenvi-dashboard.theme-dark .module-meta span,
+.tenvi-dashboard.theme-dark .calendar-events-header strong {
+  color: #93c5fd;
+}
+
+.tenvi-dashboard.theme-dark .todo-form input,
+.tenvi-dashboard.theme-dark .command-form input,
+.tenvi-dashboard.theme-dark .notes-form input,
+.tenvi-dashboard.theme-dark .notes-form textarea,
+.tenvi-dashboard.theme-dark .calendar-form input,
+.tenvi-dashboard.theme-dark .calendar-form textarea,
+.tenvi-dashboard.theme-dark .calendar-month-selectors select,
+.tenvi-dashboard.theme-dark .timer-duration-settings input,
+.tenvi-dashboard.theme-dark .map-field input,
+.tenvi-dashboard.theme-dark .map-field select,
+.tenvi-dashboard.theme-dark .map-field textarea,
+.tenvi-dashboard.theme-dark .map-search-form input,
+.tenvi-dashboard.theme-dark .map-search-form select {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.tenvi-dashboard.theme-dark .todo-form input::placeholder,
+.tenvi-dashboard.theme-dark .command-form input::placeholder,
+.tenvi-dashboard.theme-dark .notes-form input::placeholder,
+.tenvi-dashboard.theme-dark .notes-form textarea::placeholder,
+.tenvi-dashboard.theme-dark .calendar-form input::placeholder,
+.tenvi-dashboard.theme-dark .calendar-form textarea::placeholder,
+.tenvi-dashboard.theme-dark .map-field input::placeholder,
+.tenvi-dashboard.theme-dark .map-field textarea::placeholder,
+.tenvi-dashboard.theme-dark .map-search-form input::placeholder {
+  color: #475569;
+}
+
+.tenvi-dashboard.theme-dark .todo-form input:focus,
+.tenvi-dashboard.theme-dark .command-form input:focus,
+.tenvi-dashboard.theme-dark .notes-form input:focus,
+.tenvi-dashboard.theme-dark .notes-form textarea:focus,
+.tenvi-dashboard.theme-dark .calendar-form input:focus,
+.tenvi-dashboard.theme-dark .calendar-form textarea:focus,
+.tenvi-dashboard.theme-dark .calendar-month-selectors select:focus,
+.tenvi-dashboard.theme-dark .timer-duration-settings input:focus,
+.tenvi-dashboard.theme-dark .map-field input:focus,
+.tenvi-dashboard.theme-dark .map-field textarea:focus,
+.tenvi-dashboard.theme-dark .map-search-form input:focus,
+.tenvi-dashboard.theme-dark .map-search-form select:focus {
+  border-color: #60a5fa;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+.tenvi-dashboard.theme-dark .command-form button,
+.tenvi-dashboard.theme-dark .timer-button,
+.tenvi-dashboard.theme-dark .map-primary-button,
+.tenvi-dashboard.theme-dark .map-search-form button {
+  color: #ffffff;
+  border-color: #2563eb;
+  background: #2563eb;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .command-form button:hover,
+.tenvi-dashboard.theme-dark .timer-button:hover,
+.tenvi-dashboard.theme-dark .map-primary-button:hover:not(:disabled),
+.tenvi-dashboard.theme-dark .map-search-form button:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .todo-form button,
+.tenvi-dashboard.theme-dark .notes-form button,
+.tenvi-dashboard.theme-dark .calendar-form button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .todo-form button:hover,
+.tenvi-dashboard.theme-dark .notes-form button:hover,
+.tenvi-dashboard.theme-dark .calendar-form button:hover {
+  color: #e2e8f0;
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .delete-button,
+.tenvi-dashboard.theme-dark .reset-button {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.tenvi-dashboard.theme-dark .delete-button:hover,
+.tenvi-dashboard.theme-dark .reset-button:hover {
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.14);
+  box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .todo-check,
+.tenvi-dashboard.theme-dark .calendar-day,
+.tenvi-dashboard.theme-dark .filter-button.is-active,
+.tenvi-dashboard.theme-dark .timer-button.secondary {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .dashboard-briefing,
+.tenvi-dashboard.theme-dark .calendar-events-header,
+.tenvi-dashboard.theme-dark .calendar-form {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
