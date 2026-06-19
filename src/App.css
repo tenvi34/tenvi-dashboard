@@ -3652,6 +3652,20 @@ body.tenvi-modal-open .tenvi-dashboard {
   letter-spacing: 0;
 }
 
+.board-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.board-toolbar-actions .board-secondary-button {
+  min-height: 34px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
 .board-section {
   min-width: 0;
   padding: 18px;
@@ -3662,6 +3676,76 @@ body.tenvi-modal-open .tenvi-dashboard {
 
 .board-list-panel {
   padding: 12px 18px 16px;
+}
+
+.board-trash-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.board-trash-header,
+.board-trash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.board-trash-header h3 {
+  margin: 5px 0 0;
+  color: #f4fdff;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.board-trash-list {
+  display: grid;
+  gap: 8px;
+}
+
+.board-trash-item {
+  min-width: 0;
+  border: 1px solid rgba(90, 212, 255, 0.14);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.board-trash-item > div:first-child {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.board-trash-item strong {
+  color: #f4fdff;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.board-trash-item small,
+.board-trash-empty {
+  color: #9ecbd9;
+  font-size: 12px;
+}
+
+.board-trash-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.board-trash-actions .board-secondary-button,
+.board-trash-actions .board-delete-button {
+  min-height: 32px;
+  padding-inline: 10px;
+  font-size: 11px;
 }
 
 .board-screen {
@@ -4978,6 +5062,16 @@ body.tenvi-modal-open .tenvi-dashboard {
 
   .board-list-controls {
     grid-template-columns: 1fr;
+  }
+
+  .board-trash-header,
+  .board-trash-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .board-trash-actions {
+    justify-content: flex-start;
   }
 
   .board-draft-item {
@@ -6577,6 +6671,27 @@ body.tenvi-modal-open .tenvi-dashboard {
   border-color: #d9e2ec;
   background: #f8fafc;
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-standard .board-trash-panel {
+  color: #172033;
+  border-color: #d9e2ec;
+  background: #f8fafc;
+}
+
+.tenvi-dashboard.theme-standard .board-trash-header h3,
+.tenvi-dashboard.theme-standard .board-trash-item strong {
+  color: #172033;
+}
+
+.tenvi-dashboard.theme-standard .board-trash-item {
+  border-color: #d9e2ec;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .board-trash-item small,
+.tenvi-dashboard.theme-standard .board-trash-empty {
+  color: #475467;
 }
 
 .tenvi-dashboard.theme-standard .board-compose-panel {
@@ -8308,6 +8423,27 @@ body.tenvi-modal-open .tenvi-dashboard {
   border-color: rgba(148, 163, 184, 0.1);
   background: rgba(255, 255, 255, 0.03);
   box-shadow: none;
+}
+
+.tenvi-dashboard.theme-dark .board-trash-panel {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tenvi-dashboard.theme-dark .board-trash-header h3,
+.tenvi-dashboard.theme-dark .board-trash-item strong {
+  color: #f1f5f9;
+}
+
+.tenvi-dashboard.theme-dark .board-trash-item {
+  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tenvi-dashboard.theme-dark .board-trash-item small,
+.tenvi-dashboard.theme-dark .board-trash-empty {
+  color: #94a3b8;
 }
 
 .tenvi-dashboard.theme-dark .board-compose-panel {

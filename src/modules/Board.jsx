@@ -16,10 +16,12 @@ import {
   getRemovedBoardImageIds,
   increaseBoardPostViews,
   movePostsToDefaultCategory,
+  moveBoardPostToTrash,
   normalizeBoardBlocks,
   parseBoardCategories,
   parseBoardDraft,
   parseBoardPosts,
+  restoreBoardPost,
   sortBoardPosts,
   toggleBoardPostPinned,
   updateBoardCategory,
@@ -226,6 +228,7 @@ function Board({ t }) {
   const [categories, setCategories] = useState(() => loadBoardCategories())
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_FILTER_ALL)
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
+  const [trashOpen, setTrashOpen] = useState(false)
   const [categoryNameInput, setCategoryNameInput] = useState('')
   const [editingCategoryId, setEditingCategoryId] = useState('')
   const [editingCategoryName, setEditingCategoryName] = useState('')
@@ -242,7 +245,9 @@ function Board({ t }) {
   const [activeDraftId, setActiveDraftId] = useState('')
   const [draftPickerOpen, setDraftPickerOpen] = useState(false)
   const [posts, setPosts] = useState(() => loadBoardPosts())
-  const selectedPost = posts.find((post) => post.id === selectedPostId)
+  const activePosts = posts.filter((post) => !post.deletedAt)
+  const trashedPosts = posts.filter((post) => post.deletedAt)
+  const selectedPost = activePosts.find((post) => post.id === selectedPostId)
   const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
   const hasSearchQuery = normalizedSearchQuery.length > 0
@@ -315,7 +320,7 @@ function Board({ t }) {
   }, [imageViewer])
 
   // 카테고리 필터와 검색 동시 적용
-  const filteredPosts = posts.filter((post) => {
+  const filteredPosts = activePosts.filter((post) => {
     const postCategoryId = getPostCategoryId(post, categories)
 
     if (categoryFilter !== CATEGORY_FILTER_ALL && postCategoryId !== categoryFilter) {
@@ -604,6 +609,30 @@ function Board({ t }) {
       return
     }
 
+    setPosts((currentPosts) => {
+      const nextPosts = moveBoardPostToTrash(currentPosts, postId)
+      saveBoardPosts(nextPosts)
+
+      return nextPosts
+    })
+    handleBackToList()
+  }
+
+  // 고정 상태만 전환해 기존 게시글 내용과 저장 key 보존
+  const handleRestorePost = (postId) => {
+    setPosts((currentPosts) => {
+      const nextPosts = restoreBoardPost(currentPosts, postId)
+      saveBoardPosts(nextPosts)
+
+      return nextPosts
+    })
+  }
+
+  const handlePermanentDeletePost = (postId) => {
+    if (!window.confirm(t.board.permanentDeleteConfirm)) {
+      return
+    }
+
     const targetPost = posts.find((post) => post.id === postId)
     const imageIds = getBoardImageIds(targetPost?.blocks)
 
@@ -614,12 +643,10 @@ function Board({ t }) {
       return nextPosts
     })
     deleteBoardImages(imageIds).catch(() => {
-      // legacy src 이미지는 삭제 대상 아님
+      // 영구 삭제 시점에만 IndexedDB 이미지 정리
     })
-    handleBackToList()
   }
 
-  // 고정 상태만 전환해 기존 게시글 내용과 저장 key 보존
   const handleTogglePinned = (postId) => {
     setPosts((currentPosts) => {
       const nextPosts = toggleBoardPostPinned(currentPosts, postId)
@@ -924,7 +951,7 @@ function Board({ t }) {
           <p className="module-label">{t.board.label}</p>
           <h2 id="board-title">{t.board.title}</h2>
         </div>
-        <p className="module-meta">{t.board.totalCount(posts.length)}</p>
+        <p className="module-meta">{t.board.totalCount(activePosts.length)}</p>
       </div>
 
       {view === 'write' ? renderBoardForm({ mode: 'write' }) : null}
@@ -1083,14 +1110,77 @@ function Board({ t }) {
               <p className="module-label">{t.board.archiveLabel}</p>
               <h3>{t.board.listTitle}</h3>
             </div>
-            <button
-              type="button"
-              className="board-primary-button board-write-button"
-              onClick={handleOpenWrite}
-            >
-              {t.board.write}
-            </button>
+            <div className="board-toolbar-actions">
+              <button
+                type="button"
+                className="board-secondary-button"
+                onClick={() => setTrashOpen((isOpen) => !isOpen)}
+              >
+                {t.board.trash} {trashedPosts.length}
+              </button>
+              <button
+                type="button"
+                className="board-primary-button board-write-button"
+                onClick={handleOpenWrite}
+              >
+                {t.board.write}
+              </button>
+            </div>
           </div>
+
+          {trashOpen ? (
+            <section className="board-trash-panel" aria-label={t.board.trash}>
+              <div className="board-trash-header">
+                <div>
+                  <p className="module-label">{t.board.trash}</p>
+                  <h3>{t.board.trashTitle}</h3>
+                </div>
+                <span className="board-count">
+                  {t.board.trashCount(trashedPosts.length)}
+                </span>
+              </div>
+
+              {trashedPosts.length > 0 ? (
+                <div className="board-trash-list">
+                  {trashedPosts.map((post) => (
+                    <div className="board-trash-item" key={post.id}>
+                      <div>
+                        <strong>{post.title}</strong>
+                        <small>
+                          {post.deletedAt
+                            ? t.board.deletedAt(
+                                formatPostDate(post.deletedAt, {
+                                  dateStyle: 'medium',
+                                  timeStyle: 'short',
+                                }),
+                              )
+                            : ''}
+                        </small>
+                      </div>
+                      <div className="board-trash-actions">
+                        <button
+                          type="button"
+                          className="board-secondary-button"
+                          onClick={() => handleRestorePost(post.id)}
+                        >
+                          {t.board.restore}
+                        </button>
+                        <button
+                          type="button"
+                          className="board-delete-button"
+                          onClick={() => handlePermanentDeletePost(post.id)}
+                        >
+                          {t.board.permanentDelete}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="board-trash-empty">{t.board.emptyTrash}</p>
+              )}
+            </section>
+          ) : null}
 
           <section className="board-section board-list-panel">
             <div className="board-list-controls">
@@ -1129,7 +1219,7 @@ function Board({ t }) {
                 <span className="board-count">
                   {hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL
                     ? t.board.searchResultCount(sortedPosts.length)
-                    : t.board.totalCount(posts.length)}
+                    : t.board.totalCount(activePosts.length)}
                 </span>
                 <label className="board-sort-field">
                   <span>{t.board.sortLabel}</span>
@@ -1270,7 +1360,7 @@ function Board({ t }) {
               <div className="empty-state" role="status">
                 <span>{t.common.systemMessage}</span>
                 <p>
-                  {posts.length > 0 && (hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL)
+                  {activePosts.length > 0 && (hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL)
                     ? t.board.noSearchResults
                     : t.board.emptyMessage}
                 </p>

@@ -13,12 +13,14 @@ import {
   getPostCategoryId,
   getRemovedBoardImageIds,
   increaseBoardPostViews,
+  moveBoardPostToTrash,
   movePostsToDefaultCategory,
   normalizeBoardCategories,
   normalizeBoardBlocks,
   parseBoardCategories,
   parseBoardDraft,
   parseBoardPosts,
+  restoreBoardPost,
   sortBoardPosts,
   toggleBoardPostPinned,
   updateBoardCategory,
@@ -529,6 +531,31 @@ describe('boardLogic', () => {
       { id: 'post-2', title: 'Second post' },
     ])
     expect(posts).toHaveLength(2)
+  })
+
+  it('moves a post to trash and restores it', () => {
+    const posts = [
+      { id: 'post-1', title: 'First post', updatedAt: '2026-06-01T00:00:00.000Z' },
+      { id: 'post-2', title: 'Second post' },
+    ]
+    const deletedAt = '2026-06-19T00:00:00.000Z'
+    const trashedPosts = moveBoardPostToTrash(posts, 'post-1', deletedAt)
+
+    expect(trashedPosts).toEqual([
+      {
+        id: 'post-1',
+        title: 'First post',
+        updatedAt: deletedAt,
+        deletedAt,
+      },
+      { id: 'post-2', title: 'Second post' },
+    ])
+    expect(posts[0]).not.toHaveProperty('deletedAt')
+
+    const restoredPosts = restoreBoardPost(trashedPosts, 'post-1')
+
+    expect(restoredPosts[0]).not.toHaveProperty('deletedAt')
+    expect(restoredPosts[0].title).toBe('First post')
   })
 
   it('increases a post view count while tolerating old posts', () => {

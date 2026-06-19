@@ -389,6 +389,37 @@ export const parseBoardPosts = (rawPosts, fallbackPosts = []) => {
 export const deleteBoardPost = (posts, postId) =>
   posts.filter((post) => post.id !== postId)
 
+// Board 게시글 복구함 이동
+export const moveBoardPostToTrash = (
+  posts,
+  postId,
+  deletedAt = new Date().toISOString(),
+) =>
+  posts.map((post) =>
+    post.id === postId
+      ? {
+          ...post,
+          deletedAt,
+          updatedAt: deletedAt,
+        }
+      : post,
+  )
+
+// Board 게시글 복구
+export const restoreBoardPost = (posts, postId) =>
+  posts.map((post) => {
+    if (post.id !== postId) {
+      return post
+    }
+
+    const { deletedAt, ...restoredPost } = post
+
+    return {
+      ...restoredPost,
+      updatedAt: new Date().toISOString(),
+    }
+  })
+
 // Board 게시글 조회수 증가
 export const increaseBoardPostViews = (posts, postId) =>
   posts.map((post) => {
