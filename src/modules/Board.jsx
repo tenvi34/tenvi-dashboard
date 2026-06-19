@@ -34,6 +34,7 @@ const CATEGORIES_STORAGE_KEY = STORAGE_KEYS.boardCategories
 const CATEGORY_FILTER_ALL = 'all'
 const SEARCH_SCOPES = ['title', 'content', 'author']
 const LEGACY_DRAFT_ID = 'legacy-board-draft'
+const MAX_BOARD_DRAFTS = 10
 
 const createEmptyTextBlock = () => ({
   id: crypto.randomUUID(),
@@ -55,11 +56,24 @@ const getDraftPreviewText = (draft) => {
   const textContent = getBoardPostTextContent(draft?.blocks)
 
   if (textContent) {
-    return textContent
+    return textContent.split('\n').find((line) => line.trim())?.trim() ?? ''
   }
 
   return ''
 }
+
+const getBoardDraftTime = (draft) => {
+  const time = new Date(draft?.savedAt).getTime()
+
+  return Number.isNaN(time) ? 0 : time
+}
+
+// draft 최신순 유지와 최대 개수 제한
+const limitBoardDrafts = (drafts) =>
+  drafts
+    .filter(Boolean)
+    .sort((firstDraft, secondDraft) => getBoardDraftTime(secondDraft) - getBoardDraftTime(firstDraft))
+    .slice(0, MAX_BOARD_DRAFTS)
 
 // draft 목록 식별자 생성
 const createBoardDraftId = () => {
@@ -167,10 +181,7 @@ const loadBoardDrafts = () => {
       }
     }
 
-    return draftRecords.sort(
-      (firstDraft, secondDraft) =>
-        new Date(secondDraft.savedAt).getTime() - new Date(firstDraft.savedAt).getTime(),
-    )
+    return limitBoardDrafts(draftRecords)
   } catch {
     const legacyDraft = loadBoardDraft()
 
@@ -187,7 +198,11 @@ const loadBoardDrafts = () => {
 
 // Board draft 목록 저장
 const saveBoardDrafts = (drafts) => {
-  localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts))
+  const nextDrafts = limitBoardDrafts(drafts)
+
+  localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(nextDrafts))
+
+  return nextDrafts
 }
 
 const saveBoardDraft = (input, draftId) => {
@@ -333,10 +348,11 @@ function Board({ t }) {
 
     const nextDrafts = draftList.filter((draft) => draft.id !== draftId)
 
-    saveBoardDrafts(nextDrafts)
-    setDraftList(nextDrafts)
+    const limitedDrafts = saveBoardDrafts(nextDrafts)
 
-    return nextDrafts
+    setDraftList(limitedDrafts)
+
+    return limitedDrafts
   }
 
   const saveCurrentDraft = (nextValues) => {
@@ -353,9 +369,51 @@ function Board({ t }) {
       ...draftList.filter((draft) => draft.id !== nextDraft.id),
     ]
 
-    saveBoardDrafts(nextDrafts)
+    const limitedDrafts = saveBoardDrafts(nextDrafts)
+
     setActiveDraftId(nextDraft.id)
-    setDraftList(nextDrafts)
+    setDraftList(limitedDrafts)
+  }
+
+  const hasCurrentDraftInput = () =>
+    author.trim().length > 0 || title.trim().length > 0 || hasWritableBody(blocks)
+
+  const handleLoadDraft = (draft) => {
+    if (!draft) {
+      return
+    }
+
+    if (
+      draft.id !== activeDraftId &&
+      hasCurrentDraftInput() &&
+      !window.confirm(t.board.loadDraftConfirm)
+    ) {
+      return
+    }
+
+    if (draft.id !== activeDraftId && hasCurrentDraftInput()) {
+      saveCurrentDraft({})
+    }
+
+    restoreDraftToForm(draft)
+  }
+
+  const handleDeleteAllDrafts = () => {
+    if (draftList.length === 0 || !window.confirm(t.board.clearDraftsConfirm)) {
+      return
+    }
+
+    const imageIds = [...new Set(draftList.flatMap((draft) => getBoardImageIds(draft.blocks)))]
+
+    deleteBoardDraft()
+    saveBoardDrafts([])
+    setDraftList([])
+    setActiveDraftId('')
+    setDraftPickerOpen(false)
+    resetWriteForm()
+    deleteBoardImages(imageIds).catch(() => {
+      // 전체 draft 삭제는 localStorage 정리를 우선
+    })
   }
 
   const handleBlocksChange = (nextBlocks, shouldSaveDraft = false) => {
@@ -710,9 +768,18 @@ function Board({ t }) {
               <div className="board-draft-picker" aria-label={t.board.draftPickerLabel}>
                 <div className="board-draft-picker-header">
                   <p className="module-label">{t.board.draftPickerLabel}</p>
-                  <span className="board-count">
-                    {t.board.draftCount(draftList.length)}
-                  </span>
+                  <div className="board-draft-picker-actions">
+                    <span className="board-count">
+                      {t.board.draftCount(draftList.length)}
+                    </span>
+                    <button
+                      type="button"
+                      className="board-secondary-button"
+                      onClick={handleDeleteAllDrafts}
+                    >
+                      {t.board.clearDrafts}
+                    </button>
+                  </div>
                 </div>
                 {draftList.length > 0 ? (
                   <div className="board-draft-list">
@@ -728,7 +795,7 @@ function Board({ t }) {
                             className={`board-draft-load-button ${
                               draft.id === activeDraftId ? 'is-active' : ''
                             }`}
-                            onClick={() => restoreDraftToForm(draft)}
+                            onClick={() => handleLoadDraft(draft)}
                           >
                             <strong>{draft.title.trim() || t.board.untitledDraft}</strong>
                             <span>
@@ -738,7 +805,14 @@ function Board({ t }) {
                                   ? t.board.imageDraftPreview
                                   : t.board.emptyDraftPreview}
                             </span>
-                            {savedAt ? <small>{t.board.draftSavedAt(savedAt)}</small> : null}
+                            <div className="board-draft-item-meta">
+                              {hasImages ? (
+                                <em className="board-draft-image-badge">
+                                  {t.board.imageDraftBadge}
+                                </em>
+                              ) : null}
+                              {savedAt ? <small>{t.board.draftSavedAt(savedAt)}</small> : null}
+                            </div>
                           </button>
                           <button
                             type="button"

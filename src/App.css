@@ -3716,6 +3716,20 @@ body.tenvi-modal-open .tenvi-dashboard {
   gap: 10px;
 }
 
+.board-draft-picker-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.board-draft-picker-actions .board-secondary-button {
+  min-height: 26px;
+  padding-inline: 9px;
+  font-size: 11px;
+}
+
 .board-draft-list {
   display: grid;
   gap: 6px;
@@ -3758,6 +3772,7 @@ body.tenvi-modal-open .tenvi-dashboard {
 
 .board-draft-load-button span,
 .board-draft-load-button small,
+.board-draft-image-badge,
 .board-draft-empty {
   color: #9ecbd9;
   font-size: 11px;
@@ -3769,6 +3784,26 @@ body.tenvi-modal-open .tenvi-dashboard {
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+}
+
+.board-draft-item-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 14px;
+}
+
+.board-draft-image-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 16px;
+  padding: 0 6px;
+  border: 1px solid rgba(90, 212, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(90, 212, 255, 0.08);
+  font-style: normal;
+  font-weight: 800;
 }
 
 .board-draft-item .board-delete-button {
@@ -6570,8 +6605,15 @@ body.tenvi-modal-open .tenvi-dashboard {
 
 .tenvi-dashboard.theme-standard .board-draft-load-button span,
 .tenvi-dashboard.theme-standard .board-draft-load-button small,
+.tenvi-dashboard.theme-standard .board-draft-image-badge,
 .tenvi-dashboard.theme-standard .board-draft-empty {
   color: #475467;
+}
+
+.tenvi-dashboard.theme-standard .board-draft-image-badge {
+  color: #245bdb;
+  border-color: #c7d7fe;
+  background: #eef3ff;
 }
 
 .tenvi-dashboard.theme-standard .board-post-card {
