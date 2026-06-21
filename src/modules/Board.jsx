@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
-import BoardEditor from './BoardEditor.jsx'
+import BoardDetail from './board/BoardDetail.jsx'
+import BoardForm from './board/BoardForm.jsx'
+import BoardImageLightbox from './board/BoardImageLightbox.jsx'
+import BoardList from './board/BoardList.jsx'
 import './Board.css'
 import {
-  BOARD_SORT_OPTIONS,
   DEFAULT_BOARD_CATEGORY_ID,
   addBoardCategory,
   createBoardDraft,
   createBoardPost,
   deleteBoardCategory,
   deleteBoardPost,
-  getBoardCategoryName,
   getBoardImageIds,
   getBoardPostTextContent,
   getPostCategoryId,
@@ -727,222 +728,24 @@ function Board({ t }) {
     setCategoryError('')
   }
 
-  const renderCategorySelect = ({ isEditMode }) => (
-    <label className="board-field">
-      <span>{t.board.categoryField}</span>
-      <select
-        value={categoryId}
-        onChange={(event) => handleCategoryChange(event.target.value, !isEditMode)}
-      >
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
+  // 작성자 수정
+  const handleAuthorChange = (nextAuthor, shouldSaveDraft = false) => {
+    setAuthor(nextAuthor)
+    setFormError('')
 
-  const renderBoardForm = ({ mode }) => {
-    const isEditMode = mode === 'edit'
-    const boardFormId = isEditMode ? 'board-edit-form' : 'board-write-form'
+    if (shouldSaveDraft) {
+      saveCurrentDraft({ author: nextAuthor })
+    }
+  }
 
-    return (
-      <section className="board-section board-compose-panel board-screen">
-        <form
-          id={boardFormId}
-          className="board-form"
-          onSubmit={(event) => {
-            event.preventDefault()
-            if (isEditMode) {
-              handleUpdatePost()
-              return
-            }
+  // 제목 수정
+  const handleTitleChange = (nextTitle, shouldSaveDraft = false) => {
+    setTitle(nextTitle)
+    setFormError('')
 
-            handleCreatePost()
-          }}
-        >
-          <div className="board-compose-fixed">
-            <div className="board-section-header board-compose-header">
-              <div>
-                <p className="module-label">
-                  {isEditMode ? t.board.editLabel : t.board.composeLabel}
-                </p>
-                <h3>{isEditMode ? t.board.editTitle : t.board.composeTitle}</h3>
-              </div>
-              <div className="board-compose-header-actions">
-                {!isEditMode ? (
-                  <span className="board-status-chip">
-                    {draftSaved && formatDraftSavedAt(activeDraft.savedAt)
-                      ? t.board.draftSavedAt(formatDraftSavedAt(activeDraft.savedAt))
-                      : draftSaved
-                        ? t.board.draftSaved
-                        : t.board.draft}
-                  </span>
-                ) : null}
-                {!isEditMode ? (
-                  <button
-                    type="button"
-                    className="board-secondary-button"
-                    onClick={() => setDraftPickerOpen((isOpen) => !isOpen)}
-                    disabled={draftList.length === 0}
-                  >
-                    {t.board.loadDraft}
-                  </button>
-                ) : null}
-                {!isEditMode ? (
-                  <button
-                    type="button"
-                    className="board-secondary-button"
-                    onClick={() => handleDeleteDraft()}
-                    disabled={!draftSaved}
-                  >
-                    {t.board.deleteDraft}
-                  </button>
-                ) : null}
-                <button
-                  type="submit"
-                  className="board-primary-button board-submit-button"
-                >
-                  {isEditMode ? t.board.saveEdit : t.board.submit}
-                </button>
-                <button
-                  type="button"
-                  className="board-secondary-button"
-                  onClick={isEditMode ? handleCancelEdit : handleCancelWrite}
-                >
-                  {t.board.cancel}
-                </button>
-              </div>
-            </div>
-
-            {!isEditMode && draftPickerOpen ? (
-              <div className="board-draft-picker" aria-label={t.board.draftPickerLabel}>
-                <div className="board-draft-picker-header">
-                  <p className="module-label">{t.board.draftPickerLabel}</p>
-                  <div className="board-draft-picker-actions">
-                    <span className="board-count">
-                      {t.board.draftCount(draftList.length)}
-                    </span>
-                    <button
-                      type="button"
-                      className="board-secondary-button"
-                      onClick={handleDeleteAllDrafts}
-                    >
-                      {t.board.clearDrafts}
-                    </button>
-                  </div>
-                </div>
-                {draftList.length > 0 ? (
-                  <div className="board-draft-list">
-                    {draftList.map((draft) => {
-                      const previewText = getDraftPreviewText(draft)
-                      const hasImages = getBoardImageIds(draft.blocks).length > 0
-                      const savedAt = formatDraftSavedAt(draft.savedAt)
-
-                      return (
-                        <div className="board-draft-item" key={draft.id}>
-                          <button
-                            type="button"
-                            className={`board-draft-load-button ${
-                              draft.id === activeDraftId ? 'is-active' : ''
-                            }`}
-                            onClick={() => handleLoadDraft(draft)}
-                          >
-                            <strong>{draft.title.trim() || t.board.untitledDraft}</strong>
-                            <span>
-                              {previewText
-                                ? t.board.draftPreview(previewText)
-                                : hasImages
-                                  ? t.board.imageDraftPreview
-                                  : t.board.emptyDraftPreview}
-                            </span>
-                            <div className="board-draft-item-meta">
-                              {hasImages ? (
-                                <em className="board-draft-image-badge">
-                                  {t.board.imageDraftBadge}
-                                </em>
-                              ) : null}
-                              {savedAt ? <small>{t.board.draftSavedAt(savedAt)}</small> : null}
-                            </div>
-                          </button>
-                          <button
-                            type="button"
-                            className="board-delete-button"
-                            onClick={() => handleDeleteDraft(draft)}
-                          >
-                            {t.board.deleteDraft}
-                          </button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <p className="board-draft-empty">{t.board.noDrafts}</p>
-                )}
-              </div>
-            ) : null}
-
-            <div className="board-compose-meta">
-              {renderCategorySelect({ isEditMode })}
-
-              <label className="board-field">
-                <span>{t.board.authorField}</span>
-                <input
-                  type="text"
-                  value={author}
-                  onChange={(event) => {
-                    const nextAuthor = event.target.value
-                    setAuthor(nextAuthor)
-                    setFormError('')
-
-                    if (!isEditMode) {
-                      saveCurrentDraft({ author: nextAuthor })
-                    }
-                  }}
-                  placeholder={t.board.authorPlaceholder}
-                />
-              </label>
-
-              <label className="board-field">
-                <span>{t.board.titleField}</span>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(event) => {
-                    const nextTitle = event.target.value
-                    setTitle(nextTitle)
-                    setFormError('')
-
-                    if (!isEditMode) {
-                      saveCurrentDraft({ title: nextTitle })
-                    }
-                  }}
-                  placeholder={t.board.titlePlaceholder}
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="board-compose-scroll">
-            <div className="board-field">
-              <span>{t.board.contentField}</span>
-              <BoardEditor
-                blocks={blocks}
-                onChange={(nextBlocks) => handleBlocksChange(nextBlocks, !isEditMode)}
-                t={t}
-              />
-            </div>
-
-            {formError ? (
-              <p className="board-form-message" role="alert">
-                {formError}
-              </p>
-            ) : null}
-          </div>
-        </form>
-      </section>
-    )
+    if (shouldSaveDraft) {
+      saveCurrentDraft({ title: nextTitle })
+    }
   }
 
   return (
@@ -955,460 +758,127 @@ function Board({ t }) {
         <p className="module-meta">{t.board.totalCount(activePosts.length)}</p>
       </div>
 
-      {view === 'write' ? renderBoardForm({ mode: 'write' }) : null}
+      {view === 'write' ? (
+        <BoardForm
+          activeDraft={activeDraft}
+          activeDraftId={activeDraftId}
+          author={author}
+          blocks={blocks}
+          categories={categories}
+          categoryId={categoryId}
+          draftList={draftList}
+          draftPickerOpen={draftPickerOpen}
+          draftSaved={draftSaved}
+          formError={formError}
+          formatDraftSavedAt={formatDraftSavedAt}
+          getDraftPreviewText={getDraftPreviewText}
+          mode="write"
+          onAuthorChange={handleAuthorChange}
+          onBlocksChange={handleBlocksChange}
+          onCancel={handleCancelWrite}
+          onCategoryChange={handleCategoryChange}
+          onDeleteAllDrafts={handleDeleteAllDrafts}
+          onDeleteDraft={handleDeleteDraft}
+          onDraftPickerToggle={() => setDraftPickerOpen((isOpen) => !isOpen)}
+          onLoadDraft={handleLoadDraft}
+          onSubmit={handleCreatePost}
+          onTitleChange={handleTitleChange}
+          t={t}
+          title={title}
+        />
+      ) : null}
 
-      {view === 'edit' ? renderBoardForm({ mode: 'edit' }) : null}
+      {view === 'edit' ? (
+        <BoardForm
+          activeDraft={activeDraft}
+          activeDraftId={activeDraftId}
+          author={author}
+          blocks={blocks}
+          categories={categories}
+          categoryId={categoryId}
+          draftList={draftList}
+          draftPickerOpen={draftPickerOpen}
+          draftSaved={draftSaved}
+          formError={formError}
+          formatDraftSavedAt={formatDraftSavedAt}
+          getDraftPreviewText={getDraftPreviewText}
+          mode="edit"
+          onAuthorChange={handleAuthorChange}
+          onBlocksChange={handleBlocksChange}
+          onCancel={handleCancelEdit}
+          onCategoryChange={handleCategoryChange}
+          onDeleteAllDrafts={handleDeleteAllDrafts}
+          onDeleteDraft={handleDeleteDraft}
+          onDraftPickerToggle={() => setDraftPickerOpen((isOpen) => !isOpen)}
+          onLoadDraft={handleLoadDraft}
+          onSubmit={handleUpdatePost}
+          onTitleChange={handleTitleChange}
+          t={t}
+          title={title}
+        />
+      ) : null}
 
       {view === 'detail' ? (
-        <section className="board-cafe-panel board-screen">
-          {selectedPost ? (
-            <article className="board-cafe-article">
-              <div className="board-cafe-title-row">
-                <h3>{selectedPost.title}</h3>
-                <div className="board-cafe-badges">
-                  <span className="board-category-badge">
-                    {getBoardCategoryName(
-                      getPostCategoryId(selectedPost, categories),
-                      categories,
-                    )}
-                  </span>
-                  {selectedPost.pinned === true ? (
-                    <span className="board-pinned-badge">{t.board.pinned}</span>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="board-cafe-meta-row">
-                <div className="board-cafe-avatar" aria-hidden="true">
-                  {(selectedPost.author ?? t.board.unknownAuthor)
-                    .slice(0, 1)
-                    .toUpperCase()}
-                </div>
-
-                <div className="board-cafe-author">
-                  <div className="board-cafe-author-line">
-                    <strong>{selectedPost.author ?? t.board.unknownAuthor}</strong>
-                  </div>
-                  <div className="board-cafe-post-info">
-                    <time dateTime={selectedPost.createdAt}>
-                      {formatPostDate(selectedPost.createdAt, {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      })}
-                    </time>
-                    <span>{t.board.views(selectedPost.views ?? 0)}</span>
-                  </div>
-                </div>
-
-                <div className="board-detail-actions">
-                  <button
-                    type="button"
-                    className={`board-secondary-button board-pin-button ${
-                      selectedPost.pinned === true ? 'is-active' : ''
-                    }`}
-                    onClick={() => handleTogglePinned(selectedPost.id)}
-                  >
-                    {selectedPost.pinned === true ? t.board.unpin : t.board.pin}
-                  </button>
-                  <button
-                    type="button"
-                    className="board-secondary-button"
-                    onClick={handleBackToList}
-                  >
-                    {t.board.backToList}
-                  </button>
-                  <button
-                    type="button"
-                    className="board-secondary-button"
-                    onClick={handleOpenEdit}
-                  >
-                    {t.board.edit}
-                  </button>
-                  <button
-                    type="button"
-                    className="board-delete-button"
-                    onClick={() => handleDeletePost(selectedPost.id)}
-                  >
-                    {t.board.delete}
-                  </button>
-                </div>
-              </div>
-
-              <div className="board-cafe-content">
-                {selectedPostBlocks.map((block) => {
-                  const imageSource =
-                    block.type === 'image'
-                      ? block.src || detailImagePreviews[block.imageId] || ''
-                      : ''
-
-                  return block.type === 'image' ? (
-                    <figure className="board-cafe-image-block" key={block.id}>
-                      {imageSource ? (
-                        <button
-                          type="button"
-                          className="board-image-preview-button"
-                          aria-label={t.board.openImagePreview}
-                          onClick={() =>
-                            setImageViewer({
-                              alt: block.name,
-                              src: imageSource,
-                            })
-                          }
-                        >
-                          <img src={imageSource} alt={block.name} />
-                        </button>
-                      ) : null}
-                    </figure>
-                  ) : (
-                    <p className="board-cafe-text-block" key={block.id}>
-                      {block.content}
-                    </p>
-                  )
-                })}
-              </div>
-            </article>
-          ) : (
-            <div className="empty-state" role="status">
-              <span>{t.common.systemMessage}</span>
-              <p>{t.board.missingPostMessage}</p>
-            </div>
-          )}
-        </section>
+        <BoardDetail
+          categories={categories}
+          detailImagePreviews={detailImagePreviews}
+          formatPostDate={formatPostDate}
+          onBackToList={handleBackToList}
+          onDeletePost={handleDeletePost}
+          onImageViewerOpen={setImageViewer}
+          onOpenEdit={handleOpenEdit}
+          onTogglePinned={handleTogglePinned}
+          post={selectedPost}
+          postBlocks={selectedPostBlocks}
+          t={t}
+        />
       ) : null}
 
-      {imageViewer ? (
-        <div
-          className="board-image-lightbox"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t.board.imagePreviewLabel}
-          onClick={() => setImageViewer(null)}
-        >
-          <div
-            className="board-image-lightbox-body"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="board-image-lightbox-close"
-              onClick={() => setImageViewer(null)}
-            >
-              {t.board.closeImagePreview}
-            </button>
-            <img
-              className="board-image-lightbox-image"
-              src={imageViewer.src}
-              alt={imageViewer.alt}
-            />
-          </div>
-        </div>
-      ) : null}
+      <BoardImageLightbox
+        imageViewer={imageViewer}
+        onClose={() => setImageViewer(null)}
+        t={t}
+      />
 
       {view === 'list' ? (
-        <>
-          <div className="board-toolbar">
-            <div>
-              <p className="module-label">{t.board.archiveLabel}</p>
-              <h3>{t.board.listTitle}</h3>
-            </div>
-            <div className="board-toolbar-actions">
-              <button
-                type="button"
-                className="board-secondary-button"
-                onClick={() => setTrashOpen((isOpen) => !isOpen)}
-              >
-                {t.board.trash} {trashedPosts.length}
-              </button>
-              <button
-                type="button"
-                className="board-primary-button board-write-button"
-                onClick={handleOpenWrite}
-              >
-                {t.board.write}
-              </button>
-            </div>
-          </div>
-
-          {trashOpen ? (
-            <section className="board-trash-panel" aria-label={t.board.trash}>
-              <div className="board-trash-header">
-                <div>
-                  <p className="module-label">{t.board.trash}</p>
-                  <h3>{t.board.trashTitle}</h3>
-                </div>
-                <span className="board-count">
-                  {t.board.trashCount(trashedPosts.length)}
-                </span>
-              </div>
-
-              {trashedPosts.length > 0 ? (
-                <div className="board-trash-list">
-                  {trashedPosts.map((post) => (
-                    <div className="board-trash-item" key={post.id}>
-                      <div>
-                        <strong>{post.title}</strong>
-                        <small>
-                          {post.deletedAt
-                            ? t.board.deletedAt(
-                                formatPostDate(post.deletedAt, {
-                                  dateStyle: 'medium',
-                                  timeStyle: 'short',
-                                }),
-                              )
-                            : ''}
-                        </small>
-                      </div>
-                      <div className="board-trash-actions">
-                        <button
-                          type="button"
-                          className="board-secondary-button"
-                          onClick={() => handleRestorePost(post.id)}
-                        >
-                          {t.board.restore}
-                        </button>
-                        <button
-                          type="button"
-                          className="board-delete-button"
-                          onClick={() => handlePermanentDeletePost(post.id)}
-                        >
-                          {t.board.permanentDelete}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="board-trash-empty">{t.board.emptyTrash}</p>
-              )}
-            </section>
-          ) : null}
-
-          <section className="board-section board-list-panel">
-            <div className="board-list-controls">
-              <div className="board-category-filter" aria-label={t.board.categoryFilterLabel}>
-                <button
-                  type="button"
-                  className={`board-category-chip ${
-                    categoryFilter === CATEGORY_FILTER_ALL ? 'is-active' : ''
-                  }`}
-                  onClick={() => setCategoryFilter(CATEGORY_FILTER_ALL)}
-                >
-                  {t.board.allCategories}
-                </button>
-                {categories.map((category) => (
-                  <button
-                    type="button"
-                    className={`board-category-chip ${
-                      categoryFilter === category.id ? 'is-active' : ''
-                    }`}
-                    key={category.id}
-                    onClick={() => setCategoryFilter(category.id)}
-                  >
-                    {category.name}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="board-secondary-button board-category-toggle"
-                onClick={() => setCategoryManagerOpen((isOpen) => !isOpen)}
-              >
-                {t.board.categoryManage}
-              </button>
-
-              <div className="board-list-summary">
-                <span className="board-count">
-                  {hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL
-                    ? t.board.searchResultCount(sortedPosts.length)
-                    : t.board.totalCount(activePosts.length)}
-                </span>
-                <label className="board-sort-field">
-                  <span>{t.board.sortLabel}</span>
-                  <select
-                    value={sortMode}
-                    onChange={(event) => setSortMode(event.target.value)}
-                  >
-                    {BOARD_SORT_OPTIONS.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {t.board.sortOptions[option.id]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </div>
-
-            {categoryManagerOpen ? (
-              <div className="board-category-manager">
-                <div className="board-category-form">
-                  <input
-                    type="text"
-                    value={categoryNameInput}
-                    onChange={(event) => {
-                      setCategoryNameInput(event.target.value)
-                      setCategoryError('')
-                    }}
-                    placeholder={t.board.categoryNamePlaceholder}
-                  />
-                  <button
-                    type="button"
-                    className="board-secondary-button"
-                    onClick={handleAddCategory}
-                  >
-                    {t.board.categoryAdd}
-                  </button>
-                </div>
-
-                {categoryError ? (
-                  <p className="board-form-message" role="alert">
-                    {categoryError}
-                  </p>
-                ) : null}
-
-                <div className="board-category-list">
-                  {categories.map((category) => {
-                    const isEditing = editingCategoryId === category.id
-                    const isGeneral = category.id === DEFAULT_BOARD_CATEGORY_ID
-
-                    return (
-                      <div className="board-category-item" key={category.id}>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editingCategoryName}
-                            onChange={(event) =>
-                              setEditingCategoryName(event.target.value)
-                            }
-                          />
-                        ) : (
-                          <span>{category.name}</span>
-                        )}
-                        <div className="board-category-actions">
-                          {isEditing ? (
-                            <button
-                              type="button"
-                              className="board-secondary-button"
-                              onClick={() => handleUpdateCategory(category.id)}
-                            >
-                              {t.board.categorySave}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="board-secondary-button"
-                              onClick={() => {
-                                setEditingCategoryId(category.id)
-                                setEditingCategoryName(category.name)
-                                setCategoryError('')
-                              }}
-                            >
-                              {t.board.categoryEdit}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="board-delete-button"
-                            onClick={() => handleDeleteCategory(category.id)}
-                            disabled={isGeneral}
-                          >
-                            {t.board.categoryDelete}
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            ) : null}
-
-            {sortedPosts.length > 0 ? (
-              <div className="board-title-list">
-                {sortedPosts.map((post, index) => {
-                  const postCategoryId = getPostCategoryId(post, categories)
-
-                  return (
-                    <button
-                      type="button"
-                      className="board-title-row"
-                      key={post.id}
-                      onClick={() => handleOpenDetail(post.id)}
-                    >
-                      <span className="board-post-number">
-                        {sortedPosts.length - index}
-                      </span>
-                      <span className="board-title-text">
-                        {post.pinned === true ? (
-                          <span className="board-pinned-badge">{t.board.pinned}</span>
-                        ) : null}
-                        <span className="board-title-label">{post.title}</span>
-                      </span>
-                      <span className="board-category-badge">
-                        {getBoardCategoryName(postCategoryId, categories)}
-                      </span>
-                      <span className="board-title-views">
-                        {t.board.views(post.views ?? 0)}
-                      </span>
-                      <time className="board-title-date" dateTime={post.createdAt}>
-                        {formatPostDate(post.createdAt, {
-                          dateStyle: 'medium',
-                        })}
-                      </time>
-                    </button>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="empty-state" role="status">
-                <span>{t.common.systemMessage}</span>
-                <p>
-                  {activePosts.length > 0 && (hasSearchQuery || categoryFilter !== CATEGORY_FILTER_ALL)
-                    ? t.board.noSearchResults
-                    : t.board.emptyMessage}
-                </p>
-              </div>
-            )}
-
-            <div className="board-search-panel board-search-panel-bottom" role="search">
-              <label className="board-search-field">
-                <span>{t.board.searchLabel}</span>
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder={t.board.searchPlaceholder}
-                />
-              </label>
-
-              <div
-                className="board-search-scope"
-                aria-label={t.board.searchScopeLabel}
-              >
-                {SEARCH_SCOPES.map((scope) => (
-                  <button
-                    type="button"
-                    className={`board-scope-button ${
-                      searchScope === scope ? 'is-active' : ''
-                    }`}
-                    key={scope}
-                    onClick={() => setSearchScope(scope)}
-                  >
-                    {t.board.searchScopes[scope]}
-                  </button>
-                ))}
-              </div>
-
-              {hasSearchQuery ? (
-                <button
-                  type="button"
-                  className="board-secondary-button board-search-clear"
-                  onClick={() => setSearchQuery('')}
-                >
-                  {t.board.clearSearch}
-                </button>
-              ) : null}
-            </div>
-          </section>
-        </>
+        <BoardList
+          activePosts={activePosts}
+          categories={categories}
+          categoryError={categoryError}
+          categoryFilter={categoryFilter}
+          categoryFilterAll={CATEGORY_FILTER_ALL}
+          categoryManagerOpen={categoryManagerOpen}
+          categoryNameInput={categoryNameInput}
+          editingCategoryId={editingCategoryId}
+          editingCategoryName={editingCategoryName}
+          formatPostDate={formatPostDate}
+          hasSearchQuery={hasSearchQuery}
+          onAddCategory={handleAddCategory}
+          onCategoryErrorClear={() => setCategoryError('')}
+          onCategoryFilterChange={setCategoryFilter}
+          onCategoryManagerToggle={() => setCategoryManagerOpen((isOpen) => !isOpen)}
+          onCategoryNameInputChange={setCategoryNameInput}
+          onDeleteCategory={handleDeleteCategory}
+          onEditingCategoryIdChange={setEditingCategoryId}
+          onEditingCategoryNameChange={setEditingCategoryName}
+          onOpenDetail={handleOpenDetail}
+          onOpenWrite={handleOpenWrite}
+          onPermanentDeletePost={handlePermanentDeletePost}
+          onRestorePost={handleRestorePost}
+          onSearchQueryChange={setSearchQuery}
+          onSearchScopeChange={setSearchScope}
+          onSortModeChange={setSortMode}
+          onTrashToggle={() => setTrashOpen((isOpen) => !isOpen)}
+          onUpdateCategory={handleUpdateCategory}
+          searchQuery={searchQuery}
+          searchScope={searchScope}
+          searchScopes={SEARCH_SCOPES}
+          sortMode={sortMode}
+          sortedPosts={sortedPosts}
+          trashedPosts={trashedPosts}
+          trashOpen={trashOpen}
+          t={t}
+        />
       ) : null}
     </section>
   )
