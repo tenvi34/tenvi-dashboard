@@ -55,7 +55,6 @@ import {
 } from './map/MapNavigation.jsx'
 import {
   PhotoLightbox,
-  PhotoPreview,
   PhotoPreviewButton,
 } from './map/MapPhotoPreview.jsx'
 import PhotoRecordList from './map/MapRecordList.jsx'
@@ -1502,7 +1501,19 @@ function Map({ t }) {
       ),
     [collections, filteredRecords, selectedCollectionFilter, t],
   )
-  const activeRecord = normalizedRecords.find((record) => record.id === activeRecordId)
+  const visibleActiveRecordId =
+    activeRecordId && filteredRecords.some((record) => record.id === activeRecordId)
+      ? activeRecordId
+      : ''
+  const activeRecord = normalizedRecords.find((record) => record.id === visibleActiveRecordId)
+  // 모바일 빈 상태 보정용 표시 값
+  const mobileMapView =
+    !isLoading &&
+    normalizedRecords.length === 0 &&
+    activeMobileMapView === 'map' &&
+    !hasMobileMapViewInteraction
+      ? 'list'
+      : activeMobileMapView
   const focusTarget =
     editDraft?.status === 'located'
       ? editDraft
@@ -1513,7 +1524,7 @@ function Map({ t }) {
       (['completed', 'cancelled'].includes(bulkUpload.status) &&
         selectedMissingLocationItemIds.length > 0),
   )
-  const shouldFitBounds = !activeRecordId && !draft && !editDraft && !isLoading
+  const shouldFitBounds = !visibleActiveRecordId && !draft && !editDraft && !isLoading
   const getCollectionRecordCount = (collectionId) =>
     normalizedRecords.filter((record) => record.collectionId === collectionId).length
   const {
@@ -1599,23 +1610,6 @@ function Map({ t }) {
   }, [photoViewer])
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      normalizedRecords.length === 0 &&
-      activeMobileMapView === 'map' &&
-      !hasMobileMapViewInteraction
-    ) {
-      // 모바일 빈 상태 보정
-      setActiveMobileMapView('list')
-    }
-  }, [
-    activeMobileMapView,
-    hasMobileMapViewInteraction,
-    isLoading,
-    normalizedRecords.length,
-  ])
-
-  useEffect(() => {
     let isMounted = true
 
     // IndexedDB 초기 조회
@@ -1642,16 +1636,6 @@ function Map({ t }) {
       isMounted = false
     }
   }, [t.map.loadError])
-
-  useEffect(() => {
-    if (
-      activeRecordId &&
-      !filteredRecords.some((record) => record.id === activeRecordId)
-    ) {
-      // 필터 밖 선택 해제
-      setActiveRecordId('')
-    }
-  }, [activeRecordId, filteredRecords])
 
   const handlePhotoChange = async (event) => {
     const files = Array.from(event.target.files ?? [])
@@ -1943,7 +1927,7 @@ function Map({ t }) {
       <MapModeTabs activeMode={activeMapMode} onChangeMode={setActiveMapMode} t={t} />
       {activeMapMode === 'explore' ? (
         <MobileMapViewTabs
-          activeView={activeMobileMapView}
+          activeView={mobileMapView}
           onChangeView={handleSelectMobileMapView}
           t={t}
         />
@@ -1975,14 +1959,14 @@ function Map({ t }) {
       <div className="map-mode-body">
         <div
           className="map-archive-layout"
-          data-mobile-view={activeMobileMapView}
+          data-mobile-view={mobileMapView}
           data-mode={activeMapMode}
         >
         <aside className="map-control-panel">
           {/* 탐색 모드 */}
           {activeMapMode === 'explore' ? (
             <MapExplorePanel
-              activeRecordId={activeRecordId}
+              activeRecordId={visibleActiveRecordId}
               collections={collections}
               filteredEmptyMessage={filteredEmptyMessage}
               filteredRecords={filteredRecords}
@@ -2070,13 +2054,13 @@ function Map({ t }) {
           >
             <TileLayer attribution={OSM_ATTRIBUTION} url={OSM_TILE_URL} />
             <MapViewportController
-              layoutKey={activeMobileMapView}
+              layoutKey={mobileMapView}
               request={viewportRequest}
               records={filteredRecords}
               shouldFitBounds={shouldFitBounds}
               target={focusTarget}
             />
-            <MapResizeController watchValue={`${activeMapMode}-${activeMobileMapView}`} />
+            <MapResizeController watchValue={`${activeMapMode}-${mobileMapView}`} />
             <ManualLocationPicker
               disabled={!canPickLocation}
               onPickLocation={handlePickLocation}
@@ -2085,7 +2069,7 @@ function Map({ t }) {
             {filteredRecords.map((record) => (
               <PhotoRecordMarker
                 icon={markerIcon}
-                isActive={activeRecordId === record.id}
+                isActive={visibleActiveRecordId === record.id}
                 key={record.id}
                 onSelectRecord={handleSelectMarker}
                 record={record}

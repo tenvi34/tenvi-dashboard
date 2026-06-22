@@ -72,6 +72,23 @@ export const getRecentNotes = (notes, limit = 3) =>
     )
     .slice(0, limit)
 
+const getBoardPostTime = (post) => {
+  const time = new Date(post.createdAt).getTime()
+  return Number.isNaN(time) ? 0 : time
+}
+
+// Command Board 결과는 복구함 글을 제외한 활성 게시글만 사용
+export const getActiveBoardPosts = (boardPosts = []) =>
+  boardPosts.filter((post) => !post.deletedAt)
+
+export const getRecentBoardPosts = (boardPosts, limit = 5) =>
+  [...getActiveBoardPosts(boardPosts)]
+    .sort(
+      (firstPost, secondPost) =>
+        getBoardPostTime(secondPost) - getBoardPostTime(firstPost),
+    )
+    .slice(0, limit)
+
 // Task 통계 계산
 export const getTaskStats = (tasks) => {
   const completed = tasks.filter((task) => task.completed).length
@@ -128,6 +145,10 @@ export const parseCommand = (command) => {
 
   if (matchesCommand(normalizedCommand, ['최근 노트', 'recent notes'])) {
     return { type: 'recentNotes' }
+  }
+
+  if (matchesCommand(normalizedCommand, ['최근 게시글', 'recent board posts'])) {
+    return { type: 'recentBoardPosts' }
   }
 
   if (matchesCommand(normalizedCommand, ['오늘 추천', 'recommend task'])) {
@@ -210,6 +231,18 @@ export const parseCommand = (command) => {
     }
   }
 
+  const boardKeyword = parseKeywordCommand(command, normalizedCommand, [
+    '게시글 검색',
+    'search board',
+  ])
+
+  if (boardKeyword !== null) {
+    return {
+      keyword: boardKeyword,
+      type: 'searchBoardPosts',
+    }
+  }
+
   return { type: 'unknown' }
 }
 
@@ -260,6 +293,8 @@ export const createResult = ({
 }) => {
   const stats = getTaskStats(tasks)
   const recentNotes = getRecentNotes(notes)
+  const activeBoardPosts = getActiveBoardPosts(boardPosts)
+  const recentBoardPosts = getRecentBoardPosts(boardPosts)
   const recommendation = getRecommendation(stats, notes.length, t)
   const todaySchedules = getTodayEvents(calendarEvents, currentDate)
   const todayDueTasks = getTodayDueTasks(tasks, currentDate)
@@ -300,7 +335,7 @@ export const createResult = ({
         createMetric(t.command.completedTasks, stats.completed),
         createMetric(t.command.completionRate, `${stats.completionRate}%`),
         createMetric(t.command.totalNotes, notes.length),
-        createMetric(t.command.totalBoardPosts, boardPosts.length),
+        createMetric(t.command.totalBoardPosts, activeBoardPosts.length),
       ],
       title: t.command.analysisTitle,
       type: 'analysis',
@@ -360,6 +395,23 @@ export const createResult = ({
       ],
       metrics: [createMetric(t.command.totalNotes, notes.length)],
       title: t.command.recentNotesResult,
+      type: 'list',
+    }
+  }
+
+  if (parsedCommand.type === 'recentBoardPosts') {
+    return {
+      items: [
+        {
+          label: t.command.recentBoardPosts,
+          values:
+            recentBoardPosts.length > 0
+              ? recentBoardPosts.map((post) => post.title || t.board.untitledDraft)
+              : [t.command.noRecentBoardPosts],
+        },
+      ],
+      metrics: [createMetric(t.command.totalBoardPosts, activeBoardPosts.length)],
+      title: t.command.recentBoardPostsResult,
       type: 'list',
     }
   }
@@ -511,6 +563,41 @@ export const createResult = ({
     }
   }
 
+  if (parsedCommand.type === 'searchBoardPosts') {
+    if (!parsedCommand.keyword) {
+      return {
+        items: [createCommandListItem(t)],
+        metrics: [],
+        title: t.command.missingKeyword,
+        type: 'help',
+      }
+    }
+
+    const keyword = parsedCommand.keyword.toLowerCase()
+    const matchingPosts = activeBoardPosts.filter((post) => {
+      const title = post.title?.toLowerCase() ?? ''
+      const content = post.content?.toLowerCase() ?? ''
+      const author = post.author?.toLowerCase() ?? ''
+
+      return title.includes(keyword) || content.includes(keyword) || author.includes(keyword)
+    })
+
+    return {
+      items: [
+        {
+          label: `${t.command.boardSearchResults}: ${parsedCommand.keyword}`,
+          values:
+            matchingPosts.length > 0
+              ? matchingPosts.map((post) => post.title || t.board.untitledDraft)
+              : [t.command.noMatchingBoardPosts],
+        },
+      ],
+      metrics: [createMetric(t.command.matches, matchingPosts.length)],
+      title: t.command.searchBoardPostsResult,
+      type: 'list',
+    }
+  }
+
   if (parsedCommand.type === 'nextSchedule') {
     const nextSchedule = getNextEvent(calendarEvents, currentDate)
 
@@ -565,7 +652,7 @@ export const createResult = ({
       metrics: [
         createMetric(t.command.totalTasks, stats.total),
         createMetric(t.command.totalNotes, notes.length),
-        createMetric(t.command.totalBoardPosts, boardPosts.length),
+        createMetric(t.command.totalBoardPosts, activeBoardPosts.length),
         createMetric(t.command.totalSchedules, calendarEvents.length),
         createMetric(t.command.timerSessions, timerSessions),
       ],

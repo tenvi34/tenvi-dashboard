@@ -17,6 +17,24 @@ const notes = [
   { id: 1, title: 'Project note', content: 'TENVI command ideas' },
 ]
 
+const boardPosts = [
+  {
+    id: 'board-1',
+    title: 'TENVI board roadmap',
+    content: 'Command integration ideas',
+    author: 'TENVI',
+    createdAt: '2026-05-14T09:00:00.000Z',
+  },
+  {
+    id: 'board-2',
+    title: 'Archived board note',
+    content: 'hidden',
+    author: 'TENVI',
+    createdAt: '2026-05-15T09:00:00.000Z',
+    deletedAt: '2026-05-16T09:00:00.000Z',
+  },
+]
+
 // Calendar 명령 결과 fixture
 const calendarEvents = [
   {
@@ -49,6 +67,13 @@ describe('commandLogic parseCommand', () => {
     expect(parseCommand('search notes TENVI')).toEqual({
       keyword: 'TENVI',
       type: 'searchNotes',
+    })
+    expect(parseCommand('recent board posts')).toEqual({
+      type: 'recentBoardPosts',
+    })
+    expect(parseCommand('search board roadmap')).toEqual({
+      keyword: 'roadmap',
+      type: 'searchBoardPosts',
     })
     expect(parseCommand('노트 검색 프로젝트')).toEqual({
       keyword: '프로젝트',
@@ -159,6 +184,38 @@ describe('commandLogic createResult', () => {
 
     expect(result.title).toBe(t.command.dataStatusResult)
     expect(result.metrics.map((metric) => metric.value)).toEqual([4, 1, 1, 3, 7])
+  })
+
+  it('lists recent active board posts', () => {
+    const result = createResult({
+      boardPosts,
+      command: 'recent board posts',
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('recent board posts'),
+      tasks,
+      t,
+    })
+
+    expect(result.title).toBe(t.command.recentBoardPostsResult)
+    expect(result.items[0].values).toEqual(['TENVI board roadmap'])
+    expect(result.metrics[0].value).toBe(1)
+  })
+
+  it('searches active board posts by title, content, and author', () => {
+    const result = createResult({
+      boardPosts,
+      command: 'search board command',
+      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
+      notes,
+      parsedCommand: parseCommand('search board command'),
+      tasks,
+      t,
+    })
+
+    expect(result.title).toBe(t.command.searchBoardPostsResult)
+    expect(result.items[0].values).toEqual(['TENVI board roadmap'])
+    expect(result.metrics[0].value).toBe(1)
   })
 
   it('returns navigation target for open timer', () => {

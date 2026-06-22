@@ -1,22 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 
-// IndexedDB Blob 미리보기
+// IndexedDB Blob ????
 function PhotoPreview({ alt, blob, className }) {
-  const [src, setSrc] = useState('')
+  const src = useMemo(() => (blob ? URL.createObjectURL(blob) : ''), [blob])
 
   useEffect(() => {
-    if (!blob) {
-      setSrc('')
+    if (!src) {
       return undefined
     }
 
-    // Blob URL 정리
-    const objectUrl = URL.createObjectURL(blob)
-
-    setSrc(objectUrl)
-
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [blob])
+    // Blob URL ??
+    return () => URL.revokeObjectURL(src)
+  }, [src])
 
   if (!src) {
     return null
@@ -25,7 +20,7 @@ function PhotoPreview({ alt, blob, className }) {
   return <img alt={alt} className={className} src={src} />
 }
 
-// 전체 보기 진입 버튼
+// ?? ?? ?? ??
 function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
   if (!blob) {
     return <PhotoPreview alt={alt} blob={blob} className={className} />
@@ -43,7 +38,7 @@ function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
   )
 }
 
-// 사진 원본 비율 확인 모달
+// ?? ?? ?? ?? ??
 function PhotoLightbox({ photo, onClose, t }) {
   if (!photo) {
     return null

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardDetail from './board/BoardDetail.jsx'
 import BoardForm from './board/BoardForm.jsx'
 import BoardImageLightbox from './board/BoardImageLightbox.jsx'
 import BoardList from './board/BoardList.jsx'
+import useBoardDetailImages from './board/useBoardDetailImages.js'
 import './Board.css'
 import {
   DEFAULT_BOARD_CATEGORY_ID,
@@ -29,7 +30,7 @@ import {
   updateBoardCategory,
   updateBoardPost,
 } from './boardLogic.js'
-import { deleteBoardImages, getBoardImages } from './boardImageStore.js'
+import { deleteBoardImages } from './boardImageStore.js'
 
 const POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const DRAFT_STORAGE_KEY = STORAGE_KEYS.boardDraft
@@ -235,8 +236,6 @@ function Board({ t }) {
   const [editingCategoryId, setEditingCategoryId] = useState('')
   const [editingCategoryName, setEditingCategoryName] = useState('')
   const [categoryError, setCategoryError] = useState('')
-  const [detailImagePreviews, setDetailImagePreviews] = useState({})
-  const [imageViewer, setImageViewer] = useState(null)
   const [formError, setFormError] = useState('')
   const [view, setView] = useState('list')
   const [selectedPostId, setSelectedPostId] = useState('')
@@ -255,73 +254,9 @@ function Board({ t }) {
   const hasSearchQuery = normalizedSearchQuery.length > 0
   const activeDraft = draftList.find((draft) => draft.id === activeDraftId)
   const draftSaved = Boolean(activeDraft)
+  const { detailImagePreviews, imageViewer, setImageViewer } =
+    useBoardDetailImages(selectedPost)
 
-  // 상세 화면 imageId preview 복원
-  useEffect(() => {
-    if (!selectedPost) {
-      setDetailImagePreviews({})
-      setImageViewer(null)
-      return
-    }
-
-    const imageIds = getBoardImageIds(selectedPost.blocks)
-
-    if (imageIds.length === 0) {
-      setDetailImagePreviews({})
-      return
-    }
-
-    let isMounted = true
-
-    getBoardImages(imageIds)
-      .then((imagesById) => {
-        if (!isMounted) {
-          return
-        }
-
-        setDetailImagePreviews(
-          Object.fromEntries(
-            Object.entries(imagesById).map(([imageId, image]) => [
-              imageId,
-              image.dataUrl,
-            ]),
-          ),
-        )
-      })
-      .catch(() => {
-        if (isMounted) {
-          setDetailImagePreviews({})
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [selectedPost])
-
-  // 상세 이미지 확대 보기와 스크롤 잠금
-  useEffect(() => {
-    if (!imageViewer) {
-      return undefined
-    }
-
-    document.body.classList.add('tenvi-modal-open')
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setImageViewer(null)
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      document.body.classList.remove('tenvi-modal-open')
-    }
-  }, [imageViewer])
-
-  // 카테고리 필터와 검색 동시 적용
   const filteredPosts = activePosts.filter((post) => {
     const postCategoryId = getPostCategoryId(post, categories)
 
@@ -602,6 +537,7 @@ function Board({ t }) {
   // 게시글 목록으로 이동
   const handleBackToList = () => {
     setSelectedPostId('')
+    setImageViewer(null)
     setView('list')
   }
 

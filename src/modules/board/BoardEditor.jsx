@@ -228,12 +228,6 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 블록 위/아래 절반으로 드롭 위치 계산
-  const getDropPosition = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-
-    return event.clientY > rect.top + rect.height / 2 ? 'after' : 'before'
-  }
-
   // 포인터 위치의 대상 블록과 삽입 방향 계산
   const getPointerDropTarget = (event) => {
     const targetElement = document

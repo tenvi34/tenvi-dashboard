@@ -412,7 +412,8 @@ export const restoreBoardPost = (posts, postId) =>
       return post
     }
 
-    const { deletedAt, ...restoredPost } = post
+    const restoredPost = { ...post }
+    delete restoredPost.deletedAt
 
     return {
       ...restoredPost,
