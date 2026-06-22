@@ -1,3 +1,4 @@
+import UserAvatar from '../../components/UserAvatar.jsx'
 import BoardCategoryManager from './BoardCategoryManager.jsx'
 import BoardTrash from './BoardTrash.jsx'
 import {
@@ -8,6 +9,7 @@ import {
 
 function BoardList({
   activePosts,
+  avatarImageId,
   categories,
   categoryError,
   categoryFilter,
@@ -166,6 +168,16 @@ function BoardList({
                 >
                   <span className="board-post-number">
                     {sortedPosts.length - index}
+                  </span>
+                  <span className="board-author">
+                    <UserAvatar
+                      avatarImageId={avatarImageId}
+                      nickname={post.author ?? t.board.unknownAuthor}
+                      size="sm"
+                    />
+                    <span className="board-author__name">
+                      {post.author ?? t.board.unknownAuthor}
+                    </span>
                   </span>
                   <span className="board-title-text">
                     {post.pinned === true ? (

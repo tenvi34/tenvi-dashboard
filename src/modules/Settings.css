@@ -2,7 +2,7 @@
   display: grid;
   grid-template-areas:
     'interface startup actions'
-    'data data actions';
+    'profile data actions';
   grid-template-columns: minmax(240px, 1fr) minmax(260px, 1fr) minmax(260px, 0.95fr);
   gap: 12px;
   align-items: start;
@@ -254,12 +254,91 @@
 .settings-preference-panel .settings-panel-header,
 .settings-data-panel .settings-panel-header,
 .settings-backup-panel .settings-panel-header,
+.settings-board-backup-panel .settings-panel-header,
 .settings-danger-panel .settings-panel-header {
   margin-bottom: 0;
 }
 
 .settings-data-panel {
   grid-area: data;
+}
+
+.settings-profile-panel {
+  grid-area: profile;
+}
+
+.settings-profile-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.profile-settings__preview {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid rgba(90, 212, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(5, 16, 31, 0.34);
+}
+
+.profile-settings__preview > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profile-settings__preview strong {
+  color: #f4fdff;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.profile-settings__preview span {
+  color: #b8dbe7;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.profile-settings__image-actions {
+  margin-top: 10px;
+}
+
+.settings-field {
+  display: grid;
+  gap: 5px;
+}
+
+.settings-field span {
+  color: #a8c7d6;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.settings-field input,
+.settings-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(90, 212, 255, 0.2);
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: #f4fdff;
+  background: rgba(5, 16, 31, 0.58);
+  font: inherit;
+}
+
+.settings-field textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.settings-profile-panel .backup-actions {
+  margin-top: 10px;
 }
 
 .settings-data-panel .data-metrics {
@@ -270,21 +349,33 @@
 
 .settings-backup-panel {
   border-color: rgba(101, 255, 188, 0.22);
+  border-left-width: 3px;
   background:
     linear-gradient(135deg, rgba(101, 255, 188, 0.06), rgba(2, 9, 18, 0.4)),
     rgba(2, 9, 18, 0.42);
 }
 
-.settings-backup-panel .backup-actions {
+.settings-board-backup-panel {
+  border-color: rgba(90, 212, 255, 0.24);
+  border-left-width: 3px;
+  background:
+    linear-gradient(135deg, rgba(90, 212, 255, 0.06), rgba(2, 9, 18, 0.4)),
+    rgba(2, 9, 18, 0.42);
+}
+
+.settings-backup-panel .backup-actions,
+.settings-board-backup-panel .backup-actions {
   margin-top: 8px;
 }
 
-.settings-backup-panel .settings-note + .settings-note {
+.settings-backup-panel .settings-note + .settings-note,
+.settings-board-backup-panel .settings-note + .settings-note {
   margin-top: 4px;
 }
 
 .settings-danger-panel {
   border-color: rgba(255, 102, 134, 0.34);
+  border-left-width: 3px;
   background:
     linear-gradient(135deg, rgba(255, 102, 134, 0.1), rgba(2, 9, 18, 0.44)),
     rgba(2, 9, 18, 0.42);
@@ -304,6 +395,11 @@
 .settings-action-stack .settings-backup-panel {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
+}
+
+.settings-action-stack .settings-board-backup-panel {
+  border-top: 0;
+  border-radius: 0;
 }
 
 .settings-action-stack .settings-danger-panel {
@@ -343,6 +439,7 @@
       grid-template-areas:
         'interface'
         'startup'
+        'profile'
         'data'
         'actions';
     }
@@ -400,13 +497,42 @@
   color: #667085;
 }
 
-.tenvi-dashboard.theme-standard .settings-backup-panel {
-  border-color: #a6f4c5;
-  background: #f6fef9;
+.tenvi-dashboard.theme-standard .settings-field span {
+  color: #667085;
 }
 
-.tenvi-dashboard.theme-standard .settings-danger-panel {
-  border-color: #f4b4ae;
+.tenvi-dashboard.theme-standard .profile-settings__preview {
+  border-color: #d0d5dd;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .profile-settings__preview strong {
+  color: #101828;
+}
+
+.tenvi-dashboard.theme-standard .profile-settings__preview span {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .settings-field input,
+.tenvi-dashboard.theme-standard .settings-field textarea {
+  color: #101828;
+  border-color: #d0d5dd;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .settings-module .settings-backup-panel {
+  border-color: #75e0a7;
+  background: #ecfdf3;
+}
+
+.tenvi-dashboard.theme-standard .settings-module .settings-board-backup-panel {
+  border-color: #84adff;
+  background: #eef4ff;
+}
+
+.tenvi-dashboard.theme-standard .settings-module .settings-danger-panel {
+  border-color: #f97066;
   background: #fff4f2;
 }
 
@@ -460,12 +586,41 @@
   color: #94a3b8;
 }
 
-.tenvi-dashboard.theme-dark .settings-backup-panel {
+.tenvi-dashboard.theme-dark .settings-field span {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .profile-settings__preview {
+  border-color: rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.52);
+}
+
+.tenvi-dashboard.theme-dark .profile-settings__preview strong {
+  color: #e2e8f0;
+}
+
+.tenvi-dashboard.theme-dark .profile-settings__preview span {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .settings-field input,
+.tenvi-dashboard.theme-dark .settings-field textarea {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.tenvi-dashboard.theme-dark .settings-module .settings-backup-panel {
   border-color: rgba(74, 222, 128, 0.25);
   background: rgba(74, 222, 128, 0.05);
 }
 
-.tenvi-dashboard.theme-dark .settings-danger-panel {
+.tenvi-dashboard.theme-dark .settings-module .settings-board-backup-panel {
+  border-color: rgba(96, 165, 250, 0.28);
+  background: rgba(96, 165, 250, 0.06);
+}
+
+.tenvi-dashboard.theme-dark .settings-module .settings-danger-panel {
   border-color: rgba(248, 113, 113, 0.25);
   background: rgba(248, 113, 113, 0.05);
 }

@@ -1,0 +1,61 @@
+.user-avatar {
+  --avatar-size: 40px;
+  display: inline-grid;
+  place-items: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  flex: 0 0 var(--avatar-size);
+  overflow: hidden;
+  border: 1px solid rgba(90, 212, 255, 0.26);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.2), transparent 38%),
+    linear-gradient(135deg, #111827, #5b6474);
+  box-shadow: inset 0 0 16px rgba(90, 212, 255, 0.08);
+  color: #ffffff;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.user-avatar--sm {
+  --avatar-size: 30px;
+  font-size: 12px;
+}
+
+.user-avatar--md {
+  --avatar-size: 40px;
+  font-size: 16px;
+}
+
+.user-avatar--lg {
+  --avatar-size: 72px;
+  font-size: 28px;
+}
+
+.user-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar__fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+}
+
+.tenvi-dashboard.theme-standard .user-avatar {
+  border-color: #c7d7fe;
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.72), transparent 36%),
+    linear-gradient(135deg, #2563eb, #0f766e);
+  box-shadow: inset 0 0 14px rgba(37, 99, 235, 0.12);
+}
+
+.tenvi-dashboard.theme-dark .user-avatar {
+  border-color: rgba(96, 165, 250, 0.28);
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.18), transparent 36%),
+    linear-gradient(135deg, #1e293b, #475569);
+}

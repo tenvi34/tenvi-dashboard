@@ -1,9 +1,11 @@
+import UserAvatar from '../../components/UserAvatar.jsx'
 import {
   getBoardCategoryName,
   getPostCategoryId,
 } from '../boardLogic.js'
 
 function BoardDetail({
+  avatarImageId,
   categories,
   detailImagePreviews,
   formatPostDate,
@@ -33,9 +35,12 @@ function BoardDetail({
           </div>
 
           <div className="board-cafe-meta-row">
-            <div className="board-cafe-avatar" aria-hidden="true">
-              {(post.author ?? t.board.unknownAuthor).slice(0, 1).toUpperCase()}
-            </div>
+            <UserAvatar
+              avatarImageId={avatarImageId}
+              className="board-cafe-avatar"
+              nickname={post.author ?? t.board.unknownAuthor}
+              size="md"
+            />
 
             <div className="board-cafe-author">
               <div className="board-cafe-author-line">

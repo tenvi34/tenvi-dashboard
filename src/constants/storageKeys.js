@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   boardDrafts: 'tenvi.board.drafts',
   boardCategories: 'tenvi.board.categories',
   boardPosts: 'tenvi.board.posts',
+  userProfile: 'tenvi.user.profile',
   calendarEvents: 'tenvi.calendar.events',
   hudEffect: 'tenvi.hudEffect',
   language: 'tenvi.language',

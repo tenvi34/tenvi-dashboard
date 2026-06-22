@@ -107,6 +107,32 @@ export const getBoardImages = async (imageIds = []) => {
   return Object.fromEntries(imageEntries.filter(([, image]) => image))
 }
 
+// Board 백업용 전체 이미지 조회
+export const getAllBoardImages = async () =>
+  runBoardImageTransaction(
+    'readonly',
+    (store) =>
+      new Promise((resolve, reject) => {
+        const request = store.getAll()
+
+        request.onsuccess = () => resolve(request.result ?? [])
+        request.onerror = () => reject(request.error)
+      }),
+  )
+
+// Board 복원용 이미지 일괄 저장
+export const putBoardImages = async (imageRecords = []) => {
+  const validImageRecords = imageRecords.filter((imageRecord) => imageRecord?.id)
+
+  if (validImageRecords.length === 0) {
+    return
+  }
+
+  await runBoardImageTransaction('readwrite', (store) => {
+    validImageRecords.forEach((imageRecord) => store.put(imageRecord))
+  })
+}
+
 // Board 이미지 단건 삭제
 export const deleteBoardImage = async (imageId) => {
   if (!imageId) {

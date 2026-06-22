@@ -916,8 +916,8 @@
 
 .board-title-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto 58px 104px;
-  gap: 6px;
+  grid-template-columns: 34px minmax(116px, 0.42fr) minmax(0, 1fr) auto 58px 104px;
+  gap: 8px;
   align-items: center;
   width: 100%;
   min-height: 48px;
@@ -934,6 +934,23 @@
     box-shadow 0.18s ease,
     transform 0.18s ease,
     background 0.18s ease;
+}
+
+.board-author {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+}
+
+.board-author__name {
+  min-width: 0;
+  color: rgba(190, 229, 240, 0.82);
+  font-size: 12px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .board-title-row:hover {
@@ -1193,23 +1210,11 @@
 
 .board-cafe-meta-row {
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   padding-bottom: 12px;
   border-bottom: 1px solid #e5e7eb;
-}
-
-.board-cafe-avatar {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: #ffffff;
-  background: linear-gradient(135deg, #111827, #5b6474);
-  font-size: 16px;
-  font-weight: 900;
 }
 
 .board-cafe-author {
@@ -1468,7 +1473,7 @@
   }
 
   .board-title-row {
-    grid-template-columns: 38px minmax(0, 1fr) 58px;
+    grid-template-columns: 38px minmax(104px, 0.5fr) minmax(0, 1fr) 58px;
   }
 
   .board-title-row .board-category-badge,
@@ -1575,8 +1580,19 @@
     padding: 10px 12px;
   }
 
+  .board-author {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .board-title-text {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
   .board-title-date {
     grid-column: 2;
+    grid-row: 1;
     text-align: right;
     font-size: 12px;
   }
@@ -1693,6 +1709,7 @@
 .tenvi-dashboard.theme-standard .board-detail-content p,
 .tenvi-dashboard.theme-standard .board-post-card p,
 .tenvi-dashboard.theme-standard .board-post-number,
+.tenvi-dashboard.theme-standard .board-author__name,
 .tenvi-dashboard.theme-standard .board-title-views,
 .tenvi-dashboard.theme-standard .board-title-date,
 .tenvi-dashboard.theme-standard .board-post-card time {
@@ -1996,6 +2013,7 @@
 .tenvi-dashboard.theme-dark .board-detail-content p,
 .tenvi-dashboard.theme-dark .board-post-card p,
 .tenvi-dashboard.theme-dark .board-post-number,
+.tenvi-dashboard.theme-dark .board-author__name,
 .tenvi-dashboard.theme-dark .board-title-views,
 .tenvi-dashboard.theme-dark .board-title-date,
 .tenvi-dashboard.theme-dark .board-post-card time {

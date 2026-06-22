@@ -35,6 +35,7 @@ describe('settingsBackup validateBackupPayload', () => {
       hasCalendarEvents: false,
       hasMapPhotoCollections: false,
       hasMapPhotoRecords: false,
+      hasUserProfile: false,
       mapPhotoCollections: undefined,
       mapPhotoRecords: undefined,
       timerCompletedSessions: 3,
@@ -42,6 +43,7 @@ describe('settingsBackup validateBackupPayload', () => {
       startModule: 'tasks',
       // 구 백업의 'hud' 테마는 'dark'로 정규화됨
       theme: 'dark',
+      userProfile: undefined,
     })
   })
 
@@ -125,6 +127,22 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(restoredData.mapPhotoRecords).toHaveLength(1)
   })
 
+  it('accepts a local user profile as an optional backup field', () => {
+    const restoredData = validateBackupPayload(
+      createValidBackup({
+        userProfile: {
+          id: 'local-user',
+          nickname: 'TENVI',
+          bio: '',
+          avatarImageId: '',
+        },
+      }),
+    )
+
+    expect(restoredData.hasUserProfile).toBe(true)
+    expect(restoredData.userProfile.nickname).toBe('TENVI')
+  })
+
   it('rejects payloads without TENVI backup metadata', () => {
     expect(validateBackupPayload(null)).toBe(null)
     expect(validateBackupPayload([])).toBe(null)
@@ -154,6 +172,7 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(
       validateBackupPayload(createValidBackup({ mapPhotoCollections: {} })),
     ).toBe(null)
+    expect(validateBackupPayload(createValidBackup({ userProfile: [] }))).toBe(null)
     expect(
       validateBackupPayload(createValidBackup({ timerCompletedSessions: 'abc' })),
     ).toBe(null)

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import UserAvatar from '../components/UserAvatar.jsx'
 import './Settings.css'
 import {
   getPhotoRecordCount,
@@ -15,6 +16,17 @@ import {
 } from '../services/photoArchiveBackupService.js'
 import { getPhotoCollections } from '../services/photoCollectionRepository.js'
 import {
+  collectBoardBackupData,
+  downloadBoardBackupFile,
+  parseBoardBackupFile,
+  restoreBoardBackupData,
+} from './boardBackupLogic.js'
+import { getAllBoardImages } from './boardImageStore.js'
+import {
+  deleteProfileImage,
+  saveProfileImage,
+} from './profileImageStore.js'
+import {
   BACKUP_APP,
   BACKUP_TYPE,
   BACKUP_VERSION,
@@ -24,12 +36,18 @@ import {
   THEMES,
   validateBackupPayload,
 } from './settingsBackup.js'
+import {
+  parseUserProfile,
+  resetUserProfile,
+  updateUserProfile,
+} from './userProfileLogic.js'
 
 // Settings 저장 key
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const CALENDAR_EVENTS_STORAGE_KEY = STORAGE_KEYS.calendarEvents
+const USER_PROFILE_STORAGE_KEY = STORAGE_KEYS.userProfile
 
 // 저장 목록 개수 읽기
 const readStoredCount = (storageKey) => {
@@ -86,8 +104,16 @@ function Settings({
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
+  const [boardBackupStatus, setBoardBackupStatus] = useState(null)
+  const [boardImageCount, setBoardImageCount] = useState(0)
   const [mapPhotoCount, setMapPhotoCount] = useState(0)
+  const [profileStatus, setProfileStatus] = useState(null)
+  const [profileForm, setProfileForm] = useState(() =>
+    parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)),
+  )
   const backupFileInputRef = useRef(null)
+  const boardBackupFileInputRef = useRef(null)
+  const profileImageInputRef = useRef(null)
   const taskCount = readStoredCount(TASKS_STORAGE_KEY)
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
   const boardPostCount = readStoredCount(BOARD_POSTS_STORAGE_KEY)
@@ -109,6 +135,19 @@ function Settings({
         }
       })
 
+    // Board 이미지 IndexedDB 개수 반영
+    getAllBoardImages()
+      .then((images) => {
+        if (isMounted) {
+          setBoardImageCount(images.length)
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setBoardImageCount(0)
+        }
+      })
+
     return () => {
       isMounted = false
     }
@@ -125,6 +164,95 @@ function Settings({
 
   // reset 후 개수 갱신
   void dataVersion
+
+  // 로컬 프로필 저장
+  const handleSaveProfile = () => {
+    const nextProfile = updateUserProfile(
+      parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)),
+      {
+        nickname: profileForm.nickname,
+        bio: profileForm.bio,
+      },
+    )
+
+    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
+    setProfileForm(nextProfile)
+    setProfileStatus({ type: 'success', message: t.settings.profileSaved })
+    setDataVersion((currentVersion) => currentVersion + 1)
+  }
+
+  // 프로필 이미지 선택 즉시 IndexedDB와 프로필 key 갱신
+  const handleSelectProfileImage = async (event) => {
+    const imageFile = event.target.files?.[0]
+
+    if (!imageFile) {
+      return
+    }
+
+    try {
+      const currentProfile = parseUserProfile(
+        localStorage.getItem(USER_PROFILE_STORAGE_KEY),
+      )
+      const nextImage = await saveProfileImage(imageFile)
+      const nextProfile = updateUserProfile(currentProfile, {
+        ...profileForm,
+        avatarImageId: nextImage.id,
+      })
+
+      localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
+      setProfileForm(nextProfile)
+      setProfileStatus({ type: 'success', message: t.settings.profileImageSaved })
+
+      if (currentProfile.avatarImageId) {
+        deleteProfileImage(currentProfile.avatarImageId).catch(() => {
+          // 새 이미지 반영을 우선하고 이전 이미지 정리는 후처리
+        })
+      }
+    } catch {
+      setProfileStatus({ type: 'error', message: t.settings.profileImageError })
+    } finally {
+      event.target.value = ''
+    }
+  }
+
+  const handleRemoveProfileImage = () => {
+    const currentProfile = parseUserProfile(
+      localStorage.getItem(USER_PROFILE_STORAGE_KEY),
+    )
+    const nextProfile = updateUserProfile(currentProfile, {
+      ...profileForm,
+      avatarImageId: '',
+    })
+
+    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
+    setProfileForm(nextProfile)
+    setProfileStatus({ type: 'info', message: t.settings.profileImageRemoved })
+
+    if (currentProfile.avatarImageId) {
+      deleteProfileImage(currentProfile.avatarImageId).catch(() => {
+        // 프로필 fallback 전환을 우선하고 이미지 정리는 후처리
+      })
+    }
+  }
+
+  // 로컬 프로필 기본값 복원
+  const handleResetProfile = () => {
+    const currentProfile = parseUserProfile(
+      localStorage.getItem(USER_PROFILE_STORAGE_KEY),
+    )
+    const nextProfile = resetUserProfile()
+
+    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
+    setProfileForm(nextProfile)
+    setProfileStatus({ type: 'info', message: t.settings.profileReset })
+    setDataVersion((currentVersion) => currentVersion + 1)
+
+    if (currentProfile.avatarImageId) {
+      deleteProfileImage(currentProfile.avatarImageId).catch(() => {
+        // 기본 프로필 복원을 우선하고 이미지 정리는 후처리
+      })
+    }
+  }
 
   // JSON 백업 내보내기
   const handleExportBackup = async () => {
@@ -151,6 +279,9 @@ function Settings({
           theme,
           mapPhotoCollections,
           mapPhotoRecords,
+          userProfile: parseUserProfile(
+            localStorage.getItem(USER_PROFILE_STORAGE_KEY),
+          ),
         },
       }
       const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
@@ -166,6 +297,68 @@ function Settings({
       setBackupStatus({ type: 'success', message: t.settings.backupExported })
     } catch {
       setBackupStatus({ type: 'error', message: t.settings.backupReadError })
+    }
+  }
+
+  // Board 전용 JSON 백업 내보내기
+  const handleExportBoardBackup = async () => {
+    try {
+      const backupPayload = await collectBoardBackupData()
+
+      downloadBoardBackupFile(backupPayload)
+      setBoardBackupStatus({
+        type: 'success',
+        message: t.settings.boardBackupExported,
+      })
+    } catch {
+      setBoardBackupStatus({
+        type: 'error',
+        message: t.settings.boardBackupReadError,
+      })
+    }
+  }
+
+  // Board 전용 JSON 백업 복원
+  const handleRestoreBoardBackup = async (event) => {
+    const backupFile = event.target.files?.[0]
+
+    if (!backupFile) {
+      return
+    }
+
+    try {
+      const backupPayload = await parseBoardBackupFile(backupFile)
+
+      if (!backupPayload) {
+        setBoardBackupStatus({
+          type: 'error',
+          message: t.settings.boardBackupInvalid,
+        })
+        return
+      }
+
+      if (!window.confirm(t.settings.boardRestoreConfirmMessage)) {
+        setBoardBackupStatus({
+          type: 'info',
+          message: t.settings.restoreCancelled,
+        })
+        return
+      }
+
+      await restoreBoardBackupData(backupPayload)
+      setProfileForm(parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)))
+      setBoardBackupStatus({
+        type: 'success',
+        message: t.settings.boardBackupRestored,
+      })
+      setDataVersion((currentVersion) => currentVersion + 1)
+    } catch {
+      setBoardBackupStatus({
+        type: 'error',
+        message: t.settings.boardBackupReadError,
+      })
+    } finally {
+      event.target.value = ''
     }
   }
 
@@ -193,6 +386,12 @@ function Settings({
     localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
     localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
     localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
+    if (validatedBackup.hasUserProfile) {
+      localStorage.setItem(
+        STORAGE_KEYS.userProfile,
+        JSON.stringify(parseUserProfile(JSON.stringify(validatedBackup.userProfile))),
+      )
+    }
   }
 
   const handleRestoreBackup = async (event) => {
@@ -285,6 +484,7 @@ function Settings({
         language: localStorage.getItem(STORAGE_KEYS.language),
         startModule: localStorage.getItem(STORAGE_KEYS.startModule),
         theme: localStorage.getItem(STORAGE_KEYS.theme),
+        userProfile: localStorage.getItem(STORAGE_KEYS.userProfile),
       }
       const shouldTouchMapArchive =
         validatedBackup.hasMapPhotoRecords || validatedBackup.hasMapPhotoCollections
@@ -362,6 +562,9 @@ function Settings({
       onLanguageChange(validatedBackup.language)
       onStartModuleChange(validatedBackup.startModule)
       onThemeChange(validatedBackup.theme)
+      if (validatedBackup.hasUserProfile) {
+        setProfileForm(parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)))
+      }
       setDataVersion((currentVersion) => currentVersion + 1)
 
       if (!validatedBackup.hasMapPhotoRecords) {
@@ -503,6 +706,10 @@ function Settings({
               <strong>{boardPostCount}</strong>
             </div>
             <div className="data-metric">
+              <span>{t.settings.boardImageData}</span>
+              <strong>{boardImageCount}</strong>
+            </div>
+            <div className="data-metric">
               <span>{t.settings.calendarData}</span>
               <strong>{calendarEventCount}</strong>
             </div>
@@ -511,6 +718,102 @@ function Settings({
               <strong>{mapPhotoCount}</strong>
             </div>
           </div>
+        </section>
+
+        {/* 로컬 사용자 프로필 */}
+        <section className="settings-panel settings-profile-panel">
+          <div className="settings-panel-header">
+            <p className="module-label">{t.settings.profileLabel}</p>
+            <h3>{t.settings.profileTitle}</h3>
+          </div>
+          <div className="profile-settings__preview">
+            <UserAvatar
+              avatarImageId={profileForm.avatarImageId}
+              nickname={profileForm.nickname}
+              size="lg"
+            />
+            <div>
+              <strong>{profileForm.nickname || 'TENVI'}</strong>
+              <span>{profileForm.bio || t.settings.profileNoBio}</span>
+            </div>
+          </div>
+          <div className="backup-actions profile-settings__image-actions">
+            <button
+              className="settings-option"
+              type="button"
+              onClick={() => profileImageInputRef.current?.click()}
+            >
+              {t.settings.selectProfileImage}
+            </button>
+            <button
+              className="settings-option"
+              type="button"
+              onClick={handleRemoveProfileImage}
+              disabled={!profileForm.avatarImageId}
+            >
+              {t.settings.removeProfileImage}
+            </button>
+          </div>
+          <input
+            ref={profileImageInputRef}
+            className="backup-file-input"
+            type="file"
+            accept="image/*"
+            aria-label={t.settings.selectProfileImage}
+            onChange={handleSelectProfileImage}
+          />
+          <div className="settings-profile-form">
+            <label className="settings-field">
+              <span>{t.settings.profileNickname}</span>
+              <input
+                type="text"
+                value={profileForm.nickname}
+                onChange={(event) =>
+                  setProfileForm((currentProfile) => ({
+                    ...currentProfile,
+                    nickname: event.target.value,
+                  }))
+                }
+                placeholder="TENVI"
+              />
+            </label>
+            <label className="settings-field">
+              <span>{t.settings.profileBio}</span>
+              <textarea
+                value={profileForm.bio}
+                onChange={(event) =>
+                  setProfileForm((currentProfile) => ({
+                    ...currentProfile,
+                    bio: event.target.value,
+                  }))
+                }
+                rows={3}
+                placeholder={t.settings.profileBioPlaceholder}
+              />
+            </label>
+          </div>
+          <div className="backup-actions">
+            <button
+              className="settings-option"
+              type="button"
+              onClick={handleSaveProfile}
+            >
+              {t.settings.saveProfile}
+            </button>
+            <button
+              className="settings-option"
+              type="button"
+              onClick={handleResetProfile}
+            >
+              {t.settings.resetProfile}
+            </button>
+          </div>
+          <p className="settings-note">{t.settings.profileNote}</p>
+          {profileStatus ? (
+            <p className={`backup-status is-${profileStatus.type}`}>
+              {profileStatus.message}
+            </p>
+          ) : null}
         </section>
 
         {/* 백업/복원 */}
@@ -549,6 +852,43 @@ function Settings({
           {backupStatus ? (
             <p className={`backup-status is-${backupStatus.type}`}>
               {backupStatus.message}
+            </p>
+          ) : null}
+        </section>
+
+        <section className="settings-panel settings-board-backup-panel">
+          <div className="settings-panel-header">
+            <p className="module-label">{t.settings.backupLabel}</p>
+            <h3>{t.settings.boardBackupTitle}</h3>
+          </div>
+          <div className="backup-actions">
+            <button
+              className="settings-option"
+              type="button"
+              onClick={handleExportBoardBackup}
+            >
+              {t.settings.exportBoardBackup}
+            </button>
+            <button
+              className="settings-option"
+              type="button"
+              onClick={() => boardBackupFileInputRef.current?.click()}
+            >
+              {t.settings.importBoardBackup}
+            </button>
+          </div>
+          <input
+            ref={boardBackupFileInputRef}
+            className="backup-file-input"
+            type="file"
+            accept="application/json,.json"
+            aria-label={t.settings.importBoardBackup}
+            onChange={handleRestoreBoardBackup}
+          />
+          <p className="settings-note">{t.settings.boardBackupNote}</p>
+          {boardBackupStatus ? (
+            <p className={`backup-status is-${boardBackupStatus.type}`}>
+              {boardBackupStatus.message}
             </p>
           ) : null}
         </section>

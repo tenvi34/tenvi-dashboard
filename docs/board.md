@@ -32,6 +32,13 @@ src/modules/board/
 src/modules/boardLogic.js
 src/modules/boardLogic.test.js
 src/modules/boardImageStore.js
+src/modules/boardBackupLogic.js
+src/modules/boardBackupLogic.test.js
+src/modules/profileImageStore.js
+src/modules/userProfileLogic.js
+src/modules/userProfileLogic.test.js
+src/components/UserAvatar.jsx
+src/components/UserAvatar.css
 src/constants/storageKeys.js
 ```
 
@@ -212,8 +219,61 @@ Board 이미지 IndexedDB 저장소를 담당한다.
 - `saveBoardImage`
 - `getBoardImage`
 - `getBoardImages`
+- `getAllBoardImages`
+- `putBoardImages`
 - `deleteBoardImage`
 - `deleteBoardImages`
+
+### `src/modules/boardBackupLogic.js`
+
+Board 전용 백업/복원 payload를 담당한다. UI에서 직접 localStorage key를 조합하지 않고 이 파일을 통해 수집, 검증, 복원한다.
+
+주요 export:
+
+- `BOARD_BACKUP_STORAGE_KEYS`
+- `collectBoardBackupData`
+- `downloadBoardBackupFile`
+- `parseBoardBackupFile`
+- `restoreBoardBackupData`
+- `validateBoardBackupData`
+- `createBoardBackupFileName`
+
+### `src/modules/userProfileLogic.js`
+
+로컬 사용자 프로필 구조와 저장값 보정을 담당한다.
+
+주요 export:
+
+- `createDefaultUserProfile`
+- `normalizeUserProfile`
+- `parseUserProfile`
+- `updateUserProfile`
+- `resetUserProfile`
+
+### `src/modules/profileImageStore.js`
+
+로컬 사용자 프로필 이미지를 별도 IndexedDB에 저장한다. Board 게시글 이미지 저장소와 DB/store를 공유하지 않는다.
+
+주요 export:
+
+- `saveProfileImage`
+- `getProfileImage`
+- `getAllProfileImages`
+- `putProfileImages`
+- `deleteProfileImage`
+
+### `src/components/UserAvatar.jsx`
+
+원형 사용자 프로필 이미지를 표시하는 공통 컴포넌트다.
+
+주요 props:
+
+- `nickname`
+- `avatarImageId`
+- `size`: `sm`, `md`, `lg`
+- `className`
+
+`avatarImageId`가 있으면 `profileImageStore`에서 dataUrl을 읽어 표시하고, 없거나 로딩에 실패하면 nickname 첫 글자를 원형 fallback으로 표시한다.
 
 ## localStorage / IndexedDB key
 
@@ -225,10 +285,11 @@ Board 이미지 IndexedDB 저장소를 담당한다.
 | 카테고리 목록 | `tenvi.board.categories` | 카테고리 배열 저장 |
 | 단일 임시저장 | `tenvi.board.draft` | legacy key. 호환을 위해 계속 읽고 저장한다. |
 | 다중 임시저장 | `tenvi.board.drafts` | 최대 10개의 draft 목록 저장 |
+| 로컬 사용자 프로필 | `tenvi.user.profile` | 새 Board 글 작성자 기본값과 소개 저장 |
 
 key 정의는 `src/constants/storageKeys.js`의 `STORAGE_KEYS`를 사용한다.
 
-### IndexedDB
+### IndexedDB: Board 이미지
 
 | 항목 | 값 |
 | --- | --- |
@@ -236,6 +297,113 @@ key 정의는 `src/constants/storageKeys.js`의 `STORAGE_KEYS`를 사용한다.
 | DB 버전 | `1` |
 | object store | `boardImages` |
 | keyPath | `id` |
+
+### IndexedDB: 프로필 이미지
+
+| 항목 | 값 |
+| --- | --- |
+| DB 이름 | `TENVI_PROFILE_DB` |
+| DB 버전 | `1` |
+| object store | `profileImages` |
+| keyPath | `id` |
+
+## 로컬 사용자 프로필
+
+사용자 프로필은 서버 로그인 없이 브라우저 localStorage에 저장한다.
+
+```js
+{
+  id: 'local-user',
+  nickname: 'TENVI',
+  bio: '',
+  avatarImageId: '',
+  createdAt: '2026-06-22T00:00:00.000Z',
+  updatedAt: '2026-06-22T00:00:00.000Z'
+}
+```
+
+규칙:
+
+- 저장 key는 `tenvi.user.profile`이다.
+- `id`는 로컬 고정값 `local-user`를 사용한다.
+- `nickname`은 trim 후 빈 값이면 `TENVI`로 fallback한다.
+- `bio`는 선택 입력값이며 그대로 보존한다.
+- 새 Board 글 작성 화면은 현재 프로필의 `nickname`을 작성자 기본값으로 사용한다.
+- 사용자가 작성자 입력칸을 직접 수정하면 해당 게시글에는 입력한 이름이 저장된다.
+- 프로필 변경은 기존 게시글 `author`를 강제로 바꾸지 않는다.
+- 프로필 이미지는 `TENVI_PROFILE_DB`의 `profileImages` store에 저장하고, localStorage 프로필에는 `avatarImageId`만 저장한다.
+- 프로필 이미지를 교체하거나 제거하면 가능한 범위에서 이전 이미지 레코드를 삭제한다.
+- Board 목록과 상세 화면은 현재 로컬 프로필의 avatar를 표시하지만, 게시글 작성자 텍스트는 저장된 `author` 값을 그대로 보여준다.
+
+## Board 백업/복원
+
+Settings의 Board 백업 패널에서 Board 관련 데이터만 JSON 파일로 내보내고 복원할 수 있다.
+
+백업 파일명은 다음 형식을 사용한다.
+
+```txt
+tenvi-board-backup-YYYYMMDD-HHmmss.json
+```
+
+### 백업 JSON 구조
+
+```js
+{
+  version: 1,
+  app: 'TENVI Dashboard',
+  type: 'board-backup',
+  exportedAt: '2026-06-22T00:00:00.000Z',
+  localStorage: {
+    'tenvi.board.posts': '...',
+    'tenvi.board.categories': '...',
+    'tenvi.board.draft': '...',
+    'tenvi.board.drafts': '...',
+    'tenvi.user.profile': '...'
+  },
+  indexedDb: {
+    boardImages: [
+      {
+        id: 'board-image-...',
+        dataUrl: 'data:image/png;base64,...',
+        name: 'image.png',
+        type: 'image/png',
+        createdAt: '2026-06-22T00:00:00.000Z'
+      }
+    ],
+    profileImages: [
+      {
+        id: 'profile-image-...',
+        dataUrl: 'data:image/png;base64,...',
+        name: 'profile.png',
+        type: 'image/png',
+        createdAt: '2026-06-22T00:00:00.000Z'
+      }
+    ]
+  }
+}
+```
+
+### 백업 대상 key
+
+`BOARD_BACKUP_STORAGE_KEYS`는 다음 key만 수집하고 복원한다.
+
+- `tenvi.board.posts`
+- `tenvi.board.categories`
+- `tenvi.board.draft`
+- `tenvi.board.drafts`
+- `tenvi.user.profile`
+
+복원 시 백업 파일에 다른 localStorage key가 들어 있어도 무시한다. Board 이미지 데이터는 `indexedDb.boardImages`의 레코드를 `boardImages` object store에 다시 `put`하고, 프로필 이미지 데이터는 `indexedDb.profileImages`의 레코드를 `profileImages` object store에 다시 `put`한다. `profileImages`가 없는 기존 백업도 유효한 백업으로 처리한다.
+
+### 복원 주의사항
+
+- 복원 전 `window.confirm`으로 덮어쓰기 여부를 확인한다.
+- 기본 정책은 덮어쓰기 복원이다.
+- localStorage 값은 허용된 Board 관련 key만 복원한다.
+- 이미지 레코드는 같은 ID가 있으면 IndexedDB `put`으로 덮어쓴다.
+- 프로필 이미지 레코드는 같은 ID가 있으면 IndexedDB `put`으로 덮어쓴다.
+- 현재 구현은 병합 복원을 제공하지 않는다.
+- 복원 후 Board 화면은 새로고침하거나 모듈을 다시 열어 복원된 목록을 다시 읽는 방식이다.
 
 ## 게시글 데이터 구조
 
@@ -412,7 +580,7 @@ npm run lint
 ## 향후 개선 후보
 
 - `Board.jsx`의 상태/핸들러를 hook으로 분리
-- Board 데이터 백업/복원 기능
+- Board 백업 병합 복원 옵션
 - 검색/정렬 조건 저장
 - Dashboard 최근 게시글 카드
 - Command Console에서 Board 검색/요약 명령

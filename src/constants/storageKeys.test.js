@@ -17,6 +17,7 @@ describe('STORAGE_KEYS', () => {
       tasks: 'todo-manager-lite.todos',
       theme: 'tenvi.theme',
       timerCompletedSessions: 'tenvi.timer.completedSessions',
+      userProfile: 'tenvi.user.profile',
     })
   })
 })

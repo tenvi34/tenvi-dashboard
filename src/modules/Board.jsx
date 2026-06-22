@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardDetail from './board/BoardDetail.jsx'
 import BoardForm from './board/BoardForm.jsx'
 import BoardImageLightbox from './board/BoardImageLightbox.jsx'
@@ -29,9 +30,14 @@ import {
   updateBoardPost,
 } from './boardLogic.js'
 import { deleteBoardImages } from './boardImageStore.js'
+import { parseUserProfile } from './userProfileLogic.js'
 
 const CATEGORY_FILTER_ALL = 'all'
 const SEARCH_SCOPES = ['title', 'content', 'author']
+
+// 새 글 작성자 기본값은 로컬 프로필 nickname 사용
+const getDefaultAuthorName = () =>
+  parseUserProfile(localStorage.getItem(STORAGE_KEYS.userProfile)).nickname
 
 // 새 글과 빈 에디터에서 최소 1개 텍스트 블록 유지
 const createEmptyTextBlock = () => ({
@@ -80,7 +86,7 @@ function Board({ t }) {
   } = useBoardDrafts()
 
   // 작성/수정 폼 입력 상태
-  const [author, setAuthor] = useState('')
+  const [author, setAuthor] = useState(() => getDefaultAuthorName())
   const [title, setTitle] = useState('')
   const [categoryId, setCategoryId] = useState(DEFAULT_BOARD_CATEGORY_ID)
   const [blocks, setBlocks] = useState(() => [createEmptyTextBlock()])
@@ -105,6 +111,7 @@ function Board({ t }) {
   const [sortMode, setSortMode] = useState('latest')
   const selectedPost = activePosts.find((post) => post.id === selectedPostId)
   const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
+  const userProfile = parseUserProfile(localStorage.getItem(STORAGE_KEYS.userProfile))
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
   const hasSearchQuery = normalizedSearchQuery.length > 0
   const { detailImagePreviews, imageViewer, setImageViewer } =
@@ -152,7 +159,7 @@ function Board({ t }) {
 
   // 작성/수정 폼 입력 상태 초기화
   const resetWriteForm = () => {
-    setAuthor('')
+    setAuthor(getDefaultAuthorName())
     setTitle('')
     setCategoryId(DEFAULT_BOARD_CATEGORY_ID)
     setBlocks([createEmptyTextBlock()])
@@ -568,6 +575,7 @@ function Board({ t }) {
 
       {view === 'detail' ? (
         <BoardDetail
+          avatarImageId={userProfile.avatarImageId}
           categories={categories}
           detailImagePreviews={detailImagePreviews}
           formatPostDate={formatPostDate}
@@ -591,6 +599,7 @@ function Board({ t }) {
       {view === 'list' ? (
         <BoardList
           activePosts={activePosts}
+          avatarImageId={userProfile.avatarImageId}
           categories={categories}
           categoryError={categoryError}
           categoryFilter={categoryFilter}

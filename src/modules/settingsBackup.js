@@ -60,6 +60,10 @@ export const validateBackupPayload = (backupPayload) => {
     backupPayload.data,
     'calendarEvents',
   )
+  const hasUserProfile = Object.prototype.hasOwnProperty.call(
+    backupPayload.data,
+    'userProfile',
+  )
   const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
 
   // hudEffect: 구 백업 호환을 위해 존재하면 검증, 없으면 허용
@@ -99,6 +103,10 @@ export const validateBackupPayload = (backupPayload) => {
     return null
   }
 
+  if (hasUserProfile && !isPlainObject(backupPayload.data.userProfile)) {
+    return null
+  }
+
   return {
     boardPosts: hasBoardPosts ? boardPosts : undefined,
     calendarEvents: hasCalendarEvents ? calendarEvents : undefined,
@@ -106,6 +114,7 @@ export const validateBackupPayload = (backupPayload) => {
     hasCalendarEvents,
     hasMapPhotoCollections,
     hasMapPhotoRecords,
+    hasUserProfile,
     language,
     mapPhotoCollections: hasMapPhotoCollections
       ? backupPayload.data.mapPhotoCollections
@@ -118,5 +127,6 @@ export const validateBackupPayload = (backupPayload) => {
     tasks,
     theme: normalizedTheme,
     timerCompletedSessions: normalizedTimerSessions,
+    userProfile: hasUserProfile ? backupPayload.data.userProfile : undefined,
   }
 }
