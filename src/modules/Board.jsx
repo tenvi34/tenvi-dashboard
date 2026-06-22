@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardDetail from './board/BoardDetail.jsx'
 import BoardForm from './board/BoardForm.jsx'
 import BoardImageLightbox from './board/BoardImageLightbox.jsx'
 import BoardList from './board/BoardList.jsx'
+import useBoardCategories from './board/useBoardCategories.js'
 import useBoardDetailImages from './board/useBoardDetailImages.js'
+import useBoardDrafts, { getDraftPreviewText } from './board/useBoardDrafts.js'
+import useBoardPosts from './board/useBoardPosts.js'
 import './Board.css'
 import {
   DEFAULT_BOARD_CATEGORY_ID,
   addBoardCategory,
-  createBoardDraft,
   createBoardPost,
   deleteBoardCategory,
   deleteBoardPost,
@@ -21,9 +22,6 @@ import {
   movePostsToDefaultCategory,
   moveBoardPostToTrash,
   normalizeBoardBlocks,
-  parseBoardCategories,
-  parseBoardDraft,
-  parseBoardPosts,
   restoreBoardPost,
   sortBoardPosts,
   toggleBoardPostPinned,
@@ -32,14 +30,8 @@ import {
 } from './boardLogic.js'
 import { deleteBoardImages } from './boardImageStore.js'
 
-const POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
-const DRAFT_STORAGE_KEY = STORAGE_KEYS.boardDraft
-const DRAFTS_STORAGE_KEY = STORAGE_KEYS.boardDrafts
-const CATEGORIES_STORAGE_KEY = STORAGE_KEYS.boardCategories
 const CATEGORY_FILTER_ALL = 'all'
 const SEARCH_SCOPES = ['title', 'content', 'author']
-const LEGACY_DRAFT_ID = 'legacy-board-draft'
-const MAX_BOARD_DRAFTS = 10
 
 const createEmptyTextBlock = () => ({
   id: crypto.randomUUID(),
@@ -57,44 +49,6 @@ const createEditableBlocks = (post) => {
 }
 
 // 임시저장 목록 본문 단서
-const getDraftPreviewText = (draft) => {
-  const textContent = getBoardPostTextContent(draft?.blocks)
-
-  if (textContent) {
-    return textContent.split('\n').find((line) => line.trim())?.trim() ?? ''
-  }
-
-  return ''
-}
-
-const getBoardDraftTime = (draft) => {
-  const time = new Date(draft?.savedAt).getTime()
-
-  return Number.isNaN(time) ? 0 : time
-}
-
-// draft 최신순 유지와 최대 개수 제한
-const limitBoardDrafts = (drafts) =>
-  drafts
-    .filter(Boolean)
-    .sort((firstDraft, secondDraft) => getBoardDraftTime(secondDraft) - getBoardDraftTime(firstDraft))
-    .slice(0, MAX_BOARD_DRAFTS)
-
-// draft 목록 식별자 생성
-const createBoardDraftId = () => {
-  if (globalThis.crypto?.randomUUID) {
-    return globalThis.crypto.randomUUID()
-  }
-
-  return `draft-${Date.now()}-${Math.random().toString(16).slice(2)}`
-}
-
-// 다중 draft record 정규화
-const createBoardDraftRecord = (input, draftId) => ({
-  ...createBoardDraft(input),
-  id: draftId || createBoardDraftId(),
-})
-
 const hasWritableBody = (blocks) =>
   normalizeBoardBlocks(blocks).some((block) => {
     if (block.type === 'image') {
@@ -104,131 +58,27 @@ const hasWritableBody = (blocks) =>
     return block.content.trim().length > 0
   })
 
-// Board localStorage 게시글 복원
-const loadBoardPosts = () => {
-  try {
-    const rawPosts = localStorage.getItem(POSTS_STORAGE_KEY)
-
-    return rawPosts ? parseBoardPosts(rawPosts) : []
-  } catch {
-    return []
-  }
-}
-
-// 기존 Board localStorage key 보존
-const saveBoardPosts = (posts) => {
-  localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts))
-}
-
-// Board 카테고리 localStorage 복원
-const loadBoardCategories = () => {
-  try {
-    return parseBoardCategories(localStorage.getItem(CATEGORIES_STORAGE_KEY))
-  } catch {
-    return parseBoardCategories()
-  }
-}
-
-// Board 카테고리 저장
-const saveBoardCategories = (categories) => {
-  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories))
-}
-
-// Board 새 글 draft 복원
-const loadBoardDraft = () => {
-  try {
-    return parseBoardDraft(localStorage.getItem(DRAFT_STORAGE_KEY))
-  } catch {
-    return null
-  }
-}
-
-// Board 다중 draft 복원과 legacy draft 병합
-const loadBoardDrafts = () => {
-  try {
-    const rawDrafts = localStorage.getItem(DRAFTS_STORAGE_KEY)
-    const parsedDrafts = rawDrafts ? JSON.parse(rawDrafts) : []
-    const draftRecords = Array.isArray(parsedDrafts)
-      ? parsedDrafts
-          .map((draft) => {
-            const parsedDraft = parseBoardDraft(JSON.stringify(draft))
-
-            return parsedDraft
-              ? {
-                  ...parsedDraft,
-                  id: String(draft?.id || createBoardDraftId()),
-                }
-              : null
-          })
-          .filter(Boolean)
-      : []
-    const rawLegacyDraft = localStorage.getItem(DRAFT_STORAGE_KEY)
-    const legacyDraft = rawLegacyDraft ? parseBoardDraft(rawLegacyDraft) : null
-
-    if (legacyDraft) {
-      let legacyDraftId = LEGACY_DRAFT_ID
-
-      try {
-        const parsedLegacyDraft = JSON.parse(rawLegacyDraft)
-
-        legacyDraftId = String(parsedLegacyDraft?.id || LEGACY_DRAFT_ID)
-      } catch {
-        legacyDraftId = LEGACY_DRAFT_ID
-      }
-
-      const hasLegacyDraft = draftRecords.some((draft) => draft.id === legacyDraftId)
-
-      if (!hasLegacyDraft) {
-        draftRecords.push({
-          ...legacyDraft,
-          id: legacyDraftId,
-        })
-      }
-    }
-
-    return limitBoardDrafts(draftRecords)
-  } catch {
-    const legacyDraft = loadBoardDraft()
-
-    return legacyDraft
-      ? [
-          {
-            ...legacyDraft,
-            id: LEGACY_DRAFT_ID,
-          },
-        ]
-      : []
-  }
-}
-
-// Board draft 목록 저장
-const saveBoardDrafts = (drafts) => {
-  const nextDrafts = limitBoardDrafts(drafts)
-
-  localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(nextDrafts))
-
-  return nextDrafts
-}
-
-const saveBoardDraft = (input, draftId) => {
-  const nextDraft = createBoardDraftRecord(input, draftId)
-
-  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(nextDraft))
-
-  return nextDraft
-}
-
-// Board 새 글 draft 삭제
-const deleteBoardDraft = () => {
-  localStorage.removeItem(DRAFT_STORAGE_KEY)
-}
-
 function Board({ t }) {
+  const { activePosts, posts, setPosts, trashedPosts } = useBoardPosts()
+  const { categories, setCategories } = useBoardCategories()
+  const {
+    activeDraft,
+    activeDraftId,
+    clearDrafts,
+    deleteLegacyDraft,
+    draftList,
+    draftPickerOpen,
+    draftSaved,
+    reloadDrafts,
+    removeDraftFromList,
+    saveCurrentDraft: saveDraft,
+    setActiveDraftId,
+    setDraftPickerOpen,
+  } = useBoardDrafts()
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
   const [categoryId, setCategoryId] = useState(DEFAULT_BOARD_CATEGORY_ID)
   const [blocks, setBlocks] = useState(() => [createEmptyTextBlock()])
-  const [categories, setCategories] = useState(() => loadBoardCategories())
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_FILTER_ALL)
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
   const [trashOpen, setTrashOpen] = useState(false)
@@ -242,18 +92,10 @@ function Board({ t }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchScope, setSearchScope] = useState('title')
   const [sortMode, setSortMode] = useState('latest')
-  const [draftList, setDraftList] = useState(() => loadBoardDrafts())
-  const [activeDraftId, setActiveDraftId] = useState('')
-  const [draftPickerOpen, setDraftPickerOpen] = useState(false)
-  const [posts, setPosts] = useState(() => loadBoardPosts())
-  const activePosts = posts.filter((post) => !post.deletedAt)
-  const trashedPosts = posts.filter((post) => post.deletedAt)
   const selectedPost = activePosts.find((post) => post.id === selectedPostId)
   const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
   const hasSearchQuery = normalizedSearchQuery.length > 0
-  const activeDraft = draftList.find((draft) => draft.id === activeDraftId)
-  const draftSaved = Boolean(activeDraft)
   const { detailImagePreviews, imageViewer, setImageViewer } =
     useBoardDetailImages(selectedPost)
 
@@ -306,39 +148,14 @@ function Board({ t }) {
     setFormError('')
   }
 
-  // 새 글 작성 화면 변경사항 draft 저장
-  const removeDraftFromList = (draftId) => {
-    if (!draftId) {
-      return draftList
-    }
-
-    const nextDrafts = draftList.filter((draft) => draft.id !== draftId)
-
-    const limitedDrafts = saveBoardDrafts(nextDrafts)
-
-    setDraftList(limitedDrafts)
-
-    return limitedDrafts
-  }
-
   const saveCurrentDraft = (nextValues) => {
-    const nextDraftId = activeDraftId || createBoardDraftId()
-    const nextDraft = saveBoardDraft({
+    saveDraft({
       author,
       title,
       categoryId,
       blocks,
       ...nextValues,
-    }, nextDraftId)
-    const nextDrafts = [
-      nextDraft,
-      ...draftList.filter((draft) => draft.id !== nextDraft.id),
-    ]
-
-    const limitedDrafts = saveBoardDrafts(nextDrafts)
-
-    setActiveDraftId(nextDraft.id)
-    setDraftList(limitedDrafts)
+    })
   }
 
   const hasCurrentDraftInput = () =>
@@ -371,10 +188,7 @@ function Board({ t }) {
 
     const imageIds = [...new Set(draftList.flatMap((draft) => getBoardImageIds(draft.blocks)))]
 
-    deleteBoardDraft()
-    saveBoardDrafts([])
-    setDraftList([])
-    setActiveDraftId('')
+    clearDrafts()
     setDraftPickerOpen(false)
     resetWriteForm()
     deleteBoardImages(imageIds).catch(() => {
@@ -425,12 +239,10 @@ function Board({ t }) {
 
     setPosts((currentPosts) => {
       const nextPosts = [newPost, ...currentPosts]
-      saveBoardPosts(nextPosts)
 
       return nextPosts
     })
-
-    deleteBoardDraft()
+    deleteLegacyDraft()
     removeDraftFromList(activeDraftId)
     setActiveDraftId('')
     setDraftPickerOpen(false)
@@ -460,7 +272,7 @@ function Board({ t }) {
   // 저장된 draft가 있을 때 이어쓰기와 새 글 시작을 분리
   const handleOpenWrite = () => {
     resetWriteForm()
-    setDraftList(loadBoardDrafts())
+    reloadDrafts()
     setActiveDraftId('')
     setDraftPickerOpen(false)
     setSelectedPostId('')
@@ -510,8 +322,6 @@ function Board({ t }) {
         blocks,
       })
 
-      saveBoardPosts(nextPosts)
-
       return nextPosts
     })
 
@@ -527,7 +337,6 @@ function Board({ t }) {
     setSelectedPostId(postId)
     setPosts((currentPosts) => {
       const nextPosts = increaseBoardPostViews(currentPosts, postId)
-      saveBoardPosts(nextPosts)
 
       return nextPosts
     })
@@ -549,7 +358,6 @@ function Board({ t }) {
 
     setPosts((currentPosts) => {
       const nextPosts = moveBoardPostToTrash(currentPosts, postId)
-      saveBoardPosts(nextPosts)
 
       return nextPosts
     })
@@ -560,7 +368,6 @@ function Board({ t }) {
   const handleRestorePost = (postId) => {
     setPosts((currentPosts) => {
       const nextPosts = restoreBoardPost(currentPosts, postId)
-      saveBoardPosts(nextPosts)
 
       return nextPosts
     })
@@ -576,7 +383,6 @@ function Board({ t }) {
 
     setPosts((currentPosts) => {
       const nextPosts = deleteBoardPost(currentPosts, postId)
-      saveBoardPosts(nextPosts)
 
       return nextPosts
     })
@@ -588,7 +394,6 @@ function Board({ t }) {
   const handleTogglePinned = (postId) => {
     setPosts((currentPosts) => {
       const nextPosts = toggleBoardPostPinned(currentPosts, postId)
-      saveBoardPosts(nextPosts)
 
       return nextPosts
     })
@@ -597,8 +402,7 @@ function Board({ t }) {
   // 새 글 draft 수동 삭제
   const handleDeleteDraft = (targetDraft = activeDraft) => {
     const imageIds = getBoardImageIds(targetDraft?.blocks ?? blocks)
-
-    deleteBoardDraft()
+    deleteLegacyDraft()
     deleteBoardImages(imageIds).catch(() => {
       // draft 삭제는 localStorage 정리를 우선
     })
@@ -620,7 +424,6 @@ function Board({ t }) {
     }
 
     setCategories(nextCategories)
-    saveBoardCategories(nextCategories)
     setCategoryNameInput('')
     setCategoryError('')
   }
@@ -639,7 +442,6 @@ function Board({ t }) {
     }
 
     setCategories(nextCategories)
-    saveBoardCategories(nextCategories)
     setEditingCategoryId('')
     setEditingCategoryName('')
     setCategoryError('')
@@ -655,9 +457,7 @@ function Board({ t }) {
     const nextPosts = movePostsToDefaultCategory(posts, targetCategoryId, categories)
 
     setCategories(nextCategories)
-    saveBoardCategories(nextCategories)
     setPosts(nextPosts)
-    saveBoardPosts(nextPosts)
     setCategoryFilter((currentFilter) =>
       currentFilter === targetCategoryId ? CATEGORY_FILTER_ALL : currentFilter,
     )

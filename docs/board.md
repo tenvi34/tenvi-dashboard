@@ -25,6 +25,10 @@ src/modules/board/
   BoardImageLightbox.jsx
   BoardList.jsx
   BoardTrash.jsx
+  useBoardCategories.js
+  useBoardDetailImages.js
+  useBoardDrafts.js
+  useBoardPosts.js
 src/modules/boardLogic.js
 src/modules/boardLogic.test.js
 src/modules/boardImageStore.js
@@ -33,19 +37,51 @@ src/constants/storageKeys.js
 
 ### `src/modules/Board.jsx`
 
-Board 모듈의 엔트리 컴포넌트다. 화면 조립, 상태 소유, 저장소 읽기/쓰기, 주요 핸들러를 담당한다.
+Board 모듈의 엔트리 컴포넌트다. 화면 조립, 작성 폼 상태, 주요 이벤트 핸들러를 담당한다.
 
 주요 역할:
 
 - 목록, 상세, 작성, 수정 화면 전환
-- 게시글, 카테고리, 임시저장 복원 및 저장
+- 게시글, 카테고리, 임시저장 hook 연결
 - 게시글 생성, 수정, 조회수 증가, 삭제, 복구, 영구 삭제
 - 카테고리 생성, 수정, 삭제
 - 검색어, 검색 범위, 카테고리 필터, 정렬 상태 관리
 - 상세 이미지 미리보기 데이터 조회
 - 이미지 확대 보기 모달 상태 관리
 
-`Board.jsx`는 기존 localStorage key를 직접 보존한다. key 이름을 바꾸거나 의미를 재사용하면 안 된다.
+저장소 key 보존은 `useBoardPosts`, `useBoardCategories`, `useBoardDrafts`에서 담당한다. key 이름을 바꾸거나 의미를 재사용하면 안 된다.
+
+### `src/modules/board/useBoardPosts.js`
+
+게시글 목록 상태와 `tenvi.board.posts` 저장 흐름을 담당한다.
+
+- 게시글 localStorage 복원
+- 활성 게시글과 복구함 게시글 파생
+- 게시글 배열 변경 시 기존 key에 저장
+
+### `src/modules/board/useBoardCategories.js`
+
+카테고리 상태와 `tenvi.board.categories` 저장 흐름을 담당한다.
+
+- 카테고리 localStorage 복원
+- 카테고리 배열 변경 시 기존 key에 저장
+
+### `src/modules/board/useBoardDrafts.js`
+
+임시저장 상태와 draft 저장 흐름을 담당한다.
+
+- legacy draft key `tenvi.board.draft` 복원/삭제
+- 다중 draft key `tenvi.board.drafts` 복원/저장
+- 최신순 정렬과 최대 10개 제한
+- active draft 상태 관리
+
+### `src/modules/board/useBoardDetailImages.js`
+
+상세 화면 이미지 preview와 이미지 확대 보기 상태를 담당한다.
+
+- 상세 게시글의 `imageId` 기반 preview 복원
+- lightbox 상태 관리
+- Escape 닫기와 body scroll lock
 
 ### `src/modules/board/BoardForm.jsx`
 
