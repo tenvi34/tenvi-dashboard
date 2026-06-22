@@ -232,10 +232,12 @@
 .settings-interface-panel {
   grid-area: interface;
   gap: 8px;
+  align-self: stretch;
 }
 
 .settings-start-panel {
   grid-area: startup;
+  align-self: stretch;
 }
 
 .settings-combined-group {
