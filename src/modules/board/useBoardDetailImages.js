@@ -3,6 +3,7 @@ import { getBoardImages } from '../boardImageStore.js'
 import { getBoardImageIds } from '../boardLogic.js'
 
 function useBoardDetailImages(selectedPost) {
+  // 상세 화면 전용 이미지 preview와 lightbox 상태
   const [detailImagePreviews, setDetailImagePreviews] = useState({})
   const [imageViewer, setImageViewer] = useState(null)
 
@@ -37,6 +38,7 @@ function useBoardDetailImages(selectedPost) {
       })
       .catch(() => {
         if (isMounted) {
+          // 이미지 조회 실패 시 상세 텍스트는 계속 표시
           setDetailImagePreviews({})
         }
       })

@@ -19,9 +19,11 @@ const saveBoardCategories = (categories) => {
 }
 
 function useBoardCategories() {
+  // 카테고리 목록은 Board 목록/상세/폼에서 공유되는 기준 데이터
   const [categories, setCategoriesState] = useState(() => loadBoardCategories())
 
   const setCategories = (nextCategories) => {
+    // 카테고리 변경 즉시 기존 key에 저장
     setCategoriesState(nextCategories)
     saveBoardCategories(nextCategories)
   }

@@ -21,6 +21,7 @@ const saveBoardPosts = (posts) => {
 }
 
 function useBoardPosts() {
+  // 활성/복구함 목록은 같은 posts 배열에서 deletedAt 기준으로 파생
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const activePosts = posts.filter((post) => !post.deletedAt)
   const trashedPosts = posts.filter((post) => post.deletedAt)
@@ -30,6 +31,7 @@ function useBoardPosts() {
       const nextPosts =
         typeof updater === 'function' ? updater(currentPosts) : updater
 
+      // 상태 변경과 localStorage 저장을 한 경로로 묶어 누락 방지
       saveBoardPosts(nextPosts)
 
       return nextPosts

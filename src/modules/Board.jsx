@@ -33,6 +33,7 @@ import { deleteBoardImages } from './boardImageStore.js'
 const CATEGORY_FILTER_ALL = 'all'
 const SEARCH_SCOPES = ['title', 'content', 'author']
 
+// 새 글과 빈 에디터에서 최소 1개 텍스트 블록 유지
 const createEmptyTextBlock = () => ({
   id: crypto.randomUUID(),
   type: 'text',
@@ -42,13 +43,14 @@ const createEmptyTextBlock = () => ({
 const getEditableBlocks = (blocks) =>
   blocks.length > 0 ? blocks : [createEmptyTextBlock()]
 
+// legacy content-only 게시글도 에디터 blocks로 변환
 const createEditableBlocks = (post) => {
   const normalizedBlocks = normalizeBoardBlocks(post?.blocks, post?.content)
 
   return getEditableBlocks(normalizedBlocks)
 }
 
-// 임시저장 목록 본문 단서
+// 이미지 블록만 있는 글도 본문이 있는 것으로 인정
 const hasWritableBody = (blocks) =>
   normalizeBoardBlocks(blocks).some((block) => {
     if (block.type === 'image') {
@@ -59,6 +61,7 @@ const hasWritableBody = (blocks) =>
   })
 
 function Board({ t }) {
+  // localStorage에 연결된 Board 데이터 상태
   const { activePosts, posts, setPosts, trashedPosts } = useBoardPosts()
   const { categories, setCategories } = useBoardCategories()
   const {
@@ -75,10 +78,14 @@ function Board({ t }) {
     setActiveDraftId,
     setDraftPickerOpen,
   } = useBoardDrafts()
+
+  // 작성/수정 폼 입력 상태
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
   const [categoryId, setCategoryId] = useState(DEFAULT_BOARD_CATEGORY_ID)
   const [blocks, setBlocks] = useState(() => [createEmptyTextBlock()])
+
+  // 목록 필터와 보조 패널 상태
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_FILTER_ALL)
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
   const [trashOpen, setTrashOpen] = useState(false)
@@ -87,8 +94,12 @@ function Board({ t }) {
   const [editingCategoryName, setEditingCategoryName] = useState('')
   const [categoryError, setCategoryError] = useState('')
   const [formError, setFormError] = useState('')
+
+  // Board 내부 화면 전환 상태
   const [view, setView] = useState('list')
   const [selectedPostId, setSelectedPostId] = useState('')
+
+  // 검색/정렬 조건은 현재 화면 상태로만 유지
   const [searchQuery, setSearchQuery] = useState('')
   const [searchScope, setSearchScope] = useState('title')
   const [sortMode, setSortMode] = useState('latest')
@@ -139,7 +150,7 @@ function Board({ t }) {
         })
       : ''
 
-  // 게시글 입력 상태 초기화
+  // 작성/수정 폼 입력 상태 초기화
   const resetWriteForm = () => {
     setAuthor('')
     setTitle('')
@@ -192,7 +203,7 @@ function Board({ t }) {
     setDraftPickerOpen(false)
     resetWriteForm()
     deleteBoardImages(imageIds).catch(() => {
-      // 전체 draft 삭제는 localStorage 정리를 우선
+      // 전체 draft 삭제는 localStorage 정리를 우선하고 이미지 정리는 후처리
     })
   }
 
@@ -215,7 +226,7 @@ function Board({ t }) {
     }
   }
 
-  // 게시글 작성
+  // 게시글 작성: 새 post 저장 후 현재 draft 정리
   const handleCreatePost = () => {
     const trimmedAuthor = author.trim()
     const trimmedTitle = title.trim()
@@ -250,7 +261,7 @@ function Board({ t }) {
     setView('list')
   }
 
-  // 게시글 작성 취소
+  // 게시글 작성 취소: 저장된 draft는 유지하고 화면만 복귀
   const handleCancelWrite = () => {
     resetWriteForm()
     setActiveDraftId('')
@@ -258,7 +269,7 @@ function Board({ t }) {
     setView('list')
   }
 
-  // 게시글 작성 화면 열기
+  // 선택한 draft를 작성 폼으로 복원
   const restoreDraftToForm = (savedDraft) => {
     setAuthor(savedDraft.author)
     setTitle(savedDraft.title)
@@ -269,7 +280,7 @@ function Board({ t }) {
     setDraftPickerOpen(false)
   }
 
-  // 저장된 draft가 있을 때 이어쓰기와 새 글 시작을 분리
+  // 글쓰기 진입 시 draft 목록을 다시 읽어 최신 상태 반영
   const handleOpenWrite = () => {
     resetWriteForm()
     reloadDrafts()
@@ -299,7 +310,7 @@ function Board({ t }) {
     setView('detail')
   }
 
-  // 게시글 수정 저장
+  // 게시글 수정 저장: 제거된 이미지 ID를 계산해 IndexedDB 정리
   const handleUpdatePost = () => {
     if (!selectedPost) {
       return
@@ -332,7 +343,7 @@ function Board({ t }) {
     setView('detail')
   }
 
-  // 상세 화면 진입 시 조회수 증가 유지
+  // 상세 화면 진입 시 조회수 증가와 posts 저장 유지
   const handleOpenDetail = (postId) => {
     setSelectedPostId(postId)
     setPosts((currentPosts) => {
@@ -350,7 +361,7 @@ function Board({ t }) {
     setView('list')
   }
 
-  // 게시글 삭제
+  // 게시글 삭제: 복구 가능하도록 deletedAt만 기록
   const handleDeletePost = (postId) => {
     if (!window.confirm(t.board.deleteConfirm)) {
       return
@@ -364,7 +375,7 @@ function Board({ t }) {
     handleBackToList()
   }
 
-  // 고정 상태만 전환해 기존 게시글 내용과 저장 key 보존
+  // 복구함 글을 활성 목록으로 복원
   const handleRestorePost = (postId) => {
     setPosts((currentPosts) => {
       const nextPosts = restoreBoardPost(currentPosts, postId)
@@ -391,6 +402,7 @@ function Board({ t }) {
     })
   }
 
+  // 고정 상태만 전환해 기존 게시글 내용과 저장 key 보존
   const handleTogglePinned = (postId) => {
     setPosts((currentPosts) => {
       const nextPosts = toggleBoardPostPinned(currentPosts, postId)
@@ -399,7 +411,7 @@ function Board({ t }) {
     })
   }
 
-  // 새 글 draft 수동 삭제
+  // 새 글 draft 수동 삭제: 연결 이미지까지 함께 정리
   const handleDeleteDraft = (targetDraft = activeDraft) => {
     const imageIds = getBoardImageIds(targetDraft?.blocks ?? blocks)
     deleteLegacyDraft()
@@ -447,7 +459,7 @@ function Board({ t }) {
     setCategoryError('')
   }
 
-  // 카테고리 삭제 후 게시글 general 이동
+  // 카테고리 삭제 후 연결 게시글을 general로 이동
   const handleDeleteCategory = (targetCategoryId) => {
     if (targetCategoryId === DEFAULT_BOARD_CATEGORY_ID) {
       return
