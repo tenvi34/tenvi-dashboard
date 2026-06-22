@@ -660,14 +660,14 @@ export const translations = {
       confirmReset: '초기화 승인',
       cancelReset: '취소',
       backupLabel: '백업/복원',
-      backupTitle: '데이터 백업',
-      exportBackup: 'JSON 백업 내보내기',
-      importBackup: 'JSON 백업 복원',
-      boardBackupTitle: 'Board 백업',
-      exportBoardBackup: 'Board 백업 내보내기',
-      importBoardBackup: 'Board 백업 복원',
+      backupTitle: 'TENVI 전체 백업',
+      exportBackup: '전체 백업 내보내기',
+      importBackup: '전체 백업 복원',
+      boardBackupTitle: 'Board 전용 백업',
+      exportBoardBackup: 'Board 전용 백업 내보내기',
+      importBoardBackup: 'Board 전용 백업 복원',
       boardBackupNote:
-        'Board 게시글, 카테고리, 임시저장, 로컬 프로필, IndexedDB Board 이미지를 하나의 JSON으로 백업합니다.',
+        '게시글은 TENVI 전체 백업에도 포함됩니다. 이 백업은 Board 카테고리, 임시저장, 로컬 프로필, IndexedDB Board 이미지까지 함께 보관합니다.',
       boardBackupExported: 'Board 백업 파일을 생성했습니다.',
       boardBackupInvalid: '올바른 Board 백업 파일이 아닙니다.',
       boardBackupRestored:
@@ -677,7 +677,7 @@ export const translations = {
         '현재 Board 데이터와 Board 이미지가 백업 파일의 데이터로 덮어써질 수 있습니다. 복원할까요?',
       mapData: 'Map 사진 기록',
       backupNote:
-        'Tasks, Notes, Board 게시글, Calendar 일정, Timer 세션, 언어, 시작 모듈, 테마 설정, Map 사진 기록을 백업합니다. 복원 전에는 확인 절차가 표시됩니다.',
+        'Tasks, Notes, Board 게시글, Calendar 일정, Timer 세션, 언어, 시작 모듈, 테마 설정, Map 사진 기록을 백업합니다. Board 이미지, 카테고리, 임시저장은 Board 전용 백업을 사용하세요.',
       mapBackupNote:
         'Map 백업에는 미리보기 이미지와 위치 기록이 포함됩니다. 사진 수가 많으면 JSON 파일 용량이 커질 수 있습니다.',
       backupExported: '백업 파일을 생성했습니다.',
@@ -1374,14 +1374,14 @@ export const translations = {
       confirmReset: 'Confirm Reset',
       cancelReset: 'Cancel',
       backupLabel: 'Backup/Restore',
-      backupTitle: 'Data Backup',
-      exportBackup: 'Export JSON Backup',
-      importBackup: 'Restore JSON Backup',
-      boardBackupTitle: 'Board Backup',
-      exportBoardBackup: 'Export Board Backup',
-      importBoardBackup: 'Restore Board Backup',
+      backupTitle: 'Full TENVI Backup',
+      exportBackup: 'Export Full Backup',
+      importBackup: 'Restore Full Backup',
+      boardBackupTitle: 'Board Dedicated Backup',
+      exportBoardBackup: 'Export Board Dedicated Backup',
+      importBoardBackup: 'Restore Board Dedicated Backup',
       boardBackupNote:
-        'Backs up Board posts, categories, drafts, local profile, and IndexedDB Board images into one JSON file.',
+        'Board posts are already included in the full TENVI backup. This backup also preserves Board categories, drafts, local profile, and IndexedDB Board images.',
       boardBackupExported: 'Board backup file has been created.',
       boardBackupInvalid: 'This is not a valid Board backup file.',
       boardBackupRestored:
@@ -1391,7 +1391,7 @@ export const translations = {
         'Current Board data and Board images may be overwritten with this backup. Restore now?',
       mapData: 'Map photo records',
       backupNote:
-        'Backs up Tasks, Notes, Board posts, Calendar events, Timer sessions, language, start module, theme settings, and Map photo records. A confirmation step appears before restore.',
+        'Backs up Tasks, Notes, Board posts, Calendar events, Timer sessions, language, start module, theme settings, and Map photo records. Use the Board dedicated backup for Board images, categories, and drafts.',
       mapBackupNote:
         'Map backups include preview images and location records. The JSON file can become large when many photos are stored.',
       backupExported: 'Backup file has been created.',
