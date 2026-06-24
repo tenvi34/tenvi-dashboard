@@ -7,6 +7,7 @@ import {
   updateUserProfile,
 } from './userProfileLogic.js'
 
+// 로컬 프로필 저장 구조 회귀 방지
 describe('userProfileLogic', () => {
   it('creates a default local user profile', () => {
     expect(createDefaultUserProfile('2026-06-22T00:00:00.000Z')).toEqual({

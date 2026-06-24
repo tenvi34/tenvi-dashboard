@@ -1,3 +1,4 @@
+// Board 복구함 목록
 function BoardTrash({
   formatPostDate,
   onPermanentDeletePost,

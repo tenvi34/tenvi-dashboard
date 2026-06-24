@@ -4,6 +4,7 @@ import {
   getPostCategoryId,
 } from '../boardLogic.js'
 
+// Board 게시글 상세 화면
 function BoardDetail({
   avatarImageId,
   categories,
@@ -93,6 +94,7 @@ function BoardDetail({
 
           <div className="board-cafe-content">
             {postBlocks.map((block) => {
+              // legacy src와 IndexedDB preview를 모두 허용
               const imageSource =
                 block.type === 'image'
                   ? block.src || detailImagePreviews[block.imageId] || ''

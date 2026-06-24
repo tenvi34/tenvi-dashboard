@@ -1,6 +1,6 @@
 import { PhotoPreview } from './MapPhotoPreview.jsx'
 
-// 사진 기록 목록
+// Map 사진 기록 목록
 function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records, t }) {
   return (
     <section className="map-list-panel" aria-label={t.map.recordListLabel}>

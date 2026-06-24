@@ -1,4 +1,6 @@
+// Board 이미지 확대 모달
 function BoardImageLightbox({ imageViewer, onClose, t }) {
+  // 선택 이미지가 없으면 모달 DOM 자체를 만들지 않음
   if (!imageViewer) {
     return null
   }

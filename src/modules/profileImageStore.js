@@ -19,6 +19,7 @@ const openProfileImageDb = () =>
     request.onerror = () => reject(request.error)
   })
 
+// 프로필 이미지는 아바타 preview용 data URL로 보관
 const readFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -28,6 +29,7 @@ const readFileAsDataUrl = (file) =>
     reader.readAsDataURL(file)
   })
 
+// IndexedDB 연결 수명 정리 포함 트랜잭션 래퍼
 const runProfileImageTransaction = async (mode, handler) => {
   const db = await openProfileImageDb()
 
@@ -46,6 +48,7 @@ const runProfileImageTransaction = async (mode, handler) => {
   }
 }
 
+// 로컬 프로필 이미지 고유 ID
 const createProfileImageId = () => {
   if (globalThis.crypto?.randomUUID) {
     return `profile-image-${globalThis.crypto.randomUUID()}`
@@ -54,6 +57,7 @@ const createProfileImageId = () => {
   return `profile-image-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+// 프로필 이미지 저장 후 profile avatarImageId에 연결할 record 반환
 export const saveProfileImage = async (file) => {
   const dataUrl = await readFileAsDataUrl(file)
   const imageRecord = {
@@ -71,6 +75,7 @@ export const saveProfileImage = async (file) => {
   return imageRecord
 }
 
+// 아바타 렌더링용 이미지 단건 조회
 export const getProfileImage = async (imageId) => {
   if (!imageId) {
     return null
@@ -88,6 +93,7 @@ export const getProfileImage = async (imageId) => {
   )
 }
 
+// Board 전용 백업에 포함할 프로필 이미지 전체 조회
 export const getAllProfileImages = async () =>
   runProfileImageTransaction(
     'readonly',
@@ -100,6 +106,7 @@ export const getAllProfileImages = async () =>
       }),
   )
 
+// Board 백업 복원용 프로필 이미지 일괄 저장
 export const putProfileImages = async (imageRecords = []) => {
   const validImageRecords = imageRecords.filter((imageRecord) => imageRecord?.id)
 
@@ -112,6 +119,7 @@ export const putProfileImages = async (imageRecords = []) => {
   })
 }
 
+// 프로필 이미지 교체/초기화 후 이전 record 정리
 export const deleteProfileImage = async (imageId) => {
   if (!imageId) {
     return

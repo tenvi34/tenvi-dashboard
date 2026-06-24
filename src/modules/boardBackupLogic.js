@@ -2,10 +2,12 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import { getAllBoardImages, putBoardImages } from './boardImageStore.js'
 import { getAllProfileImages, putProfileImages } from './profileImageStore.js'
 
+// Board 전용 백업 파일 메타데이터
 export const BOARD_BACKUP_APP = 'TENVI Dashboard'
 export const BOARD_BACKUP_TYPE = 'board-backup'
 export const BOARD_BACKUP_VERSION = 1
 
+// Board 백업에서 허용하는 localStorage key
 export const BOARD_BACKUP_STORAGE_KEYS = [
   STORAGE_KEYS.boardPosts,
   STORAGE_KEYS.boardCategories,
@@ -49,6 +51,7 @@ const normalizeBoardImageBackupRecord = (imageRecord) => {
   }
 }
 
+// 프로필 이미지는 Board 이미지와 동일한 data URL 백업 구조 사용
 const normalizeProfileImageBackupRecord = normalizeBoardImageBackupRecord
 
 // localStorage 원문과 IndexedDB 이미지 레코드를 하나의 payload로 수집
@@ -101,6 +104,7 @@ export const validateBoardBackupData = (backupPayload) => {
 
   const localStorageData = {}
 
+  // 허용된 key만 복원 후보로 정규화
   for (const storageKey of BOARD_BACKUP_STORAGE_KEYS) {
     const value = backupPayload.localStorage[storageKey]
 
@@ -181,5 +185,6 @@ export const downloadBoardBackupFile = (backupPayload) => {
   URL.revokeObjectURL(backupUrl)
 }
 
+// 파일 선택 input에서 받은 JSON 백업 검증
 export const parseBoardBackupFile = async (backupFile) =>
   validateBoardBackupData(JSON.parse(await backupFile.text()))

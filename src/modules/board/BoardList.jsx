@@ -7,6 +7,7 @@ import {
   getPostCategoryId,
 } from '../boardLogic.js'
 
+// Board 목록/검색/분류 컨트롤
 function BoardList({
   activePosts,
   avatarImageId,
@@ -157,6 +158,7 @@ function BoardList({
         {sortedPosts.length > 0 ? (
           <div className="board-title-list">
             {sortedPosts.map((post, index) => {
+              // 저장된 categoryId가 사라져도 기본 카테고리로 표시
               const postCategoryId = getPostCategoryId(post, categories)
 
               return (

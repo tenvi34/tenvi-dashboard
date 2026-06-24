@@ -1,6 +1,7 @@
 import BoardEditor from './BoardEditor.jsx'
 import { getBoardImageIds } from '../boardLogic.js'
 
+// 게시글 작성/수정 공용 폼
 function BoardForm({
   activeDraft,
   activeDraftId,
@@ -28,6 +29,7 @@ function BoardForm({
   t,
   title,
 }) {
+  // mode에 따라 draft 기능 노출 범위 분리
   const isEditMode = mode === 'edit'
   const boardFormId = isEditMode ? 'board-edit-form' : 'board-write-form'
 
@@ -115,6 +117,7 @@ function BoardForm({
               {draftList.length > 0 ? (
                 <div className="board-draft-list">
                   {draftList.map((draft) => {
+                    // draft 목록은 텍스트/이미지 존재 여부만 요약
                     const previewText = getDraftPreviewText(draft)
                     const hasImages = getBoardImageIds(draft.blocks).length > 0
                     const savedAt = formatDraftSavedAt(draft.savedAt)

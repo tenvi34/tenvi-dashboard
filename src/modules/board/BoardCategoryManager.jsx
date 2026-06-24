@@ -1,5 +1,6 @@
 import { DEFAULT_BOARD_CATEGORY_ID } from '../boardLogic.js'
 
+// Board 카테고리 편집 패널
 function BoardCategoryManager({
   categoryError,
   categoryNameInput,
@@ -44,6 +45,7 @@ function BoardCategoryManager({
 
       <div className="board-category-list">
         {categories.map((category) => {
+          // 기본 카테고리는 게시글 fallback 대상이라 삭제 차단
           const isEditing = editingCategoryId === category.id
           const isGeneral = category.id === DEFAULT_BOARD_CATEGORY_ID
 

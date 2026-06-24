@@ -11,6 +11,7 @@ import {
   validateBoardBackupData,
 } from './boardBackupLogic.js'
 
+// localStorage 의존 로직을 검증하기 위한 최소 mock
 const createStorageMock = (initialEntries = {}) => {
   const store = new Map(Object.entries(initialEntries))
 
@@ -22,6 +23,7 @@ const createStorageMock = (initialEntries = {}) => {
   }
 }
 
+// Board 백업 검증 기본 fixture
 const createValidBoardBackup = (overrides = {}) => ({
   version: BOARD_BACKUP_VERSION,
   app: BOARD_BACKUP_APP,

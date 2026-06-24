@@ -1,4 +1,4 @@
-// 컬렉션 선택 필드
+// Map 컬렉션 선택 필드
 function PhotoCollectionSelect({ collections, onChange, t, value }) {
   return (
     <label className="map-field">
