@@ -1389,6 +1389,16 @@ export const translations = {
       boardBackupReadError: 'Could not read the Board backup JSON file.',
       boardRestoreConfirmMessage:
         'Current Board data and Board images may be overwritten with this backup. Restore now?',
+      backendStatus: {
+        label: 'Backend',
+        title: 'Backend Connection Status',
+        checking: 'Checking backend connection.',
+        connected: 'Connected',
+        failed: 'Connection failed',
+        failedHint: 'Check whether the backend server is running.',
+        expectedUrl: 'Expected URL',
+        retry: 'Check Again',
+      },
       mapData: 'Map photo records',
       backupNote:
         'Backs up Tasks, Notes, Board posts, Calendar events, Timer sessions, language, start module, theme settings, and Map photo records. Use the Board dedicated backup for Board images, categories, and drafts.',

@@ -23,6 +23,14 @@ npm install
 npm run dev
 ```
 
+백엔드 API 주소는 Vite 환경변수로 설정합니다. 기본값은 `http://localhost:5032`이며, 로컬에서 변경이 필요하면 `.env.example`을 참고해 `.env`에 아래 값을 설정하세요.
+
+```txt
+VITE_API_BASE_URL=http://localhost:5032
+```
+
+`.env`는 Git에 올리지 않고, 예시 파일인 `.env.example`만 저장소에 포함합니다.
+
 빌드 결과 미리보기:
 
 ```bash
@@ -116,10 +124,27 @@ npm run lint
 
 - 언어, 기본 시작 모듈, 테마 설정
 - 저장 데이터 개수 표시
+- 백엔드 Health API 연결 상태 확인
 - 로컬 사용자 프로필 편집
 - 전체 앱 JSON 백업/복원
 - Board 전용 JSON 백업/복원
 - Tasks/Notes 데이터 초기화
+
+## 백엔드 연결 확인
+
+백엔드 프로젝트는 `backend/Tenvi.Backend/Tenvi.Api`에 있습니다. 실행 후 프론트엔드 Settings 화면의 “백엔드 연결 상태” 카드에서 Health API 연결을 확인할 수 있습니다.
+
+```bash
+dotnet run --project backend/Tenvi.Backend/Tenvi.Api/Tenvi.Api.csproj
+```
+
+Health API:
+
+```txt
+GET http://localhost:5032/api/health
+```
+
+백엔드 문서는 [docs/backend.md](docs/backend.md)를 참고하세요.
 
 ## 주요 모듈 구조
 
@@ -136,6 +161,7 @@ src/
   i18n/
     translations.js
   modules/
+    BackendStatus.jsx
     Board.jsx
     Board.css
     board/

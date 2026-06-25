@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import UserAvatar from '../components/UserAvatar.jsx'
+import BackendStatus from './BackendStatus.jsx'
 import './Settings.css'
 import {
   getPhotoRecordCount,
@@ -817,6 +818,8 @@ function Settings({
         </section>
 
         {/* 백업/복원 */}
+        <BackendStatus t={t} />
+
         <div className="settings-action-stack">
         <section className="settings-panel settings-backup-panel">
           <div className="settings-panel-header">
