@@ -77,7 +77,7 @@ const getBoardPostTime = (post) => {
   return Number.isNaN(time) ? 0 : time
 }
 
-// Command Board 결과는 복구함 글을 제외한 활성 게시글만 사용
+// Command Board 결과는 휴지통 글을 제외한 활성 게시글만 사용
 export const getActiveBoardPosts = (boardPosts = []) =>
   boardPosts.filter((post) => !post.deletedAt)
 

@@ -103,6 +103,9 @@ describe('localBoardPostRepository', () => {
     })
 
     await expect(repository.softDeletePost(createdPost.id)).resolves.toBeNull()
+    expect(repository.fetchAllPosts()).toMatchObject([
+      { id: createdPost.id, deletedAt: expect.any(String) },
+    ])
     await expect(repository.fetchPosts()).resolves.toEqual([])
     await expect(repository.fetchTrashPosts()).resolves.toMatchObject([
       { id: createdPost.id, deletedAt: expect.any(String) },
@@ -111,6 +114,7 @@ describe('localBoardPostRepository', () => {
     const restoredPost = await repository.restorePost(createdPost.id)
 
     expect(restoredPost.deletedAt).toBeUndefined()
+    expect(repository.fetchAllPosts()[0]).not.toHaveProperty('deletedAt')
     await expect(repository.fetchPosts()).resolves.toMatchObject([
       { id: createdPost.id },
     ])
@@ -125,6 +129,7 @@ describe('localBoardPostRepository', () => {
     })
 
     await expect(repository.permanentlyDeletePost(createdPost.id)).resolves.toBeNull()
+    expect(repository.fetchAllPosts()).toEqual([])
     await expect(repository.fetchPosts()).resolves.toEqual([])
     await expect(repository.fetchTrashPosts()).resolves.toEqual([])
   })

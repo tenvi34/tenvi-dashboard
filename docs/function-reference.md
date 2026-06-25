@@ -26,12 +26,12 @@
 
 ### 진입 파일
 
-- `src/modules/Board.jsx`: Board 모듈의 화면 상태, 목록/작성/상세/수정/복구함 흐름을 조합한다.
+- `src/modules/Board.jsx`: Board 모듈의 화면 상태, 목록/작성/상세/수정/휴지통 흐름을 조합한다.
 - `src/modules/Board.css`: Board 전용 스타일.
 
 ### Board 하위 컴포넌트
 
-- `src/modules/board/BoardList.jsx`: 게시글 목록, 검색, 정렬, 카테고리 필터, 고정글 토글, 복구함/카테고리 관리 진입.
+- `src/modules/board/BoardList.jsx`: 게시글 목록, 검색, 정렬, 카테고리 필터, 고정글 토글, 휴지통/카테고리 관리 진입.
 - `src/modules/board/BoardDetail.jsx`: 게시글 상세, 조회수 표시, 작성자 아바타, 이미지 확대 보기 진입.
 - `src/modules/board/BoardForm.jsx`: 작성/수정 폼 wrapper, 제목/작성자/카테고리 입력, 임시저장 목록 UI.
 - `src/modules/board/BoardEditor.jsx`: 텍스트/이미지 block 편집, block 이동, 중간 삽입, 이미지 선택.

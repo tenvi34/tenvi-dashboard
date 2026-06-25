@@ -233,7 +233,7 @@ function BoardApiExtendedTest() {
           onClick={loadTrashPosts}
           disabled={isLoading}
         >
-          복구함
+          휴지통
         </button>
       </div>
 
@@ -415,7 +415,7 @@ function BoardApiExtendedTest() {
               </article>
             ))}
             {trashPosts.length === 0 ? (
-              <p className="settings-note">복구함이 비어 있습니다.</p>
+              <p className="settings-note">휴지통이 비어 있습니다.</p>
             ) : null}
           </div>
         </div>

@@ -14,15 +14,12 @@ import {
   addBoardCategory,
   createBoardPost,
   deleteBoardCategory,
-  deleteBoardPost,
   getBoardImageIds,
   getBoardPostTextContent,
   getPostCategoryId,
   getRemovedBoardImageIds,
   movePostsToDefaultCategory,
-  moveBoardPostToTrash,
   normalizeBoardBlocks,
-  restoreBoardPost,
   sortBoardPosts,
   toggleBoardPostPinned,
   updateBoardCategory,
@@ -67,8 +64,16 @@ const hasWritableBody = (blocks) =>
 
 function Board({ t }) {
   // localStorage에 연결된 Board 데이터 상태
-  const { activePosts, increasePostViews, posts, setPosts, trashedPosts } =
-    useBoardPosts()
+  const {
+    activePosts,
+    increasePostViews,
+    permanentlyDeletePost,
+    posts,
+    restorePost,
+    setPosts,
+    softDeletePost,
+    trashedPosts,
+  } = useBoardPosts()
   const { categories, setCategories } = useBoardCategories()
   const {
     activeDraft,
@@ -367,29 +372,21 @@ function Board({ t }) {
   }
 
   // 게시글 삭제: 복구 가능하도록 deletedAt만 기록
-  const handleDeletePost = (postId) => {
+  const handleDeletePost = async (postId) => {
     if (!window.confirm(t.board.deleteConfirm)) {
       return
     }
 
-    setPosts((currentPosts) => {
-      const nextPosts = moveBoardPostToTrash(currentPosts, postId)
-
-      return nextPosts
-    })
+    await softDeletePost(postId)
     handleBackToList()
   }
 
-  // 복구함 글을 활성 목록으로 복원
-  const handleRestorePost = (postId) => {
-    setPosts((currentPosts) => {
-      const nextPosts = restoreBoardPost(currentPosts, postId)
-
-      return nextPosts
-    })
+  // 휴지통 글을 활성 목록으로 복원
+  const handleRestorePost = async (postId) => {
+    await restorePost(postId)
   }
 
-  const handlePermanentDeletePost = (postId) => {
+  const handlePermanentDeletePost = async (postId) => {
     if (!window.confirm(t.board.permanentDeleteConfirm)) {
       return
     }
@@ -397,11 +394,7 @@ function Board({ t }) {
     const targetPost = posts.find((post) => post.id === postId)
     const imageIds = getBoardImageIds(targetPost?.blocks)
 
-    setPosts((currentPosts) => {
-      const nextPosts = deleteBoardPost(currentPosts, postId)
-
-      return nextPosts
-    })
+    await permanentlyDeletePost(postId)
     deleteBoardImages(imageIds).catch(() => {
       // 영구 삭제 시점에만 IndexedDB 이미지 정리
     })

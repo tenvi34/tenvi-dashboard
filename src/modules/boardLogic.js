@@ -389,7 +389,7 @@ export const parseBoardPosts = (rawPosts, fallbackPosts = []) => {
 export const deleteBoardPost = (posts, postId) =>
   posts.filter((post) => post.id !== postId)
 
-// Board 게시글 복구함 이동
+// Board 게시글 휴지통 이동
 export const moveBoardPostToTrash = (
   posts,
   postId,

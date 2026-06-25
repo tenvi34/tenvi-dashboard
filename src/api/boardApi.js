@@ -58,7 +58,7 @@ export const fetchBoardPosts = ({
   fetcher = fetch,
 } = {}) => requestBoardApi(getBoardPostsUrl(baseUrl), {}, fetcher)
 
-// Board 복구함 게시글 목록 조회
+// Board 휴지통 게시글 목록 조회
 export const fetchTrashBoardPosts = ({
   baseUrl = API_BASE_URL,
   fetcher = fetch,

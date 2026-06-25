@@ -10,7 +10,7 @@ const loadBoardPosts = () => boardPostRepository.fetchAllPosts()
 const saveBoardPosts = (posts) => boardPostRepository.replacePosts(posts)
 
 function useBoardPosts() {
-  // 활성/복구함 목록은 같은 posts 배열에서 deletedAt 기준으로 파생
+  // 활성/휴지통 목록은 같은 posts 배열에서 deletedAt 기준으로 파생
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const activePosts = posts.filter((post) => !post.deletedAt)
   const trashedPosts = posts.filter((post) => post.deletedAt)
@@ -37,14 +37,43 @@ function useBoardPosts() {
     // repository 처리 후 localStorage 스냅샷을 다시 읽어 화면 상태 동기화
     refreshPosts()
 
+    refreshPosts()
+
     return viewedPost
+  }
+
+  const softDeletePost = async (postId) => {
+    const result = await boardPostRepository.softDeletePost(postId)
+
+    refreshPosts()
+
+    return result
+  }
+
+  const restorePost = async (postId) => {
+    const restoredPost = await boardPostRepository.restorePost(postId)
+
+    refreshPosts()
+
+    return restoredPost
+  }
+
+  const permanentlyDeletePost = async (postId) => {
+    const result = await boardPostRepository.permanentlyDeletePost(postId)
+
+    refreshPosts()
+
+    return result
   }
 
   return {
     activePosts,
     increasePostViews,
+    permanentlyDeletePost,
     posts,
+    restorePost,
     setPosts: updatePosts,
+    softDeletePost,
     trashedPosts,
   }
 }
