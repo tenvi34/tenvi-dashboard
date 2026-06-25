@@ -51,6 +51,7 @@ describe('localBoardPostRepository', () => {
       STORAGE_KEYS.boardPosts,
       expect.stringContaining('Local title'),
     )
+    expect(repository.fetchAllPosts()).toEqual([createdPost])
   })
 
   it('reads and replaces the full posts snapshot for useBoardPosts compatibility', () => {

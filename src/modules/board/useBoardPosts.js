@@ -31,6 +31,14 @@ function useBoardPosts() {
     setPosts(loadBoardPosts())
   }
 
+  const createPost = async (payload) => {
+    const createdPost = await boardPostRepository.createPost(payload)
+
+    refreshPosts()
+
+    return createdPost
+  }
+
   const increasePostViews = async (postId) => {
     const viewedPost = await boardPostRepository.increaseViews(postId)
 
@@ -68,6 +76,7 @@ function useBoardPosts() {
 
   return {
     activePosts,
+    createPost,
     increasePostViews,
     permanentlyDeletePost,
     posts,

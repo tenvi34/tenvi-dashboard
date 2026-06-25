@@ -12,7 +12,6 @@ import './Board.css'
 import {
   DEFAULT_BOARD_CATEGORY_ID,
   addBoardCategory,
-  createBoardPost,
   deleteBoardCategory,
   getBoardImageIds,
   getBoardPostTextContent,
@@ -66,6 +65,7 @@ function Board({ t }) {
   // localStorage에 연결된 Board 데이터 상태
   const {
     activePosts,
+    createPost,
     increasePostViews,
     permanentlyDeletePost,
     posts,
@@ -239,7 +239,7 @@ function Board({ t }) {
   }
 
   // 게시글 작성: 새 post 저장 후 현재 draft 정리
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
     const trimmedAuthor = author.trim()
     const trimmedTitle = title.trim()
 
@@ -248,23 +248,20 @@ function Board({ t }) {
       return
     }
 
-    const newPost = createBoardPost({
+    const payload = {
       author: trimmedAuthor,
       title: trimmedTitle,
       categoryId,
       blocks,
-    })
+    }
 
-    if (!newPost) {
+    try {
+      await createPost(payload)
+    } catch {
       setFormError(t.board.formRequiredMessage)
       return
     }
 
-    setPosts((currentPosts) => {
-      const nextPosts = [newPost, ...currentPosts]
-
-      return nextPosts
-    })
     deleteLegacyDraft()
     removeDraftFromList(activeDraftId)
     setActiveDraftId('')
