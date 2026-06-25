@@ -3,7 +3,7 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import UserAvatar from '../components/UserAvatar.jsx'
 import BackendEchoTest from './BackendEchoTest.jsx'
 import BackendStatus from './BackendStatus.jsx'
-import BoardApiTest from './BoardApiCompactTest.jsx'
+import BoardApiTest from './BoardApiExtendedTest.jsx'
 import './Settings.css'
 import {
   getPhotoRecordCount,
