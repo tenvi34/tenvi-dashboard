@@ -3,6 +3,7 @@ import {
   createBoardPost,
   fetchBoardPosts,
   fetchTrashBoardPosts,
+  increaseBoardPostViews,
   permanentlyDeleteBoardPost,
   restoreBoardPost,
   softDeleteBoardPost,
@@ -177,6 +178,32 @@ function BoardApiExtendedTest() {
     resetForm()
   }
 
+  const handleIncreaseViews = async () => {
+    if (!selectedPost) {
+      setErrorMessage('Select an active post first.')
+      return
+    }
+
+    if (selectedPost.deletedAt) {
+      setErrorMessage('Deleted posts cannot increase views.')
+      return
+    }
+
+    const viewedPost = await runBoardAction(() =>
+      increaseBoardPostViews(selectedPost.id),
+    )
+
+    if (!viewedPost) {
+      return
+    }
+
+    setActivePosts((posts) =>
+      posts.map((post) => (post.id === viewedPost.id ? viewedPost : post)),
+    )
+    setSelectedPost(viewedPost)
+    setLastResponse(viewedPost)
+  }
+
   const handleChange = (field, value) => {
     setForm((currentForm) => ({
       ...currentForm,
@@ -270,6 +297,14 @@ function BoardApiExtendedTest() {
             disabled={isLoading || !selectedPost}
           >
             수정
+          </button>
+          <button
+            className="settings-option"
+            type="button"
+            onClick={handleIncreaseViews}
+            disabled={isLoading || !selectedPost || Boolean(selectedPost.deletedAt)}
+          >
+            views +1
           </button>
         </div>
       </form>

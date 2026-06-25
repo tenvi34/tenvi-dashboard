@@ -9,7 +9,9 @@ import {
   getBoardPostsUrl,
   getBoardPostPermanentUrl,
   getBoardPostRestoreUrl,
+  getBoardPostViewsUrl,
   getTrashBoardPostsUrl,
+  increaseBoardPostViews,
   permanentlyDeleteBoardPost,
   restoreBoardPost,
   softDeleteBoardPost,
@@ -161,6 +163,25 @@ describe('boardApi', () => {
     ).resolves.toBe(restored)
     expect(fetcher).toHaveBeenCalledWith(
       getBoardPostRestoreUrl('post-1', 'http://localhost:5032'),
+      { method: 'PATCH' },
+    )
+  })
+
+  it('increases board post views', async () => {
+    const viewedPost = { id: 'post-1', views: 2 }
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue(viewedPost),
+    })
+
+    await expect(
+      increaseBoardPostViews('post-1', {
+        baseUrl: 'http://localhost:5032',
+        fetcher,
+      }),
+    ).resolves.toBe(viewedPost)
+    expect(fetcher).toHaveBeenCalledWith(
+      getBoardPostViewsUrl('post-1', 'http://localhost:5032'),
       { method: 'PATCH' },
     )
   })

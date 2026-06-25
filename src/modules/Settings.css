@@ -1010,7 +1010,7 @@
 
 .board-api-test__compact-actions {
   display: grid;
-  grid-template-columns: auto minmax(72px, 0.4fr) minmax(72px, 0.4fr);
+  grid-template-columns: auto repeat(3, minmax(64px, 0.35fr));
   gap: 6px;
   align-items: center;
 }

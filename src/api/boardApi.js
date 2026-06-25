@@ -18,6 +18,12 @@ export const getBoardPostRestoreUrl = (id, baseUrl = API_BASE_URL) =>
     `${BOARD_POSTS_API_PATH}/${encodeURIComponent(id)}/restore`,
   )
 
+export const getBoardPostViewsUrl = (id, baseUrl = API_BASE_URL) =>
+  joinApiPath(
+    baseUrl,
+    `${BOARD_POSTS_API_PATH}/${encodeURIComponent(id)}/views`,
+  )
+
 export const getBoardPostPermanentUrl = (id, baseUrl = API_BASE_URL) =>
   joinApiPath(
     baseUrl,
@@ -129,6 +135,19 @@ export const restoreBoardPost = (
   )
 
 // Board 게시글 영구 삭제
+// Board 게시글 조회수 증가
+export const increaseBoardPostViews = (
+  id,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) =>
+  requestBoardApi(
+    getBoardPostViewsUrl(id, baseUrl),
+    {
+      method: 'PATCH',
+    },
+    fetcher,
+  )
+
 export const permanentlyDeleteBoardPost = (
   id,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
