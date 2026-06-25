@@ -3,6 +3,7 @@ import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import UserAvatar from '../components/UserAvatar.jsx'
 import BackendEchoTest from './BackendEchoTest.jsx'
 import BackendStatus from './BackendStatus.jsx'
+import BoardApiTest from './BoardApiCompactTest.jsx'
 import './Settings.css'
 import {
   getPhotoRecordCount,
@@ -844,6 +845,7 @@ function Settings({
         {/* 백업/복원 */}
         <BackendStatus t={t} />
         <BackendEchoTest />
+        <BoardApiTest />
 
         <div className="settings-action-stack">
         <section className="settings-panel settings-backup-panel">
