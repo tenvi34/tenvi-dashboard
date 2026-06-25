@@ -14,7 +14,7 @@ public class HealthController : ControllerBase
             ok = true,
             service = "TENVI API",
             message = "Backend is Running",
-            checkedAt = DateTimeOffset.UtcNow
+            checkedAt = DateTime.UtcNow
         });
     }
 }
