@@ -156,6 +156,24 @@ public class BoardController : ControllerBase
     }
 
     // 대소문자 차이를 허용하는 게시글 식별자 조회
+    // 조회수 증가 전용: 읽기 지표라 updatedAt은 변경하지 않음
+    [HttpPatch("{id}/views")]
+    public ActionResult<BoardPostResponse> IncreasePostViews(string id)
+    {
+        lock (PostsLock)
+        {
+            var post = FindPost(id);
+
+            if (post is null || post.DeletedAt is not null)
+            {
+                return NotFound();
+            }
+
+            post.ViewCount += 1;
+            return Ok(ToResponse(post));
+        }
+    }
+
     [HttpPatch("{id}/restore")]
     public ActionResult<BoardPostResponse> RestorePost(string id)
     {

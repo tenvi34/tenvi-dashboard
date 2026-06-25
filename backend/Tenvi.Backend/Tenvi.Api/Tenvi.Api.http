@@ -88,4 +88,8 @@ PATCH {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}/restore
 
 ###
 
+PATCH {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}/views
+
+###
+
 DELETE {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}/permanent
