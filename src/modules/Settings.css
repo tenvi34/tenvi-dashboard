@@ -512,7 +512,9 @@
 
 .backend-status__failure {
   display: grid;
-  gap: 6px;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .backend-status__failure p {
@@ -521,7 +523,7 @@
 
 .backend-status__failure code {
   color: inherit;
-  font-size: 12px;
+  font-size: 11px;
   overflow-wrap: anywhere;
 }
 
@@ -936,12 +938,13 @@
 
 .backend-echo-test__error {
   margin-top: 10px;
-  padding: 8px 10px;
+  padding: 7px 9px;
   border: 1px solid rgba(255, 102, 134, 0.34);
   border-radius: 8px;
   color: #ffd7df;
   background: rgba(255, 102, 134, 0.08);
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1.45;
 }
 
