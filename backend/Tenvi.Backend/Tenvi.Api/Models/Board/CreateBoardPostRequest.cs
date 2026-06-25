@@ -9,9 +9,19 @@ public class CreateBoardPostRequest
     // 선택 입력 가능한 본문
     public string Content { get; set; } = string.Empty;
 
+    public List<BoardBlock>? Blocks { get; set; }
+
+    public string Author { get; set; } = "TENVI";
+
     // 선택 입력 가능한 카테고리 식별자
     public string CategoryId { get; set; } = string.Empty;
 
     // 생성 시 목록 상단 고정 여부
     public bool IsPinned { get; set; }
+
+    public bool? Pinned { get; set; }
+
+    public int? Views { get; set; }
+
+    public int? ViewCount { get; set; }
 }

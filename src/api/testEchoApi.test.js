@@ -4,7 +4,7 @@ import { fetchTestEcho, getTestEchoUrl } from './testEchoApi.js'
 describe('fetchTestEcho', () => {
   it('posts a message to the echo endpoint and returns JSON', async () => {
     const echoPayload = {
-      message: 'TENVI ping',
+      message: 'ping message',
       serverTime: '2026-06-25T00:00:00Z',
     }
     const fetcher = vi.fn().mockResolvedValue({
@@ -14,7 +14,7 @@ describe('fetchTestEcho', () => {
 
     await expect(
       fetchTestEcho({
-        message: 'TENVI ping',
+        message: 'ping message',
         baseUrl: 'http://localhost:5032',
         fetcher,
       }),
@@ -26,7 +26,7 @@ describe('fetchTestEcho', () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: 'TENVI ping' }),
+        body: JSON.stringify({ message: 'ping message' }),
       },
     )
   })

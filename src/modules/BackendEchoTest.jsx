@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { fetchTestEcho } from '../api/testEchoApi.js'
 
-const DEFAULT_MESSAGE = 'TENVI ping'
+const DEFAULT_MESSAGE = 'ping message'
 
 // 서버 UTC 시간을 브라우저 로컬 시간으로 표시
 const formatServerTime = (serverTime) => {

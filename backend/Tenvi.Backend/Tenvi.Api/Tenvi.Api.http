@@ -9,7 +9,7 @@ POST {{Tenvi.Api_HostAddress}}/api/test/echo
 Content-Type: application/json
 
 {
-  "message": "TENVI ping"
+  "message": "ping message"
 }
 
 ###
@@ -51,3 +51,41 @@ Content-Type: application/json
 ###
 
 DELETE {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}
+
+###
+
+GET {{Tenvi.Api_HostAddress}}/api/board/posts/trash
+Accept: application/json
+
+###
+
+POST {{Tenvi.Api_HostAddress}}/api/board/posts
+Content-Type: application/json
+
+{
+  "title": "Board blocks post",
+  "content": "Fallback content",
+  "author": "TENVI",
+  "categoryId": "general",
+  "pinned": false,
+  "views": 0,
+  "blocks": [
+    {
+      "type": "text",
+      "content": "Text block from API"
+    },
+    {
+      "type": "image",
+      "imageId": "board-image-local-id",
+      "name": "sample.png"
+    }
+  ]
+}
+
+###
+
+PATCH {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}/restore
+
+###
+
+DELETE {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}/permanent
