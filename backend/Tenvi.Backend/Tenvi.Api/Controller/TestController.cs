@@ -6,6 +6,7 @@ namespace Tenvi.Api.Controller;
 [Route("api/[controller]")]
 public class TestController : ControllerBase
 {
+    // 프론트엔드와 백엔드 연결 확인용 에코 요청
     [HttpPost("echo")]
     public IActionResult Echo([FromBody] EchoRequest? request)
     {
@@ -26,11 +27,13 @@ public class TestController : ControllerBase
     }
 }
 
+// 에코 요청 본문 계약
 public class EchoRequest
 {
     public string Message { get; set; } = string.Empty;
 }
 
+// 에코 응답 본문 계약
 public class EchoResponse
 {
     public string Message { get; set; } = string.Empty;

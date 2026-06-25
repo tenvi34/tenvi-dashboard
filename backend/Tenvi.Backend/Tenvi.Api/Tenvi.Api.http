@@ -1,6 +1,53 @@
 @Tenvi.Api_HostAddress = http://localhost:5032
 
-GET {{Tenvi.Api_HostAddress}}/weatherforecast/
+GET {{Tenvi.Api_HostAddress}}/api/health
 Accept: application/json
 
 ###
+
+POST {{Tenvi.Api_HostAddress}}/api/test/echo
+Content-Type: application/json
+
+{
+  "message": "TENVI ping"
+}
+
+###
+
+GET {{Tenvi.Api_HostAddress}}/api/board/posts
+Accept: application/json
+
+###
+
+POST {{Tenvi.Api_HostAddress}}/api/board/posts
+Content-Type: application/json
+
+{
+  "title": "첫 Board API 게시글",
+  "content": "InMemory Board API 테스트",
+  "categoryId": "general",
+  "isPinned": false
+}
+
+###
+
+@BoardPostId = replace-with-created-id
+
+GET {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}
+Accept: application/json
+
+###
+
+PUT {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}
+Content-Type: application/json
+
+{
+  "title": "수정된 Board API 게시글",
+  "content": "PUT 테스트",
+  "categoryId": "general",
+  "isPinned": true
+}
+
+###
+
+DELETE {{Tenvi.Api_HostAddress}}/api/board/posts/{{BoardPostId}}

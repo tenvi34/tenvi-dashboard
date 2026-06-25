@@ -6,6 +6,7 @@ namespace Tenvi.Api.Controller;
 [Route("api/[controller]")]
 public class HealthController : ControllerBase
 {
+    // API 상태 확인용 경량 엔드포인트
     [HttpGet]
     public IActionResult Get()
     {
