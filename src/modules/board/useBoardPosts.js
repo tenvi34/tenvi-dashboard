@@ -1,24 +1,13 @@
 import { useState } from 'react'
-import { STORAGE_KEYS } from '../../constants/storageKeys.js'
-import { parseBoardPosts } from '../boardLogic.js'
+import { localBoardPostRepository } from './repositories/localBoardPostRepository.js'
 
-const POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
+const boardPostRepository = localBoardPostRepository
 
 // Board 게시글 localStorage 복원
-const loadBoardPosts = () => {
-  try {
-    const rawPosts = localStorage.getItem(POSTS_STORAGE_KEY)
-
-    return rawPosts ? parseBoardPosts(rawPosts) : []
-  } catch {
-    return []
-  }
-}
+const loadBoardPosts = () => boardPostRepository.fetchAllPosts()
 
 // 기존 Board 게시글 key 보존
-const saveBoardPosts = (posts) => {
-  localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts))
-}
+const saveBoardPosts = (posts) => boardPostRepository.replacePosts(posts)
 
 function useBoardPosts() {
   // 활성/복구함 목록은 같은 posts 배열에서 deletedAt 기준으로 파생
@@ -38,8 +27,22 @@ function useBoardPosts() {
     })
   }
 
+  const refreshPosts = () => {
+    setPosts(loadBoardPosts())
+  }
+
+  const increasePostViews = async (postId) => {
+    const viewedPost = await boardPostRepository.increaseViews(postId)
+
+    // repository 처리 후 localStorage 스냅샷을 다시 읽어 화면 상태 동기화
+    refreshPosts()
+
+    return viewedPost
+  }
+
   return {
     activePosts,
+    increasePostViews,
     posts,
     setPosts: updatePosts,
     trashedPosts,

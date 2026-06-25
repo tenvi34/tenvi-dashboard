@@ -19,7 +19,6 @@ import {
   getBoardPostTextContent,
   getPostCategoryId,
   getRemovedBoardImageIds,
-  increaseBoardPostViews,
   movePostsToDefaultCategory,
   moveBoardPostToTrash,
   normalizeBoardBlocks,
@@ -68,7 +67,8 @@ const hasWritableBody = (blocks) =>
 
 function Board({ t }) {
   // localStorage에 연결된 Board 데이터 상태
-  const { activePosts, posts, setPosts, trashedPosts } = useBoardPosts()
+  const { activePosts, increasePostViews, posts, setPosts, trashedPosts } =
+    useBoardPosts()
   const { categories, setCategories } = useBoardCategories()
   const {
     activeDraft,
@@ -353,10 +353,8 @@ function Board({ t }) {
   // 상세 화면 진입 시 조회수 증가와 posts 저장 유지
   const handleOpenDetail = (postId) => {
     setSelectedPostId(postId)
-    setPosts((currentPosts) => {
-      const nextPosts = increaseBoardPostViews(currentPosts, postId)
-
-      return nextPosts
+    increasePostViews(postId).catch(() => {
+      // 조회수 갱신 실패가 상세 진입 자체를 막지 않도록 유지
     })
     setView('detail')
   }
