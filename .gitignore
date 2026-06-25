@@ -7,18 +7,41 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node / Vite
 node_modules
 dist
 dist-ssr
 *.local
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# ASP.NET Core / .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Core sensitive config
+appsettings.Production.json
+appsettings.Local.json
+appsettings.*.local.json
+
+# Certificates / keys
+*.pfx
+*.key
+*.pem
+*.crt
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
-*.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?

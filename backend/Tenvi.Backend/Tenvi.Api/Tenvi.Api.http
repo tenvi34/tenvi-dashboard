@@ -1,0 +1,6 @@
+@Tenvi.Api_HostAddress = http://localhost:5032
+
+GET {{Tenvi.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
