@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import UserAvatar from '../components/UserAvatar.jsx'
+import BackendEchoTest from './BackendEchoTest.jsx'
 import BackendStatus from './BackendStatus.jsx'
 import './Settings.css'
 import {
@@ -49,6 +50,13 @@ const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const CALENDAR_EVENTS_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 const USER_PROFILE_STORAGE_KEY = STORAGE_KEYS.userProfile
+
+// 설정 화면 탭 분리 기준
+const SETTINGS_TABS = [
+  { id: 'general', label: '일반설정' },
+  { id: 'backup', label: '백업/복원/초기화' },
+  { id: 'server', label: '서버 관련' },
+]
 
 // 저장 목록 개수 읽기
 const readStoredCount = (storageKey) => {
@@ -102,6 +110,7 @@ function Settings({
   t,
   theme,
 }) {
+  const [activeSettingsTab, setActiveSettingsTab] = useState('general')
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
@@ -608,7 +617,7 @@ function Settings({
 
   return (
     <section
-      className="module-panel settings-module"
+      className={`module-panel settings-module settings-module--${activeSettingsTab}`}
       aria-labelledby="settings-title"
     >
       {/* Settings 헤더 */}
@@ -620,6 +629,21 @@ function Settings({
       </div>
 
       {/* Settings 그리드 */}
+      <div className="settings-tabs" aria-label="설정 탭">
+        {SETTINGS_TABS.map((tab) => (
+          <button
+            className={`settings-tab ${
+              activeSettingsTab === tab.id ? 'is-active' : ''
+            }`}
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveSettingsTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <div className="settings-grid">
         {/* 언어 선택 */}
         <section className="settings-panel settings-preference-panel settings-interface-panel">
@@ -819,6 +843,7 @@ function Settings({
 
         {/* 백업/복원 */}
         <BackendStatus t={t} />
+        <BackendEchoTest />
 
         <div className="settings-action-stack">
         <section className="settings-panel settings-backup-panel">

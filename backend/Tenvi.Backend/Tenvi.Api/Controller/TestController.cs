@@ -7,32 +7,32 @@ namespace Tenvi.Api.Controller;
 public class TestController : ControllerBase
 {
     [HttpPost("echo")]
-    public IActionResult Echo([FromBody] EcoRequest request)
+    public IActionResult Echo([FromBody] EchoRequest? request)
     {
-        if (string.IsNullOrEmpty(request.Message))
+        // 연결 테스트 입력값 검증
+        if (request is null || string.IsNullOrWhiteSpace(request.Message))
         {
             return BadRequest(new
             {
-                message = "메세지를 입력해주세요."
+                message = "Message is required."
             });
         }
 
-        return Ok(new EcoResponse
-            {
-                ReceivedMessage = request.Message,
-                ServerTime = DateTime.Now
-            }
-        );
+        return Ok(new EchoResponse
+        {
+            Message = request.Message.Trim(),
+            ServerTime = DateTimeOffset.UtcNow
+        });
     }
 }
 
-public class EcoRequest
+public class EchoRequest
 {
     public string Message { get; set; } = string.Empty;
 }
 
-public class EcoResponse
+public class EchoResponse
 {
-    public string ReceivedMessage { get; set; } = string.Empty;
-    public DateTime ServerTime { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public DateTimeOffset ServerTime { get; set; }
 }

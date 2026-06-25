@@ -788,6 +788,7 @@
   grid-template-areas:
     'profile interface startup'
     'profile data backend'
+    'profile data backend-test'
     'actions actions actions';
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
@@ -795,6 +796,10 @@
 
 .backend-status {
   grid-area: backend;
+}
+
+.backend-echo-test {
+  grid-area: backend-test;
 }
 
 .settings-action-stack {
@@ -815,7 +820,8 @@
 .settings-backup-panel,
 .settings-board-backup-panel,
 .settings-danger-panel,
-.backend-status {
+.backend-status,
+.backend-echo-test {
   border-left-width: 1px;
   background: rgba(2, 9, 18, 0.42);
 }
@@ -838,7 +844,8 @@
 
 .tenvi-dashboard.theme-standard .settings-module .settings-backup-panel,
 .tenvi-dashboard.theme-standard .settings-module .settings-board-backup-panel,
-.tenvi-dashboard.theme-standard .settings-module .backend-status {
+.tenvi-dashboard.theme-standard .settings-module .backend-status,
+.tenvi-dashboard.theme-standard .settings-module .backend-echo-test {
   border-color: #d0d5dd;
   background: #f8fafc;
 }
@@ -850,7 +857,8 @@
 
 .tenvi-dashboard.theme-dark .settings-module .settings-backup-panel,
 .tenvi-dashboard.theme-dark .settings-module .settings-board-backup-panel,
-.tenvi-dashboard.theme-dark .settings-module .backend-status {
+.tenvi-dashboard.theme-dark .settings-module .backend-status,
+.tenvi-dashboard.theme-dark .settings-module .backend-echo-test {
   border-color: rgba(148, 163, 184, 0.18);
   background: rgba(15, 23, 42, 0.42);
 }
@@ -866,6 +874,7 @@
       'profile interface'
       'profile startup'
       'data backend'
+      'data backend-test'
       'actions actions';
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -883,7 +892,222 @@
       'startup'
       'data'
       'backend'
+      'backend-test'
       'actions';
     grid-template-columns: 1fr;
+  }
+}
+
+.backend-echo-test__form {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.backend-echo-test__result {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px;
+  border: 1px solid rgba(101, 255, 188, 0.3);
+  border-radius: 8px;
+  color: #d7ffef;
+  background: rgba(101, 255, 188, 0.07);
+}
+
+.backend-echo-test__result div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.backend-echo-test__result dt {
+  color: #8fb7c7;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.backend-echo-test__result dd {
+  min-width: 0;
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.backend-echo-test__error {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 102, 134, 0.34);
+  border-radius: 8px;
+  color: #ffd7df;
+  background: rgba(255, 102, 134, 0.08);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.tenvi-dashboard.theme-standard .backend-echo-test__result {
+  color: #067647;
+  border-color: #a6f4c5;
+  background: #ecfdf3;
+}
+
+.tenvi-dashboard.theme-standard .backend-echo-test__result dt {
+  color: #667085;
+}
+
+.tenvi-dashboard.theme-standard .backend-echo-test__error {
+  color: #b42318;
+  border-color: #f4b4ae;
+  background: #fff4f2;
+}
+
+.tenvi-dashboard.theme-dark .backend-echo-test__result {
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.07);
+}
+
+.tenvi-dashboard.theme-dark .backend-echo-test__result dt {
+  color: #94a3b8;
+}
+
+.tenvi-dashboard.theme-dark .backend-echo-test__error {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+/* Settings 탭 전환 */
+.settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.settings-tab {
+  min-height: 32px;
+  width: auto;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #aacbd8;
+  background: rgba(5, 16, 31, 0.42);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.settings-tab:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+}
+
+.settings-tab.is-active {
+  color: #f4fdff;
+  border-color: var(--line-strong);
+  background: rgba(90, 212, 255, 0.14);
+  box-shadow: inset 0 0 18px rgba(90, 212, 255, 0.1);
+}
+
+.settings-tab:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+}
+
+.settings-module--general .settings-grid {
+  grid-template-areas:
+    'profile interface startup'
+    'profile data data';
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.settings-module--general .backend-status,
+.settings-module--general .backend-echo-test,
+.settings-module--general .settings-action-stack,
+.settings-module--backup .settings-interface-panel,
+.settings-module--backup .settings-start-panel,
+.settings-module--backup .settings-data-panel,
+.settings-module--backup .settings-profile-panel,
+.settings-module--backup .backend-status,
+.settings-module--backup .backend-echo-test,
+.settings-module--server .settings-interface-panel,
+.settings-module--server .settings-start-panel,
+.settings-module--server .settings-data-panel,
+.settings-module--server .settings-profile-panel,
+.settings-module--server .settings-action-stack {
+  display: none;
+}
+
+.settings-module--backup .settings-grid {
+  grid-template-areas: 'actions';
+  grid-template-columns: 1fr;
+}
+
+.settings-module--server .settings-grid {
+  grid-template-areas: 'backend backend-test';
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tenvi-dashboard.theme-standard .settings-tab {
+  color: #344054;
+  border-color: #d0d5dd;
+  background: #ffffff;
+}
+
+.tenvi-dashboard.theme-standard .settings-tab.is-active {
+  color: #004eeb;
+  border-color: #84adff;
+  background: #eef4ff;
+}
+
+.tenvi-dashboard.theme-dark .settings-tab {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.52);
+}
+
+.tenvi-dashboard.theme-dark .settings-tab.is-active {
+  color: #e2e8f0;
+  border-color: rgba(96, 165, 250, 0.34);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+@media (max-width: 1100px) {
+  .settings-module--general .settings-grid {
+    grid-template-areas:
+      'profile interface'
+      'profile startup'
+      'data data';
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .settings-module--general .settings-grid,
+  .settings-module--server .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-module--general .settings-grid {
+    grid-template-areas:
+      'profile'
+      'interface'
+      'startup'
+      'data';
+  }
+
+  .settings-module--server .settings-grid {
+    grid-template-areas:
+      'backend'
+      'backend-test';
   }
 }
