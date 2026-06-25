@@ -22,7 +22,6 @@ import {
   sortBoardPosts,
   toggleBoardPostPinned,
   updateBoardCategory,
-  updateBoardPost,
 } from './boardLogic.js'
 import { deleteBoardImages } from './boardImageStore.js'
 import { parseUserProfile } from './userProfileLogic.js'
@@ -73,6 +72,7 @@ function Board({ t }) {
     setPosts,
     softDeletePost,
     trashedPosts,
+    updatePost,
   } = useBoardPosts()
   const { categories, setCategories } = useBoardCategories()
   const {
@@ -320,7 +320,7 @@ function Board({ t }) {
   }
 
   // 게시글 수정 저장: 제거된 이미지 ID를 계산해 IndexedDB 정리
-  const handleUpdatePost = () => {
+  const handleUpdatePost = async () => {
     if (!selectedPost) {
       return
     }
@@ -333,17 +333,19 @@ function Board({ t }) {
     }
 
     const removedImageIds = getRemovedBoardImageIds(selectedPost.blocks, blocks)
+    const payload = {
+      author,
+      title,
+      categoryId,
+      blocks,
+    }
 
-    setPosts((currentPosts) => {
-      const nextPosts = updateBoardPost(currentPosts, selectedPost.id, {
-        author,
-        title,
-        categoryId,
-        blocks,
-      })
-
-      return nextPosts
-    })
+    try {
+      await updatePost(selectedPost.id, payload)
+    } catch {
+      setFormError(t.board.formRequiredMessage)
+      return
+    }
 
     deleteBoardImages(removedImageIds).catch(() => {
       // 이미지 정리는 실패해도 게시글 수정 흐름 유지

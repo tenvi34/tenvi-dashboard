@@ -93,6 +93,9 @@ describe('localBoardPostRepository', () => {
       categoryId: 'notice',
       blocks: [{ id: 'block-1', type: 'text', content: 'Updated body' }],
     })
+    expect(repository.fetchAllPosts()).toMatchObject([
+      { id: createdPost.id, title: 'After', content: 'Updated body' },
+    ])
   })
 
   it('moves posts between active and trash lists', async () => {

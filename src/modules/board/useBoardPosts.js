@@ -39,6 +39,14 @@ function useBoardPosts() {
     return createdPost
   }
 
+  const updatePost = async (postId, payload) => {
+    const updatedPost = await boardPostRepository.updatePost(postId, payload)
+
+    refreshPosts()
+
+    return updatedPost
+  }
+
   const increasePostViews = async (postId) => {
     const viewedPost = await boardPostRepository.increaseViews(postId)
 
@@ -84,6 +92,7 @@ function useBoardPosts() {
     setPosts: updatePosts,
     softDeletePost,
     trashedPosts,
+    updatePost,
   }
 }
 
