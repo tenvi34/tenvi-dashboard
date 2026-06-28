@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import {
+  DEFAULT_BOARD_CATEGORY_ID,
+  moveBoardPostsToCategoryFallback,
+} from '../boardLogic.js'
 import { localBoardPostRepository } from './repositories/localBoardPostRepository.js'
 
 const boardPostRepository = localBoardPostRepository
@@ -71,6 +75,22 @@ function useBoardPosts() {
     return updatedPost
   }
 
+  const movePostsToCategoryFallback = async (
+    categoryId,
+    fallbackCategoryId = DEFAULT_BOARD_CATEGORY_ID,
+  ) => {
+    const nextPosts = moveBoardPostsToCategoryFallback(
+      boardPostRepository.fetchAllPosts(),
+      categoryId,
+      fallbackCategoryId,
+    )
+
+    boardPostRepository.replacePosts(nextPosts)
+    refreshPosts()
+
+    return nextPosts
+  }
+
   const increasePostViews = async (postId) => {
     const viewedPost = await boardPostRepository.increaseViews(postId)
 
@@ -110,6 +130,7 @@ function useBoardPosts() {
     activePosts,
     createPost,
     increasePostViews,
+    movePostsToCategoryFallback,
     permanentlyDeletePost,
     posts,
     restorePost,

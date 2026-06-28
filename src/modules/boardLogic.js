@@ -253,6 +253,18 @@ export const movePostsToDefaultCategory = (
     }
   })
 
+// 지정 카테고리 게시글의 categoryId만 fallback으로 변경
+export const moveBoardPostsToCategoryFallback = (
+  posts = [],
+  categoryId,
+  fallbackCategoryId = DEFAULT_BOARD_CATEGORY_ID,
+) =>
+  posts.map((post) =>
+    post.categoryId === categoryId
+      ? { ...post, categoryId: fallbackCategoryId }
+      : post,
+  )
+
 // Board 카테고리 이름 조회
 export const getBoardCategoryName = (
   categoryId,

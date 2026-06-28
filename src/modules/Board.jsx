@@ -17,7 +17,6 @@ import {
   getBoardPostTextContent,
   getPostCategoryId,
   getRemovedBoardImageIds,
-  movePostsToDefaultCategory,
   normalizeBoardBlocks,
   sortBoardPosts,
   updateBoardCategory,
@@ -65,10 +64,10 @@ function Board({ t }) {
     activePosts,
     createPost,
     increasePostViews,
+    movePostsToCategoryFallback,
     permanentlyDeletePost,
     posts,
     restorePost,
-    setPosts,
     softDeletePost,
     togglePostPinned,
     trashedPosts,
@@ -453,16 +452,16 @@ function Board({ t }) {
   }
 
   // 카테고리 삭제 후 연결 게시글을 general로 이동
-  const handleDeleteCategory = (targetCategoryId) => {
+  const handleDeleteCategory = async (targetCategoryId) => {
     if (targetCategoryId === DEFAULT_BOARD_CATEGORY_ID) {
       return
     }
 
     const nextCategories = deleteBoardCategory(categories, targetCategoryId)
-    const nextPosts = movePostsToDefaultCategory(posts, targetCategoryId, categories)
+
+    await movePostsToCategoryFallback(targetCategoryId)
 
     setCategories(nextCategories)
-    setPosts(nextPosts)
     setCategoryFilter((currentFilter) =>
       currentFilter === targetCategoryId ? CATEGORY_FILTER_ALL : currentFilter,
     )

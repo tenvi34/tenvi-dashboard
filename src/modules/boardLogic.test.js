@@ -13,6 +13,7 @@ import {
   getPostCategoryId,
   getRemovedBoardImageIds,
   increaseBoardPostViews,
+  moveBoardPostsToCategoryFallback,
   moveBoardPostToTrash,
   movePostsToDefaultCategory,
   normalizeBoardCategories,
@@ -339,6 +340,43 @@ describe('boardLogic', () => {
     expect(movePostsToDefaultCategory(posts, 'dev')).toEqual([
       { id: 'post-1', categoryId: 'general', title: 'Dev' },
       { id: 'post-2', categoryId: 'daily', title: 'Daily' },
+    ])
+  })
+
+  it('moves only matching categoryId without changing other post fields', () => {
+    const targetPost = {
+      id: 'post-1',
+      title: 'Category target',
+      content: 'Keep this body',
+      blocks: [{ id: 'block-1', type: 'text', content: 'Keep this body' }],
+      author: 'TENVI',
+      categoryId: 'dev',
+      views: 4,
+      pinned: true,
+      createdAt: '2026-06-01T00:00:00.000Z',
+      updatedAt: '2026-06-02T00:00:00.000Z',
+      deletedAt: '2026-06-03T00:00:00.000Z',
+    }
+    const untouchedPost = {
+      id: 'post-2',
+      title: 'Other category',
+      categoryId: 'daily',
+    }
+
+    const nextPosts = moveBoardPostsToCategoryFallback(
+      [targetPost, untouchedPost],
+      'dev',
+    )
+
+    expect(nextPosts[0]).toEqual({ ...targetPost, categoryId: 'general' })
+    expect(nextPosts[1]).toBe(untouchedPost)
+  })
+
+  it('moves matching posts to an explicit fallback category', () => {
+    const posts = [{ id: 'post-1', categoryId: 'dev', title: 'Move target' }]
+
+    expect(moveBoardPostsToCategoryFallback(posts, 'dev', 'archive')).toEqual([
+      { id: 'post-1', categoryId: 'archive', title: 'Move target' },
     ])
   })
 
