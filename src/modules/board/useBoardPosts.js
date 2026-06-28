@@ -47,6 +47,30 @@ function useBoardPosts() {
     return updatedPost
   }
 
+  const togglePostPinned = async (postId) => {
+    const targetPost = boardPostRepository
+      .fetchAllPosts()
+      .find((post) => post.id === postId)
+
+    if (!targetPost) {
+      throw new Error('Board post not found.')
+    }
+
+    // 현재 편집 필드를 함께 전달해 pinned 외 게시글 데이터 보존
+    const updatedPost = await boardPostRepository.updatePost(postId, {
+      author: targetPost.author,
+      title: targetPost.title,
+      content: targetPost.content,
+      categoryId: targetPost.categoryId,
+      blocks: targetPost.blocks,
+      pinned: targetPost.pinned !== true,
+    })
+
+    refreshPosts()
+
+    return updatedPost
+  }
+
   const increasePostViews = async (postId) => {
     const viewedPost = await boardPostRepository.increaseViews(postId)
 
@@ -91,6 +115,7 @@ function useBoardPosts() {
     restorePost,
     setPosts: updatePosts,
     softDeletePost,
+    togglePostPinned,
     trashedPosts,
     updatePost,
   }

@@ -98,6 +98,42 @@ describe('localBoardPostRepository', () => {
     ])
   })
 
+  it('updates pinned without damaging existing post fields', async () => {
+    const storage = createMemoryStorage()
+    const repository = createLocalBoardPostRepository({ storage })
+    const originalPost = {
+      id: 'post-1',
+      title: 'Pinned target',
+      content: 'Keep this body',
+      blocks: [{ id: 'block-1', type: 'text', content: 'Keep this body' }],
+      author: 'TENVI',
+      categoryId: 'notice',
+      pinned: false,
+      views: 7,
+      createdAt: '2026-06-01T00:00:00.000Z',
+      updatedAt: '2026-06-02T00:00:00.000Z',
+      deletedAt: '2026-06-03T00:00:00.000Z',
+    }
+    repository.replacePosts([originalPost])
+
+    const updatedPost = await repository.updatePost(originalPost.id, {
+      author: originalPost.author,
+      title: originalPost.title,
+      content: originalPost.content,
+      categoryId: originalPost.categoryId,
+      blocks: originalPost.blocks,
+      pinned: !originalPost.pinned,
+    })
+
+    expect(updatedPost).toMatchObject({
+      ...originalPost,
+      pinned: true,
+      updatedAt: expect.any(String),
+    })
+    expect(updatedPost.updatedAt).not.toBe(originalPost.updatedAt)
+    expect(repository.fetchAllPosts()).toEqual([updatedPost])
+  })
+
   it('moves posts between active and trash lists', async () => {
     const storage = createMemoryStorage()
     const repository = createLocalBoardPostRepository({ storage })

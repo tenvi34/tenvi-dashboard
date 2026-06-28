@@ -20,7 +20,6 @@ import {
   movePostsToDefaultCategory,
   normalizeBoardBlocks,
   sortBoardPosts,
-  toggleBoardPostPinned,
   updateBoardCategory,
 } from './boardLogic.js'
 import { deleteBoardImages } from './boardImageStore.js'
@@ -71,6 +70,7 @@ function Board({ t }) {
     restorePost,
     setPosts,
     softDeletePost,
+    togglePostPinned,
     trashedPosts,
     updatePost,
   } = useBoardPosts()
@@ -399,13 +399,9 @@ function Board({ t }) {
     })
   }
 
-  // 고정 상태만 전환해 기존 게시글 내용과 저장 key 보존
-  const handleTogglePinned = (postId) => {
-    setPosts((currentPosts) => {
-      const nextPosts = toggleBoardPostPinned(currentPosts, postId)
-
-      return nextPosts
-    })
+  // repository action을 통한 고정 상태 전환
+  const handleTogglePinned = async (postId) => {
+    await togglePostPinned(postId)
   }
 
   // 새 글 draft 수동 삭제: 연결 이미지까지 함께 정리
