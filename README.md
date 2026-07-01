@@ -77,7 +77,10 @@ npm run lint
 ### Board
 
 - 게시글 목록, 상세, 작성, 수정, 삭제
-- 상세 진입 시 조회수 증가 및 `tenvi.board.posts` 저장
+- Board 저장소 모드를 Local/Remote 중 선택 가능하며 기본값은 Local
+- 선택한 모드는 localStorage `tenvi.board.storageMode`에 저장
+- Local 모드는 기존 `tenvi.board.posts`, Remote 모드는 백엔드 Board API 사용
+- 상세 진입 시 현재 저장소의 조회수 증가
 - 카테고리 생성/수정/삭제, 카테고리 필터
 - 검색 범위: 제목, 내용, 작성자
 - 정렬: 최신순, 오래된순, 조회수순, 제목순
@@ -89,6 +92,8 @@ npm run lint
 - 게시글 localStorage에는 이미지 원본이 아니라 `imageId` 중심으로 저장
 - 로컬 사용자 프로필의 nickname을 새 글 작성자 기본값으로 사용
 - 게시글 목록/상세 작성자 영역에 원형 `UserAvatar` 표시
+- Remote 연결 실패 시 오류를 안내하고 기존 로컬 게시글을 화면에 유지
+- Remote 모드에서도 게시글 이미지는 현재 브라우저의 IndexedDB에만 저장
 
 현재 코드 기준 이미지 캡션 입력/저장 필드는 확인되지 않습니다. 캡션 기능은 구현 완료 기능으로 문서화하지 않습니다.
 
@@ -125,23 +130,78 @@ npm run lint
 - 언어, 기본 시작 모듈, 테마 설정
 - 저장 데이터 개수 표시
 - 백엔드 Health API 연결 상태 확인
+- 서버 관련 탭에서 Board Local/Remote 저장소 모드 선택
 - 로컬 사용자 프로필 편집
 - 전체 앱 JSON 백업/복원
 - Board 전용 JSON 백업/복원
 - Tasks/Notes 데이터 초기화
 
-## 백엔드 연결 확인
+## 백엔드 실행과 Board Remote 모드
 
-백엔드 프로젝트는 `backend/Tenvi.Backend/Tenvi.Api`에 있습니다. 실행 후 프론트엔드 Settings 화면의 “백엔드 연결 상태” 카드에서 Health API 연결을 확인할 수 있습니다.
+백엔드 프로젝트는 `backend/Tenvi.Backend/Tenvi.Api`에 있으며 .NET 9 SDK가 필요합니다. 저장소 루트에서 아래 명령으로 실행합니다.
 
 ```bash
 dotnet run --project backend/Tenvi.Backend/Tenvi.Api/Tenvi.Api.csproj
 ```
 
+백엔드와 프론트엔드를 함께 실행할 때는 터미널을 두 개 사용합니다.
+
+터미널 1 — 백엔드:
+
+```bash
+dotnet run --project backend/Tenvi.Backend/Tenvi.Api/Tenvi.Api.csproj
+```
+
+터미널 2 — 프론트엔드:
+
+```bash
+npm install
+npm run dev
+```
+
+기본 접속 주소:
+
+```txt
+Frontend: http://localhost:5173
+Backend:  http://localhost:5032
+```
+
+Settings의 서버 관련 탭에서 다음 순서로 연결을 확인할 수 있습니다.
+
+1. “백엔드 연결 상태”에서 Health API 연결을 확인합니다.
+2. 필요한 경우 Board API 테스트 UI로 목록 조회와 생성/수정/삭제를 확인합니다.
+3. “게시글 저장소 모드”에서 Remote를 선택합니다.
+4. Board 모듈에 다시 진입해 원격 게시글을 불러옵니다.
+
+Remote 선택값은 `tenvi.board.storageMode`에 저장됩니다. 설정이 없거나 값이 올바르지 않으면 Local을 사용하며, 모드를 변경해도 기존 `tenvi.board.posts` 데이터는 삭제하지 않습니다. 백엔드 연결에 실패하면 Board는 오류 메시지와 함께 기존 로컬 게시글을 표시합니다.
+
+현재 백엔드 Board 저장소는 프로세스 메모리 기반입니다. 백엔드를 재시작하면 Remote 게시글이 초기화되므로 영구 저장소로 사용하면 안 됩니다.
+
+Board 이미지는 저장소 모드와 별개로 현재 브라우저 IndexedDB에 저장됩니다. 따라서 Remote 게시글을 다른 브라우저나 기기에서 열면 이미지가 표시되지 않을 수 있습니다.
+
 Health API:
 
 ```txt
 GET http://localhost:5032/api/health
+```
+
+Board API 주요 경로:
+
+```txt
+GET    /api/board/posts
+GET    /api/board/posts/trash
+POST   /api/board/posts
+PUT    /api/board/posts/{id}
+DELETE /api/board/posts/{id}
+PATCH  /api/board/posts/{id}/restore
+PATCH  /api/board/posts/{id}/views
+DELETE /api/board/posts/{id}/permanent
+```
+
+백엔드 빌드만 확인하려면:
+
+```bash
+dotnet build backend/Tenvi.Backend/Tenvi.Api/Tenvi.Api.csproj
 ```
 
 백엔드 문서는 [docs/backend.md](docs/backend.md)를 참고하세요.
@@ -205,6 +265,7 @@ src/
 | Tasks | `todo-manager-lite.todos` |
 | Notes | `tenvi.notes` |
 | Board 게시글 | `tenvi.board.posts` |
+| Board 저장소 모드 (`local`/`remote`) | `tenvi.board.storageMode` |
 | Board 카테고리 | `tenvi.board.categories` |
 | Board legacy 단일 임시저장 | `tenvi.board.draft` |
 | Board 다중 임시저장 | `tenvi.board.drafts` |
@@ -228,6 +289,8 @@ src/
 
 - 실제 로그인, 회원가입, 비밀번호 기능은 없습니다.
 - 데이터는 브라우저 로컬 저장소에 저장되므로 브라우저/프로필/기기 간 자동 동기화가 없습니다.
+- Remote Board 게시글은 현재 백엔드 프로세스 메모리에만 저장되어 서버 재시작 시 초기화됩니다.
+- Remote Board 이미지와 카테고리, draft는 브라우저 로컬 저장소를 계속 사용하므로 다른 브라우저와 동기화되지 않습니다.
 - Board 백업 복원은 기본적으로 덮어쓰기 방식이며 병합 복원은 없습니다.
 - Board 이미지 캡션 필드는 현재 코드 기준 확인되지 않습니다.
 - Board 상세 URL 라우팅은 없습니다.
