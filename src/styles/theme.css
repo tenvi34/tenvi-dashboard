@@ -1,6 +1,22 @@
 /* TENVI theme styles */
 
 .tenvi-dashboard.theme-standard {
+  --text-primary: #172033;
+  --text-secondary: #344054;
+  --text-muted: #667085;
+  --surface-base: #f4f7fb;
+  --surface-raised: #f8fafc;
+  --surface-selected: #eef4ff;
+  --border-default: #d9e2ec;
+  --border-active: #4f7cff;
+  --color-primary: #4f7cff;
+  --color-success: #067647;
+  --color-danger: #d92d20;
+  --color-warning: #b54708;
+  --shadow-card: 0 8px 24px rgba(28, 39, 62, 0.05);
+  --shadow-panel: 0 12px 36px rgba(28, 39, 62, 0.07);
+  --transition-control: 0.18s ease;
+
   --panel-bg: #ffffff;
   --panel-bg-strong: #ffffff;
   --line: #d9e2ec;
@@ -14,7 +30,7 @@
   --surface-soft: #f4f7fb;
   --focus-ring: 0 0 0 3px rgba(79, 124, 255, 0.14);
   --hover-glow: none;
-  --panel-shadow: 0 12px 36px rgba(28, 39, 62, 0.07);
+  --panel-shadow: var(--shadow-panel);
 
   color: #172033;
   background: #eef3f8;
@@ -390,6 +406,22 @@
 
 /* ─── 다크 테마 ─────────────────────────────────────────────── */
 .tenvi-dashboard.theme-dark {
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --surface-base: rgba(255, 255, 255, 0.02);
+  --surface-raised: rgba(255, 255, 255, 0.04);
+  --surface-selected: rgba(96, 165, 250, 0.12);
+  --border-default: rgba(148, 163, 184, 0.15);
+  --border-active: #60a5fa;
+  --color-primary: #60a5fa;
+  --color-success: #4ade80;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.24);
+  --shadow-panel: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --transition-control: 0.18s ease;
+
   --panel-bg: #1e293b;
   --panel-bg-strong: #0f172a;
   --line: rgba(148, 163, 184, 0.15);
@@ -403,7 +435,7 @@
   --surface-soft: rgba(255, 255, 255, 0.02);
   --focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.2);
   --hover-glow: none;
-  --panel-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --panel-shadow: var(--shadow-panel);
 
   color: #e2e8f0;
   background: #0f172a;

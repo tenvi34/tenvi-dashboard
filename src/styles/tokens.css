@@ -22,26 +22,70 @@ body.tenvi-modal-open .tenvi-dashboard {
 }
 
 .tenvi-dashboard {
+  /* Typography scale */
+  --font-size-caption: 11px;
+  --font-size-label: 12px;
+  --font-size-control: 13px;
+  --font-size-body: 14px;
+  --font-size-card-title: 16px;
+  --font-size-section-title: 18px;
+  --font-size-module-title: 21px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+
+  /* Control size scale */
+  --control-height-compact: 28px;
+  --control-height-small: 32px;
+  --control-height-default: 40px;
+  --control-height-large: 46px;
+
+  /* Semantic dark-theme defaults */
+  --text-primary: #dff8ff;
+  --text-secondary: #cceef8;
+  --text-muted: #9edff2;
+  --surface-base: rgba(2, 9, 18, 0.42);
+  --surface-raised: rgba(5, 16, 31, 0.58);
+  --surface-selected: rgba(90, 212, 255, 0.14);
+  --border-default: rgba(90, 212, 255, 0.28);
+  --border-active: rgba(90, 212, 255, 0.55);
+  --color-primary: #5ad4ff;
+  --color-success: #65ffbc;
+  --color-danger: #ff6686;
+  --color-warning: #fbbf24;
+
+  /* Radius and effects */
+  --radius-sm: 6px;
+  --radius-control: 8px;
+  --radius-panel: 10px;
+  --radius-pill: 999px;
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-panel: 0 0 30px rgba(45, 125, 255, 0.12);
+  --focus-ring: 0 0 0 3px rgba(90, 212, 255, 0.14);
+  --transition-control: 0.18s ease;
+
+  /* Existing component token compatibility aliases */
   --panel-bg: rgba(8, 18, 32, 0.78);
   --panel-bg-strong: rgba(10, 28, 48, 0.92);
-  --line: rgba(90, 212, 255, 0.28);
-  --line-strong: rgba(90, 212, 255, 0.55);
-  --neon: #5ad4ff;
+  --line: var(--border-default);
+  --line-strong: var(--border-active);
+  --neon: var(--color-primary);
   --neon-strong: #86ecff;
   --blue: #2d7dff;
-  --muted-cyan: #9edff2;
-  --danger: #ff6686;
-  --surface: rgba(5, 16, 31, 0.58);
-  --surface-soft: rgba(2, 9, 18, 0.42);
-  --radius-panel: 10px;
-  --radius-control: 8px;
-  --control-height: 46px;
+  --muted-cyan: var(--text-muted);
+  --danger: var(--color-danger);
+  --surface: var(--surface-raised);
+  --surface-soft: var(--surface-base);
+  --control-height: var(--control-height-large);
   --mobile-tabbar-height: 72px;
   --panel-padding: 18px;
   --module-gap: 12px;
-  --focus-ring: 0 0 0 3px rgba(90, 212, 255, 0.14);
   --hover-glow: 0 0 18px rgba(90, 212, 255, 0.14);
-  --panel-shadow: 0 0 30px rgba(45, 125, 255, 0.12);
+  --panel-shadow: var(--shadow-panel);
 
   position: relative;
   min-height: 100svh;
