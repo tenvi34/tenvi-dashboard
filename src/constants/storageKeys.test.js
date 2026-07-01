@@ -9,6 +9,7 @@ describe('STORAGE_KEYS', () => {
       boardDrafts: 'tenvi.board.drafts',
       boardCategories: 'tenvi.board.categories',
       boardPosts: 'tenvi.board.posts',
+      boardStorageMode: 'tenvi.board.storageMode',
       calendarEvents: 'tenvi.calendar.events',
       hudEffect: 'tenvi.hudEffect',
       language: 'tenvi.language',

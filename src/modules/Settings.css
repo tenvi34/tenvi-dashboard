@@ -1305,6 +1305,7 @@
 .settings-module--general .backend-status,
 .settings-module--general .backend-echo-test,
 .settings-module--general .board-api-test,
+.settings-module--general .settings-board-storage-panel,
 .settings-module--general .settings-action-stack,
 .settings-module--backup .settings-interface-panel,
 .settings-module--backup .settings-start-panel,
@@ -1313,6 +1314,7 @@
 .settings-module--backup .backend-status,
 .settings-module--backup .backend-echo-test,
 .settings-module--backup .board-api-test,
+.settings-module--backup .settings-board-storage-panel,
 .settings-module--server .settings-interface-panel,
 .settings-module--server .settings-start-panel,
 .settings-module--server .settings-data-panel,
@@ -1329,8 +1331,13 @@
 .settings-module--server .settings-grid {
   grid-template-areas:
     'backend backend-test'
+    'board-storage board-storage'
     'board-api-test .';
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-board-storage-panel {
+  grid-area: board-storage;
 }
 
 .tenvi-dashboard.theme-standard .settings-tab {

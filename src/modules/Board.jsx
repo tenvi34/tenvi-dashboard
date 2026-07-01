@@ -63,7 +63,9 @@ function Board({ t }) {
   const {
     activePosts,
     createPost,
+    error: postsError,
     increasePostViews,
+    loading: postsLoading,
     movePostsToCategoryFallback,
     permanentlyDeletePost,
     posts,
@@ -497,6 +499,13 @@ function Board({ t }) {
         </div>
         <p className="module-meta">{t.board.totalCount(activePosts.length)}</p>
       </div>
+
+      {postsLoading ? (
+        <p className="board-storage-status">원격 Board 게시글을 불러오는 중입니다.</p>
+      ) : null}
+      {postsError ? (
+        <p className="board-storage-status is-error" role="alert">{postsError}</p>
+      ) : null}
 
       {view === 'write' ? (
         <BoardForm

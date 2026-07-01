@@ -4,6 +4,11 @@ import UserAvatar from '../components/UserAvatar.jsx'
 import BackendEchoTest from './BackendEchoTest.jsx'
 import BackendStatus from './BackendStatus.jsx'
 import BoardApiTest from './BoardApiExtendedTest.jsx'
+import {
+  BOARD_STORAGE_MODES,
+  readBoardStorageMode,
+  saveBoardStorageMode,
+} from './board/boardStorageMode.js'
 import './Settings.css'
 import {
   getPhotoRecordCount,
@@ -112,6 +117,9 @@ function Settings({
   theme,
 }) {
   const [activeSettingsTab, setActiveSettingsTab] = useState('general')
+  const [boardStorageMode, setBoardStorageMode] = useState(() =>
+    readBoardStorageMode(),
+  )
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
@@ -845,6 +853,30 @@ function Settings({
         {/* 백업/복원 */}
         <BackendStatus t={t} />
         <BackendEchoTest />
+        <section className="settings-panel settings-board-storage-panel">
+          <div className="settings-panel-header">
+            <p className="module-label">BOARD STORAGE</p>
+            <h3>게시글 저장소 모드</h3>
+          </div>
+          <div className="settings-options" aria-label="Board 저장소 모드">
+            {Object.values(BOARD_STORAGE_MODES).map((mode) => (
+              <button
+                className={`settings-option ${boardStorageMode === mode ? 'is-active' : ''}`}
+                key={mode}
+                type="button"
+                onClick={() => setBoardStorageMode(saveBoardStorageMode(mode))}
+              >
+                {mode === BOARD_STORAGE_MODES.local ? 'Local' : 'Remote'}
+              </button>
+            ))}
+          </div>
+          <p className="settings-note">
+            기본값은 Local입니다. 변경 후 Board에 다시 진입하면 적용됩니다.
+          </p>
+          <p className="settings-note">
+            Remote에서도 이미지는 이 브라우저의 IndexedDB에만 저장되어 다른 브라우저에서는 표시되지 않습니다.
+          </p>
+        </section>
         <BoardApiTest />
 
         <div className="settings-action-stack">

@@ -1,10 +1,15 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   DEFAULT_BOARD_CATEGORY_ID,
   moveBoardPostsToCategoryFallback,
 } from '../boardLogic.js'
+import { readBoardStorageMode } from './boardStorageMode.js'
 import { localBoardPostRepository } from './repositories/localBoardPostRepository.js'
+import { remoteBoardPostRepository } from './repositories/remoteBoardPostRepository.js'
 
+const REMOTE_ERROR_MESSAGE =
+  'Board 서버에 연결할 수 없습니다. 기존 로컬 게시글을 표시합니다.'
+/* 이전 local 전용 구현 참고용 보존
 const boardPostRepository = localBoardPostRepository
 
 // Board 게시글 localStorage 복원
@@ -13,7 +18,7 @@ const loadBoardPosts = () => boardPostRepository.fetchAllPosts()
 // 기존 Board 게시글 key 보존
 const saveBoardPosts = (posts) => boardPostRepository.replacePosts(posts)
 
-function useBoardPosts() {
+function useLegacyBoardPosts() {
   // 활성/휴지통 목록은 같은 posts 배열에서 deletedAt 기준으로 파생
   const [posts, setPosts] = useState(() => loadBoardPosts())
   const activePosts = posts.filter((post) => !post.deletedAt)
@@ -138,6 +143,139 @@ function useBoardPosts() {
     softDeletePost,
     togglePostPinned,
     trashedPosts,
+    updatePost,
+  }
+}
+
+*/
+function useBoardPosts() {
+  // Board 재진입 시 Settings에서 저장한 모드 반영
+  const [storageMode] = useState(() => readBoardStorageMode())
+  const repository = useMemo(
+    () => storageMode === 'remote' ? remoteBoardPostRepository : localBoardPostRepository,
+    [storageMode],
+  )
+  const [posts, setPostsState] = useState(() =>
+    storageMode === 'local' ? localBoardPostRepository.fetchAllPosts() : [],
+  )
+  const [loading, setLoading] = useState(storageMode === 'remote')
+  const [error, setError] = useState(null)
+
+  // 원격 active/trash 응답을 기존 단일 posts 배열로 결합
+  const refreshPosts = useCallback(async () => {
+    if (storageMode === 'local') {
+      setPostsState(localBoardPostRepository.fetchAllPosts())
+      setError(null)
+      return
+    }
+
+    setLoading(true)
+    try {
+      const [active, trash] = await Promise.all([
+        repository.fetchPosts(),
+        repository.fetchTrashPosts(),
+      ])
+      setPostsState([
+        ...(Array.isArray(active) ? active : []),
+        ...(Array.isArray(trash) ? trash : []),
+      ])
+      setError(null)
+    } catch {
+      // 서버 중단 시 빈 화면 대신 삭제하지 않은 로컬 스냅샷 유지
+      setPostsState(localBoardPostRepository.fetchAllPosts())
+      setError(REMOTE_ERROR_MESSAGE)
+    } finally {
+      setLoading(false)
+    }
+  }, [repository, storageMode])
+
+  useEffect(() => {
+    if (storageMode === 'remote') {
+      // effect 본문과 원격 상태 갱신 분리
+      void Promise.resolve().then(refreshPosts)
+    }
+  }, [refreshPosts, storageMode])
+
+  const runAction = async (action) => {
+    setError(null)
+    try {
+      const result = await action()
+      await refreshPosts()
+      return result
+    } catch (actionError) {
+      if (storageMode === 'remote') setError(REMOTE_ERROR_MESSAGE)
+      throw actionError
+    }
+  }
+
+  // 원격에는 전체 치환 API가 없어 setPosts는 화면 상태 호환만 제공
+  const setPosts = (updater) => {
+    setPostsState((currentPosts) => {
+      const value = typeof updater === 'function' ? updater(currentPosts) : updater
+      const nextPosts = Array.isArray(value) ? value : []
+      if (storageMode === 'local') localBoardPostRepository.replacePosts(nextPosts)
+      return nextPosts
+    })
+  }
+
+  const createPost = (payload) => runAction(() => repository.createPost(payload))
+  const updatePost = (id, payload) => runAction(() => repository.updatePost(id, payload))
+  const softDeletePost = (id) => runAction(() => repository.softDeletePost(id))
+  const restorePost = (id) => runAction(() => repository.restorePost(id))
+  const permanentlyDeletePost = (id) => runAction(() => repository.permanentlyDeletePost(id))
+  const increasePostViews = (id) => runAction(() => repository.increaseViews(id))
+
+  const togglePostPinned = (id) => {
+    const post = posts.find((item) => item.id === id)
+    if (!post) return Promise.reject(new Error('Board post not found.'))
+    return updatePost(id, {
+      author: post.author,
+      title: post.title,
+      content: post.content,
+      categoryId: post.categoryId,
+      blocks: post.blocks,
+      pinned: post.pinned !== true,
+    })
+  }
+
+  const movePostsToCategoryFallback = async (
+    categoryId,
+    fallbackCategoryId = DEFAULT_BOARD_CATEGORY_ID,
+  ) => {
+    const nextPosts = moveBoardPostsToCategoryFallback(posts, categoryId, fallbackCategoryId)
+    if (storageMode === 'local') {
+      localBoardPostRepository.replacePosts(nextPosts)
+      await refreshPosts()
+      return nextPosts
+    }
+
+    const movedPosts = nextPosts.filter((post, index) => post !== posts[index])
+    await runAction(() => Promise.all(movedPosts.map((post) => repository.updatePost(post.id, {
+      author: post.author,
+      title: post.title,
+      content: post.content,
+      categoryId: post.categoryId,
+      blocks: post.blocks,
+      pinned: post.pinned === true,
+    }))))
+    return nextPosts
+  }
+
+  return {
+    activePosts: posts.filter((post) => !post.deletedAt),
+    createPost,
+    error,
+    increasePostViews,
+    loading,
+    movePostsToCategoryFallback,
+    permanentlyDeletePost,
+    posts,
+    restorePost,
+    setPosts,
+    softDeletePost,
+    storageMode,
+    togglePostPinned,
+    trashedPosts: posts.filter((post) => post.deletedAt),
     updatePost,
   }
 }
