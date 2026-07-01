@@ -854,28 +854,40 @@ function Settings({
         <BackendStatus t={t} />
         <BackendEchoTest />
         <section className="settings-panel settings-board-storage-panel">
-          <div className="settings-panel-header">
-            <p className="module-label">BOARD STORAGE</p>
-            <h3>게시글 저장소 모드</h3>
+          <div className="settings-board-storage-copy">
+            <div className="settings-panel-header">
+              <p className="module-label">BOARD STORAGE</p>
+              <h3>게시글 저장소 모드</h3>
+            </div>
+            <p className="settings-note settings-board-storage-note">
+              기본값은 Local이며, 변경 후 Board 재진입 시 적용됩니다.
+              <span>Remote 이미지도 현재 브라우저에만 저장됩니다.</span>
+            </p>
           </div>
-          <div className="settings-options" aria-label="Board 저장소 모드">
-            {Object.values(BOARD_STORAGE_MODES).map((mode) => (
-              <button
-                className={`settings-option ${boardStorageMode === mode ? 'is-active' : ''}`}
-                key={mode}
-                type="button"
-                onClick={() => setBoardStorageMode(saveBoardStorageMode(mode))}
-              >
-                {mode === BOARD_STORAGE_MODES.local ? 'Local' : 'Remote'}
-              </button>
-            ))}
+          <div className="settings-board-storage-control">
+            <div
+              className="settings-options settings-board-storage-options"
+              aria-label="Board 저장소 모드"
+              role="group"
+            >
+              {Object.values(BOARD_STORAGE_MODES).map((mode) => (
+                <button
+                  aria-pressed={boardStorageMode === mode}
+                  className={`settings-option ${boardStorageMode === mode ? 'is-active' : ''}`}
+                  key={mode}
+                  type="button"
+                  onClick={() => setBoardStorageMode(saveBoardStorageMode(mode))}
+                >
+                  {mode === BOARD_STORAGE_MODES.local ? 'Local' : 'Remote'}
+                </button>
+              ))}
+            </div>
+            <span className={`settings-board-storage-badge is-${boardStorageMode}`}>
+              {boardStorageMode === BOARD_STORAGE_MODES.local
+                ? '기본값 · Local'
+                : '선택 중 · Remote'}
+            </span>
           </div>
-          <p className="settings-note">
-            기본값은 Local입니다. 변경 후 Board에 다시 진입하면 적용됩니다.
-          </p>
-          <p className="settings-note">
-            Remote에서도 이미지는 이 브라우저의 IndexedDB에만 저장되어 다른 브라우저에서는 표시되지 않습니다.
-          </p>
         </section>
         <BoardApiTest />
 

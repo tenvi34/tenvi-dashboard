@@ -1331,13 +1331,126 @@
 .settings-module--server .settings-grid {
   grid-template-areas:
     'backend backend-test'
-    'board-storage board-storage'
+    'board-storage .'
     'board-api-test .';
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .settings-board-storage-panel {
   grid-area: board-storage;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px;
+  border-color: rgba(90, 212, 255, 0.24);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.settings-board-storage-panel .settings-panel-header {
+  margin: 0;
+}
+
+.settings-board-storage-panel .settings-panel-header h3 {
+  margin: 2px 0 0;
+  font-size: 16px;
+}
+
+.settings-board-storage-panel .module-label {
+  margin: 0;
+}
+
+.settings-board-storage-options {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(74px, 1fr));
+  gap: 2px;
+  width: 176px;
+  padding: 2px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(5, 16, 31, 0.35);
+}
+
+.settings-board-storage-options .settings-option {
+  min-height: 28px;
+  padding: 0 10px;
+  border-color: transparent;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.settings-board-storage-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.settings-board-storage-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid rgba(90, 212, 255, 0.18);
+  border-radius: 999px;
+  color: #a9cbd8;
+  background: rgba(5, 16, 31, 0.35);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.settings-board-storage-badge.is-remote {
+  color: #b9d5ff;
+  border-color: rgba(96, 165, 250, 0.38);
+  background: rgba(96, 165, 250, 0.12);
+}
+
+.settings-board-storage-note {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  opacity: 0.82;
+}
+
+.settings-board-storage-note span {
+  display: block;
+  margin-top: 2px;
+}
+
+.tenvi-dashboard.theme-standard .settings-board-storage-options {
+  border-color: #d0d5dd;
+  background: #f2f4f7;
+}
+
+.tenvi-dashboard.theme-standard .settings-board-storage-badge {
+  color: #475467;
+  border-color: #d0d5dd;
+  background: #f2f4f7;
+}
+
+.tenvi-dashboard.theme-standard .settings-board-storage-badge.is-remote {
+  color: #175cd3;
+  border-color: #b2ccff;
+  background: #eff4ff;
+}
+
+@media (max-width: 720px) {
+  .settings-board-storage-panel {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .settings-board-storage-control {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .settings-board-storage-options {
+    grid-template-columns: repeat(2, minmax(62px, 1fr));
+    width: 142px;
+  }
 }
 
 .tenvi-dashboard.theme-standard .settings-tab {
@@ -1391,6 +1504,8 @@
   .settings-module--server .settings-grid {
     grid-template-areas:
       'backend'
-      'backend-test';
+      'backend-test'
+      'board-storage'
+      'board-api-test';
   }
 }
