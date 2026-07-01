@@ -8,7 +8,7 @@ import { localBoardPostRepository } from './repositories/localBoardPostRepositor
 import { remoteBoardPostRepository } from './repositories/remoteBoardPostRepository.js'
 
 const REMOTE_ERROR_MESSAGE =
-  'Board 서버에 연결할 수 없습니다. 기존 로컬 게시글을 표시합니다.'
+  'Board 서버에 연결할 수 없어 이번 화면에서는 Local 모드로 동작합니다.'
 /* 이전 local 전용 구현 참고용 보존
 const boardPostRepository = localBoardPostRepository
 
@@ -160,6 +160,10 @@ function useBoardPosts() {
   )
   const [loading, setLoading] = useState(storageMode === 'remote')
   const [error, setError] = useState(null)
+  const [isLocalFallback, setIsLocalFallback] = useState(false)
+  const actionRepository = isLocalFallback
+    ? localBoardPostRepository
+    : repository
 
   // 원격 active/trash 응답을 기존 단일 posts 배열로 결합
   const refreshPosts = useCallback(async () => {
@@ -180,10 +184,12 @@ function useBoardPosts() {
         ...(Array.isArray(trash) ? trash : []),
       ])
       setError(null)
+      setIsLocalFallback(false)
     } catch {
       // 서버 중단 시 빈 화면 대신 삭제하지 않은 로컬 스냅샷 유지
       setPostsState(localBoardPostRepository.fetchAllPosts())
       setError(REMOTE_ERROR_MESSAGE)
+      setIsLocalFallback(true)
     } finally {
       setLoading(false)
     }
@@ -197,10 +203,14 @@ function useBoardPosts() {
   }, [refreshPosts, storageMode])
 
   const runAction = async (action) => {
-    setError(null)
+    if (!isLocalFallback) setError(null)
     try {
       const result = await action()
-      await refreshPosts()
+      if (isLocalFallback) {
+        setPostsState(localBoardPostRepository.fetchAllPosts())
+      } else {
+        await refreshPosts()
+      }
       return result
     } catch (actionError) {
       if (storageMode === 'remote') setError(REMOTE_ERROR_MESSAGE)
@@ -213,17 +223,20 @@ function useBoardPosts() {
     setPostsState((currentPosts) => {
       const value = typeof updater === 'function' ? updater(currentPosts) : updater
       const nextPosts = Array.isArray(value) ? value : []
-      if (storageMode === 'local') localBoardPostRepository.replacePosts(nextPosts)
+      if (storageMode === 'local' || isLocalFallback) {
+        localBoardPostRepository.replacePosts(nextPosts)
+      }
       return nextPosts
     })
   }
 
-  const createPost = (payload) => runAction(() => repository.createPost(payload))
-  const updatePost = (id, payload) => runAction(() => repository.updatePost(id, payload))
-  const softDeletePost = (id) => runAction(() => repository.softDeletePost(id))
-  const restorePost = (id) => runAction(() => repository.restorePost(id))
-  const permanentlyDeletePost = (id) => runAction(() => repository.permanentlyDeletePost(id))
-  const increasePostViews = (id) => runAction(() => repository.increaseViews(id))
+  const createPost = (payload) => runAction(() => actionRepository.createPost(payload))
+  const updatePost = (id, payload) => runAction(() => actionRepository.updatePost(id, payload))
+  const softDeletePost = (id) => runAction(() => actionRepository.softDeletePost(id))
+  const restorePost = (id) => runAction(() => actionRepository.restorePost(id))
+  const permanentlyDeletePost = (id) =>
+    runAction(() => actionRepository.permanentlyDeletePost(id))
+  const increasePostViews = (id) => runAction(() => actionRepository.increaseViews(id))
 
   const togglePostPinned = (id) => {
     const post = posts.find((item) => item.id === id)
@@ -243,9 +256,9 @@ function useBoardPosts() {
     fallbackCategoryId = DEFAULT_BOARD_CATEGORY_ID,
   ) => {
     const nextPosts = moveBoardPostsToCategoryFallback(posts, categoryId, fallbackCategoryId)
-    if (storageMode === 'local') {
+    if (storageMode === 'local' || isLocalFallback) {
       localBoardPostRepository.replacePosts(nextPosts)
-      await refreshPosts()
+      setPostsState(nextPosts)
       return nextPosts
     }
 
@@ -267,6 +280,7 @@ function useBoardPosts() {
     error,
     increasePostViews,
     loading,
+    isLocalFallback,
     movePostsToCategoryFallback,
     permanentlyDeletePost,
     posts,

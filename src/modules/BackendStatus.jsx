@@ -71,7 +71,10 @@ function BackendStatus({ t }) {
   }, [])
 
   useEffect(() => {
-    checkBackendHealth()
+    // 초기 checking 상태 렌더 후 비동기 health 확인 예약
+    const checkTimer = window.setTimeout(checkBackendHealth, 0)
+
+    return () => window.clearTimeout(checkTimer)
   }, [checkBackendHealth])
 
   return (
