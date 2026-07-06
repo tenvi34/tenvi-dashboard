@@ -396,7 +396,6 @@
   color: #172033;
 }
 
-.tenvi-dashboard.theme-standard .dashboard-briefing,
 .tenvi-dashboard.theme-standard .calendar-events-header,
 .tenvi-dashboard.theme-standard .calendar-form {
   border-color: #d9e2ec;
@@ -800,7 +799,6 @@
   color: #e2e8f0;
 }
 
-.tenvi-dashboard.theme-dark .dashboard-briefing,
 .tenvi-dashboard.theme-dark .calendar-events-header,
 .tenvi-dashboard.theme-dark .calendar-form {
   border-color: rgba(148, 163, 184, 0.12);

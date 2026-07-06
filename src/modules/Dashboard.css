@@ -30,26 +30,6 @@
   line-height: 1;
 }
 
-.dashboard-briefing {
-  align-items: flex-start;
-  margin-bottom: 18px;
-}
-
-.dashboard-briefing strong {
-  max-width: 720px;
-  color: #f4fdff;
-  font-size: 16px;
-  line-height: 1.45;
-  text-align: right;
-}
-
-.dashboard-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 16px;
-  align-items: stretch;
-}
-
 /* Dashboard 요약과 최근 항목 */
 .summary-panel {
   min-width: 0;
@@ -107,11 +87,6 @@
   color: var(--neon-strong);
   font-size: 28px;
   line-height: 1;
-}
-
-.summary-metric-wide {
-  min-height: 86px;
-  margin-bottom: 14px;
 }
 
 .recent-notes-title {
@@ -191,10 +166,6 @@
   color: #f4fdff;
   font-size: 22px;
   line-height: 1;
-}
-
-.dashboard-map-collection {
-  margin-top: 14px;
 }
 
 /* Dashboard 정보 위계 */
@@ -375,16 +346,6 @@
   font-size: 13px;
 }
 
-.dashboard-system-metrics {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.dashboard-system-metrics .summary-metric strong {
-  font-size: 22px;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-
 .dashboard-compact-list {
   display: grid;
   gap: 8px;
@@ -420,30 +381,6 @@
   line-height: 1.2;
   text-align: right;
   overflow-wrap: anywhere;
-}
-
-.dashboard-briefing {
-  position: relative;
-  overflow: hidden;
-  align-items: center;
-  padding: 18px 20px;
-  border-color: rgba(90, 212, 255, 0.28);
-  background:
-    linear-gradient(135deg, rgba(90, 212, 255, 0.12), rgba(5, 16, 31, 0.72)),
-    var(--surface);
-}
-
-.dashboard-briefing::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--neon);
-  box-shadow: 0 0 14px rgba(90, 212, 255, 0.5);
-}
-
-.dashboard-briefing strong {
-  font-size: 17px;
 }
 
 .summary-panel {
@@ -512,16 +449,11 @@
 }
 
 .compact-empty {
-  padding: 18px;
-}
-
-.compact-empty {
-  padding: 12px;
+  padding: var(--space-3);
 }
 
 @media (max-width: 1180px) {
-  .dashboard-summary-grid,
-    .dashboard-tab-grid,
+  .dashboard-tab-grid,
     .dashboard-overview-grid {
       grid-template-columns: 1fr;
     }
@@ -601,11 +533,6 @@
   border-bottom-color: #d9e2ec;
 }
 
-.tenvi-dashboard.theme-standard .dashboard-briefing::before {
-  background: #4f7cff;
-  box-shadow: none;
-}
-
 .tenvi-dashboard.theme-dark .map-source-grid div,
 .tenvi-dashboard.theme-dark .dashboard-compact-list div {
   border-color: rgba(148, 163, 184, 0.1);
@@ -666,11 +593,6 @@
 
 .tenvi-dashboard.theme-dark .dashboard-tabs {
   border-bottom-color: rgba(148, 163, 184, 0.12);
-}
-
-.tenvi-dashboard.theme-dark .dashboard-briefing::before {
-  background: #3b82f6;
-  box-shadow: none;
 }
 
 /* Dashboard 현재 탭 화면의 공통 토큰 보정 */
