@@ -1,24 +1,26 @@
 /* 지도 모드 탭 */
 .map-mode-tabs {
   display: flex;
-  gap: 4px;
-  margin-bottom: 14px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(90, 212, 255, 0.18);
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  padding: var(--space-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-base);
   overflow: visible;
 }
 
 .map-mode-tab {
-  padding: 8px 18px;
-  min-height: 38px;
+  padding: 0 var(--space-4);
+  min-height: var(--control-height-small);
   border: 1px solid transparent;
-  border-radius: 8px 8px 0 0;
-  color: #a8c7d6;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
   background: transparent;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--font-size-control);
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   cursor: pointer;
   transition:
     color 0.18s ease,
@@ -27,16 +29,16 @@
 }
 
 .map-mode-tab:hover {
-  color: #dff8ff;
-  border-color: rgba(90, 212, 255, 0.18);
-  background: rgba(5, 16, 31, 0.4);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--surface-selected);
 }
 
 .map-mode-tab.is-active {
-  color: var(--neon-strong);
-  border-color: rgba(90, 212, 255, 0.32);
-  border-bottom-color: rgba(90, 212, 255, 0.32);
-  background: rgba(5, 16, 31, 0.6);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--border-active);
 }
 
 .map-layout {
@@ -165,20 +167,20 @@
 }
 
 .map-status {
-  padding: 12px 14px;
-  border: 1px solid rgba(90, 212, 255, 0.22);
-  border-radius: 8px;
-  color: var(--neon-strong);
-  background: rgba(90, 212, 255, 0.08);
-  font-size: 14px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  background: var(--surface-base);
+  font-size: var(--font-size-body);
   font-weight: 700;
   line-height: 1.45;
 }
 
 .map-status.is-error {
-  color: #ffd7df;
-  border-color: rgba(255, 102, 134, 0.3);
-  background: rgba(255, 102, 134, 0.1);
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--surface-base));
 }
 
 .map-bulk-panel {
@@ -305,14 +307,14 @@
 
 .map-field {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .map-field span {
-  color: var(--muted-cyan);
-  font-size: 12px;
+  color: var(--text-muted);
+  font-size: var(--font-size-label);
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -320,11 +322,12 @@
 .map-field select,
 .map-field textarea {
   min-width: 0;
-  color: #f4fdff;
-  background: rgba(2, 9, 18, 0.82);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px 14px;
+  min-height: var(--control-height-default);
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-3);
   font: inherit;
   line-height: 1.4;
   box-sizing: border-box;
@@ -334,16 +337,16 @@
 
 .map-field input::placeholder,
 .map-field textarea::placeholder {
-  color: rgba(190, 229, 240, 0.48);
+  color: var(--text-muted);
 }
 
 .map-field input:focus,
 .map-field select:focus,
 .map-field textarea:focus {
   outline: none;
-  border-color: var(--line-strong);
-  box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
-  background: rgba(4, 14, 28, 0.95);
+  border-color: var(--border-active);
+  box-shadow: var(--focus-ring);
+  background: var(--surface-raised);
 }
 
 .map-filter-options,
@@ -355,11 +358,11 @@
 
 .map-record-search-panel {
   display: grid;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid rgba(90, 212, 255, 0.16);
-  border-radius: 8px;
-  background: rgba(2, 9, 18, 0.32);
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-base);
 }
 
 .map-search-controls {
@@ -375,8 +378,8 @@
 
 .map-filter-result-count {
   margin: 0;
-  color: var(--muted-cyan);
-  font-size: 13px;
+  color: var(--text-muted);
+  font-size: var(--font-size-control);
   font-weight: 700;
 }
 
@@ -393,11 +396,11 @@
 
 .map-record-filter-bar {
   display: grid;
-  gap: 8px;
-  padding: 9px 10px;
-  border: 1px solid rgba(90, 212, 255, 0.16);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-control);
-  background: rgba(2, 9, 18, 0.3);
+  background: var(--surface-base);
   box-sizing: border-box;
 }
 
@@ -428,21 +431,22 @@
 }
 
 .map-filter-badge {
-  min-height: 30px;
-  border: 1px solid rgba(101, 255, 188, 0.28);
-  border-radius: 999px;
-  padding: 0 10px;
-  color: #d7ffef;
-  background: rgba(101, 255, 188, 0.1);
+  min-height: var(--control-height-compact);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  padding: 0 var(--space-2);
+  color: var(--text-secondary);
+  background: var(--surface-selected);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--font-size-label);
   font-weight: 800;
   cursor: pointer;
 }
 
 .map-filter-badge:hover {
-  border-color: rgba(101, 255, 188, 0.48);
-  box-shadow: 0 0 14px rgba(101, 255, 188, 0.12);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  box-shadow: none;
 }
 
 .map-filter-button,
@@ -450,28 +454,28 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding: 8px 10px;
-  border: 1px solid rgba(90, 212, 255, 0.18);
-  border-left-color: var(--line-strong);
-  border-radius: 8px;
-  color: #dff8ff;
-  background: rgba(5, 16, 31, 0.5);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-left: 2px solid var(--border-active);
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+  background: var(--surface-raised);
   font: inherit;
   text-align: left;
 }
 
 .map-filter-button {
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--font-size-control);
   line-height: 1.35;
 }
 
 .map-filter-button:hover,
 .map-filter-button.is-active {
-  transform: translateY(-1px);
-  border-color: var(--line-strong);
-  background: rgba(90, 212, 255, 0.1);
-  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+  transform: none;
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+  box-shadow: none;
 }
 
 .map-date-row,
@@ -523,9 +527,9 @@
 }
 
 .map-primary-button {
-  min-height: 48px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  min-height: var(--control-height-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
   color: #00131c;
   background: linear-gradient(135deg, var(--neon-strong), var(--blue));
   font: inherit;
@@ -540,11 +544,11 @@
 }
 
 .map-secondary-button {
-  min-height: 48px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: #dff8ff;
-  background: rgba(5, 16, 31, 0.5);
+  min-height: var(--control-height-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  color: var(--text-secondary);
+  background: var(--surface-raised);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -557,14 +561,16 @@
 }
 
 .map-secondary-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: var(--line-strong);
-  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+  transform: none;
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+  box-shadow: none;
 }
 
 .map-primary-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 0 18px rgba(90, 212, 255, 0.18);
+  transform: none;
+  box-shadow: var(--focus-ring);
 }
 
 .map-primary-button:disabled {
@@ -575,31 +581,32 @@
 
 .map-search-panel {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .map-search-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(86px, auto) auto;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .map-search-form input,
 .map-search-form select {
   min-width: 0;
-  color: #f4fdff;
-  background: rgba(2, 9, 18, 0.82);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px 14px;
+  min-height: var(--control-height-default);
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
   font: inherit;
   box-sizing: border-box;
 }
 
 .map-search-form button {
-  min-height: 44px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  min-height: var(--control-height-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
   color: #00131c;
   background: linear-gradient(135deg, var(--neon-strong), var(--blue));
   font: inherit;
@@ -609,14 +616,14 @@
 
 .map-search-attribution {
   margin: 0;
-  color: var(--muted-cyan);
-  font-size: 12px;
+  color: var(--text-muted);
+  font-size: var(--font-size-label);
   line-height: 1.4;
 }
 
 .map-search-results {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 0;
   margin: 0;
   list-style: none;
@@ -626,13 +633,13 @@
   width: 100%;
   min-width: 0;
   display: grid;
-  gap: 5px;
-  padding: 10px 12px;
-  border: 1px solid rgba(90, 212, 255, 0.18);
-  border-left-color: var(--line-strong);
-  border-radius: 8px;
-  color: #dff8ff;
-  background: rgba(5, 16, 31, 0.5);
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-left: 2px solid var(--border-active);
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+  background: var(--surface-raised);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -710,9 +717,10 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid rgba(90, 212, 255, 0.22);
-  border-radius: 10px;
-  background: rgba(2, 9, 18, 0.46);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-base);
+  box-shadow: none;
 }
 
 .photo-map {
@@ -844,7 +852,7 @@
 
 .map-record-list {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 0;
   margin: 0;
   list-style: none;
@@ -862,14 +870,14 @@
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
-  gap: 10px;
+  gap: var(--space-3);
   align-items: center;
-  padding: 9px;
-  border: 1px solid rgba(90, 212, 255, 0.18);
-  border-left-color: var(--line-strong);
-  border-radius: 8px;
-  color: #dff8ff;
-  background: rgba(5, 16, 31, 0.5);
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-left: 2px solid var(--border-active);
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+  background: var(--surface-raised);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -882,18 +890,18 @@
 
 .map-record-button:hover,
 .map-record-button.is-active {
-  transform: translateY(-1px);
-  border-color: var(--line-strong);
-  background: rgba(90, 212, 255, 0.1);
-  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+  transform: none;
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+  box-shadow: none;
 }
 
 .map-record-thumb {
   width: 58px;
   height: 58px;
   object-fit: cover;
-  border-radius: 7px;
-  background: rgba(2, 9, 18, 0.46);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
 }
 
 .map-record-button span {
@@ -910,8 +918,8 @@
 }
 
 .map-record-button small {
-  color: var(--muted-cyan);
-  font-size: 12px;
+  color: var(--text-muted);
+  font-size: var(--font-size-label);
 }
 
 .map-detail-column {
@@ -1031,11 +1039,11 @@
 /* 사진 추가 토글 */
 .map-add-toggle-button {
   width: 100%;
-  min-height: 44px;
-  border: 1px solid rgba(90, 212, 255, 0.28);
-  border-radius: 8px;
-  color: #dff8ff;
-  background: rgba(5, 16, 31, 0.6);
+  min-height: var(--control-height-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  color: var(--text-secondary);
+  background: var(--surface-raised);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -1048,16 +1056,17 @@
 }
 
 .map-add-toggle-button:hover {
-  transform: translateY(-1px);
-  border-color: var(--line-strong);
-  background: rgba(90, 212, 255, 0.1);
-  box-shadow: 0 0 18px rgba(90, 212, 255, 0.14);
+  transform: none;
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+  box-shadow: none;
 }
 
 .map-add-toggle-button.is-open {
-  color: #aacbd8;
-  border-color: rgba(90, 212, 255, 0.22);
-  background: rgba(2, 9, 18, 0.42);
+  color: var(--text-muted);
+  border-color: var(--border-default);
+  background: var(--surface-base);
 }
 
 /* 컬렉션 필터 헤더 */
@@ -1072,14 +1081,14 @@
 /* 컬렉션 관리 토글 */
 .map-collection-toggle {
   flex: 0 0 auto;
-  min-height: 32px;
-  padding: 0 12px;
-  border: 1px solid rgba(90, 212, 255, 0.22);
-  border-radius: 8px;
-  color: #aacbd8;
-  background: rgba(5, 16, 31, 0.5);
+  min-height: var(--control-height-small);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  background: var(--surface-raised);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--font-size-label);
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -1091,9 +1100,9 @@
 }
 
 .map-collection-toggle:hover {
-  border-color: var(--line-strong);
-  background: rgba(90, 212, 255, 0.1);
-  color: #f4fdff;
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+  color: var(--text-primary);
 }
 
 /* 전체 위치 플로팅 버튼 */
@@ -1245,38 +1254,38 @@
   .mobile-map-view-tabs {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
-      padding: 6px;
-      margin: 0 0 12px;
-      border: 1px solid rgba(90, 212, 255, 0.18);
+      gap: var(--space-1);
+      padding: var(--space-1);
+      margin: 0 0 var(--space-3);
+      border: 1px solid var(--border-default);
       border-radius: var(--radius-control);
-      background: rgba(2, 9, 18, 0.45);
+      background: var(--surface-base);
     }
 
   .mobile-map-view-tab {
       min-width: 0;
-      min-height: 44px;
+      min-height: var(--control-height-default);
       border: 1px solid transparent;
-      border-radius: 8px;
-      padding: 0 10px;
-      color: #aacbd8;
+      border-radius: var(--radius-sm);
+      padding: 0 var(--space-2);
+      color: var(--text-muted);
       background: transparent;
       font: inherit;
-      font-size: 13px;
+      font-size: var(--font-size-control);
       font-weight: 800;
       cursor: pointer;
     }
 
   .mobile-map-view-tab.is-active {
-      color: #f4fdff;
-      border-color: var(--line-strong);
-      background: rgba(90, 212, 255, 0.14);
-      box-shadow: inset 0 0 16px rgba(90, 212, 255, 0.1);
+      color: var(--text-primary);
+      border-color: var(--border-active);
+      background: var(--surface-selected);
+      box-shadow: inset 0 0 0 1px var(--border-active);
     }
 
   .mobile-map-view-tab:focus-visible {
-      outline: 2px solid var(--neon);
-      outline-offset: 2px;
+      outline: none;
+      box-shadow: var(--focus-ring);
     }
 
   /* 모바일 Map 단일 보기 */
@@ -1321,15 +1330,15 @@
       z-index: 1100;
       display: grid;
       grid-template-columns: 48px minmax(0, 1fr) auto;
-      gap: 10px;
+      gap: var(--space-2);
       align-items: center;
       min-height: 68px;
-      padding: 9px;
-      border: 1px solid rgba(90, 212, 255, 0.32);
-      border-radius: 9px;
-      color: #dff8ff;
-      background: rgba(3, 8, 16, 0.9);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      padding: var(--space-2);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-panel);
+      color: var(--text-primary);
+      background: var(--panel-bg-strong);
+      box-shadow: var(--shadow-card);
       backdrop-filter: blur(12px);
       font: inherit;
       text-align: left;
@@ -1382,24 +1391,24 @@
       left: 12px;
       z-index: 1100;
       display: grid;
-      gap: 8px;
-      padding: 14px;
-      border: 1px solid rgba(90, 212, 255, 0.28);
-      border-radius: 9px;
-      background: rgba(3, 8, 16, 0.9);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      gap: var(--space-2);
+      padding: var(--space-3);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-panel);
+      background: var(--panel-bg-strong);
+      box-shadow: var(--shadow-card);
       backdrop-filter: blur(12px);
     }
 
   .mobile-map-empty-card strong {
-      color: #f4fdff;
-      font-size: 15px;
+      color: var(--text-primary);
+      font-size: var(--font-size-body);
     }
 
   .mobile-map-empty-card p {
       margin: 0;
-      color: #b8dbe7;
-      font-size: 13px;
+      color: var(--text-muted);
+      font-size: var(--font-size-control);
       line-height: 1.45;
     }
 
@@ -1962,4 +1971,27 @@
 
 .tenvi-dashboard.theme-dark .map-filter-result-count {
   color: #94a3b8;
+}
+
+/* Map 전용 빈 상태와 키보드 포커스 */
+.map-module .empty-state {
+  border-color: var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-base);
+  box-shadow: none;
+}
+
+.map-module .empty-state span,
+.map-module .empty-state p {
+  color: var(--text-muted);
+}
+
+.map-module .map-mode-tab:focus-visible,
+.map-module .map-filter-button:focus-visible,
+.map-module .map-record-button:focus-visible,
+.map-module .map-search-results button:focus-visible,
+.map-module .map-primary-button:focus-visible,
+.map-module .map-secondary-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }

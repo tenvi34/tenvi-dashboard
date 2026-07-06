@@ -1,26 +1,39 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useRef } from 'react'
 
-// IndexedDB Blob ????
+// IndexedDB Blob을 화면 수명에 맞춰 URL로 변환
 function PhotoPreview({ alt, blob, className }) {
-  const src = useMemo(() => (blob ? URL.createObjectURL(blob) : ''), [blob])
+  const imageRef = useRef(null)
 
   useEffect(() => {
-    if (!src) {
+    if (!blob) {
       return undefined
     }
 
-    // Blob URL ??
-    return () => URL.revokeObjectURL(src)
-  }, [src])
+    // effect 재실행 시 폐기된 URL을 재사용하지 않도록 매번 새로 생성
+    const objectUrl = URL.createObjectURL(blob)
+    const imageElement = imageRef.current
 
-  if (!src) {
+    if (imageElement) {
+      imageElement.src = objectUrl
+    }
+
+    return () => {
+      if (imageElement?.src === objectUrl) {
+        imageElement.removeAttribute('src')
+      }
+
+      URL.revokeObjectURL(objectUrl)
+    }
+  }, [blob])
+
+  if (!blob) {
     return null
   }
 
-  return <img alt={alt} className={className} src={src} />
+  return <img ref={imageRef} alt={alt} className={className} />
 }
 
-// ?? ?? ?? ??
+// 클릭 가능한 사진 미리보기
 function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
   if (!blob) {
     return <PhotoPreview alt={alt} blob={blob} className={className} />
@@ -38,7 +51,7 @@ function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
   )
 }
 
-// ?? ?? ?? ?? ??
+// 원본 비율 사진 라이트박스
 function PhotoLightbox({ photo, onClose, t }) {
   if (!photo) {
     return null
