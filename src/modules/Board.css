@@ -1,16 +1,20 @@
 /* Board module styles */
 
 .board-storage-status {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border: 1px solid rgba(90, 210, 255, 0.3);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
   color: var(--text-muted);
-  background: rgba(7, 20, 30, 0.72);
+  background: var(--surface-base);
+  font-size: var(--font-size-label);
+  line-height: 1.5;
 }
 
 .board-storage-status.is-error {
-  border-color: rgba(255, 112, 112, 0.45);
-  color: #ffaaaa;
+  border-color: color-mix(in srgb, var(--color-danger) 38%, transparent);
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--surface-base));
 }
 
 /* Board 모듈 목록 중심 레이아웃 */
@@ -65,8 +69,9 @@
   margin-bottom: var(--space-3);
   padding: var(--space-3);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-control);
+  border-radius: var(--radius-panel);
   background: var(--surface-base);
+  box-shadow: none;
 }
 
 .board-trash-header,
@@ -95,6 +100,7 @@
   border-radius: var(--radius-control);
   padding: var(--space-2) var(--space-3);
   background: var(--surface-raised);
+  box-shadow: none;
 }
 
 .board-trash-item > div:first-child {
@@ -113,6 +119,14 @@
 .board-trash-empty {
   color: var(--text-muted);
   font-size: var(--font-size-label);
+  line-height: 1.5;
+}
+
+.board-trash-empty {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
 }
 
 .board-trash-actions {
@@ -125,7 +139,8 @@
 .board-trash-actions .board-secondary-button,
 .board-trash-actions .board-delete-button {
   min-height: var(--control-height-small);
-  padding-inline: 10px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-control);
   font-size: var(--font-size-caption);
 }
 
@@ -268,6 +283,13 @@
   background: var(--surface-selected);
   font-style: normal;
   font-weight: 800;
+}
+
+.board-draft-empty {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-base);
 }
 
 .board-draft-item .board-delete-button {
@@ -614,14 +636,14 @@
 
 .board-form-message {
   margin: 0;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 102, 134, 0.34);
-  border-radius: 8px;
-  color: #ffd8df;
-  background: rgba(255, 102, 134, 0.08);
-  font-size: 13px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 34%, transparent);
+  border-radius: var(--radius-control);
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--surface-base));
+  font-size: var(--font-size-control);
   font-weight: 800;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .board-primary-button {
@@ -735,6 +757,8 @@
 }
 
 .board-category-chip {
+  color: var(--text-muted);
+  font-weight: 600;
   cursor: pointer;
   transition:
     border-color var(--transition-control),
@@ -745,7 +769,7 @@
 
 .board-category-chip:hover,
 .board-category-chip.is-active {
-  color: var(--text-primary);
+  color: var(--text-secondary);
   border-color: var(--border-active);
   background: var(--surface-selected);
 }
@@ -762,12 +786,13 @@
 
 .board-category-manager {
   display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-  padding: var(--space-2);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-control);
+  border-radius: var(--radius-panel);
   background: var(--surface-base);
+  box-shadow: none;
 }
 
 .board-category-form {
@@ -787,11 +812,23 @@
   background: var(--surface-raised);
   font: inherit;
   font-size: var(--font-size-control);
+  transition:
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    background var(--transition-control);
+}
+
+.board-category-form input:focus,
+.board-category-item input:focus {
+  outline: none;
+  border-color: var(--border-active);
+  background: var(--surface-raised);
+  box-shadow: var(--focus-ring);
 }
 
 .board-category-list {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .board-category-item {
@@ -805,6 +842,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-control);
   background: var(--surface-raised);
+  box-shadow: none;
 }
 
 .board-category-item span {
@@ -817,16 +855,46 @@
 
 .board-category-actions {
   display: flex;
-  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 .board-category-actions .board-secondary-button,
 .board-category-actions .board-delete-button,
 .board-category-form .board-secondary-button {
-  min-height: 30px;
+  min-height: var(--control-height-small);
   min-width: 52px;
-  padding-inline: 10px;
-  font-size: 12px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-control);
+  font-size: var(--font-size-label);
+}
+
+.board-category-actions .board-delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  transform: none;
+}
+
+/* Board 전용 빈 상태의 절제된 안내 카드 */
+.board-module .empty-state {
+  padding: var(--space-5);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-base);
+  box-shadow: none;
+}
+
+.board-module .empty-state span {
+  color: var(--text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.board-module .empty-state p {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
 }
 
 .board-search-field,
@@ -1519,7 +1587,7 @@
   }
 
   .board-draft-item .board-delete-button {
-    min-height: 34px;
+    min-height: var(--control-height-small);
     justify-self: flex-start;
   }
 
@@ -1689,7 +1757,7 @@
   }
 
   .board-category-actions {
-    gap: 6px;
+    gap: var(--space-2);
     justify-content: flex-end;
   }
 
@@ -1919,14 +1987,14 @@
 }
 
 .tenvi-dashboard.theme-standard .board-category-chip {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   border-color: var(--border-default);
   background: var(--surface-raised);
 }
 
 .tenvi-dashboard.theme-standard .board-category-chip:hover,
 .tenvi-dashboard.theme-standard .board-category-chip.is-active {
-  color: var(--text-primary);
+  color: var(--text-secondary);
   border-color: var(--border-active);
   background: var(--surface-selected);
 }
