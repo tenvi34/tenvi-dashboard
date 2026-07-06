@@ -19,6 +19,10 @@ function BoardDetail({
   postBlocks,
   t,
 }) {
+  // 생성 시각과 다른 저장 데이터의 수정 시각만 노출
+  const hasUpdatedAt =
+    post?.updatedAt && post.updatedAt !== post.createdAt
+
   return (
     <section className="board-cafe-panel board-screen">
       {post ? (
@@ -54,6 +58,16 @@ function BoardDetail({
                     timeStyle: 'short',
                   })}
                 </time>
+                {hasUpdatedAt ? (
+                  <time dateTime={post.updatedAt}>
+                    {t.board.updatedAt(
+                      formatPostDate(post.updatedAt, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      }),
+                    )}
+                  </time>
+                ) : null}
                 <span>{t.board.views(post.views ?? 0)}</span>
               </div>
             </div>
