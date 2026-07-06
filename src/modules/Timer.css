@@ -1,93 +1,99 @@
 .timer-tabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  padding: 6px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(90, 212, 255, 0.18);
-  border-radius: 10px;
-  background: rgba(2, 9, 18, 0.45);
+  gap: var(--space-1);
+  padding: var(--space-1);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-base);
 }
 
 /* Timer 화면 */
 .timer-tab {
-  min-height: 40px;
+  min-height: var(--control-height-small);
   border: 1px solid transparent;
-  border-radius: 8px;
-  color: #aacbd8;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
   background: transparent;
   font: inherit;
+  font-size: var(--font-size-control);
   cursor: pointer;
   transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease,
-    background 0.18s ease,
-    color 0.18s ease;
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    background var(--transition-control),
+    color var(--transition-control);
 }
 
 .timer-tab:hover {
-  transform: translateY(-1px);
-  border-color: var(--line-strong);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--surface-selected);
 }
 
 .timer-tab.is-active {
-  color: #f4fdff;
-  border-color: var(--line-strong);
-  background: rgba(90, 212, 255, 0.14);
-  box-shadow: inset 0 0 18px rgba(90, 212, 255, 0.1);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+  box-shadow: inset 0 0 0 1px var(--border-active);
+}
+
+.timer-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .timer-duration-settings {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .timer-duration-settings label {
   display: grid;
-  gap: 8px;
-  padding: 14px;
-  border: 1px solid rgba(90, 212, 255, 0.18);
-  border-radius: 8px;
-  background: rgba(5, 16, 31, 0.5);
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
 }
 
 .timer-duration-settings span {
-  color: #a8c7d6;
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: var(--font-size-body);
 }
 
 .timer-duration-settings input {
   width: 100%;
   min-width: 0;
-  color: #f4fdff;
-  background: rgba(2, 9, 18, 0.82);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
+  min-height: var(--control-height-default);
+  color: var(--text-primary);
+  background: var(--surface-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
   font: inherit;
   box-sizing: border-box;
 }
 
 .timer-duration-settings input:focus {
   outline: none;
-  border-color: var(--line-strong);
-  box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
+  border-color: var(--border-active);
+  box-shadow: var(--focus-ring);
 }
 
 .timer-display-panel {
   display: grid;
   place-items: center;
   min-height: 300px;
-  padding: 30px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(90, 212, 255, 0.22);
-  border-radius: 10px;
-  background:
-    radial-gradient(circle at center, rgba(90, 212, 255, 0.12), transparent 58%),
-    rgba(2, 9, 18, 0.46);
+  padding: calc(var(--space-5) + var(--space-3));
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-base);
+  box-shadow: var(--shadow-card);
 }
 
 .timer-mode {
@@ -99,23 +105,24 @@
 }
 
 .timer-time {
-  color: #f4fdff;
+  color: var(--text-primary);
   font-size: clamp(60px, 9vw, 128px);
   font-weight: 700;
   line-height: 1;
-  text-shadow: 0 0 26px rgba(90, 212, 255, 0.32);
+  text-shadow: none;
   word-break: keep-all;
 }
 
 .timer-caption {
-  color: #b8dbe7;
+  color: var(--text-muted);
+  font-size: var(--font-size-body);
 }
 
 .timer-controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .stopwatch-panel {
@@ -123,35 +130,35 @@
 }
 
 .timer-button {
-  min-height: 50px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  min-height: var(--control-height-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
   color: #00131c;
   background: linear-gradient(135deg, var(--neon-strong), var(--blue));
   font: inherit;
+  font-size: var(--font-size-control);
   font-weight: 800;
   cursor: pointer;
   transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease,
-    background 0.18s ease,
-    color 0.18s ease;
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    background var(--transition-control),
+    color var(--transition-control);
 }
 
 .timer-button.secondary {
-  color: #dff8ff;
-  background: rgba(5, 16, 31, 0.5);
+  color: var(--text-secondary);
+  background: var(--surface-raised);
 }
 
 .timer-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 18px rgba(90, 212, 255, 0.18);
+  border-color: var(--border-active);
+  box-shadow: var(--focus-ring);
 }
 
 .timer-button:focus-visible {
-  outline: 2px solid var(--neon);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .timer-button:active {
@@ -161,41 +168,41 @@
 .timer-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .timer-stat {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
   min-height: 92px;
-  padding: 14px;
-  border: 1px solid rgba(90, 212, 255, 0.2);
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(90, 212, 255, 0.09), rgba(5, 16, 31, 0.72));
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
 }
 
 .timer-stat span {
-  color: #a8c7d6;
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: var(--font-size-body);
 }
 
 .timer-stat strong {
   align-self: end;
-  color: var(--neon-strong);
+  color: var(--color-primary);
   font-size: 28px;
   line-height: 1;
 }
 
 .lap-panel {
-  padding: 16px;
-  border: 1px solid rgba(90, 212, 255, 0.18);
-  border-radius: 8px;
-  background: rgba(2, 9, 18, 0.38);
+  padding: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-base);
 }
 
 .lap-panel ol {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 0;
   margin: 0;
   list-style: none;
@@ -205,25 +212,52 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid rgba(90, 212, 255, 0.16);
-  border-left-color: var(--line-strong);
-  border-radius: 8px;
-  background: rgba(5, 16, 31, 0.5);
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-left: 2px solid var(--border-active);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
 }
 
 .lap-panel span {
-  color: #b8dbe7;
+  color: var(--text-muted);
+  font-size: var(--font-size-body);
 }
 
 .lap-panel strong {
-  color: var(--neon-strong);
+  color: var(--color-primary);
+  font-size: var(--font-size-body);
+}
+
+.timer-module .command-history-empty {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  font-size: var(--font-size-body);
 }
 
 /* PC/모바일 분기 */
 @media (max-width: 860px) {
   .timer-time {
-      font-size: clamp(48px, 18vw, 88px);
-    }
+    font-size: clamp(48px, 18vw, 88px);
+  }
+}
+
+@media (max-width: 560px) {
+  .timer-duration-settings,
+  .timer-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .timer-display-panel {
+    min-height: 220px;
+    padding: var(--space-4);
+  }
+
+  .timer-controls {
+    grid-template-columns: 1fr;
+  }
 }
