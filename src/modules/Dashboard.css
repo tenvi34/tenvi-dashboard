@@ -672,3 +672,244 @@
   background: #3b82f6;
   box-shadow: none;
 }
+
+/* Dashboard 현재 탭 화면의 공통 토큰 보정 */
+.dashboard-module .dashboard-tabs {
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  padding: var(--space-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-base);
+}
+
+.dashboard-module .dashboard-tab {
+  min-height: var(--control-height-small);
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: transparent;
+  font-size: var(--font-size-control);
+  font-weight: 700;
+  letter-spacing: 0;
+  transition:
+    color var(--transition-control),
+    border-color var(--transition-control),
+    background var(--transition-control),
+    box-shadow var(--transition-control);
+}
+
+.dashboard-module .dashboard-tab:hover,
+.dashboard-module .dashboard-tab.is-active {
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background: var(--surface-selected);
+}
+
+.dashboard-module .dashboard-tab.is-active {
+  box-shadow: inset 0 0 0 1px var(--border-active);
+}
+
+.dashboard-module .dashboard-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.dashboard-module .dashboard-tab-grid {
+  gap: var(--space-4);
+}
+
+.dashboard-module .summary-panel {
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-base);
+  box-shadow: var(--shadow-card);
+}
+
+.dashboard-module .summary-panel-header {
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.dashboard-module .summary-panel-header h3 {
+  margin: var(--space-1) 0 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-section-title);
+  line-height: 1.3;
+}
+
+.dashboard-module .summary-metrics {
+  gap: var(--space-3);
+}
+
+.dashboard-module .summary-metric {
+  gap: var(--space-2);
+  min-height: 76px;
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  box-shadow: none;
+}
+
+.dashboard-module .summary-metric span {
+  color: var(--text-muted);
+  font-size: var(--font-size-label);
+}
+
+.dashboard-module .summary-metric strong {
+  color: var(--color-primary);
+  font-size: 28px;
+}
+
+.dashboard-module .dashboard-count-chip,
+.dashboard-module .dashboard-system-tag {
+  min-height: var(--control-height-compact);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  background: var(--surface-selected);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.dashboard-module .dashboard-compact-list {
+  gap: var(--space-2);
+}
+
+.dashboard-module .dashboard-compact-list div,
+.dashboard-module .dashboard-system-list div,
+.dashboard-module .map-source-grid div {
+  gap: var(--space-2);
+  min-height: var(--control-height-default);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  box-shadow: none;
+}
+
+.dashboard-module .dashboard-system-list div {
+  border-left: 2px solid var(--border-active);
+}
+
+.dashboard-module .dashboard-compact-list dt,
+.dashboard-module .map-source-grid span {
+  color: var(--text-muted);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+}
+
+.dashboard-module .dashboard-compact-list dd {
+  color: var(--color-primary);
+  font-size: var(--font-size-body);
+  font-weight: 800;
+}
+
+.dashboard-module .map-source-grid {
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.dashboard-module .map-source-grid strong {
+  color: var(--color-primary);
+  font-size: var(--font-size-section-title);
+}
+
+.dashboard-module .recent-notes {
+  gap: var(--space-2);
+}
+
+.dashboard-module .recent-notes-title {
+  color: var(--text-muted);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-module .recent-notes ul {
+  gap: var(--space-2);
+}
+
+.dashboard-module .recent-note {
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-left: 2px solid var(--border-active);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+}
+
+.dashboard-module .recent-note strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+}
+
+.dashboard-module .recent-note span {
+  color: var(--text-muted);
+  font-size: var(--font-size-label);
+}
+
+.dashboard-module .compact-empty {
+  padding: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  box-shadow: none;
+}
+
+.dashboard-module .compact-empty span {
+  color: var(--text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.dashboard-module .compact-empty p {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+
+.dashboard-module .dashboard-system-panel {
+  border-color: var(--border-default);
+  background: var(--surface-base);
+  box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 760px) {
+  .dashboard-module .dashboard-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-module .dashboard-tab {
+    width: 100%;
+    padding-inline: var(--space-2);
+  }
+
+  .dashboard-module .dashboard-archive-grid,
+  .dashboard-module .dashboard-work-grid,
+  .dashboard-module .dashboard-system-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-module .dashboard-overview-panel,
+  .dashboard-module .dashboard-overview-list,
+  .dashboard-module .dashboard-work-list {
+    width: 100%;
+  }
+
+  .dashboard-module .summary-panel {
+    padding: var(--space-3);
+  }
+
+  .dashboard-module .map-source-grid {
+    grid-template-columns: 1fr;
+  }
+}
