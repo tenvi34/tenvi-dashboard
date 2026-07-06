@@ -69,12 +69,22 @@ public class BoardController : ControllerBase
         }
 
         var now = DateTimeOffset.UtcNow;
+        var requestedId = request.Id?.Trim();
+
+        lock (PostsLock)
+        {
+            // 병렬 요청에서도 같은 LOCAL id가 중복 생성되지 않도록 서버에서도 방어
+            if (!string.IsNullOrWhiteSpace(requestedId) && FindPost(requestedId) is not null)
+            {
+                return Conflict(new { message = "A board post with the same id already exists." });
+            }
+        }
 
         // 블록 기반 본문과 이전 단일 본문 입력을 함께 수용
         var blocks = NormalizeBlocks(request.Blocks, request.Content);
         var post = new BoardPost
         {
-            Id = Guid.NewGuid().ToString("N"),
+            Id = string.IsNullOrWhiteSpace(requestedId) ? Guid.NewGuid().ToString("N") : requestedId,
             Title = request.Title.Trim(),
             Content = NormalizeContent(request.Content, blocks),
             Blocks = blocks,
@@ -84,12 +94,19 @@ public class BoardController : ControllerBase
             // 이전 필드명과 현재 필드명을 모두 허용하는 호환 처리
             IsPinned = request.Pinned ?? request.IsPinned,
             ViewCount = Math.Max(0, request.Views ?? request.ViewCount ?? 0),
-            CreatedAt = now,
-            UpdatedAt = now
+            CreatedAt = request.CreatedAt ?? now,
+            UpdatedAt = request.UpdatedAt ?? request.CreatedAt ?? now,
+            DeletedAt = request.DeletedAt
         };
 
         lock (PostsLock)
         {
+            // 사전 검사 뒤 들어온 동일 id 요청과의 경쟁 조건 방지
+            if (FindPost(post.Id) is not null)
+            {
+                return Conflict(new { message = "A board post with the same id already exists." });
+            }
+
             // DB 연결 전까지 프로세스 메모리에만 보관
             Posts.Add(post);
         }

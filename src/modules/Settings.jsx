@@ -9,6 +9,7 @@ import {
   readBoardStorageMode,
   saveBoardStorageMode,
 } from './board/boardStorageMode.js'
+import { copyLocalBoardPostsToRemote } from './board/boardRemoteCopy.js'
 import './Settings.css'
 import {
   getPhotoRecordCount,
@@ -124,6 +125,8 @@ function Settings({
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
   const [boardBackupStatus, setBoardBackupStatus] = useState(null)
+  const [boardRemoteCopyStatus, setBoardRemoteCopyStatus] = useState(null)
+  const [isBoardRemoteCopying, setIsBoardRemoteCopying] = useState(false)
   const [boardImageCount, setBoardImageCount] = useState(0)
   const [mapPhotoCount, setMapPhotoCount] = useState(0)
   const [profileStatus, setProfileStatus] = useState(null)
@@ -171,6 +174,37 @@ function Settings({
       isMounted = false
     }
   }, [dataVersion])
+
+  // LOCAL 원본은 유지하고 REMOTE 게시글만 추가
+  const handleCopyBoardPostsToRemote = async () => {
+    setIsBoardRemoteCopying(true)
+    setBoardRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalBoardPostsToRemote()
+
+      if (result.total === 0) {
+        setBoardRemoteCopyStatus({ type: 'info', message: t.settings.boardRemoteCopyEmpty })
+        return
+      }
+
+      setBoardRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: t.settings.boardRemoteCopyResult(
+          result.copied,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setBoardRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.boardRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsBoardRemoteCopying(false)
+    }
+  }
 
   // Tasks/Notes 초기화
   const handleConfirmReset = () => {
@@ -887,7 +921,22 @@ function Settings({
                 ? '기본값 · Local'
                 : '선택 중 · Remote'}
             </span>
+            <button
+              className="settings-option settings-board-copy-button"
+              type="button"
+              disabled={isBoardRemoteCopying}
+              onClick={handleCopyBoardPostsToRemote}
+            >
+              {isBoardRemoteCopying
+                ? t.settings.boardRemoteCopying
+                : t.settings.boardRemoteCopy}
+            </button>
           </div>
+          {boardRemoteCopyStatus ? (
+            <p className={`backup-status settings-board-copy-status is-${boardRemoteCopyStatus.type}`}>
+              {boardRemoteCopyStatus.message}
+            </p>
+          ) : null}
         </section>
         <BoardApiTest />
 

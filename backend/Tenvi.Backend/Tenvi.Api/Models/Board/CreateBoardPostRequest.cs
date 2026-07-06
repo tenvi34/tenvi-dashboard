@@ -3,6 +3,9 @@ namespace Tenvi.Api.Models.Board;
 // 게시글 생성 요청 본문 계약
 public class CreateBoardPostRequest
 {
+    // LOCAL -> REMOTE 복사 시 기존 식별자와 작성 시각 보존
+    public string? Id { get; set; }
+
     // 서버에서 필수값으로 검증하는 제목
     public string Title { get; set; } = string.Empty;
 
@@ -24,4 +27,10 @@ public class CreateBoardPostRequest
     public int? Views { get; set; }
 
     public int? ViewCount { get; set; }
+
+    public DateTimeOffset? CreatedAt { get; set; }
+
+    public DateTimeOffset? UpdatedAt { get; set; }
+
+    public DateTimeOffset? DeletedAt { get; set; }
 }

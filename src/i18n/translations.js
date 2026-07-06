@@ -665,6 +665,12 @@ export const translations = {
       exportBackup: '전체 백업 내보내기',
       importBackup: '전체 백업 복원',
       boardBackupTitle: 'Board 전용 백업',
+      boardRemoteCopy: 'LOCAL 데이터를 REMOTE로 복사',
+      boardRemoteCopying: 'REMOTE로 복사 중...',
+      boardRemoteCopyEmpty: '복사할 LOCAL 데이터가 없습니다.',
+      boardRemoteCopyConnectionError: 'REMOTE API에 연결하지 못해 복사에 실패했습니다.',
+      boardRemoteCopyResult: (copied, skipped, failed) =>
+        `복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
       exportBoardBackup: 'Board 전용 백업 내보내기',
       importBoardBackup: 'Board 전용 백업 복원',
       boardBackupNote:
@@ -1380,6 +1386,12 @@ export const translations = {
       exportBackup: 'Export Full Backup',
       importBackup: 'Restore Full Backup',
       boardBackupTitle: 'Board Dedicated Backup',
+      boardRemoteCopy: 'Copy LOCAL data to REMOTE',
+      boardRemoteCopying: 'Copying to REMOTE...',
+      boardRemoteCopyEmpty: 'There is no LOCAL data to copy.',
+      boardRemoteCopyConnectionError: 'Copy failed because the REMOTE API is unavailable.',
+      boardRemoteCopyResult: (copied, skipped, failed) =>
+        `Copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
       exportBoardBackup: 'Export Board Dedicated Backup',
       importBoardBackup: 'Restore Board Dedicated Backup',
       boardBackupNote:

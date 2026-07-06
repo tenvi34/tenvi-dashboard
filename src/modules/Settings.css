@@ -1353,12 +1353,21 @@
 .settings-board-storage-panel {
   grid-area: board-storage;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-2) var(--space-3);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  padding: var(--space-3);
   border-color: var(--border-default);
   box-shadow: var(--shadow-card);
+}
+
+.settings-board-copy-button {
+  white-space: nowrap;
+}
+
+.settings-board-copy-status {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .settings-board-storage-panel .settings-panel-header {
@@ -1396,7 +1405,8 @@
 .settings-board-storage-control {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
@@ -1451,12 +1461,7 @@
 
 @media (max-width: 720px) {
   .settings-board-storage-panel {
-    grid-template-columns: 1fr;
     gap: 9px;
-  }
-
-  .settings-board-storage-control {
-    justify-content: flex-start;
   }
 }
 
