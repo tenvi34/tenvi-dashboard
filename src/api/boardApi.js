@@ -1,6 +1,8 @@
 import { API_BASE_URL, joinApiPath } from './client.js'
 
 export const BOARD_POSTS_API_PATH = '/api/board/posts'
+export const BOARD_CATEGORIES_API_PATH = '/api/board/categories'
+export const BOARD_IMAGES_API_PATH = '/api/board/images'
 
 // Board API URL 결합
 export const getBoardPostsUrl = (baseUrl = API_BASE_URL) =>
@@ -29,6 +31,18 @@ export const getBoardPostPermanentUrl = (id, baseUrl = API_BASE_URL) =>
     baseUrl,
     `${BOARD_POSTS_API_PATH}/${encodeURIComponent(id)}/permanent`,
   )
+
+export const getBoardCategoriesUrl = (baseUrl = API_BASE_URL) =>
+  joinApiPath(baseUrl, BOARD_CATEGORIES_API_PATH)
+
+export const getBoardCategoryUrl = (id, baseUrl = API_BASE_URL) =>
+  joinApiPath(baseUrl, `${BOARD_CATEGORIES_API_PATH}/${encodeURIComponent(id)}`)
+
+export const getBoardImagesUrl = (baseUrl = API_BASE_URL) =>
+  joinApiPath(baseUrl, BOARD_IMAGES_API_PATH)
+
+export const getBoardImageUrl = (id, baseUrl = API_BASE_URL) =>
+  joinApiPath(baseUrl, `${BOARD_IMAGES_API_PATH}/${encodeURIComponent(id)}`)
 
 const readJsonResponse = async (response) => {
   if (response.status === 204) {
@@ -159,3 +173,76 @@ export const permanentlyDeleteBoardPost = (
     },
     fetcher,
   )
+
+export const fetchBoardCategories = ({
+  baseUrl = API_BASE_URL,
+  fetcher = fetch,
+} = {}) => requestBoardApi(getBoardCategoriesUrl(baseUrl), {}, fetcher)
+
+export const fetchBoardCategory = (
+  id,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) => requestBoardApi(getBoardCategoryUrl(id, baseUrl), {}, fetcher)
+
+export const createBoardCategory = (
+  payload,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) =>
+  requestBoardApi(
+    getBoardCategoriesUrl(baseUrl),
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+    fetcher,
+  )
+
+export const updateBoardCategory = (
+  id,
+  payload,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) =>
+  requestBoardApi(
+    getBoardCategoryUrl(id, baseUrl),
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+    fetcher,
+  )
+
+export const deleteBoardCategory = (
+  id,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) => requestBoardApi(getBoardCategoryUrl(id, baseUrl), { method: 'DELETE' }, fetcher)
+
+export const fetchBoardImages = ({
+  baseUrl = API_BASE_URL,
+  fetcher = fetch,
+} = {}) => requestBoardApi(getBoardImagesUrl(baseUrl), {}, fetcher)
+
+export const fetchBoardImage = (
+  id,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) => requestBoardApi(getBoardImageUrl(id, baseUrl), {}, fetcher)
+
+export const createBoardImage = (
+  payload,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) =>
+  requestBoardApi(
+    getBoardImagesUrl(baseUrl),
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+    fetcher,
+  )
+
+export const deleteBoardImage = (
+  id,
+  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
+) => requestBoardApi(getBoardImageUrl(id, baseUrl), { method: 'DELETE' }, fetcher)

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { getBoardImages, saveBoardImage } from '../boardImageStore.js'
+import { getBoardImages, saveBoardImage } from './boardImageRepository.js'
 
 // 에디터 블록 고유 ID 생성
 const createEditorBlockId = () => {

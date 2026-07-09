@@ -686,6 +686,20 @@ export const translations = {
       boardRemoteCopyConnectionError: 'REMOTE API에 연결하지 못해 복사에 실패했습니다.',
       boardRemoteCopyResult: (copied, skipped, failed) =>
         `복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
+      boardCategoriesRemoteCopy: 'LOCAL Board 카테고리를 REMOTE로 복사',
+      boardCategoriesRemoteCopying: 'Board 카테고리를 REMOTE로 복사 중...',
+      boardCategoriesRemoteCopyEmpty: '복사할 LOCAL Board 카테고리가 없습니다.',
+      boardCategoriesRemoteCopyConnectionError:
+        'REMOTE API에 연결하지 못해 Board 카테고리 복사에 실패했습니다.',
+      boardCategoriesRemoteCopyResult: (copied, skipped, failed) =>
+        `Board 카테고리 복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
+      boardImagesRemoteCopy: 'LOCAL Board 이미지를 REMOTE로 복사',
+      boardImagesRemoteCopying: 'Board 이미지를 REMOTE로 복사 중...',
+      boardImagesRemoteCopyEmpty: '복사할 LOCAL Board 이미지가 없습니다.',
+      boardImagesRemoteCopyConnectionError:
+        'REMOTE API에 연결하지 못해 Board 이미지 복사에 실패했습니다.',
+      boardImagesRemoteCopyResult: (copied, skipped, failed) =>
+        `Board 이미지 복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
       tasksRemoteCopy: 'LOCAL Tasks를 REMOTE로 복사',
       tasksRemoteCopying: 'Tasks를 REMOTE로 복사 중...',
       tasksRemoteCopyEmpty: '복사할 LOCAL Tasks 데이터가 없습니다.',
@@ -1444,6 +1458,21 @@ export const translations = {
       boardRemoteCopyConnectionError: 'Copy failed because the REMOTE API is unavailable.',
       boardRemoteCopyResult: (copied, skipped, failed) =>
         `Copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
+      boardCategoriesRemoteCopy: 'Copy LOCAL Board categories to REMOTE',
+      boardCategoriesRemoteCopying: 'Copying Board categories to REMOTE...',
+      boardCategoriesRemoteCopyEmpty:
+        'There are no LOCAL Board categories to copy.',
+      boardCategoriesRemoteCopyConnectionError:
+        'Board category copy failed because the REMOTE API is unavailable.',
+      boardCategoriesRemoteCopyResult: (copied, skipped, failed) =>
+        `Board category copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
+      boardImagesRemoteCopy: 'Copy LOCAL Board images to REMOTE',
+      boardImagesRemoteCopying: 'Copying Board images to REMOTE...',
+      boardImagesRemoteCopyEmpty: 'There are no LOCAL Board images to copy.',
+      boardImagesRemoteCopyConnectionError:
+        'Board image copy failed because the REMOTE API is unavailable.',
+      boardImagesRemoteCopyResult: (copied, skipped, failed) =>
+        `Board image copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
       tasksRemoteCopy: 'Copy LOCAL Tasks to REMOTE',
       tasksRemoteCopying: 'Copying Tasks to REMOTE...',
       tasksRemoteCopyEmpty: 'There is no LOCAL Tasks data to copy.',

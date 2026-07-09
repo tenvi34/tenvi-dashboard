@@ -57,6 +57,25 @@ public class BoardSqliteStore
                     updatedAt TEXT NOT NULL,
                     deletedAt TEXT NULL
                 );
+
+                CREATE TABLE IF NOT EXISTS board_categories (
+                    id TEXT PRIMARY KEY COLLATE NOCASE,
+                    name TEXT NOT NULL,
+                    isDefault INTEGER NOT NULL,
+                    createdAt TEXT NOT NULL,
+                    updatedAt TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS board_images (
+                    id TEXT PRIMARY KEY COLLATE NOCASE,
+                    dataUrl TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    size INTEGER NOT NULL,
+                    width INTEGER NOT NULL,
+                    height INTEGER NOT NULL,
+                    createdAt TEXT NOT NULL
+                );
                 """;
 
             command.ExecuteNonQuery();
@@ -227,6 +246,184 @@ public class BoardSqliteStore
         }
     }
 
+    public List<BoardCategory> GetCategories()
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT * FROM board_categories ORDER BY isDefault DESC, createdAt ASC;";
+
+        using var reader = command.ExecuteReader();
+        var categories = new List<BoardCategory>();
+
+        while (reader.Read())
+        {
+            categories.Add(ReadCategory(reader));
+        }
+
+        return categories;
+    }
+
+    public BoardCategory? GetCategory(string id)
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT * FROM board_categories WHERE id = $id LIMIT 1;";
+        command.Parameters.AddWithValue("$id", id);
+
+        using var reader = command.ExecuteReader();
+
+        return reader.Read() ? ReadCategory(reader) : null;
+    }
+
+    public bool CreateCategory(BoardCategory category)
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        command.CommandText = """
+            INSERT OR IGNORE INTO board_categories (
+                id,
+                name,
+                isDefault,
+                createdAt,
+                updatedAt
+            )
+            VALUES (
+                $id,
+                $name,
+                $isDefault,
+                $createdAt,
+                $updatedAt
+            );
+            """;
+        AddCategoryParameters(command, category);
+
+        return command.ExecuteNonQuery() > 0;
+    }
+
+    public bool UpdateCategory(BoardCategory category)
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        command.CommandText = """
+            UPDATE board_categories
+            SET name = $name,
+                isDefault = $isDefault,
+                createdAt = $createdAt,
+                updatedAt = $updatedAt
+            WHERE id = $id;
+            """;
+        AddCategoryParameters(command, category);
+
+        return command.ExecuteNonQuery() > 0;
+    }
+
+    public bool DeleteCategory(string id)
+    {
+        using var connection = OpenConnection();
+        using var transaction = connection.BeginTransaction();
+
+        using var updatePostsCommand = connection.CreateCommand();
+        updatePostsCommand.Transaction = transaction;
+        updatePostsCommand.CommandText = """
+            UPDATE BoardPosts
+            SET categoryId = 'general',
+                updatedAt = $updatedAt
+            WHERE categoryId = $id;
+            """;
+        updatePostsCommand.Parameters.AddWithValue("$id", id);
+        updatePostsCommand.Parameters.AddWithValue("$updatedAt", FormatDateTime(DateTimeOffset.UtcNow));
+        updatePostsCommand.ExecuteNonQuery();
+
+        using var deleteCommand = connection.CreateCommand();
+        deleteCommand.Transaction = transaction;
+        deleteCommand.CommandText = "DELETE FROM board_categories WHERE id = $id;";
+        deleteCommand.Parameters.AddWithValue("$id", id);
+        var deletedCount = deleteCommand.ExecuteNonQuery();
+
+        transaction.Commit();
+
+        return deletedCount > 0;
+    }
+
+    public List<BoardImage> GetImages()
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT * FROM board_images ORDER BY createdAt DESC;";
+
+        using var reader = command.ExecuteReader();
+        var images = new List<BoardImage>();
+
+        while (reader.Read())
+        {
+            images.Add(ReadImage(reader));
+        }
+
+        return images;
+    }
+
+    public BoardImage? GetImage(string id)
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT * FROM board_images WHERE id = $id LIMIT 1;";
+        command.Parameters.AddWithValue("$id", id);
+
+        using var reader = command.ExecuteReader();
+
+        return reader.Read() ? ReadImage(reader) : null;
+    }
+
+    public bool CreateImage(BoardImage image)
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        // TODO: 이미지가 커지면 SQLite TEXT 대신 파일/오브젝트 저장소 분리 검토
+        command.CommandText = """
+            INSERT OR IGNORE INTO board_images (
+                id,
+                dataUrl,
+                name,
+                type,
+                size,
+                width,
+                height,
+                createdAt
+            )
+            VALUES (
+                $id,
+                $dataUrl,
+                $name,
+                $type,
+                $size,
+                $width,
+                $height,
+                $createdAt
+            );
+            """;
+        AddImageParameters(command, image);
+
+        return command.ExecuteNonQuery() > 0;
+    }
+
+    public bool DeleteImage(string id)
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+
+        command.CommandText = "DELETE FROM board_images WHERE id = $id;";
+        command.Parameters.AddWithValue("$id", id);
+
+        return command.ExecuteNonQuery() > 0;
+    }
+
     private SqliteConnection OpenConnection()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -251,6 +448,27 @@ public class BoardSqliteStore
         command.Parameters.AddWithValue("$deletedAt", post.DeletedAt.HasValue ? FormatDateTime(post.DeletedAt.Value) : DBNull.Value);
     }
 
+    private static void AddCategoryParameters(SqliteCommand command, BoardCategory category)
+    {
+        command.Parameters.AddWithValue("$id", category.Id);
+        command.Parameters.AddWithValue("$name", category.Name);
+        command.Parameters.AddWithValue("$isDefault", category.IsDefault ? 1 : 0);
+        command.Parameters.AddWithValue("$createdAt", FormatDateTime(category.CreatedAt));
+        command.Parameters.AddWithValue("$updatedAt", FormatDateTime(category.UpdatedAt));
+    }
+
+    private static void AddImageParameters(SqliteCommand command, BoardImage image)
+    {
+        command.Parameters.AddWithValue("$id", image.Id);
+        command.Parameters.AddWithValue("$dataUrl", image.DataUrl);
+        command.Parameters.AddWithValue("$name", image.Name);
+        command.Parameters.AddWithValue("$type", image.Type);
+        command.Parameters.AddWithValue("$size", image.Size);
+        command.Parameters.AddWithValue("$width", image.Width);
+        command.Parameters.AddWithValue("$height", image.Height);
+        command.Parameters.AddWithValue("$createdAt", FormatDateTime(image.CreatedAt));
+    }
+
     private static BoardPost ReadPost(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -264,6 +482,27 @@ public class BoardSqliteStore
         CreatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("createdAt"))),
         UpdatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("updatedAt"))),
         DeletedAt = ReadNullableDateTime(reader, "deletedAt")
+    };
+
+    private static BoardCategory ReadCategory(SqliteDataReader reader) => new()
+    {
+        Id = reader.GetString(reader.GetOrdinal("id")),
+        Name = reader.GetString(reader.GetOrdinal("name")),
+        IsDefault = reader.GetInt32(reader.GetOrdinal("isDefault")) == 1,
+        CreatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("createdAt"))),
+        UpdatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("updatedAt")))
+    };
+
+    private static BoardImage ReadImage(SqliteDataReader reader) => new()
+    {
+        Id = reader.GetString(reader.GetOrdinal("id")),
+        DataUrl = reader.GetString(reader.GetOrdinal("dataUrl")),
+        Name = reader.GetString(reader.GetOrdinal("name")),
+        Type = reader.GetString(reader.GetOrdinal("type")),
+        Size = reader.GetInt64(reader.GetOrdinal("size")),
+        Width = reader.GetInt32(reader.GetOrdinal("width")),
+        Height = reader.GetInt32(reader.GetOrdinal("height")),
+        CreatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("createdAt")))
     };
 
     private static List<BoardBlock> ReadBlocks(string blocksJson)

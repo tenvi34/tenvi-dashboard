@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getBoardImages } from '../boardImageStore.js'
+import { getBoardImages } from './boardImageRepository.js'
 import { getBoardImageIds } from '../boardLogic.js'
 
 function useBoardDetailImages(selectedPost) {

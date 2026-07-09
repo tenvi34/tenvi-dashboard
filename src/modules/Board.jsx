@@ -22,7 +22,7 @@ import {
   sortBoardPosts,
   updateBoardCategory,
 } from './boardLogic.js'
-import { deleteBoardImages } from './boardImageStore.js'
+import { deleteBoardImages } from './board/boardImageRepository.js'
 import { parseUserProfile } from './userProfileLogic.js'
 
 const CATEGORY_FILTER_ALL = 'all'

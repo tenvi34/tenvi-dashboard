@@ -9,7 +9,11 @@ import {
   readBoardStorageMode,
   saveBoardStorageMode,
 } from './board/boardStorageMode.js'
-import { copyLocalBoardPostsToRemote } from './board/boardRemoteCopy.js'
+import {
+  copyLocalBoardCategoriesToRemote,
+  copyLocalBoardImagesToRemote,
+  copyLocalBoardPostsToRemote,
+} from './board/boardRemoteCopy.js'
 import {
   MAP_STORAGE_MODES,
   readMapStorageMode,
@@ -150,10 +154,18 @@ function Settings({
   const [backupStatus, setBackupStatus] = useState(null)
   const [boardBackupStatus, setBoardBackupStatus] = useState(null)
   const [boardRemoteCopyStatus, setBoardRemoteCopyStatus] = useState(null)
+  const [boardCategoriesRemoteCopyStatus, setBoardCategoriesRemoteCopyStatus] =
+    useState(null)
+  const [boardImagesRemoteCopyStatus, setBoardImagesRemoteCopyStatus] =
+    useState(null)
   const [tasksRemoteCopyStatus, setTasksRemoteCopyStatus] = useState(null)
   const [notesRemoteCopyStatus, setNotesRemoteCopyStatus] = useState(null)
   const [mapRemoteCopyStatus, setMapRemoteCopyStatus] = useState(null)
   const [isBoardRemoteCopying, setIsBoardRemoteCopying] = useState(false)
+  const [isBoardCategoriesRemoteCopying, setIsBoardCategoriesRemoteCopying] =
+    useState(false)
+  const [isBoardImagesRemoteCopying, setIsBoardImagesRemoteCopying] =
+    useState(false)
   const [isTasksRemoteCopying, setIsTasksRemoteCopying] = useState(false)
   const [isNotesRemoteCopying, setIsNotesRemoteCopying] = useState(false)
   const [isMapRemoteCopying, setIsMapRemoteCopying] = useState(false)
@@ -231,6 +243,72 @@ function Settings({
       })
     } finally {
       setIsBoardRemoteCopying(false)
+    }
+  }
+
+  const handleCopyBoardCategoriesToRemote = async () => {
+    setIsBoardCategoriesRemoteCopying(true)
+    setBoardCategoriesRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalBoardCategoriesToRemote()
+
+      if (result.total === 0) {
+        setBoardCategoriesRemoteCopyStatus({
+          type: 'info',
+          message: t.settings.boardCategoriesRemoteCopyEmpty,
+        })
+        return
+      }
+
+      setBoardCategoriesRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: t.settings.boardCategoriesRemoteCopyResult(
+          result.copied,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setBoardCategoriesRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.boardCategoriesRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsBoardCategoriesRemoteCopying(false)
+    }
+  }
+
+  const handleCopyBoardImagesToRemote = async () => {
+    setIsBoardImagesRemoteCopying(true)
+    setBoardImagesRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalBoardImagesToRemote()
+
+      if (result.total === 0) {
+        setBoardImagesRemoteCopyStatus({
+          type: 'info',
+          message: t.settings.boardImagesRemoteCopyEmpty,
+        })
+        return
+      }
+
+      setBoardImagesRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: t.settings.boardImagesRemoteCopyResult(
+          result.copied,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setBoardImagesRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.boardImagesRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsBoardImagesRemoteCopying(false)
     }
   }
 
@@ -1048,10 +1126,40 @@ function Settings({
                     ? t.settings.boardRemoteCopying
                     : t.settings.boardRemoteCopy}
                 </button>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isBoardCategoriesRemoteCopying}
+                  onClick={handleCopyBoardCategoriesToRemote}
+                >
+                  {isBoardCategoriesRemoteCopying
+                    ? t.settings.boardCategoriesRemoteCopying
+                    : t.settings.boardCategoriesRemoteCopy}
+                </button>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isBoardImagesRemoteCopying}
+                  onClick={handleCopyBoardImagesToRemote}
+                >
+                  {isBoardImagesRemoteCopying
+                    ? t.settings.boardImagesRemoteCopying
+                    : t.settings.boardImagesRemoteCopy}
+                </button>
               </div>
               {boardRemoteCopyStatus ? (
                 <p className={`backup-status settings-board-copy-status is-${boardRemoteCopyStatus.type}`}>
                   {boardRemoteCopyStatus.message}
+                </p>
+              ) : null}
+              {boardCategoriesRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${boardCategoriesRemoteCopyStatus.type}`}>
+                  {boardCategoriesRemoteCopyStatus.message}
+                </p>
+              ) : null}
+              {boardImagesRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${boardImagesRemoteCopyStatus.type}`}>
+                  {boardImagesRemoteCopyStatus.message}
                 </p>
               ) : null}
             </div>
