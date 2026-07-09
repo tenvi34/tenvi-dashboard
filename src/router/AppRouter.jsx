@@ -12,7 +12,6 @@ import NotesView from '../views/NotesView.jsx'
 import SettingsView from '../views/SettingsView.jsx'
 import StorageSettingsView from '../views/StorageSettingsView.jsx'
 import TasksView from '../views/TasksView.jsx'
-import TimerView from '../views/TimerView.jsx'
 import { getModulePath } from './routes.js'
 
 function AppRouter({ appContext }) {
@@ -32,7 +31,6 @@ function AppRouter({ appContext }) {
         <Route path="/board/posts/:postId/edit" element={<BoardEditView />} />
         <Route path="/calendar" element={<CalendarView />} />
         <Route path="/map" element={<MapView />} />
-        <Route path="/timer" element={<TimerView />} />
         <Route path="/settings" element={<SettingsView />} />
         <Route path="/settings/storage" element={<StorageSettingsView />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

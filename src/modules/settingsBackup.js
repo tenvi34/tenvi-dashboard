@@ -42,7 +42,6 @@ export const validateBackupPayload = (backupPayload) => {
     startModule,
     tasks,
     theme = 'dark',
-    timerCompletedSessions,
   } = backupPayload.data
   const hasMapPhotoRecords = Object.prototype.hasOwnProperty.call(
     backupPayload.data,
@@ -64,7 +63,6 @@ export const validateBackupPayload = (backupPayload) => {
     backupPayload.data,
     'userProfile',
   )
-  const normalizedTimerSessions = Number.parseInt(timerCompletedSessions, 10)
 
   // hudEffect: 구 백업 호환을 위해 존재하면 검증, 없으면 허용
   const isHudEffectValid = hudEffect === undefined || HUD_EFFECTS.includes(hudEffect)
@@ -74,8 +72,6 @@ export const validateBackupPayload = (backupPayload) => {
   if (
     !Array.isArray(tasks) ||
     !Array.isArray(notes) ||
-    Number.isNaN(normalizedTimerSessions) ||
-    normalizedTimerSessions < 0 ||
     !LANGUAGES.includes(language) ||
     !START_MODULES.includes(startModule) ||
     !isHudEffectValid ||
@@ -126,7 +122,6 @@ export const validateBackupPayload = (backupPayload) => {
     startModule,
     tasks,
     theme: normalizedTheme,
-    timerCompletedSessions: normalizedTimerSessions,
     userProfile: hasUserProfile ? backupPayload.data.userProfile : undefined,
   }
 }

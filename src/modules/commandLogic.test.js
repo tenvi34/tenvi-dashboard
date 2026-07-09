@@ -97,17 +97,9 @@ describe('commandLogic parseCommand', () => {
   })
 
   it('returns navigation intents for module commands', () => {
-    expect(parseCommand('open timer')).toEqual({
-      targetModule: 'timer',
-      type: 'openModule',
-    })
     expect(parseCommand('설정 열기')).toEqual({
       targetModule: 'settings',
       type: 'openModule',
-    })
-    expect(parseCommand('focus mode')).toEqual({
-      targetModule: 'timer',
-      type: 'focusMode',
     })
     expect(parseCommand('open board')).toEqual({
       targetModule: 'board',
@@ -183,7 +175,7 @@ describe('commandLogic createResult', () => {
     })
 
     expect(result.title).toBe(t.command.dataStatusResult)
-    expect(result.metrics.map((metric) => metric.value)).toEqual([4, 1, 1, 3, 7])
+    expect(result.metrics.map((metric) => metric.value)).toEqual([4, 1, 1, 3])
   })
 
   it('lists recent active board posts', () => {
@@ -216,20 +208,6 @@ describe('commandLogic createResult', () => {
     expect(result.title).toBe(t.command.searchBoardPostsResult)
     expect(result.items[0].values).toEqual(['TENVI board roadmap'])
     expect(result.metrics[0].value).toBe(1)
-  })
-
-  it('returns navigation target for open timer', () => {
-    const result = createResult({
-      command: 'open timer',
-      dataStatus: { language: 'en', startModule: 'tasks', timerSessions: 0 },
-      notes,
-      parsedCommand: parseCommand('open timer'),
-      tasks,
-      t,
-    })
-
-    expect(result.navigateTo).toBe('timer')
-    expect(result.type).toBe('action')
   })
 
   it('lists today schedules', () => {

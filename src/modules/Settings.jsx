@@ -140,13 +140,6 @@ const readStoredList = (storageKey) => {
   }
 }
 
-const readStoredCompletedSessions = () => {
-  const savedValue = localStorage.getItem(STORAGE_KEYS.timerCompletedSessions)
-  const parsedValue = Number.parseInt(savedValue, 10)
-
-  return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
-}
-
 const readFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -820,7 +813,6 @@ function Settings({
           notes: readStoredList(STORAGE_KEYS.notes),
           boardPosts: readStoredList(STORAGE_KEYS.boardPosts),
           calendarEvents: readStoredList(STORAGE_KEYS.calendarEvents),
-          timerCompletedSessions: readStoredCompletedSessions(),
           language,
           startModule,
           theme,
@@ -924,10 +916,6 @@ function Settings({
         JSON.stringify(validatedBackup.calendarEvents),
       )
     }
-    localStorage.setItem(
-      STORAGE_KEYS.timerCompletedSessions,
-      String(validatedBackup.timerCompletedSessions),
-    )
     localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
     localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
     localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
@@ -1021,9 +1009,6 @@ function Settings({
         notes: localStorage.getItem(STORAGE_KEYS.notes),
         boardPosts: localStorage.getItem(STORAGE_KEYS.boardPosts),
         calendarEvents: localStorage.getItem(STORAGE_KEYS.calendarEvents),
-        timerCompletedSessions: localStorage.getItem(
-          STORAGE_KEYS.timerCompletedSessions,
-        ),
         language: localStorage.getItem(STORAGE_KEYS.language),
         startModule: localStorage.getItem(STORAGE_KEYS.startModule),
         theme: localStorage.getItem(STORAGE_KEYS.theme),

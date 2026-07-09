@@ -12,7 +12,6 @@ export const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 export const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 export const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 export const CALENDAR_STORAGE_KEY = STORAGE_KEYS.calendarEvents
-export const TIMER_SESSIONS_STORAGE_KEY = STORAGE_KEYS.timerCompletedSessions
 export const START_MODULE_STORAGE_KEY = STORAGE_KEYS.startModule
 export const LANGUAGE_STORAGE_KEY = STORAGE_KEYS.language
 
@@ -37,13 +36,6 @@ export const readStoredList = (storageKey) => {
 }
 
 // Command 숫자 읽기
-export const readStoredNumber = (storageKey) => {
-  const savedValue = localStorage.getItem(storageKey)
-  const parsedValue = Number.parseInt(savedValue, 10)
-
-  return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
-}
-
 // 선택값 fallback
 export const readStoredChoice = (storageKey, allowedValues, fallback) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -55,7 +47,6 @@ export const readStoredChoice = (storageKey, allowedValues, fallback) => {
 export const readCommandDataStatus = () => ({
   language: readStoredChoice(LANGUAGE_STORAGE_KEY, LANGUAGES, 'ko'),
   startModule: readStoredChoice(START_MODULE_STORAGE_KEY, START_MODULES, 'tasks'),
-  timerSessions: readStoredNumber(TIMER_SESSIONS_STORAGE_KEY),
 })
 
 // Note 작성 시각 변환
@@ -159,20 +150,12 @@ export const parseCommand = (command) => {
     return { type: 'dataStatus' }
   }
 
-  if (matchesCommand(normalizedCommand, ['타이머 열기', 'open timer'])) {
-    return { targetModule: 'timer', type: 'openModule' }
-  }
-
   if (matchesCommand(normalizedCommand, ['설정 열기', 'open settings'])) {
     return { targetModule: 'settings', type: 'openModule' }
   }
 
   if (matchesCommand(normalizedCommand, ['게시판 열기', 'open board'])) {
     return { targetModule: 'board', type: 'openModule' }
-  }
-
-  if (matchesCommand(normalizedCommand, ['집중 모드', 'focus mode'])) {
-    return { targetModule: 'timer', type: 'focusMode' }
   }
 
   if (matchesCommand(normalizedCommand, ['오늘 일정', 'today schedules'])) {
@@ -636,7 +619,6 @@ export const createResult = ({
     const {
       language = 'ko',
       startModule = 'tasks',
-      timerSessions = 0,
     } = dataStatus ?? {}
 
     return {
@@ -654,7 +636,6 @@ export const createResult = ({
         createMetric(t.command.totalNotes, notes.length),
         createMetric(t.command.totalBoardPosts, activeBoardPosts.length),
         createMetric(t.command.totalSchedules, calendarEvents.length),
-        createMetric(t.command.timerSessions, timerSessions),
       ],
       title: t.command.dataStatusResult,
       type: 'analysis',
@@ -674,29 +655,6 @@ export const createResult = ({
       ],
       metrics: [],
       title: t.command.openModuleResult,
-      type: 'action',
-    }
-  }
-
-  if (parsedCommand.type === 'focusMode') {
-    const recommendedTask = getRecommendedTask(tasks)
-
-    return {
-      navigateTo: 'timer',
-      items: [
-        {
-          label: t.command.recommendedTask,
-          values: recommendedTask
-            ? [recommendedTask.title]
-            : [t.command.noTaskRecommendation],
-        },
-        {
-          label: t.command.navigation,
-          values: [t.command.focusModeMessage],
-        },
-      ],
-      metrics: [createMetric(t.command.activeTasks, stats.active)],
-      title: t.command.focusModeResult,
       type: 'action',
     }
   }

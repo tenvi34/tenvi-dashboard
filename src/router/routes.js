@@ -8,7 +8,6 @@ export const MODULE_PATHS = {
   notes: '/notes',
   settings: '/settings',
   tasks: '/tasks',
-  timer: '/timer',
 }
 
 // URL에서 활성 모듈 계산

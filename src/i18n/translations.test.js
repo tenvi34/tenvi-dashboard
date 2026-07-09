@@ -14,7 +14,6 @@ const requiredTopLevelKeys = [
   'notes',
   'calendar',
   'map',
-  'timer',
   'settings',
 ]
 
@@ -25,7 +24,6 @@ const requiredCommandKeys = [
   'searchTasksResult',
   'dataStatusResult',
   'openModuleResult',
-  'focusModeResult',
   'todaySchedulesResult',
   'thisMonthSchedulesResult',
   'searchSchedulesResult',
@@ -113,7 +111,6 @@ const requiredDashboardKeys = [
   'activeTaskList',
   'systemSummary',
   'currentSettings',
-  'timerSessions',
   'currentLanguage',
   'defaultStartModule',
   'theme',

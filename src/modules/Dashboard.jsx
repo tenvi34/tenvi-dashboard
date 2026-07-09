@@ -30,13 +30,6 @@ const readStoredList = (storageKey) => {
   }
 }
 
-const readStoredNumber = (storageKey) => {
-  const savedValue = localStorage.getItem(storageKey)
-  const parsedValue = Number.parseInt(savedValue, 10)
-
-  return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
-}
-
 // Notes 작성 시각 변환
 const getNoteTime = (note) => {
   const time = new Date(note.createdAt).getTime()
@@ -72,10 +65,6 @@ function Dashboard({
   const completedTasks = tasks.filter((task) => task.completed).length
   const activeTasks = tasks.length - completedTasks
   const activeTaskList = tasks.filter((task) => !task.completed).slice(0, 4)
-  const timerCompletedSessions = readStoredNumber(
-    STORAGE_KEYS.timerCompletedSessions,
-  )
-
   // Calendar 요약 재배치
   const allTodayEvents = getTodayEvents(calendarEvents)
   const todayEvents = allTodayEvents.slice(0, 3)
@@ -447,10 +436,6 @@ function Dashboard({
             <span className="dashboard-system-tag">CONFIG</span>
           </div>
           <dl className="dashboard-compact-list dashboard-system-list">
-            <div>
-              <dt>{t.dashboard.timerSessions}</dt>
-              <dd>{timerCompletedSessions}</dd>
-            </div>
             <div>
               <dt>{t.dashboard.currentLanguage}</dt>
               <dd>{t.languages[language] ?? language}</dd>

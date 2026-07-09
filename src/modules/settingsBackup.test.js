@@ -15,7 +15,6 @@ const createValidBackup = (overrides = {}) => ({
   data: {
     tasks: [{ id: 1, title: 'Task', completed: false }],
     notes: [{ id: 1, title: 'Note', content: 'Memo' }],
-    timerCompletedSessions: 3,
     language: 'ko',
     startModule: 'tasks',
     hudEffect: 'normal',
@@ -38,7 +37,6 @@ describe('settingsBackup validateBackupPayload', () => {
       hasUserProfile: false,
       mapPhotoCollections: undefined,
       mapPhotoRecords: undefined,
-      timerCompletedSessions: 3,
       language: 'ko',
       startModule: 'tasks',
       // 구 백업의 'hud' 테마는 'dark'로 정규화됨
@@ -51,14 +49,6 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(validateBackupPayload(createValidBackup({ theme: 'hud' }))?.theme).toBe('dark')
     expect(validateBackupPayload(createValidBackup({ theme: 'dark' }))?.theme).toBe('dark')
     expect(validateBackupPayload(createValidBackup({ theme: 'standard' }))?.theme).toBe('standard')
-  })
-
-  it('normalizes numeric timer session strings from backup data', () => {
-    expect(
-      validateBackupPayload(
-        createValidBackup({ timerCompletedSessions: '5' }),
-      ).timerCompletedSessions,
-    ).toBe(5)
   })
 
   it('accepts Board and Calendar backup data as optional v1 fields', () => {
@@ -173,12 +163,6 @@ describe('settingsBackup validateBackupPayload', () => {
       validateBackupPayload(createValidBackup({ mapPhotoCollections: {} })),
     ).toBe(null)
     expect(validateBackupPayload(createValidBackup({ userProfile: [] }))).toBe(null)
-    expect(
-      validateBackupPayload(createValidBackup({ timerCompletedSessions: 'abc' })),
-    ).toBe(null)
-    expect(
-      validateBackupPayload(createValidBackup({ timerCompletedSessions: -1 })),
-    ).toBe(null)
   })
 
   it('rejects values outside supported app settings', () => {

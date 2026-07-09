@@ -12,7 +12,6 @@ const MODULES = [
   { id: 'board' },
   { id: 'calendar' },
   { id: 'map' },
-  { id: 'timer' },
   { id: 'settings' },
 ]
 
@@ -27,7 +26,6 @@ const MOBILE_MORE_MODULES = [
   { id: 'calendar' },
   { id: 'board' },
   { id: 'command' },
-  { id: 'timer' },
   { id: 'settings' },
 ]
 
