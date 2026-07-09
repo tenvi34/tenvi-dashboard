@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { STORAGE_KEYS } from './constants/storageKeys.js'
 import { isSupportedLanguage, translations } from './i18n/translations.js'
+import { readProfileSettingsStorageMode } from './modules/profileSettingsStorageMode.js'
+import { loadRemoteAppSettings } from './modules/profileSettingsRemoteCopy.js'
 import AppRouter from './router/AppRouter.jsx'
 import './App.css'
 
@@ -30,6 +32,38 @@ function App() {
   })
 
   // 전역 설정 저장 흐름
+  // REMOTE 공통 설정 복원
+  useEffect(() => {
+    let isMounted = true
+
+    if (readProfileSettingsStorageMode() !== 'remote') {
+      return () => {
+        isMounted = false
+      }
+    }
+
+    loadRemoteAppSettings()
+      .then((remoteSettings) => {
+        if (!isMounted) {
+          return
+        }
+
+        if (remoteSettings.language) setLanguage(remoteSettings.language)
+        if (remoteSettings.startModule) setStartModule(remoteSettings.startModule)
+        if (remoteSettings.theme) setTheme(remoteSettings.theme)
+        if (remoteSettings.hudEffect) {
+          localStorage.setItem(STORAGE_KEYS.hudEffect, remoteSettings.hudEffect)
+        }
+      })
+      .catch(() => {
+        // REMOTE 서버가 없으면 기존 LOCAL 설정으로 기동
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.language, language)
   }, [language])

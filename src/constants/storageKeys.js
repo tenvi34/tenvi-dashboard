@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   boardStorageMode: 'tenvi.board.storageMode',
   mapStorageMode: 'tenvi.map.storageMode',
   notesStorageMode: 'tenvi.notes.storageMode',
+  profileSettingsStorageMode: 'tenvi.profileSettings.storageMode',
   tasksStorageMode: 'tenvi.tasks.storageMode',
   userProfile: 'tenvi.user.profile',
   calendarEvents: 'tenvi.calendar.events',

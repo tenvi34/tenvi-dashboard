@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { fetchProfileImage } from '../api/profileApi.js'
+import { readProfileSettingsStorageMode } from '../modules/profileSettingsStorageMode.js'
 import { getProfileImage } from '../modules/profileImageStore.js'
 import './UserAvatar.css'
 
@@ -39,7 +41,12 @@ function UserAvatar({
       }
     }
 
-    getProfileImage(avatarImageId)
+    const imageLoader =
+      readProfileSettingsStorageMode() === 'remote'
+        ? fetchProfileImage
+        : getProfileImage
+
+    imageLoader(avatarImageId)
       .then((imageRecord) => {
         if (isMounted) {
           setLoadedImage({

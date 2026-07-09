@@ -16,6 +16,7 @@ describe('STORAGE_KEYS', () => {
       mapStorageMode: 'tenvi.map.storageMode',
       notes: 'tenvi.notes',
       notesStorageMode: 'tenvi.notes.storageMode',
+      profileSettingsStorageMode: 'tenvi.profileSettings.storageMode',
       startModule: 'tenvi.startModule',
       tasks: 'todo-manager-lite.todos',
       tasksStorageMode: 'tenvi.tasks.storageMode',

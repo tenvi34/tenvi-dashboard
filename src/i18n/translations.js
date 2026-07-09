@@ -733,6 +733,26 @@ export const translations = {
       boardRestoreConfirmMessage:
         '현재 Board 데이터와 Board 이미지가 백업 파일의 데이터로 덮어써질 수 있습니다. 복원할까요?',
       mapData: 'Map 사진 기록',
+      profileSettingsStorageTitle: 'Profile / Settings',
+      profileSettingsStorageModeLabel: 'Profile / Settings storage mode',
+      profileSettingsStorageDescription:
+        'Stores profile and shared app settings. API URL and storage modes stay device-local.',
+      profileRemoteCopy: 'Copy LOCAL Profile to REMOTE',
+      profileRemoteCopying: 'Copying Profile to REMOTE...',
+      profileRemoteCopyConnectionError:
+        'Profile copy failed because the REMOTE API is unavailable.',
+      profileRemoteCopyResult: (copied, updated, skipped, failed) =>
+        `Profile copy complete: ${copied} created, ${updated} updated, ${skipped} skipped, ${failed} failed`,
+      appSettingsRemoteCopy: 'Copy LOCAL Settings to REMOTE',
+      appSettingsRemoteCopying: 'Copying Settings to REMOTE...',
+      appSettingsRemoteCopyConnectionError:
+        'Settings copy failed because the REMOTE API is unavailable.',
+      appSettingsRemoteCopyResult: (copied, updated, skipped, failed) =>
+        `Settings copy complete: ${copied} created, ${updated} updated, ${skipped} skipped, ${failed} failed`,
+      appSettingsRemoteSaveError: 'Could not save REMOTE Settings.',
+      profileRemoteLoadError:
+        'Could not load REMOTE Profile, so LOCAL values are kept.',
+      profileRemoteSaveError: 'Could not save REMOTE Profile.',
       backupNote:
         'Tasks, Notes, Board 게시글, Calendar 일정, Timer 세션, 언어, 시작 모듈, 테마 설정, Map 사진 기록을 백업합니다. Board 이미지, 카테고리, 임시저장은 Board 전용 백업을 사용하세요.',
       mapBackupNote:
@@ -1505,6 +1525,26 @@ export const translations = {
       boardBackupReadError: 'Could not read the Board backup JSON file.',
       boardRestoreConfirmMessage:
         'Current Board data and Board images may be overwritten with this backup. Restore now?',
+      profileSettingsStorageTitle: 'Profile / Settings',
+      profileSettingsStorageModeLabel: 'Profile / Settings storage mode',
+      profileSettingsStorageDescription:
+        'Stores profile and shared app settings. API URL and storage modes stay device-local.',
+      profileRemoteCopy: 'Copy LOCAL Profile to REMOTE',
+      profileRemoteCopying: 'Copying Profile to REMOTE...',
+      profileRemoteCopyConnectionError:
+        'Profile copy failed because the REMOTE API is unavailable.',
+      profileRemoteCopyResult: (copied, updated, skipped, failed) =>
+        `Profile copy complete: ${copied} created, ${updated} updated, ${skipped} skipped, ${failed} failed`,
+      appSettingsRemoteCopy: 'Copy LOCAL Settings to REMOTE',
+      appSettingsRemoteCopying: 'Copying Settings to REMOTE...',
+      appSettingsRemoteCopyConnectionError:
+        'Settings copy failed because the REMOTE API is unavailable.',
+      appSettingsRemoteCopyResult: (copied, updated, skipped, failed) =>
+        `Settings copy complete: ${copied} created, ${updated} updated, ${skipped} skipped, ${failed} failed`,
+      appSettingsRemoteSaveError: 'Could not save REMOTE Settings.',
+      profileRemoteLoadError:
+        'Could not load REMOTE Profile, so LOCAL values are kept.',
+      profileRemoteSaveError: 'Could not save REMOTE Profile.',
       backendStatus: {
         label: 'Backend',
         title: 'Backend Connection Status',

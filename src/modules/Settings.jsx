@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import UserAvatar from '../components/UserAvatar.jsx'
+import {
+  createRemoteProfileImage,
+  deleteRemoteProfileImage,
+  fetchRemoteProfile,
+  saveRemoteProfile,
+} from '../api/profileApi.js'
 import BackendEchoTest from './BackendEchoTest.jsx'
 import BackendStatus from './BackendStatus.jsx'
 import BoardApiTest from './BoardApiExtendedTest.jsx'
@@ -20,6 +26,16 @@ import {
   saveMapStorageMode,
 } from './mapStorageMode.js'
 import { copyLocalMapDataToRemote } from './map/mapRemoteCopy.js'
+import {
+  PROFILE_SETTINGS_STORAGE_MODES,
+  readProfileSettingsStorageMode,
+  saveProfileSettingsStorageMode,
+} from './profileSettingsStorageMode.js'
+import {
+  copyLocalProfileToRemote,
+  copyLocalSettingsToRemote,
+  saveRemoteSettingValue,
+} from './profileSettingsRemoteCopy.js'
 import {
   NOTES_STORAGE_MODES,
   readNotesStorageMode,
@@ -125,6 +141,27 @@ const readStoredCompletedSessions = () => {
   return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
 }
 
+const readFileAsDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
+
+const createProfileImageId = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return `profile-image-${globalThis.crypto.randomUUID()}`
+  }
+
+  return `profile-image-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+const saveProfileToLocalStorage = (profile) => {
+  localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(profile))
+}
+
 function Settings({
   activeTab = 'general',
   language,
@@ -149,6 +186,9 @@ function Settings({
   const [mapStorageMode, setMapStorageMode] = useState(() =>
     readMapStorageMode(),
   )
+  const [profileSettingsStorageMode, setProfileSettingsStorageMode] = useState(
+    () => readProfileSettingsStorageMode(),
+  )
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
@@ -161,6 +201,8 @@ function Settings({
   const [tasksRemoteCopyStatus, setTasksRemoteCopyStatus] = useState(null)
   const [notesRemoteCopyStatus, setNotesRemoteCopyStatus] = useState(null)
   const [mapRemoteCopyStatus, setMapRemoteCopyStatus] = useState(null)
+  const [profileRemoteCopyStatus, setProfileRemoteCopyStatus] = useState(null)
+  const [settingsRemoteCopyStatus, setSettingsRemoteCopyStatus] = useState(null)
   const [isBoardRemoteCopying, setIsBoardRemoteCopying] = useState(false)
   const [isBoardCategoriesRemoteCopying, setIsBoardCategoriesRemoteCopying] =
     useState(false)
@@ -169,6 +211,8 @@ function Settings({
   const [isTasksRemoteCopying, setIsTasksRemoteCopying] = useState(false)
   const [isNotesRemoteCopying, setIsNotesRemoteCopying] = useState(false)
   const [isMapRemoteCopying, setIsMapRemoteCopying] = useState(false)
+  const [isProfileRemoteCopying, setIsProfileRemoteCopying] = useState(false)
+  const [isSettingsRemoteCopying, setIsSettingsRemoteCopying] = useState(false)
   const [boardImageCount, setBoardImageCount] = useState(0)
   const [mapPhotoCount, setMapPhotoCount] = useState(0)
   const [profileStatus, setProfileStatus] = useState(null)
@@ -182,6 +226,8 @@ function Settings({
   const noteCount = readStoredCount(NOTES_STORAGE_KEY)
   const boardPostCount = readStoredCount(BOARD_POSTS_STORAGE_KEY)
   const calendarEventCount = readStoredCount(CALENDAR_EVENTS_STORAGE_KEY)
+  const isProfileSettingsRemote =
+    profileSettingsStorageMode === PROFILE_SETTINGS_STORAGE_MODES.remote
 
   useEffect(() => {
     let isMounted = true
@@ -214,6 +260,40 @@ function Settings({
       isMounted = false
     }
   }, [dataVersion])
+
+  useEffect(() => {
+    let isMounted = true
+
+    if (!isProfileSettingsRemote) {
+      return () => {
+        isMounted = false
+      }
+    }
+
+    fetchRemoteProfile()
+      .then((remoteProfile) => {
+        if (!isMounted) {
+          return
+        }
+
+        const nextProfile = parseUserProfile(JSON.stringify(remoteProfile))
+
+        saveProfileToLocalStorage(nextProfile)
+        setProfileForm(nextProfile)
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProfileStatus({
+            type: 'info',
+            message: t.settings.profileRemoteLoadError,
+          })
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [isProfileSettingsRemote, t.settings.profileRemoteLoadError])
 
   // LOCAL ?????? ????????汝뷴젆?琉????REMOTE ???뀀맩鍮???癲????????룸챷援????????????ш끽紐???
   const handleCopyBoardPostsToRemote = async () => {
@@ -402,6 +482,102 @@ function Settings({
     }
   }
 
+  const handleCopyProfileToRemote = async () => {
+    setIsProfileRemoteCopying(true)
+    setProfileRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalProfileToRemote()
+
+      setProfileRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: t.settings.profileRemoteCopyResult(
+          result.copied,
+          result.updated,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setProfileRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.profileRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsProfileRemoteCopying(false)
+    }
+  }
+
+  const handleCopySettingsToRemote = async () => {
+    setIsSettingsRemoteCopying(true)
+    setSettingsRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalSettingsToRemote()
+
+      setSettingsRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: t.settings.appSettingsRemoteCopyResult(
+          result.copied,
+          result.updated,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setSettingsRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.appSettingsRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsSettingsRemoteCopying(false)
+    }
+  }
+
+  const handleProfileSettingsModeChange = (mode) => {
+    setProfileSettingsStorageMode(saveProfileSettingsStorageMode(mode))
+    setProfileStatus(null)
+  }
+
+  const handleLanguageChange = (languageId) => {
+    onLanguageChange(languageId)
+
+    if (isProfileSettingsRemote) {
+      saveRemoteSettingValue('language', languageId).catch(() => {
+        setSettingsRemoteCopyStatus({
+          type: 'error',
+          message: t.settings.appSettingsRemoteSaveError,
+        })
+      })
+    }
+  }
+
+  const handleThemeChange = (themeId) => {
+    onThemeChange(themeId)
+
+    if (isProfileSettingsRemote) {
+      saveRemoteSettingValue('theme', themeId).catch(() => {
+        setSettingsRemoteCopyStatus({
+          type: 'error',
+          message: t.settings.appSettingsRemoteSaveError,
+        })
+      })
+    }
+  }
+
+  const handleStartModuleChange = (moduleId) => {
+    onStartModuleChange(moduleId)
+
+    if (isProfileSettingsRemote) {
+      saveRemoteSettingValue('startModule', moduleId).catch(() => {
+        setSettingsRemoteCopyStatus({
+          type: 'error',
+          message: t.settings.appSettingsRemoteSaveError,
+        })
+      })
+    }
+  }
+
   const handleSettingsTabChange = (tabId) => {
     setActiveSettingsTab(tabId)
     onSettingsTabChange?.(tabId)
@@ -417,7 +593,7 @@ function Settings({
 
   void dataVersion
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     const nextProfile = updateUserProfile(
       parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)),
       {
@@ -426,10 +602,21 @@ function Settings({
       },
     )
 
-    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
-    setProfileForm(nextProfile)
-    setProfileStatus({ type: 'success', message: t.settings.profileSaved })
-    setDataVersion((currentVersion) => currentVersion + 1)
+    try {
+      if (isProfileSettingsRemote) {
+        await saveRemoteProfile(nextProfile)
+      }
+
+      saveProfileToLocalStorage(nextProfile)
+      setProfileForm(nextProfile)
+      setProfileStatus({ type: 'success', message: t.settings.profileSaved })
+      setDataVersion((currentVersion) => currentVersion + 1)
+    } catch {
+      setProfileStatus({
+        type: 'error',
+        message: t.settings.profileRemoteSaveError,
+      })
+    }
   }
 
   const handleSelectProfileImage = async (event) => {
@@ -443,18 +630,34 @@ function Settings({
       const currentProfile = parseUserProfile(
         localStorage.getItem(USER_PROFILE_STORAGE_KEY),
       )
-      const nextImage = await saveProfileImage(imageFile)
+      const nextImage = isProfileSettingsRemote
+        ? await createRemoteProfileImage({
+            id: createProfileImageId(),
+            dataUrl: await readFileAsDataUrl(imageFile),
+            name: imageFile.name,
+            type: imageFile.type,
+            createdAt: new Date().toISOString(),
+          })
+        : await saveProfileImage(imageFile)
       const nextProfile = updateUserProfile(currentProfile, {
         ...profileForm,
         avatarImageId: nextImage.id,
       })
 
-      localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
+      if (isProfileSettingsRemote) {
+        await saveRemoteProfile(nextProfile)
+      }
+
+      saveProfileToLocalStorage(nextProfile)
       setProfileForm(nextProfile)
       setProfileStatus({ type: 'success', message: t.settings.profileImageSaved })
 
       if (currentProfile.avatarImageId) {
-        deleteProfileImage(currentProfile.avatarImageId).catch(() => {
+        const deleteImage = isProfileSettingsRemote
+          ? deleteRemoteProfileImage
+          : deleteProfileImage
+
+        deleteImage(currentProfile.avatarImageId).catch(() => {
           // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
         })
       }
@@ -465,7 +668,7 @@ function Settings({
     }
   }
 
-  const handleRemoveProfileImage = () => {
+  const handleRemoveProfileImage = async () => {
     const currentProfile = parseUserProfile(
       localStorage.getItem(USER_PROFILE_STORAGE_KEY),
     )
@@ -474,30 +677,62 @@ function Settings({
       avatarImageId: '',
     })
 
-    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
-    setProfileForm(nextProfile)
-    setProfileStatus({ type: 'info', message: t.settings.profileImageRemoved })
+    try {
+      if (isProfileSettingsRemote) {
+        await saveRemoteProfile(nextProfile)
+      }
+
+      saveProfileToLocalStorage(nextProfile)
+      setProfileForm(nextProfile)
+      setProfileStatus({ type: 'info', message: t.settings.profileImageRemoved })
+    } catch {
+      setProfileStatus({
+        type: 'error',
+        message: t.settings.profileRemoteSaveError,
+      })
+      return
+    }
 
     if (currentProfile.avatarImageId) {
-      deleteProfileImage(currentProfile.avatarImageId).catch(() => {
+      const deleteImage = isProfileSettingsRemote
+        ? deleteRemoteProfileImage
+        : deleteProfileImage
+
+      deleteImage(currentProfile.avatarImageId).catch(() => {
             // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
           })
     }
   }
 
-  const handleResetProfile = () => {
+  const handleResetProfile = async () => {
     const currentProfile = parseUserProfile(
       localStorage.getItem(USER_PROFILE_STORAGE_KEY),
     )
     const nextProfile = resetUserProfile()
 
-    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(nextProfile))
-    setProfileForm(nextProfile)
-    setProfileStatus({ type: 'info', message: t.settings.profileReset })
-    setDataVersion((currentVersion) => currentVersion + 1)
+    try {
+      if (isProfileSettingsRemote) {
+        await saveRemoteProfile(nextProfile)
+      }
+
+      saveProfileToLocalStorage(nextProfile)
+      setProfileForm(nextProfile)
+      setProfileStatus({ type: 'info', message: t.settings.profileReset })
+      setDataVersion((currentVersion) => currentVersion + 1)
+    } catch {
+      setProfileStatus({
+        type: 'error',
+        message: t.settings.profileRemoteSaveError,
+      })
+      return
+    }
 
     if (currentProfile.avatarImageId) {
-      deleteProfileImage(currentProfile.avatarImageId).catch(() => {
+      const deleteImage = isProfileSettingsRemote
+        ? deleteRemoteProfileImage
+        : deleteProfileImage
+
+      deleteImage(currentProfile.avatarImageId).catch(() => {
             // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
           })
     }
@@ -892,7 +1127,7 @@ function Settings({
                 }`}
                 key={languageId}
                 type="button"
-                // App ?????????                onClick={() => onLanguageChange(languageId)}
+                onClick={() => handleLanguageChange(languageId)}
               >
                 {t.languages[languageId]}
               </button>
@@ -908,7 +1143,7 @@ function Settings({
                   }`}
                   key={themeId}
                   type="button"
-                  onClick={() => onThemeChange(themeId)}
+                  onClick={() => handleThemeChange(themeId)}
                 >
                   {t.settings.themes[themeId]}
                 </button>
@@ -934,7 +1169,7 @@ function Settings({
                 }`}
                 key={moduleId}
                 type="button"
-                // ???????濡?씀?濾??????????????節뗭젔??????遺얘턁????????????濾?????釉먮폁???????????釉먮폇????                onClick={() => onStartModuleChange(moduleId)}
+                onClick={() => handleStartModuleChange(moduleId)}
               >
                 {t.modules[moduleId]}
               </button>
@@ -1298,6 +1533,69 @@ function Settings({
               {mapRemoteCopyStatus ? (
                 <p className={`backup-status settings-board-copy-status is-${mapRemoteCopyStatus.type}`}>
                   {mapRemoteCopyStatus.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="settings-storage-row">
+              <div>
+                <strong>{t.settings.profileSettingsStorageTitle}</strong>
+                <span>{t.settings.profileSettingsStorageDescription}</span>
+              </div>
+              <div className="settings-board-storage-control">
+                <div
+                  className="settings-options settings-board-storage-options"
+                  aria-label={t.settings.profileSettingsStorageModeLabel}
+                  role="group"
+                >
+                  {Object.values(PROFILE_SETTINGS_STORAGE_MODES).map((mode) => (
+                    <button
+                      aria-pressed={profileSettingsStorageMode === mode}
+                      className={`settings-option ${profileSettingsStorageMode === mode ? 'is-active' : ''}`}
+                      key={mode}
+                      type="button"
+                      onClick={() => handleProfileSettingsModeChange(mode)}
+                    >
+                      {mode === PROFILE_SETTINGS_STORAGE_MODES.local
+                        ? 'Local'
+                        : 'Remote'}
+                    </button>
+                  ))}
+                </div>
+                <span className={`settings-board-storage-badge is-${profileSettingsStorageMode}`}>
+                  {profileSettingsStorageMode === PROFILE_SETTINGS_STORAGE_MODES.local
+                    ? t.settings.storageModeLocal
+                    : t.settings.storageModeRemote}
+                </span>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isProfileRemoteCopying}
+                  onClick={handleCopyProfileToRemote}
+                >
+                  {isProfileRemoteCopying
+                    ? t.settings.profileRemoteCopying
+                    : t.settings.profileRemoteCopy}
+                </button>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isSettingsRemoteCopying}
+                  onClick={handleCopySettingsToRemote}
+                >
+                  {isSettingsRemoteCopying
+                    ? t.settings.appSettingsRemoteCopying
+                    : t.settings.appSettingsRemoteCopy}
+                </button>
+              </div>
+              {profileRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${profileRemoteCopyStatus.type}`}>
+                  {profileRemoteCopyStatus.message}
+                </p>
+              ) : null}
+              {settingsRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${settingsRemoteCopyStatus.type}`}>
+                  {settingsRemoteCopyStatus.message}
                 </p>
               ) : null}
             </div>
