@@ -1,5 +1,1 @@
-@import './styles/tokens.css';
-@import './styles/layout.css';
-@import './styles/forms.css';
-@import './styles/buttons.css';
-@import './styles/theme.css';
+/* App import 호환용 엔트리 */

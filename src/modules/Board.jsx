@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import BoardDetail from './board/BoardDetail.jsx'
 import BoardForm from './board/BoardForm.jsx'
@@ -58,7 +59,12 @@ const hasWritableBody = (blocks) =>
     return block.content.trim().length > 0
   })
 
-function Board({ t }) {
+function Board({ routeView = 'list', t }) {
+  const navigate = useNavigate()
+  const { postId = '' } = useParams()
+  const editPostIdRef = useRef('')
+  const writeRouteInitializedRef = useRef(false)
+  const viewedPostIdsRef = useRef(new Set())
   // localStorage에 연결된 Board 데이터 상태
   const {
     activePosts,
@@ -107,14 +113,11 @@ function Board({ t }) {
   const [categoryError, setCategoryError] = useState('')
   const [formError, setFormError] = useState('')
 
-  // Board 내부 화면 전환 상태
-  const [view, setView] = useState('list')
-  const [selectedPostId, setSelectedPostId] = useState('')
-
   // 검색/정렬 조건은 현재 화면 상태로만 유지
   const [searchQuery, setSearchQuery] = useState('')
   const [searchScope, setSearchScope] = useState('title')
   const [sortMode, setSortMode] = useState('latest')
+  const selectedPostId = postId
   const selectedPost = activePosts.find((post) => post.id === selectedPostId)
   const selectedPostBlocks = selectedPost ? createEditableBlocks(selectedPost) : []
   const userProfile = parseUserProfile(localStorage.getItem(STORAGE_KEYS.userProfile))
@@ -164,13 +167,13 @@ function Board({ t }) {
       : ''
 
   // 작성/수정 폼 입력 상태 초기화
-  const resetWriteForm = () => {
+  const resetWriteForm = useCallback(() => {
     setAuthor(getDefaultAuthorName())
     setTitle('')
     setCategoryId(DEFAULT_BOARD_CATEGORY_ID)
     setBlocks([createEmptyTextBlock()])
     setFormError('')
-  }
+  }, [])
 
   const saveCurrentDraft = (nextValues) => {
     saveDraft({
@@ -268,7 +271,7 @@ function Board({ t }) {
     setActiveDraftId('')
     setDraftPickerOpen(false)
     resetWriteForm()
-    setView('list')
+    navigate('/board')
   }
 
   // 게시글 작성 취소: 저장된 draft는 유지하고 화면만 복귀
@@ -276,7 +279,7 @@ function Board({ t }) {
     resetWriteForm()
     setActiveDraftId('')
     setDraftPickerOpen(false)
-    setView('list')
+    navigate('/board')
   }
 
   // 선택한 draft를 작성 폼으로 복원
@@ -292,12 +295,7 @@ function Board({ t }) {
 
   // 글쓰기 진입 시 draft 목록을 다시 읽어 최신 상태 반영
   const handleOpenWrite = () => {
-    resetWriteForm()
-    reloadDrafts()
-    setActiveDraftId('')
-    setDraftPickerOpen(false)
-    setSelectedPostId('')
-    setView('write')
+    navigate('/board/posts/new')
   }
 
   // 게시글 수정 화면 열기
@@ -306,18 +304,13 @@ function Board({ t }) {
       return
     }
 
-    setAuthor(selectedPost.author ?? '')
-    setTitle(selectedPost.title)
-    setCategoryId(getPostCategoryId(selectedPost, categories))
-    setBlocks(createEditableBlocks(selectedPost))
-    setFormError('')
-    setView('edit')
+    navigate(`/board/posts/${selectedPost.id}/edit`)
   }
 
   // 게시글 수정 취소
   const handleCancelEdit = () => {
     resetWriteForm()
-    setView('detail')
+    navigate(selectedPost ? `/board/posts/${selectedPost.id}` : '/board')
   }
 
   // 게시글 수정 저장: 제거된 이미지 ID를 계산해 IndexedDB 정리
@@ -352,23 +345,18 @@ function Board({ t }) {
       // 이미지 정리는 실패해도 게시글 수정 흐름 유지
     })
     resetWriteForm()
-    setView('detail')
+    navigate(`/board/posts/${selectedPost.id}`)
   }
 
-  // 상세 화면 진입 시 조회수 증가와 posts 저장 유지
+  // 상세 URL 진입
   const handleOpenDetail = (postId) => {
-    setSelectedPostId(postId)
-    increasePostViews(postId).catch(() => {
-      // 조회수 갱신 실패가 상세 진입 자체를 막지 않도록 유지
-    })
-    setView('detail')
+    navigate(`/board/posts/${postId}`)
   }
 
-  // 게시글 목록으로 이동
+  // 게시글 목록 URL로 이동
   const handleBackToList = () => {
-    setSelectedPostId('')
     setImageViewer(null)
-    setView('list')
+    navigate('/board')
   }
 
   // 게시글 삭제: 복구 가능하도록 deletedAt만 기록
@@ -490,6 +478,60 @@ function Board({ t }) {
     }
   }
 
+  useEffect(() => {
+    if (routeView !== 'write') {
+      writeRouteInitializedRef.current = false
+      return
+    }
+
+    if (writeRouteInitializedRef.current) {
+      return
+    }
+
+    // 글쓰기 URL 진입 시 draft 목록 최신화
+    resetWriteForm()
+    reloadDrafts()
+    setActiveDraftId('')
+    setDraftPickerOpen(false)
+    editPostIdRef.current = ''
+    writeRouteInitializedRef.current = true
+    // URL 진입 시점에만 실행해 작성 중 입력값 보존
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetWriteForm, routeView])
+
+  useEffect(() => {
+    if (routeView !== 'edit' || !selectedPost) {
+      return
+    }
+
+    if (editPostIdRef.current === selectedPost.id) {
+      return
+    }
+
+    // URL postId 기준 수정 폼 복원
+    setAuthor(selectedPost.author ?? '')
+    setTitle(selectedPost.title)
+    setCategoryId(getPostCategoryId(selectedPost, categories))
+    setBlocks(createEditableBlocks(selectedPost))
+    setFormError('')
+    editPostIdRef.current = selectedPost.id
+  }, [categories, routeView, selectedPost])
+
+  useEffect(() => {
+    if (routeView !== 'detail' || !selectedPostId || !selectedPost) {
+      return
+    }
+
+    if (viewedPostIdsRef.current.has(selectedPostId)) {
+      return
+    }
+
+    viewedPostIdsRef.current.add(selectedPostId)
+    increasePostViews(selectedPostId).catch(() => {
+      // 조회수 갱신 실패가 상세 진입 자체를 막지 않도록 유지
+    })
+  }, [increasePostViews, routeView, selectedPost, selectedPostId])
+
   return (
     <section className="module-panel board-module" aria-labelledby="board-title">
       <div className="module-header">
@@ -507,7 +549,7 @@ function Board({ t }) {
         <p className="board-storage-status is-error" role="alert">{postsError}</p>
       ) : null}
 
-      {view === 'write' ? (
+      {routeView === 'write' ? (
         <BoardForm
           activeDraft={activeDraft}
           activeDraftId={activeDraftId}
@@ -537,7 +579,7 @@ function Board({ t }) {
         />
       ) : null}
 
-      {view === 'edit' ? (
+      {routeView === 'edit' ? (
         <BoardForm
           activeDraft={activeDraft}
           activeDraftId={activeDraftId}
@@ -567,7 +609,7 @@ function Board({ t }) {
         />
       ) : null}
 
-      {view === 'detail' ? (
+      {routeView === 'detail' ? (
         <BoardDetail
           avatarImageId={userProfile.avatarImageId}
           categories={categories}
@@ -590,7 +632,7 @@ function Board({ t }) {
         t={t}
       />
 
-      {view === 'list' ? (
+      {routeView === 'list' ? (
         <BoardList
           activePosts={activePosts}
           avatarImageId={userProfile.avatarImageId}

@@ -109,15 +109,17 @@ const readStoredCompletedSessions = () => {
 
 // Settings 컴포넌트
 function Settings({
+  activeTab = 'general',
   language,
   onLanguageChange,
   onStartModuleChange,
+  onSettingsTabChange,
   onThemeChange,
   startModule,
   t,
   theme,
 }) {
-  const [activeSettingsTab, setActiveSettingsTab] = useState('general')
+  const [activeSettingsTab, setActiveSettingsTab] = useState(activeTab)
   const [boardStorageMode, setBoardStorageMode] = useState(() =>
     readBoardStorageMode(),
   )
@@ -204,6 +206,11 @@ function Settings({
     } finally {
       setIsBoardRemoteCopying(false)
     }
+  }
+
+  const handleSettingsTabChange = (tabId) => {
+    setActiveSettingsTab(tabId)
+    onSettingsTabChange?.(tabId)
   }
 
   // Tasks/Notes 초기화
@@ -676,11 +683,11 @@ function Settings({
         {SETTINGS_TABS.map((tab) => (
           <button
             className={`settings-tab ${
-              activeSettingsTab === tab.id ? 'is-active' : ''
+                  activeSettingsTab === tab.id ? 'is-active' : ''
             }`}
             key={tab.id}
             type="button"
-            onClick={() => setActiveSettingsTab(tab.id)}
+            onClick={() => handleSettingsTabChange(tab.id)}
           >
             {tab.label}
           </button>
