@@ -1,4 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  createRemoteCalendarEvent,
+  deleteRemoteCalendarEvent,
+  fetchCalendarEvents,
+} from '../api/calendarApi.js'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import './Calendar.css'
 import {
@@ -18,6 +23,7 @@ import {
   readCalendarEvents,
   removeCalendarEvent,
 } from './calendarLogic.js'
+import { readCalendarStorageMode } from './calendarStorageMode.js'
 import { countDueTasksByDate, getTasksDueOnDate } from './tasksLogic.js'
 
 const CALENDAR_STORAGE_KEY = STORAGE_KEYS.calendarEvents
@@ -54,13 +60,23 @@ function Calendar({ t }) {
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const [visibleYear, setVisibleYear] = useState(initialVisibleDate.year)
   const [visibleMonth, setVisibleMonth] = useState(initialVisibleDate.month)
-  const [events, setEvents] = useState(readStoredCalendarEvents)
+  const [storageMode] = useState(() => readCalendarStorageMode())
+  const [events, setEvents] = useState(() =>
+    storageMode === 'remote' ? [] : readStoredCalendarEvents(),
+  )
   const [tasks] = useState(readStoredTasks)
   const [title, setTitle] = useState('')
   const [memo, setMemo] = useState('')
   const [startDate, setStartDate] = useState(initialDate)
   const [endDate, setEndDate] = useState(initialDate)
   const [formMessage, setFormMessage] = useState('')
+  const [isLoadingEvents, setIsLoadingEvents] = useState(storageMode === 'remote')
+  const remoteLoadingMessage =
+    t.calendar.remoteLoading ?? 'Loading REMOTE Calendar events.'
+  const remoteLoadErrorMessage =
+    t.calendar.remoteLoadError ?? 'Could not load REMOTE Calendar events.'
+  const remoteSaveErrorMessage =
+    t.calendar.remoteSaveError ?? 'Could not save REMOTE Calendar event.'
   const selectedEvents = getEventsForDate(events, selectedDate)
   const selectedDueTasks = getTasksDueOnDate(tasks, selectedDate)
   const eventCounts = useMemo(() => {
@@ -96,6 +112,43 @@ function Calendar({ t }) {
     [calendarCells, events],
   )
   const todayDate = getDateKey()
+
+  useEffect(() => {
+    let isMounted = true
+
+    if (storageMode !== 'remote') {
+      return () => {
+        isMounted = false
+      }
+    }
+
+    fetchCalendarEvents()
+      .then((remoteEvents) => {
+        if (!isMounted) {
+          return
+        }
+
+        const normalizedEvents = readCalendarEvents(JSON.stringify(remoteEvents))
+
+        localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(normalizedEvents))
+        setEvents(normalizedEvents)
+        setFormMessage('')
+      })
+      .catch(() => {
+        if (isMounted) {
+          setFormMessage(remoteLoadErrorMessage)
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingEvents(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [remoteLoadErrorMessage, storageMode])
 
   const resetEventForm = () => {
     setTitle('')
@@ -174,7 +227,7 @@ function Calendar({ t }) {
   }
 
   // Calendar 이벤트 추가
-  const handleAddEvent = (event) => {
+  const handleAddEvent = async (event) => {
     event.preventDefault()
 
     if (!isValidCalendarDateRange(startDate, endDate)) {
@@ -195,13 +248,35 @@ function Calendar({ t }) {
       return
     }
 
-    persistEvents([...events, nextEvent])
-    resetEventForm()
+    try {
+      if (storageMode === 'remote') {
+        const createdEvent = await createRemoteCalendarEvent(nextEvent)
+        const nextEvents = readCalendarEvents(
+          JSON.stringify([...events, createdEvent]),
+        )
+
+        persistEvents(nextEvents)
+      } else {
+        persistEvents([...events, nextEvent])
+      }
+
+      resetEventForm()
+    } catch {
+      setFormMessage(remoteSaveErrorMessage)
+    }
   }
 
   // Calendar 이벤트 삭제
-  const handleDeleteEvent = (eventId) => {
-    persistEvents(removeCalendarEvent(events, eventId))
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      if (storageMode === 'remote') {
+        await deleteRemoteCalendarEvent(eventId)
+      }
+
+      persistEvents(removeCalendarEvent(events, eventId))
+    } catch {
+      setFormMessage(remoteSaveErrorMessage)
+    }
   }
 
   const handleStartDateChange = (event) => {
@@ -256,7 +331,12 @@ function Calendar({ t }) {
           </div>
 
           {/* 선택 날짜 일정 목록 */}
-          {selectedEvents.length > 0 ? (
+          {isLoadingEvents ? (
+            <div className="empty-state compact-empty" role="status">
+              <span>{t.common.systemMessage}</span>
+              <p>{remoteLoadingMessage}</p>
+            </div>
+          ) : selectedEvents.length > 0 ? (
             <ul className="calendar-event-list">
               {selectedEvents.map((calendarEvent) => (
                 <li

@@ -27,6 +27,12 @@ import {
 } from './mapStorageMode.js'
 import { copyLocalMapDataToRemote } from './map/mapRemoteCopy.js'
 import {
+  CALENDAR_STORAGE_MODES,
+  readCalendarStorageMode,
+  saveCalendarStorageMode,
+} from './calendarStorageMode.js'
+import { copyLocalCalendarEventsToRemote } from './calendarRemoteCopy.js'
+import {
   PROFILE_SETTINGS_STORAGE_MODES,
   readProfileSettingsStorageMode,
   saveProfileSettingsStorageMode,
@@ -186,6 +192,9 @@ function Settings({
   const [mapStorageMode, setMapStorageMode] = useState(() =>
     readMapStorageMode(),
   )
+  const [calendarStorageMode, setCalendarStorageMode] = useState(() =>
+    readCalendarStorageMode(),
+  )
   const [profileSettingsStorageMode, setProfileSettingsStorageMode] = useState(
     () => readProfileSettingsStorageMode(),
   )
@@ -201,6 +210,7 @@ function Settings({
   const [tasksRemoteCopyStatus, setTasksRemoteCopyStatus] = useState(null)
   const [notesRemoteCopyStatus, setNotesRemoteCopyStatus] = useState(null)
   const [mapRemoteCopyStatus, setMapRemoteCopyStatus] = useState(null)
+  const [calendarRemoteCopyStatus, setCalendarRemoteCopyStatus] = useState(null)
   const [profileRemoteCopyStatus, setProfileRemoteCopyStatus] = useState(null)
   const [settingsRemoteCopyStatus, setSettingsRemoteCopyStatus] = useState(null)
   const [isBoardRemoteCopying, setIsBoardRemoteCopying] = useState(false)
@@ -211,6 +221,7 @@ function Settings({
   const [isTasksRemoteCopying, setIsTasksRemoteCopying] = useState(false)
   const [isNotesRemoteCopying, setIsNotesRemoteCopying] = useState(false)
   const [isMapRemoteCopying, setIsMapRemoteCopying] = useState(false)
+  const [isCalendarRemoteCopying, setIsCalendarRemoteCopying] = useState(false)
   const [isProfileRemoteCopying, setIsProfileRemoteCopying] = useState(false)
   const [isSettingsRemoteCopying, setIsSettingsRemoteCopying] = useState(false)
   const [boardImageCount, setBoardImageCount] = useState(0)
@@ -228,6 +239,25 @@ function Settings({
   const calendarEventCount = readStoredCount(CALENDAR_EVENTS_STORAGE_KEY)
   const isProfileSettingsRemote =
     profileSettingsStorageMode === PROFILE_SETTINGS_STORAGE_MODES.remote
+  const calendarStorageModeLabel =
+    t.settings.calendarStorageModeLabel ?? 'Calendar storage mode'
+  const calendarStorageDescription =
+    t.settings.calendarStorageDescription ??
+    'Stores calendar event dates, ranges, and memos.'
+  const calendarRemoteCopy =
+    t.settings.calendarRemoteCopy ?? 'Copy LOCAL Calendar to REMOTE'
+  const calendarRemoteCopying =
+    t.settings.calendarRemoteCopying ?? 'Copying Calendar to REMOTE...'
+  const calendarRemoteCopyEmpty =
+    t.settings.calendarRemoteCopyEmpty ??
+    'There are no LOCAL Calendar events to copy.'
+  const calendarRemoteCopyConnectionError =
+    t.settings.calendarRemoteCopyConnectionError ??
+    'Calendar copy failed because the REMOTE API is unavailable.'
+  const calendarRemoteCopyResult =
+    t.settings.calendarRemoteCopyResult ??
+    ((copied, skipped, failed) =>
+      `Calendar copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`)
 
   useEffect(() => {
     let isMounted = true
@@ -479,6 +509,39 @@ function Settings({
       })
     } finally {
       setIsMapRemoteCopying(false)
+    }
+  }
+
+  const handleCopyCalendarToRemote = async () => {
+    setIsCalendarRemoteCopying(true)
+    setCalendarRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalCalendarEventsToRemote()
+
+      if (result.total === 0) {
+        setCalendarRemoteCopyStatus({
+          type: 'info',
+          message: calendarRemoteCopyEmpty,
+        })
+        return
+      }
+
+      setCalendarRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: calendarRemoteCopyResult(
+          result.copied,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setCalendarRemoteCopyStatus({
+        type: 'error',
+        message: calendarRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsCalendarRemoteCopying(false)
     }
   }
 
@@ -1533,6 +1596,52 @@ function Settings({
               {mapRemoteCopyStatus ? (
                 <p className={`backup-status settings-board-copy-status is-${mapRemoteCopyStatus.type}`}>
                   {mapRemoteCopyStatus.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="settings-storage-row">
+              <div>
+                <strong>{t.modules.calendar}</strong>
+                <span>{calendarStorageDescription}</span>
+              </div>
+              <div className="settings-board-storage-control">
+                <div
+                  className="settings-options settings-board-storage-options"
+                  aria-label={calendarStorageModeLabel}
+                  role="group"
+                >
+                  {Object.values(CALENDAR_STORAGE_MODES).map((mode) => (
+                    <button
+                      aria-pressed={calendarStorageMode === mode}
+                      className={`settings-option ${calendarStorageMode === mode ? 'is-active' : ''}`}
+                      key={mode}
+                      type="button"
+                      onClick={() => setCalendarStorageMode(saveCalendarStorageMode(mode))}
+                    >
+                      {mode === CALENDAR_STORAGE_MODES.local ? 'Local' : 'Remote'}
+                    </button>
+                  ))}
+                </div>
+                <span className={`settings-board-storage-badge is-${calendarStorageMode}`}>
+                  {calendarStorageMode === CALENDAR_STORAGE_MODES.local
+                    ? t.settings.storageModeLocal
+                    : t.settings.storageModeRemote}
+                </span>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isCalendarRemoteCopying}
+                  onClick={handleCopyCalendarToRemote}
+                >
+                  {isCalendarRemoteCopying
+                    ? calendarRemoteCopying
+                    : calendarRemoteCopy}
+                </button>
+              </div>
+              {calendarRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${calendarRemoteCopyStatus.type}`}>
+                  {calendarRemoteCopyStatus.message}
                 </p>
               ) : null}
             </div>

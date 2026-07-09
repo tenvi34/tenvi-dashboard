@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   tasksStorageMode: 'tenvi.tasks.storageMode',
   userProfile: 'tenvi.user.profile',
   calendarEvents: 'tenvi.calendar.events',
+  calendarStorageMode: 'tenvi.calendar.storageMode',
   hudEffect: 'tenvi.hudEffect',
   language: 'tenvi.language',
   notes: 'tenvi.notes',

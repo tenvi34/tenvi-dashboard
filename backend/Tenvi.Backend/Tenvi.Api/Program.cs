@@ -9,6 +9,7 @@ builder.Services.AddSingleton<Tenvi.Api.Services.TaskSqliteStore>();
 builder.Services.AddSingleton<Tenvi.Api.Services.NoteSqliteStore>();
 builder.Services.AddSingleton<Tenvi.Api.Services.MapSqliteStore>();
 builder.Services.AddSingleton<Tenvi.Api.Services.ProfileSqliteStore>();
+builder.Services.AddSingleton<Tenvi.Api.Services.CalendarSqliteStore>();
 
 // React/Vite 프론트엔드 CORS 허용
 builder.Services.AddCors(options =>
@@ -33,6 +34,7 @@ app.Services.GetRequiredService<Tenvi.Api.Services.TaskSqliteStore>().Initialize
 app.Services.GetRequiredService<Tenvi.Api.Services.NoteSqliteStore>().Initialize();
 app.Services.GetRequiredService<Tenvi.Api.Services.MapSqliteStore>().Initialize();
 app.Services.GetRequiredService<Tenvi.Api.Services.ProfileSqliteStore>().Initialize();
+app.Services.GetRequiredService<Tenvi.Api.Services.CalendarSqliteStore>().Initialize();
 
 if (app.Environment.IsDevelopment())
 {

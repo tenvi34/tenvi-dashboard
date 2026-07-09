@@ -11,6 +11,7 @@ describe('STORAGE_KEYS', () => {
       boardPosts: 'tenvi.board.posts',
       boardStorageMode: 'tenvi.board.storageMode',
       calendarEvents: 'tenvi.calendar.events',
+      calendarStorageMode: 'tenvi.calendar.storageMode',
       hudEffect: 'tenvi.hudEffect',
       language: 'tenvi.language',
       mapStorageMode: 'tenvi.map.storageMode',
