@@ -3,6 +3,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Controller 기반 API 사용
 builder.Services.AddControllers();
 
+// Board REMOTE 게시글을 SQLite 파일에 저장하는 싱글톤 저장소
+builder.Services.AddSingleton<Tenvi.Api.Services.BoardSqliteStore>();
+
 // React/Vite 프론트엔드 CORS 허용
 builder.Services.AddCors(options =>
 {
@@ -19,6 +22,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// 서버 시작 시 DB 파일과 테이블을 준비. 이미 존재하는 데이터는 유지
+app.Services.GetRequiredService<Tenvi.Api.Services.BoardSqliteStore>().Initialize();
 
 if (app.Environment.IsDevelopment())
 {

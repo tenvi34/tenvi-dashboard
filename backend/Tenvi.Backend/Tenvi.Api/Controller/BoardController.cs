@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Tenvi.Api.Models.Board;
+using Tenvi.Api.Services;
 
 namespace Tenvi.Api.Controller;
 
@@ -7,22 +8,29 @@ namespace Tenvi.Api.Controller;
 [Route("api/board/posts")]
 public class BoardController : ControllerBase
 {
-    // 게시글 임시 저장소
-    private static readonly List<BoardPost> Posts = [];
+    private readonly BoardSqliteStore _store;
+    private readonly ILogger<BoardController> _logger;
 
-    // InMemory 목록 동시 접근 보호
-    private static readonly object PostsLock = new();
+    public BoardController(BoardSqliteStore store, ILogger<BoardController> logger)
+    {
+        _store = store;
+        _logger = logger;
+    }
 
     // 게시글 목록 조회와 정렬 기준
     [HttpGet]
     public ActionResult<IEnumerable<BoardPostResponse>> GetPosts()
     {
-        lock (PostsLock)
+        try
         {
-            // 고정 게시글 우선, 최신 작성순 유지
-            return Ok(SortPosts(Posts.Where(post => post.DeletedAt is null))
+            // 저장소 정렬 결과를 기존 응답 DTO로 변환
+            return Ok(_store.GetPosts(includeDeleted: false)
                 .Select(ToResponse)
                 .ToList());
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to load board posts.");
         }
     }
 
@@ -30,12 +38,16 @@ public class BoardController : ControllerBase
     [HttpGet("trash")]
     public ActionResult<IEnumerable<BoardPostResponse>> GetTrashPosts()
     {
-        lock (PostsLock)
+        try
         {
             // 삭제 시간이 있는 글만 휴지통 목록으로 노출
-            return Ok(SortPosts(Posts.Where(post => post.DeletedAt is not null))
+            return Ok(_store.GetPosts(includeDeleted: true)
                 .Select(ToResponse)
                 .ToList());
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to load deleted board posts.");
         }
     }
 
@@ -43,9 +55,9 @@ public class BoardController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<BoardPostResponse> GetPost(string id)
     {
-        lock (PostsLock)
+        try
         {
-            var post = FindPost(id);
+            var post = _store.GetPost(id);
 
             if (post is null)
             {
@@ -53,6 +65,10 @@ public class BoardController : ControllerBase
             }
 
             return Ok(ToResponse(post));
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to load board post.");
         }
     }
 
@@ -71,13 +87,17 @@ public class BoardController : ControllerBase
         var now = DateTimeOffset.UtcNow;
         var requestedId = request.Id?.Trim();
 
-        lock (PostsLock)
+        try
         {
             // 병렬 요청에서도 같은 LOCAL id가 중복 생성되지 않도록 서버에서도 방어
-            if (!string.IsNullOrWhiteSpace(requestedId) && FindPost(requestedId) is not null)
+            if (!string.IsNullOrWhiteSpace(requestedId) && _store.GetPost(requestedId) is not null)
             {
                 return Conflict(new { message = "A board post with the same id already exists." });
             }
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to check board post id.");
         }
 
         // 블록 기반 본문과 이전 단일 본문 입력을 함께 수용
@@ -99,16 +119,17 @@ public class BoardController : ControllerBase
             DeletedAt = request.DeletedAt
         };
 
-        lock (PostsLock)
+        try
         {
             // 사전 검사 뒤 들어온 동일 id 요청과의 경쟁 조건 방지
-            if (FindPost(post.Id) is not null)
+            if (!_store.CreatePost(post))
             {
                 return Conflict(new { message = "A board post with the same id already exists." });
             }
-
-            // DB 연결 전까지 프로세스 메모리에만 보관
-            Posts.Add(post);
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to create board post.");
         }
 
         return CreatedAtAction(nameof(GetPost), new { id = post.Id }, ToResponse(post));
@@ -126,9 +147,9 @@ public class BoardController : ControllerBase
             });
         }
 
-        lock (PostsLock)
+        try
         {
-            var post = FindPost(id);
+            var post = _store.GetPost(id);
 
             if (post is null)
             {
@@ -155,7 +176,16 @@ public class BoardController : ControllerBase
 
             post.UpdatedAt = DateTimeOffset.UtcNow;
 
+            if (!_store.UpdatePost(post))
+            {
+                return NotFound();
+            }
+
             return Ok(ToResponse(post));
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to update board post.");
         }
     }
 
@@ -163,9 +193,9 @@ public class BoardController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult DeletePost(string id)
     {
-        lock (PostsLock)
+        try
         {
-            var post = FindPost(id);
+            var post = _store.GetPost(id);
 
             if (post is null)
             {
@@ -177,7 +207,17 @@ public class BoardController : ControllerBase
             // 휴지통 복원을 위해 실제 제거 대신 삭제 시간만 기록
             post.DeletedAt = deletedAt;
             post.UpdatedAt = deletedAt;
+
+            if (!_store.UpdatePost(post))
+            {
+                return NotFound();
+            }
+
             return NoContent();
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to delete board post.");
         }
     }
 
@@ -185,9 +225,9 @@ public class BoardController : ControllerBase
     [HttpPatch("{id}/views")]
     public ActionResult<BoardPostResponse> IncreasePostViews(string id)
     {
-        lock (PostsLock)
+        try
         {
-            var post = FindPost(id);
+            var post = _store.GetPost(id);
 
             // 삭제된 글의 조회수 증가는 허용하지 않음
             if (post is null || post.DeletedAt is not null)
@@ -196,7 +236,17 @@ public class BoardController : ControllerBase
             }
 
             post.ViewCount += 1;
+
+            if (!_store.UpdatePost(post))
+            {
+                return NotFound();
+            }
+
             return Ok(ToResponse(post));
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to increase board post views.");
         }
     }
 
@@ -204,9 +254,9 @@ public class BoardController : ControllerBase
     [HttpPatch("{id}/restore")]
     public ActionResult<BoardPostResponse> RestorePost(string id)
     {
-        lock (PostsLock)
+        try
         {
-            var post = FindPost(id);
+            var post = _store.GetPost(id);
 
             if (post is null)
             {
@@ -217,7 +267,16 @@ public class BoardController : ControllerBase
             post.DeletedAt = null;
             post.UpdatedAt = DateTimeOffset.UtcNow;
 
+            if (!_store.UpdatePost(post))
+            {
+                return NotFound();
+            }
+
             return Ok(ToResponse(post));
+        }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to restore board post.");
         }
     }
 
@@ -225,30 +284,20 @@ public class BoardController : ControllerBase
     [HttpDelete("{id}/permanent")]
     public IActionResult PermanentlyDeletePost(string id)
     {
-        lock (PostsLock)
+        try
         {
-            var post = FindPost(id);
-
-            if (post is null)
+            if (!_store.PermanentlyDeletePost(id))
             {
                 return NotFound();
             }
 
-            // 복원 불가능한 메모리 저장소 제거
-            Posts.Remove(post);
             return NoContent();
         }
+        catch (Exception exception)
+        {
+            return HandleStorageError(exception, "Failed to permanently delete board post.");
+        }
     }
-
-    // 대소문자 차이를 허용하는 게시글 식별자 조회
-    private static BoardPost? FindPost(string id) =>
-        Posts.FirstOrDefault(post => string.Equals(post.Id, id, StringComparison.OrdinalIgnoreCase));
-
-    // 목록 화면 공통 정렬 규칙
-    private static IEnumerable<BoardPost> SortPosts(IEnumerable<BoardPost> posts) =>
-        posts
-            .OrderByDescending(post => post.IsPinned)
-            .ThenByDescending(post => post.CreatedAt);
 
     // 내부 저장 모델을 프론트엔드 응답 계약으로 변환
     private static BoardPostResponse ToResponse(BoardPost post) => new()
@@ -265,6 +314,17 @@ public class BoardController : ControllerBase
         Pinned = post.IsPinned,
         DeletedAt = post.DeletedAt
     };
+
+    // DB 장애는 콘솔 로그에 원인을 남기고, 클라이언트에는 기존 API 형태를 해치지 않는 500 응답 반환
+    private ObjectResult HandleStorageError(Exception exception, string message)
+    {
+        _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);
+
+        return StatusCode(StatusCodes.Status500InternalServerError, new
+        {
+            message
+        });
+    }
 
     // 작성자 기본값 보정
     private static string NormalizeAuthor(string? author)

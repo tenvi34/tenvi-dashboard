@@ -50,3 +50,4 @@ appsettings.*.local.json
 data/
 *.db
 *.sqlite
+*.sqlite3
