@@ -9,10 +9,6 @@ import {
   toggleBulkMissingLocationSelection,
 } from '../bulkPhotoUploadLogic.js'
 import { readPhotoLocation } from '../mapLogic.js'
-import {
-  createPhotoRecords,
-  getPhotoRecords,
-} from '../../services/photoArchiveRepository.js'
 import { createPreviewImageBlob } from '../../utils/imageUtils.js'
 
 const createBulkUploadId = (file, index) =>
@@ -30,6 +26,7 @@ const createInitialBulkUploadState = () => ({
 // bulk 업로드 상태 컨트롤러
 function useMapBulkUploadController({
   createViewportRequest,
+  mapRepository,
   setActiveRecordId,
   setError,
   setRecords,
@@ -241,10 +238,10 @@ function useMapBulkUploadController({
     }))
 
     try {
-      // IndexedDB 저장 후 최신 목록 재조회
-      const results = await createPhotoRecords(recordInputs)
+      // 현재 저장소 기준 최신 목록 재조회
+      const results = await mapRepository.createRecords(recordInputs)
       const saveResult = createBulkPhotoSaveResult(results)
-      const savedRecords = await getPhotoRecords()
+      const savedRecords = await mapRepository.fetchRecords()
 
       setRecords(savedRecords)
       setBulkSaveReport(saveResult)

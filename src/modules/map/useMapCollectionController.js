@@ -4,15 +4,11 @@ import {
   isPhotoCollectionInputValid,
   normalizePhotoCollectionInput,
 } from '../mapLogic.js'
-import {
-  createPhotoCollection,
-  deletePhotoCollection,
-  updatePhotoCollection,
-} from '../../services/photoCollectionRepository.js'
 
 // 컬렉션 CRUD 상태 컨트롤러
 function useMapCollectionController({
   getCollectionRecordCount,
+  mapRepository,
   setCollections,
   setError,
   setRecords,
@@ -53,7 +49,7 @@ function useMapCollectionController({
     try {
       // id 유무로 생성/수정 분기
       if (editingCollectionId) {
-        const updatedCollection = await updatePhotoCollection(
+        const updatedCollection = await mapRepository.updateCollection(
           editingCollectionId,
           normalizedInput,
         )
@@ -69,7 +65,9 @@ function useMapCollectionController({
         )
         setStatusMessage(t.map.collectionUpdated)
       } else {
-        const createdCollection = await createPhotoCollection(normalizedInput)
+        const createdCollection = await mapRepository.createCollection(
+          normalizedInput,
+        )
 
         setCollections((currentCollections) => [
           createdCollection,
@@ -98,7 +96,7 @@ function useMapCollectionController({
 
     try {
       // 컬렉션 삭제 transaction
-      await deletePhotoCollection(collection.id)
+      await mapRepository.deleteCollection(collection.id)
       setCollections((currentCollections) =>
         currentCollections.filter((item) => item.id !== collection.id),
       )

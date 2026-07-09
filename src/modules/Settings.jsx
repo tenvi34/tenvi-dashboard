@@ -11,6 +11,12 @@ import {
 } from './board/boardStorageMode.js'
 import { copyLocalBoardPostsToRemote } from './board/boardRemoteCopy.js'
 import {
+  MAP_STORAGE_MODES,
+  readMapStorageMode,
+  saveMapStorageMode,
+} from './mapStorageMode.js'
+import { copyLocalMapDataToRemote } from './map/mapRemoteCopy.js'
+import {
   NOTES_STORAGE_MODES,
   readNotesStorageMode,
   saveNotesStorageMode,
@@ -136,6 +142,9 @@ function Settings({
   const [notesStorageMode, setNotesStorageMode] = useState(() =>
     readNotesStorageMode(),
   )
+  const [mapStorageMode, setMapStorageMode] = useState(() =>
+    readMapStorageMode(),
+  )
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
@@ -143,9 +152,11 @@ function Settings({
   const [boardRemoteCopyStatus, setBoardRemoteCopyStatus] = useState(null)
   const [tasksRemoteCopyStatus, setTasksRemoteCopyStatus] = useState(null)
   const [notesRemoteCopyStatus, setNotesRemoteCopyStatus] = useState(null)
+  const [mapRemoteCopyStatus, setMapRemoteCopyStatus] = useState(null)
   const [isBoardRemoteCopying, setIsBoardRemoteCopying] = useState(false)
   const [isTasksRemoteCopying, setIsTasksRemoteCopying] = useState(false)
   const [isNotesRemoteCopying, setIsNotesRemoteCopying] = useState(false)
+  const [isMapRemoteCopying, setIsMapRemoteCopying] = useState(false)
   const [boardImageCount, setBoardImageCount] = useState(0)
   const [mapPhotoCount, setMapPhotoCount] = useState(0)
   const [profileStatus, setProfileStatus] = useState(null)
@@ -280,6 +291,36 @@ function Settings({
       })
     } finally {
       setIsNotesRemoteCopying(false)
+    }
+  }
+
+  const handleCopyMapToRemote = async () => {
+    setIsMapRemoteCopying(true)
+    setMapRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalMapDataToRemote()
+      const total = result.collections.total + result.records.total
+
+      if (total === 0) {
+        setMapRemoteCopyStatus({ type: 'info', message: t.settings.mapRemoteCopyEmpty })
+        return
+      }
+
+      setMapRemoteCopyStatus({
+        type:
+          result.collections.failed > 0 || result.records.failed > 0
+            ? 'error'
+            : 'success',
+        message: t.settings.mapRemoteCopyResult(result.collections, result.records),
+      })
+    } catch {
+      setMapRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.mapRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsMapRemoteCopying(false)
     }
   }
 
@@ -1103,6 +1144,52 @@ function Settings({
               {notesRemoteCopyStatus ? (
                 <p className={`backup-status settings-board-copy-status is-${notesRemoteCopyStatus.type}`}>
                   {notesRemoteCopyStatus.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="settings-storage-row">
+              <div>
+                <strong>{t.modules.map}</strong>
+                <span>{t.settings.mapStorageDescription}</span>
+              </div>
+              <div className="settings-board-storage-control">
+                <div
+                  className="settings-options settings-board-storage-options"
+                  aria-label={t.settings.mapStorageModeLabel}
+                  role="group"
+                >
+                  {Object.values(MAP_STORAGE_MODES).map((mode) => (
+                    <button
+                      aria-pressed={mapStorageMode === mode}
+                      className={`settings-option ${mapStorageMode === mode ? 'is-active' : ''}`}
+                      key={mode}
+                      type="button"
+                      onClick={() => setMapStorageMode(saveMapStorageMode(mode))}
+                    >
+                      {mode === MAP_STORAGE_MODES.local ? 'Local' : 'Remote'}
+                    </button>
+                  ))}
+                </div>
+                <span className={`settings-board-storage-badge is-${mapStorageMode}`}>
+                  {mapStorageMode === MAP_STORAGE_MODES.local
+                    ? t.settings.storageModeLocal
+                    : t.settings.storageModeRemote}
+                </span>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isMapRemoteCopying}
+                  onClick={handleCopyMapToRemote}
+                >
+                  {isMapRemoteCopying
+                    ? t.settings.mapRemoteCopying
+                    : t.settings.mapRemoteCopy}
+                </button>
+              </div>
+              {mapRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${mapRemoteCopyStatus.type}`}>
+                  {mapRemoteCopyStatus.message}
                 </p>
               ) : null}
             </div>

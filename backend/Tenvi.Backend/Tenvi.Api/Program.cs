@@ -7,6 +7,7 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<Tenvi.Api.Services.BoardSqliteStore>();
 builder.Services.AddSingleton<Tenvi.Api.Services.TaskSqliteStore>();
 builder.Services.AddSingleton<Tenvi.Api.Services.NoteSqliteStore>();
+builder.Services.AddSingleton<Tenvi.Api.Services.MapSqliteStore>();
 
 // React/Vite 프론트엔드 CORS 허용
 builder.Services.AddCors(options =>
@@ -29,6 +30,7 @@ var app = builder.Build();
 app.Services.GetRequiredService<Tenvi.Api.Services.BoardSqliteStore>().Initialize();
 app.Services.GetRequiredService<Tenvi.Api.Services.TaskSqliteStore>().Initialize();
 app.Services.GetRequiredService<Tenvi.Api.Services.NoteSqliteStore>().Initialize();
+app.Services.GetRequiredService<Tenvi.Api.Services.MapSqliteStore>().Initialize();
 
 if (app.Environment.IsDevelopment())
 {

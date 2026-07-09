@@ -13,6 +13,7 @@ describe('STORAGE_KEYS', () => {
       calendarEvents: 'tenvi.calendar.events',
       hudEffect: 'tenvi.hudEffect',
       language: 'tenvi.language',
+      mapStorageMode: 'tenvi.map.storageMode',
       notes: 'tenvi.notes',
       notesStorageMode: 'tenvi.notes.storageMode',
       startModule: 'tenvi.startModule',

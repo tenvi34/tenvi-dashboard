@@ -35,17 +35,9 @@ import {
   normalizeLocationSource,
   readPhotoLocation,
 } from './mapLogic.js'
-import {
-  createPhotoRecord,
-  deletePhotoRecord,
-  getPhotoRecords,
-  updatePhotoRecord,
-} from '../services/photoArchiveRepository.js'
-import {
-  getPhotoCollections,
-} from '../services/photoCollectionRepository.js'
 import { searchPlaces } from '../services/placeSearchService.js'
 import { createPreviewImageBlob } from '../utils/imageUtils.js'
+import { readMapStorageMode } from './mapStorageMode.js'
 import PhotoCollectionSelect from './map/MapCollectionSelect.jsx'
 import {
   MapModeTabs,
@@ -58,6 +50,10 @@ import {
   PhotoPreviewButton,
 } from './map/MapPhotoPreview.jsx'
 import PhotoRecordList from './map/MapRecordList.jsx'
+import {
+  localMapRepository,
+  remoteMapRepository,
+} from './map/repositories/index.js'
 import useMapBulkUploadController from './map/useMapBulkUploadController.js'
 import useMapCollectionController from './map/useMapCollectionController.js'
 
@@ -815,11 +811,9 @@ function BulkUploadPanel({
 function PhotoDraftPanel({
   collections,
   draft,
-  isSaving,
   language,
   onChangeDraft,
   onOpenPhoto,
-  onSaveDraft,
   onSelectPlace,
   t,
 }) {
@@ -831,8 +825,6 @@ function PhotoDraftPanel({
       </div>
     )
   }
-
-  const isReadyToSave = isPhotoDraftReadyToSave(draft)
 
   return (
     <section className="map-draft-panel" aria-label={t.map.draftLabel}>
@@ -903,14 +895,6 @@ function PhotoDraftPanel({
         </dl>
       ) : null}
 
-      <button
-        className="map-primary-button"
-        type="button"
-        disabled={!isReadyToSave || isSaving}
-        onClick={onSaveDraft}
-      >
-        {isSaving ? t.map.saving : t.map.saveRecord}
-      </button>
     </section>
   )
 }
@@ -1283,6 +1267,7 @@ function MapUploadPanel({
   t,
 }) {
   const isBulkActive = bulkUpload.status !== 'idle'
+  const isDraftReadyToSave = Boolean(draft && isPhotoDraftReadyToSave(draft))
 
   return (
     <>
@@ -1328,14 +1313,22 @@ function MapUploadPanel({
                 {t.map.clickToSetLocation}
               </div>
             ) : null}
+            {draft ? (
+              <button
+                className="map-primary-button"
+                type="button"
+                disabled={!isDraftReadyToSave || isSaving}
+                onClick={onSaveDraft}
+              >
+                {isSaving ? t.map.saving : t.map.saveRecord}
+              </button>
+            ) : null}
             <PhotoDraftPanel
               collections={collections}
               draft={draft}
-                isSaving={isSaving}
                 language={t.map.searchLanguage}
                 onChangeDraft={onChangeDraft}
                 onOpenPhoto={onOpenPhoto}
-                onSaveDraft={onSaveDraft}
                 onSelectPlace={onSelectPlace}
                 t={t}
             />
@@ -1410,6 +1403,12 @@ function MapCollectionManagerPanel({
 // TENVI Map 모듈
 function Map({ t }) {
   const photoInputRef = useRef(null)
+  const [mapStorageMode] = useState(() => readMapStorageMode())
+  const mapRepository = useMemo(
+    () =>
+      mapStorageMode === 'remote' ? remoteMapRepository : localMapRepository,
+    [mapStorageMode],
+  )
   const [records, setRecords] = useState([])
   const [collections, setCollections] = useState([])
   const [selectedCollectionFilter, setSelectedCollectionFilter] = useState(
@@ -1457,6 +1456,7 @@ function Map({ t }) {
     selectedMissingLocationItemIds,
   } = useMapBulkUploadController({
     createViewportRequest,
+    mapRepository,
     setActiveRecordId,
     setError,
     setRecords,
@@ -1537,6 +1537,7 @@ function Map({ t }) {
     resetCollectionDraft,
   } = useMapCollectionController({
     getCollectionRecordCount,
+    mapRepository,
     setCollections,
     setError,
     setRecords,
@@ -1612,8 +1613,11 @@ function Map({ t }) {
   useEffect(() => {
     let isMounted = true
 
-    // IndexedDB 초기 조회
-    Promise.all([getPhotoRecords(), getPhotoCollections()])
+    // 선택 저장소 초기 조회
+    Promise.all([
+      mapRepository.fetchRecords(),
+      mapRepository.fetchCollections(),
+    ])
       .then(([savedRecords, savedCollections]) => {
         if (isMounted) {
           setRecords(savedRecords)
@@ -1635,7 +1639,7 @@ function Map({ t }) {
     return () => {
       isMounted = false
     }
-  }, [t.map.loadError])
+  }, [mapRepository, t.map.loadError])
 
   const handlePhotoChange = async (event) => {
     const files = Array.from(event.target.files ?? [])
@@ -1761,7 +1765,7 @@ function Map({ t }) {
     setError('')
 
     try {
-      const savedRecord = await createPhotoRecord(recordInput)
+      const savedRecord = await mapRepository.createRecord(recordInput)
 
       setRecords((currentRecords) => [savedRecord, ...currentRecords])
       setDraft(null)
@@ -1803,8 +1807,11 @@ function Map({ t }) {
     setError('')
 
     try {
-      // 저장 버튼 후 IndexedDB 업데이트
-      const updatedRecord = await updatePhotoRecord(editDraft.id, updatePatch)
+      // 저장 버튼 후 현재 저장소 업데이트
+      const updatedRecord = await mapRepository.updateRecord(
+        editDraft.id,
+        updatePatch,
+      )
 
       if (!updatedRecord) {
         throw new Error('Missing photo record.')
@@ -1878,8 +1885,8 @@ function Map({ t }) {
     setError('')
 
     try {
-      // IndexedDB 삭제 반영
-      await deletePhotoRecord(recordId)
+      // 현재 저장소 삭제 반영
+      await mapRepository.deleteRecord(recordId)
       setRecords((currentRecords) =>
         currentRecords.filter((record) => record.id !== recordId),
       )

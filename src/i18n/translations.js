@@ -675,9 +675,11 @@ export const translations = {
       boardStorageModeLabel: 'Board 저장소 모드',
       tasksStorageModeLabel: 'Tasks 저장소 모드',
       notesStorageModeLabel: 'Notes 저장소 모드',
+      mapStorageModeLabel: 'Map 저장소 모드',
       boardStorageDescription: '게시글 목록과 상세 데이터를 저장합니다.',
       tasksStorageDescription: '할 일 목록과 완료 상태를 저장합니다.',
       notesStorageDescription: '메모 제목과 본문을 저장합니다.',
+      mapStorageDescription: '지도 기록과 컬렉션 데이터를 저장합니다.',
       boardRemoteCopy: 'LOCAL 데이터를 REMOTE로 복사',
       boardRemoteCopying: 'REMOTE로 복사 중...',
       boardRemoteCopyEmpty: '복사할 LOCAL 데이터가 없습니다.',
@@ -698,6 +700,13 @@ export const translations = {
         'REMOTE API에 연결하지 못해 Notes 복사에 실패했습니다.',
       notesRemoteCopyResult: (copied, skipped, failed) =>
         `Notes 복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
+      mapRemoteCopy: 'LOCAL Map 데이터를 REMOTE로 복사',
+      mapRemoteCopying: 'Map 데이터를 REMOTE로 복사 중...',
+      mapRemoteCopyEmpty: '복사할 LOCAL Map 데이터가 없습니다.',
+      mapRemoteCopyConnectionError:
+        'REMOTE API에 연결하지 못해 Map 복사에 실패했습니다.',
+      mapRemoteCopyResult: (collections, records) =>
+        `Map 복사 완료: 컬렉션 성공 ${collections.copied}개, 건너뜀 ${collections.skipped}개, 실패 ${collections.failed}개 / 기록 성공 ${records.copied}개, 건너뜀 ${records.skipped}개, 실패 ${records.failed}개`,
       exportBoardBackup: 'Board 전용 백업 내보내기',
       importBoardBackup: 'Board 전용 백업 복원',
       boardBackupNote:
@@ -1424,9 +1433,11 @@ export const translations = {
       boardStorageModeLabel: 'Board storage mode',
       tasksStorageModeLabel: 'Tasks storage mode',
       notesStorageModeLabel: 'Notes storage mode',
+      mapStorageModeLabel: 'Map storage mode',
       boardStorageDescription: 'Stores board post list and detail data.',
       tasksStorageDescription: 'Stores task list and completion state.',
       notesStorageDescription: 'Stores note titles and content.',
+      mapStorageDescription: 'Stores map records and collection data.',
       boardRemoteCopy: 'Copy LOCAL data to REMOTE',
       boardRemoteCopying: 'Copying to REMOTE...',
       boardRemoteCopyEmpty: 'There is no LOCAL data to copy.',
@@ -1447,6 +1458,13 @@ export const translations = {
         'Notes copy failed because the REMOTE API is unavailable.',
       notesRemoteCopyResult: (copied, skipped, failed) =>
         `Notes copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
+      mapRemoteCopy: 'Copy LOCAL Map data to REMOTE',
+      mapRemoteCopying: 'Copying Map data to REMOTE...',
+      mapRemoteCopyEmpty: 'There is no LOCAL Map data to copy.',
+      mapRemoteCopyConnectionError:
+        'Map copy failed because the REMOTE API is unavailable.',
+      mapRemoteCopyResult: (collections, records) =>
+        `Map copy complete: collections ${collections.copied} copied, ${collections.skipped} skipped, ${collections.failed} failed / records ${records.copied} copied, ${records.skipped} skipped, ${records.failed} failed`,
       exportBoardBackup: 'Export Board Dedicated Backup',
       importBoardBackup: 'Restore Board Dedicated Backup',
       boardBackupNote:
