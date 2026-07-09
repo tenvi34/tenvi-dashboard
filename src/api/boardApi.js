@@ -132,7 +132,6 @@ export const updateBoardPost = (
     fetcher,
   )
 
-// Board 게시글 삭제
 // Board 게시글 soft delete
 export const softDeleteBoardPost = (
   id,
@@ -162,7 +161,6 @@ export const restoreBoardPost = (
     fetcher,
   )
 
-// Board 게시글 영구 삭제
 // Board 게시글 조회수 증가
 export const increaseBoardPostViews = (
   id,
