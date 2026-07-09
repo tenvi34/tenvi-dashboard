@@ -8,6 +8,7 @@ namespace Tenvi.Api.Controller;
 [Route("api/board/categories")]
 public class BoardCategoriesController : ControllerBase
 {
+    // 기본 카테고리 보호 id
     private const string DefaultCategoryId = "general";
 
     private readonly BoardSqliteStore _store;
@@ -20,6 +21,7 @@ public class BoardCategoriesController : ControllerBase
     }
 
     [HttpGet]
+    // Board 카테고리 목록 조회
     public ActionResult<IEnumerable<BoardCategoryResponse>> GetCategories()
     {
         try
@@ -33,6 +35,7 @@ public class BoardCategoriesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    // Board 카테고리 단건 조회
     public ActionResult<BoardCategoryResponse> GetCategory(string id)
     {
         try
@@ -48,8 +51,10 @@ public class BoardCategoriesController : ControllerBase
     }
 
     [HttpPost]
+    // Board 카테고리 생성 처리
     public ActionResult<BoardCategoryResponse> CreateCategory([FromBody] BoardCategoryRequest? request)
     {
+        // 카테고리 생성 요청 검증
         if (request is null || string.IsNullOrWhiteSpace(request.Name))
         {
             return BadRequest(new { message = "Name is required." });
@@ -59,6 +64,7 @@ public class BoardCategoriesController : ControllerBase
 
         try
         {
+            // LOCAL id 복사 충돌 방지
             if (!string.IsNullOrWhiteSpace(requestedId) && _store.GetCategory(requestedId) is not null)
             {
                 return Conflict(new { message = "A board category with the same id already exists." });
@@ -88,8 +94,10 @@ public class BoardCategoriesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // Board 카테고리 수정 처리
     public ActionResult<BoardCategoryResponse> UpdateCategory(string id, [FromBody] BoardCategoryRequest? request)
     {
+        // 카테고리 수정 요청 검증
         if (request is null || string.IsNullOrWhiteSpace(request.Name))
         {
             return BadRequest(new { message = "Name is required." });
@@ -122,8 +130,10 @@ public class BoardCategoriesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // Board 카테고리 삭제 처리
     public IActionResult DeleteCategory(string id)
     {
+        // 기본 카테고리 삭제 차단
         if (id.Equals(DefaultCategoryId, StringComparison.OrdinalIgnoreCase))
         {
             return BadRequest(new { message = "Default category cannot be deleted." });
@@ -139,6 +149,7 @@ public class BoardCategoriesController : ControllerBase
         }
     }
 
+    // 카테고리 응답 DTO 변환
     private static BoardCategoryResponse ToResponse(BoardCategory category) => new()
     {
         Id = category.Id,
@@ -148,6 +159,7 @@ public class BoardCategoriesController : ControllerBase
         UpdatedAt = category.UpdatedAt
     };
 
+    // 저장소 오류 응답 변환
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);

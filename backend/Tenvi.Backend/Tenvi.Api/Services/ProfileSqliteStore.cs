@@ -4,6 +4,7 @@ using Tenvi.Api.Models.Profile;
 
 namespace Tenvi.Api.Services;
 
+// Profile/Settings SQLite 저장소
 public class ProfileSqliteStore
 {
     private const string DataDirectoryName = "data";
@@ -17,6 +18,7 @@ public class ProfileSqliteStore
     {
         _logger = logger;
 
+        // DB 파일 경로 준비
         var dataDirectory = Path.Combine(environment.ContentRootPath, DataDirectoryName);
         Directory.CreateDirectory(dataDirectory);
 
@@ -29,6 +31,7 @@ public class ProfileSqliteStore
 
     public string DatabasePath => _databasePath;
 
+    // 프로필/이미지/공통 설정 테이블 초기화
     public void Initialize()
     {
         try
@@ -71,6 +74,7 @@ public class ProfileSqliteStore
         }
     }
 
+    // 최신 프로필 단건 조회
     public UserProfile? GetProfile()
     {
         using var connection = OpenConnection();
@@ -83,6 +87,7 @@ public class ProfileSqliteStore
         return reader.Read() ? ReadProfile(reader) : null;
     }
 
+    // 프로필 upsert 저장
     public UserProfile UpsertProfile(UserProfile profile)
     {
         using var connection = OpenConnection();
@@ -118,6 +123,7 @@ public class ProfileSqliteStore
         return profile;
     }
 
+    // 프로필 이미지 최신순 조회
     public List<ProfileImage> GetImages()
     {
         using var connection = OpenConnection();
@@ -136,6 +142,7 @@ public class ProfileSqliteStore
         return images;
     }
 
+    // 프로필 이미지 단건 조회
     public ProfileImage? GetImage(string id)
     {
         using var connection = OpenConnection();
@@ -149,6 +156,7 @@ public class ProfileSqliteStore
         return reader.Read() ? ReadImage(reader) : null;
     }
 
+    // 프로필 이미지 생성
     public bool CreateImage(ProfileImage image)
     {
         using var connection = OpenConnection();
@@ -176,6 +184,7 @@ public class ProfileSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // 프로필 이미지 삭제
     public bool DeleteImage(string id)
     {
         using var connection = OpenConnection();
@@ -187,6 +196,7 @@ public class ProfileSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // REMOTE 공통 설정 조회
     public List<AppSetting> GetSettings()
     {
         using var connection = OpenConnection();
@@ -205,6 +215,7 @@ public class ProfileSqliteStore
         return settings;
     }
 
+    // 공통 설정 단건 조회
     public AppSetting? GetSetting(string key)
     {
         using var connection = OpenConnection();
@@ -218,6 +229,7 @@ public class ProfileSqliteStore
         return reader.Read() ? ReadSetting(reader) : null;
     }
 
+    // 공통 설정 upsert 저장
     public AppSetting UpsertSetting(AppSetting setting)
     {
         using var connection = OpenConnection();
@@ -244,6 +256,7 @@ public class ProfileSqliteStore
         return setting;
     }
 
+    // SQLite 연결 열기
     private SqliteConnection OpenConnection()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -252,6 +265,7 @@ public class ProfileSqliteStore
         return connection;
     }
 
+    // 프로필 SQL 파라미터 매핑
     private static void AddProfileParameters(SqliteCommand command, UserProfile profile)
     {
         command.Parameters.AddWithValue("$id", profile.Id);
@@ -262,6 +276,7 @@ public class ProfileSqliteStore
         command.Parameters.AddWithValue("$updatedAt", FormatDateTime(profile.UpdatedAt));
     }
 
+    // 이미지 SQL 파라미터 매핑
     private static void AddImageParameters(SqliteCommand command, ProfileImage image)
     {
         command.Parameters.AddWithValue("$id", image.Id);
@@ -271,6 +286,7 @@ public class ProfileSqliteStore
         command.Parameters.AddWithValue("$createdAt", FormatDateTime(image.CreatedAt));
     }
 
+    // 설정 SQL 파라미터 매핑
     private static void AddSettingParameters(SqliteCommand command, AppSetting setting)
     {
         command.Parameters.AddWithValue("$key", setting.Key);
@@ -278,6 +294,7 @@ public class ProfileSqliteStore
         command.Parameters.AddWithValue("$updatedAt", FormatDateTime(setting.UpdatedAt));
     }
 
+    // SQLite row 프로필 모델 변환
     private static UserProfile ReadProfile(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -288,6 +305,7 @@ public class ProfileSqliteStore
         UpdatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("updatedAt")))
     };
 
+    // SQLite row 이미지 모델 변환
     private static ProfileImage ReadImage(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -297,6 +315,7 @@ public class ProfileSqliteStore
         CreatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("createdAt")))
     };
 
+    // SQLite row 설정 모델 변환
     private static AppSetting ReadSetting(SqliteDataReader reader) => new()
     {
         Key = reader.GetString(reader.GetOrdinal("key")),
@@ -304,8 +323,10 @@ public class ProfileSqliteStore
         UpdatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("updatedAt")))
     };
 
+    // UTC ISO 문자열 변환
     private static string FormatDateTime(DateTimeOffset value) => value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 
+    // ISO 문자열 DateTimeOffset 복원
     private static DateTimeOffset ParseDateTime(string value) =>
         DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 }

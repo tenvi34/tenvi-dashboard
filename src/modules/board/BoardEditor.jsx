@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getBoardImages, saveBoardImage } from './boardImageRepository.js'
 
 // 에디터 블록 고유 ID 생성
+// 에디터 블록 id 생성
 const createEditorBlockId = () => {
   if (globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID()
@@ -12,6 +13,7 @@ const createEditorBlockId = () => {
 }
 
 // 기본 텍스트 블록 생성
+// 텍스트 블록 기본값 생성
 const createTextBlock = () => ({
   id: createEditorBlockId(),
   type: 'text',
@@ -19,9 +21,11 @@ const createTextBlock = () => ({
 })
 
 // 텍스트 내용 길이에 따른 textarea 높이
+// 텍스트 줄 수 기반 높이 계산
 const getTextBlockRows = (content = '') =>
   Math.max(String(content).split('\n').length, 2)
 
+// Board 블록 에디터
 function BoardEditor({ blocks, onChange, t }) {
   const fileInputRef = useRef(null)
   const activeBlockIdRef = useRef('')
@@ -44,12 +48,14 @@ function BoardEditor({ blocks, onChange, t }) {
   const textBlockCount = blocks.filter((block) => block.type === 'text').length
 
   // 실제 선택된 블록 기준 유지
+  // 현재 선택 블록 기록
   const selectActiveBlock = (blockId) => {
     activeBlockIdRef.current = blockId
     setActiveBlockId(blockId)
   }
 
   // 드래그 상태 ref/state 동기화
+  // 드래그 상태 동기화
   const updateDragState = (nextState) => {
     dragStateRef.current = nextState
     setDragState(nextState)
@@ -94,6 +100,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }, [blocks, imagePreviews])
 
   // 기준 블록 바로 아래 삽입 위치 계산
+  // 삽입 위치 계산
   const getInsertIndex = (targetBlockId = activeBlockIdRef.current) => {
     const activeIndex = blocks.findIndex((block) => block.id === targetBlockId)
 
@@ -101,6 +108,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 기준 블록 다음 위치에 삽입
+  // 블록 배열 삽입
   const insertBlocks = (newBlocks, targetBlockId) => {
     const insertIndex = getInsertIndex(targetBlockId)
     onChange([
@@ -111,6 +119,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 단일 블록 내용 갱신
+  // 블록 내용 갱신
   const updateBlock = (blockId, patch) => {
     onChange(
       blocks.map((block) =>
@@ -125,6 +134,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 텍스트 블록 추가 후 포커스 이동
+  // 텍스트 블록 추가
   const addTextBlock = (targetBlockId) => {
     const nextBlock = createTextBlock()
 
@@ -133,6 +143,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 이미지 선택 위치 예약
+  // 이미지 삽입 위치 예약
   const openImagePicker = (
     targetBlockId = activeBlockIdRef.current,
     appendTextBlock = false,
@@ -145,6 +156,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 이미지 파일을 IndexedDB 이미지 블록으로 변환
+  // 이미지 파일 저장 후 블록 추가
   const addImageBlock = async (file, options = {}) => {
     if (!file) {
       return
@@ -177,6 +189,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 최소 1개 텍스트 블록 보존 삭제
+  // 블록 삭제
   const removeBlock = (blockId) => {
     const targetBlock = blocks.find((block) => block.id === blockId)
 
@@ -187,6 +200,7 @@ function BoardEditor({ blocks, onChange, t }) {
     onChange(blocks.filter((block) => block.id !== blockId))
   }
 
+  // 블록 순서 이동
   // 블록 순서 이동
   const moveBlock = (blockId, direction) => {
     const blockIndex = blocks.findIndex((block) => block.id === blockId)
@@ -203,6 +217,7 @@ function BoardEditor({ blocks, onChange, t }) {
   }
 
   // 드롭 위치 기준 블록 재정렬
+  // 드래그 기준 블록 재배치
   const reorderBlock = (draggedBlockId, targetBlockId, position) => {
     if (!draggedBlockId || draggedBlockId === targetBlockId) {
       return
@@ -229,6 +244,7 @@ function BoardEditor({ blocks, onChange, t }) {
 
   // 블록 위/아래 절반으로 드롭 위치 계산
   // 포인터 위치의 대상 블록과 삽입 방향 계산
+  // 포인터 위치의 드롭 대상 계산
   const getPointerDropTarget = (event) => {
     const targetElement = document
       .elementFromPoint(event.clientX, event.clientY)

@@ -15,6 +15,7 @@ import {
   dataUrlToBlob,
 } from '../../../services/photoArchiveBackupService.js'
 
+// REMOTE 컬렉션 응답 보정
 const normalizeRemoteCollection = (collection) => ({
   ...collection,
   description: String(collection.description ?? ''),
@@ -22,6 +23,7 @@ const normalizeRemoteCollection = (collection) => ({
   startDate: String(collection.startDate ?? ''),
 })
 
+// IndexedDB record를 REMOTE 요청 본문으로 변환
 const toRemoteRecordPayload = async (record) => ({
   id: record.id,
   collectionId: record.collectionId ?? null,
@@ -45,6 +47,7 @@ const toRemoteRecordPayload = async (record) => ({
   deletedAt: record.deletedAt,
 })
 
+// REMOTE record를 Map UI 구조로 복원
 const fromRemoteRecord = async (record) => {
   const previewDataUrl = record.previewDataUrl ?? record.previewImageDataUrl
 
@@ -61,6 +64,7 @@ const fromRemoteRecord = async (record) => {
   }
 }
 
+// REMOTE 컬렉션 요청 본문 변환
 const toRemoteCollectionPayload = (collection) => ({
   id: collection.id,
   name: collection.name,
@@ -83,16 +87,20 @@ export const createRemoteMapRepository = (mapApi = {
   updateRemoteMapCollection,
   updateRemoteMapRecord,
 }) => ({
+  // REMOTE 사진 기록 목록 조회
   async fetchRecords() {
+    // preview Blob 복원 포함
     const records = await mapApi.fetchMapRecords()
 
     return Promise.all(records.map(fromRemoteRecord))
   },
 
+  // REMOTE 사진 기록 단건 조회
   async fetchRecord(id) {
     return fromRemoteRecord(await mapApi.fetchMapRecord(id))
   },
 
+  // REMOTE 사진 기록 생성
   async createRecord(payload) {
     const createdRecord = await mapApi.createRemoteMapRecord(
       await toRemoteRecordPayload(payload),
@@ -101,6 +109,7 @@ export const createRemoteMapRepository = (mapApi = {
     return fromRemoteRecord(createdRecord)
   },
 
+  // REMOTE 사진 기록 일괄 생성
   async createRecords(recordInputs) {
     const results = []
 
@@ -111,6 +120,7 @@ export const createRemoteMapRepository = (mapApi = {
           status: 'saved',
         })
       } catch (error) {
+        // bulk 일부 실패 유지
         results.push({
           error,
           fileName: recordInput?.originalFileName ?? '',
@@ -122,44 +132,52 @@ export const createRemoteMapRepository = (mapApi = {
     return results
   },
 
+  // REMOTE 사진 기록 수정
   async updateRecord(id, payload) {
     const updatedRecord = await mapApi.updateRemoteMapRecord(id, payload)
 
     return fromRemoteRecord(updatedRecord)
   },
 
+  // REMOTE 사진 기록 삭제
   async deleteRecord(id) {
     await mapApi.deleteRemoteMapRecord(id)
 
     return id
   },
 
+  // REMOTE 사진 기록 개수 조회
   async fetchRecordCount() {
     return (await mapApi.fetchMapRecords()).length
   },
 
+  // REMOTE 컬렉션 목록 조회
   async fetchCollections() {
     const collections = await mapApi.fetchMapCollections()
 
     return collections.map(normalizeRemoteCollection)
   },
 
+  // REMOTE 컬렉션 단건 조회
   async fetchCollection(id) {
     return normalizeRemoteCollection(await mapApi.fetchMapCollection(id))
   },
 
+  // REMOTE 컬렉션 생성
   async createCollection(payload) {
     return normalizeRemoteCollection(
       await mapApi.createRemoteMapCollection(toRemoteCollectionPayload(payload)),
     )
   },
 
+  // REMOTE 컬렉션 수정
   async updateCollection(id, payload) {
     return normalizeRemoteCollection(
       await mapApi.updateRemoteMapCollection(id, payload),
     )
   },
 
+  // REMOTE 컬렉션 삭제
   async deleteCollection(id) {
     await mapApi.deleteRemoteMapCollection(id)
 

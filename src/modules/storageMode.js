@@ -4,6 +4,7 @@ export const STORAGE_MODES = {
 }
 
 // 기능별 LOCAL/REMOTE 선택값 보정
+// 기능별 LOCAL/REMOTE 선택값 읽기
 export const readStorageMode = (storageKey, storage = globalThis.localStorage) => {
   try {
     return storage?.getItem(storageKey) === STORAGE_MODES.remote
@@ -14,6 +15,7 @@ export const readStorageMode = (storageKey, storage = globalThis.localStorage) =
   }
 }
 
+// 기능별 LOCAL/REMOTE 선택값 저장
 export const saveStorageMode = (
   storageKey,
   mode,

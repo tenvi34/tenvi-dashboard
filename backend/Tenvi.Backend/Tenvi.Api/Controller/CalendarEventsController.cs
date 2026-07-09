@@ -19,6 +19,7 @@ public partial class CalendarEventsController : ControllerBase
     }
 
     [HttpGet]
+    // Calendar 이벤트 목록 조회
     public ActionResult<IEnumerable<CalendarEventResponse>> GetEvents()
     {
         try
@@ -32,6 +33,7 @@ public partial class CalendarEventsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    // Calendar 이벤트 단건 조회
     public ActionResult<CalendarEventResponse> GetEvent(string id)
     {
         try
@@ -52,8 +54,10 @@ public partial class CalendarEventsController : ControllerBase
     }
 
     [HttpPost]
+    // Calendar 이벤트 생성 처리
     public ActionResult<CalendarEventResponse> CreateEvent([FromBody] CalendarEventRequest? request)
     {
+        // 날짜 범위 요청 검증
         if (!IsValidEventRequest(request))
         {
             return BadRequest(new { message = "Title, startDate, and endDate are required." });
@@ -63,6 +67,7 @@ public partial class CalendarEventsController : ControllerBase
 
         try
         {
+            // LOCAL id 복사 충돌 방지
             if (!string.IsNullOrWhiteSpace(requestedId) && _store.GetEvent(requestedId) is not null)
             {
                 return Conflict(new { message = "A calendar event with the same id already exists." });
@@ -97,8 +102,10 @@ public partial class CalendarEventsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // Calendar 이벤트 수정 처리
     public ActionResult<CalendarEventResponse> UpdateEvent(string id, [FromBody] CalendarEventRequest? request)
     {
+        // 날짜 범위 요청 검증
         if (!IsValidEventRequest(request))
         {
             return BadRequest(new { message = "Title, startDate, and endDate are required." });
@@ -135,6 +142,7 @@ public partial class CalendarEventsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // Calendar 이벤트 삭제 처리
     public IActionResult DeleteEvent(string id)
     {
         try
@@ -163,6 +171,7 @@ public partial class CalendarEventsController : ControllerBase
         }
     }
 
+    // Calendar 이벤트 요청 검증
     private static bool IsValidEventRequest(CalendarEventRequest? request)
     {
         if (request is null || string.IsNullOrWhiteSpace(request.Title))
@@ -176,16 +185,20 @@ public partial class CalendarEventsController : ControllerBase
         return IsDateKey(startDate) && IsDateKey(endDate) && string.CompareOrdinal(endDate, startDate) >= 0;
     }
 
+    // 시작일 fallback 보정
     private static string NormalizeStartDate(CalendarEventRequest request) =>
         string.IsNullOrWhiteSpace(request.StartDate)
             ? request.Date?.Trim() ?? string.Empty
             : request.StartDate.Trim();
 
+    // 종료일 fallback 보정
     private static string NormalizeEndDate(CalendarEventRequest request) =>
         string.IsNullOrWhiteSpace(request.EndDate) ? NormalizeStartDate(request) : request.EndDate.Trim();
 
+    // 날짜 key 형식 검증
     private static bool IsDateKey(string value) => DateKeyRegex().IsMatch(value);
 
+    // Calendar 응답 DTO 변환
     private static CalendarEventResponse ToResponse(CalendarEventItem calendarEvent) => new()
     {
         Id = calendarEvent.Id,
@@ -202,6 +215,7 @@ public partial class CalendarEventsController : ControllerBase
 
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
+        // SQLite 오류 응답 통일
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);
 
         return StatusCode(StatusCodes.Status500InternalServerError, new { message });

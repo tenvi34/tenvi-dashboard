@@ -18,6 +18,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet]
+    // Task 목록 조회
     public ActionResult<IEnumerable<TaskItemResponse>> GetTasks()
     {
         try
@@ -31,6 +32,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    // Task 단건 조회
     public ActionResult<TaskItemResponse> GetTask(string id)
     {
         try
@@ -51,8 +53,10 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost]
+    // Task 생성 처리
     public ActionResult<TaskItemResponse> CreateTask([FromBody] TaskItemRequest? request)
     {
+        // 생성 요청 검증
         if (request is null || string.IsNullOrWhiteSpace(request.Title))
         {
             return BadRequest(new { message = "Title is required." });
@@ -62,6 +66,7 @@ public class TasksController : ControllerBase
 
         try
         {
+            // LOCAL id 복사 충돌 방지
             if (!string.IsNullOrWhiteSpace(requestedId) && _store.GetTask(requestedId) is not null)
             {
                 return Conflict(new { message = "A task with the same id already exists." });
@@ -93,8 +98,10 @@ public class TasksController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // Task 수정 처리
     public ActionResult<TaskItemResponse> UpdateTask(string id, [FromBody] TaskItemRequest? request)
     {
+        // 수정 요청 검증
         if (request is null || string.IsNullOrWhiteSpace(request.Title))
         {
             return BadRequest(new { message = "Title is required." });
@@ -128,6 +135,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // Task 삭제 처리
     public IActionResult DeleteTask(string id)
     {
         try
@@ -156,6 +164,7 @@ public class TasksController : ControllerBase
         }
     }
 
+    // Task 응답 DTO 변환
     private static TaskItemResponse ToResponse(TaskItem task) => new()
     {
         Id = task.Id,
@@ -169,6 +178,7 @@ public class TasksController : ControllerBase
 
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
+        // SQLite 오류 응답 통일
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);
 
         return StatusCode(StatusCodes.Status500InternalServerError, new { message });
@@ -176,6 +186,7 @@ public class TasksController : ControllerBase
 
     private static string NormalizeDueDate(string? dueDate)
     {
+        // 날짜 key 형식 보존
         var value = dueDate?.Trim() ?? string.Empty;
 
         return value.Length == 10 ? value : string.Empty;

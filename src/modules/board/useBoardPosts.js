@@ -148,6 +148,7 @@ function useLegacyBoardPosts() {
 }
 
 */
+// Board 게시글 저장소 컨트롤러
 function useBoardPosts() {
   // Board 재진입 시 Settings에서 저장한 모드 반영
   const [storageMode] = useState(() => readBoardStorageMode())
@@ -161,11 +162,13 @@ function useBoardPosts() {
   const [loading, setLoading] = useState(storageMode === 'remote')
   const [error, setError] = useState(null)
   const [isLocalFallback, setIsLocalFallback] = useState(false)
+  // REMOTE 장애 시 LOCAL 저장소 사용
   const actionRepository = isLocalFallback
     ? localBoardPostRepository
     : repository
 
   // 원격 active/trash 응답을 기존 단일 posts 배열로 결합
+  // active/trash 목록 동기화
   const refreshPosts = useCallback(async () => {
     if (storageMode === 'local') {
       setPostsState(localBoardPostRepository.fetchAllPosts())
@@ -202,6 +205,7 @@ function useBoardPosts() {
     }
   }, [refreshPosts, storageMode])
 
+  // 저장 작업 후 목록 재조회
   const runAction = async (action) => {
     if (!isLocalFallback) setError(null)
     try {
@@ -219,6 +223,7 @@ function useBoardPosts() {
   }
 
   // 원격에는 전체 치환 API가 없어 setPosts는 화면 상태 호환만 제공
+  // legacy setPosts 호환 처리
   const setPosts = (updater) => {
     setPostsState((currentPosts) => {
       const value = typeof updater === 'function' ? updater(currentPosts) : updater
@@ -230,14 +235,26 @@ function useBoardPosts() {
     })
   }
 
+  // 게시글 생성
   const createPost = (payload) => runAction(() => actionRepository.createPost(payload))
+
+  // 게시글 수정
   const updatePost = (id, payload) => runAction(() => actionRepository.updatePost(id, payload))
+
+  // 게시글 휴지통 이동
   const softDeletePost = (id) => runAction(() => actionRepository.softDeletePost(id))
+
+  // 휴지통 게시글 복원
   const restorePost = (id) => runAction(() => actionRepository.restorePost(id))
+
+  // 휴지통 게시글 영구 삭제
   const permanentlyDeletePost = (id) =>
     runAction(() => actionRepository.permanentlyDeletePost(id))
+
+  // 게시글 조회수 증가
   const increasePostViews = (id) => runAction(() => actionRepository.increaseViews(id))
 
+  // 게시글 상단 고정 토글
   const togglePostPinned = (id) => {
     const post = posts.find((item) => item.id === id)
     if (!post) return Promise.reject(new Error('Board post not found.'))
@@ -251,6 +268,7 @@ function useBoardPosts() {
     })
   }
 
+  // 삭제된 카테고리 게시글 기본 카테고리 이동
   const movePostsToCategoryFallback = async (
     categoryId,
     fallbackCategoryId = DEFAULT_BOARD_CATEGORY_ID,

@@ -3,10 +3,12 @@ import { API_BASE_URL, joinApiPath } from './client.js'
 export const TEST_ECHO_API_PATH = '/api/test/echo'
 
 // Echo API 실제 호출 URL
+// Echo API URL 결합
 export const getTestEchoUrl = (baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, TEST_ECHO_API_PATH)
 
 // 프론트-백엔드 POST 연결 테스트 호출
+// Echo POST 요청
 export const fetchTestEcho = async ({
   message,
   baseUrl = API_BASE_URL,

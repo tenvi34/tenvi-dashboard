@@ -17,6 +17,7 @@ import { parseUserProfile } from './userProfileLogic.js'
 
 const HUD_EFFECTS = ['minimal', 'normal', 'max']
 
+// 복사 결과 카운터 생성
 const createCopyResult = (total) => ({
   total,
   copied: 0,
@@ -25,6 +26,7 @@ const createCopyResult = (total) => ({
   failed: 0,
 })
 
+// localStorage 설정 안전 읽기
 const readStoredSetting = (storageKey, fallbackValue) => {
   try {
     return globalThis.localStorage?.getItem(storageKey) ?? fallbackValue
@@ -33,6 +35,7 @@ const readStoredSetting = (storageKey, fallbackValue) => {
   }
 }
 
+// REMOTE 설정 JSON 파싱
 export const parseRemoteSettingValue = (setting) => {
   try {
     return JSON.parse(setting?.valueJson ?? 'null')
@@ -41,6 +44,7 @@ export const parseRemoteSettingValue = (setting) => {
   }
 }
 
+// REMOTE 설정값 유효성 보정
 export const normalizeRemoteAppSettings = (settings = []) => {
   const nextSettings = {}
 
@@ -71,15 +75,18 @@ export const normalizeRemoteAppSettings = (settings = []) => {
   return nextSettings
 }
 
+// REMOTE 공통 설정 로드
 export const loadRemoteAppSettings = async ({
   fetchSettings = fetchRemoteAppSettings,
 } = {}) => normalizeRemoteAppSettings(await fetchSettings())
 
+// REMOTE 설정 단건 저장
 export const saveRemoteSettingValue = (key, value) =>
   REMOTE_APP_SETTING_KEYS.includes(key)
     ? saveRemoteAppSetting(key, JSON.stringify(value))
     : Promise.resolve(null)
 
+// LOCAL 공통 설정 읽기
 const readLocalAppSettings = () => ({
   language: readStoredSetting(STORAGE_KEYS.language, 'ko'),
   theme: readStoredSetting(STORAGE_KEYS.theme, 'dark'),
@@ -87,12 +94,14 @@ const readLocalAppSettings = () => ({
   hudEffect: readStoredSetting(STORAGE_KEYS.hudEffect, 'normal'),
 })
 
+// REMOTE 설정 payload 변환
 const toRemoteSettingPayload = ([key, value]) => ({
   key,
   valueJson: JSON.stringify(value),
 })
 
 // LOCAL Profile 원본 보존 후 REMOTE 프로필과 이미지에 반영
+// LOCAL Profile 원본 보존 후 REMOTE 반영
 export const copyLocalProfileToRemote = async ({
   fetchImages = fetchProfileImages,
   getLocalImages = getAllProfileImages,
@@ -142,6 +151,7 @@ export const copyLocalProfileToRemote = async ({
 }
 
 // API URL과 저장소 모드는 기기별 값으로 남기고 공통 설정만 REMOTE에 복사
+// 공통 설정만 REMOTE 복사
 export const copyLocalSettingsToRemote = async ({
   fetchSettings = fetchRemoteAppSettings,
   saveSettings = saveRemoteAppSettings,

@@ -1,5 +1,6 @@
 import { fetchTestEcho } from './testEchoApi.js'
 
+// Echo 메시지 전송 wrapper
 export async function sendEchoMessage(message) {
   const response = await fetchTestEcho({ message })
   return response

@@ -18,6 +18,7 @@ public class MapCollectionsController : ControllerBase
     }
 
     [HttpGet]
+    // Map 컬렉션 목록 조회
     public ActionResult<IEnumerable<MapCollectionResponse>> GetCollections()
     {
         try
@@ -31,6 +32,7 @@ public class MapCollectionsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    // Map 컬렉션 단건 조회
     public ActionResult<MapCollectionResponse> GetCollection(string id)
     {
         try
@@ -46,8 +48,10 @@ public class MapCollectionsController : ControllerBase
     }
 
     [HttpPost]
+    // Map 컬렉션 생성 처리
     public ActionResult<MapCollectionResponse> CreateCollection([FromBody] MapCollectionRequest? request)
     {
+        // 컬렉션 생성 요청 검증
         if (request is null || string.IsNullOrWhiteSpace(request.Name))
         {
             return BadRequest(new { message = "Name is required." });
@@ -57,6 +61,7 @@ public class MapCollectionsController : ControllerBase
 
         try
         {
+            // LOCAL id 복사 충돌 방지
             if (!string.IsNullOrWhiteSpace(requestedId) && _store.GetCollection(requestedId) is not null)
             {
                 return Conflict(new { message = "A map collection with the same id already exists." });
@@ -88,8 +93,10 @@ public class MapCollectionsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // Map 컬렉션 수정 처리
     public ActionResult<MapCollectionResponse> UpdateCollection(string id, [FromBody] MapCollectionRequest? request)
     {
+        // 컬렉션 수정 요청 검증
         if (request is null || string.IsNullOrWhiteSpace(request.Name))
         {
             return BadRequest(new { message = "Name is required." });
@@ -124,6 +131,7 @@ public class MapCollectionsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // Map 컬렉션 삭제 처리
     public IActionResult DeleteCollection(string id)
     {
         try
@@ -136,6 +144,7 @@ public class MapCollectionsController : ControllerBase
         }
     }
 
+    // Map 컬렉션 응답 DTO 변환
     private static MapCollectionResponse ToResponse(MapCollectionItem collection) => new()
     {
         Id = collection.Id,
@@ -147,6 +156,7 @@ public class MapCollectionsController : ControllerBase
         UpdatedAt = collection.UpdatedAt
     };
 
+    // 저장소 오류 응답 변환
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);

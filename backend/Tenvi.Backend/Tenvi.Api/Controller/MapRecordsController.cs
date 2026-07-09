@@ -8,6 +8,7 @@ namespace Tenvi.Api.Controller;
 [Route("api/map/records")]
 public class MapRecordsController : ControllerBase
 {
+    // Map 위치 출처 허용값
     private static readonly HashSet<string> LocationSources = new(StringComparer.OrdinalIgnoreCase)
     {
         "exif",
@@ -25,6 +26,7 @@ public class MapRecordsController : ControllerBase
     }
 
     [HttpGet]
+    // 사진 기록 목록 조회
     public ActionResult<IEnumerable<MapRecordResponse>> GetRecords()
     {
         try
@@ -38,6 +40,7 @@ public class MapRecordsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    // 사진 기록 단건 조회
     public ActionResult<MapRecordResponse> GetRecord(string id)
     {
         try
@@ -58,8 +61,10 @@ public class MapRecordsController : ControllerBase
     }
 
     [HttpPost]
+    // 사진 기록 생성 처리
     public ActionResult<MapRecordResponse> CreateRecord([FromBody] MapRecordRequest? request)
     {
+        // preview 포함 생성 요청 검증
         if (!IsValidRecordRequest(request))
         {
             return BadRequest(new { message = "Title, coordinates, and previewDataUrl are required." });
@@ -69,6 +74,7 @@ public class MapRecordsController : ControllerBase
 
         try
         {
+            // LOCAL id 복사 충돌 방지
             if (!string.IsNullOrWhiteSpace(requestedId) && _store.GetRecord(requestedId) is not null)
             {
                 return Conflict(new { message = "A map record with the same id already exists." });
@@ -110,8 +116,10 @@ public class MapRecordsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // 사진 기록 수정 처리
     public ActionResult<MapRecordResponse> UpdateRecord(string id, [FromBody] MapRecordRequest? request)
     {
+        // 위치 수정 요청 검증
         if (!IsValidRecordPatch(request))
         {
             return BadRequest(new { message = "Title and coordinates are required." });
@@ -148,6 +156,7 @@ public class MapRecordsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // 사진 기록 삭제 처리
     public IActionResult DeleteRecord(string id)
     {
         try
@@ -176,11 +185,13 @@ public class MapRecordsController : ControllerBase
         }
     }
 
+    // 생성 record 요청 검증
     private static bool IsValidRecordRequest(MapRecordRequest? request) =>
         IsValidRecordPatch(request) &&
         !string.IsNullOrWhiteSpace(request?.PreviewDataUrl) &&
         request.PreviewDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
 
+    // 수정 가능한 record 필수값 검증
     private static bool IsValidRecordPatch(MapRecordRequest? request) =>
         request is not null &&
         !string.IsNullOrWhiteSpace(request.Title) &&
@@ -189,14 +200,17 @@ public class MapRecordsController : ControllerBase
         double.IsFinite(request.Latitude.Value) &&
         double.IsFinite(request.Longitude.Value);
 
+    // 미분류 컬렉션 보정
     private static string NormalizeCollectionId(string? collectionId) =>
         string.IsNullOrWhiteSpace(collectionId) ? string.Empty : collectionId.Trim();
 
+    // 위치 출처 기본값 보정
     private static string NormalizeLocationSource(string? source) =>
         !string.IsNullOrWhiteSpace(source) && LocationSources.Contains(source)
             ? source.ToLowerInvariant()
             : "manual";
 
+    // Map record 응답 DTO 변환
     private static MapRecordResponse ToResponse(MapRecordItem record) => new()
     {
         Id = record.Id,
@@ -220,6 +234,7 @@ public class MapRecordsController : ControllerBase
 
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
+        // SQLite 오류 응답 통일
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);
 
         return StatusCode(StatusCodes.Status500InternalServerError, new { message });

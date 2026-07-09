@@ -8,6 +8,7 @@ namespace Tenvi.Api.Controller;
 [Route("api/profile")]
 public class ProfileController : ControllerBase
 {
+    // 로컬 기본 프로필 id
     private const string DefaultProfileId = "local-user";
 
     private readonly ProfileSqliteStore _store;
@@ -22,6 +23,7 @@ public class ProfileController : ControllerBase
     [HttpGet]
     public ActionResult<UserProfileResponse> GetProfile()
     {
+        // 저장 프로필 없을 때 기본값 응답
         try
         {
             var profile = _store.GetProfile() ?? CreateDefaultProfile();
@@ -37,6 +39,7 @@ public class ProfileController : ControllerBase
     [HttpPut]
     public ActionResult<UserProfileResponse> PutProfile([FromBody] UserProfileRequest? request)
     {
+        // 프로필 저장 payload 검증
         if (request is null)
         {
             return BadRequest(new { message = "Profile payload is required." });
@@ -46,6 +49,7 @@ public class ProfileController : ControllerBase
         {
             var currentProfile = _store.GetProfile();
             var now = DateTimeOffset.UtcNow;
+            // 기존 createdAt 유지
             var createdAt = request.CreatedAt ?? currentProfile?.CreatedAt ?? now;
             var profile = new UserProfile
             {
@@ -67,6 +71,7 @@ public class ProfileController : ControllerBase
 
     private static UserProfile CreateDefaultProfile()
     {
+        // 첫 실행 기본 프로필
         var now = DateTimeOffset.UtcNow;
 
         return new UserProfile
@@ -78,6 +83,7 @@ public class ProfileController : ControllerBase
         };
     }
 
+    // 프로필 응답 DTO 변환
     private static UserProfileResponse ToResponse(UserProfile profile) => new()
     {
         Id = profile.Id,
@@ -90,6 +96,7 @@ public class ProfileController : ControllerBase
 
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
+        // SQLite 오류 응답 통일
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);
 
         return StatusCode(StatusCodes.Status500InternalServerError, new { message });

@@ -20,6 +20,7 @@ public class ProfileImagesController : ControllerBase
     [HttpGet]
     public ActionResult<IEnumerable<ProfileImageResponse>> GetImages()
     {
+        // 프로필 이미지 목록 조회
         try
         {
             return Ok(_store.GetImages().Select(ToResponse).ToList());
@@ -33,6 +34,7 @@ public class ProfileImagesController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<ProfileImageResponse> GetImage(string id)
     {
+        // 프로필 이미지 단건 조회
         try
         {
             var image = _store.GetImage(id);
@@ -48,6 +50,7 @@ public class ProfileImagesController : ControllerBase
     [HttpPost]
     public ActionResult<ProfileImageResponse> CreateImage([FromBody] ProfileImageRequest? request)
     {
+        // data URL 이미지 요청 검증
         if (
             request is null ||
             string.IsNullOrWhiteSpace(request.Id) ||
@@ -62,6 +65,7 @@ public class ProfileImagesController : ControllerBase
 
         try
         {
+            // 이미지 id 중복 방지
             if (_store.GetImage(id) is not null)
             {
                 return Conflict(new { message = "A profile image with the same id already exists." });
@@ -92,6 +96,7 @@ public class ProfileImagesController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult DeleteImage(string id)
     {
+        // 프로필 이미지 삭제
         try
         {
             return _store.DeleteImage(id) ? NoContent() : NotFound();
@@ -102,6 +107,7 @@ public class ProfileImagesController : ControllerBase
         }
     }
 
+    // 프로필 이미지 응답 DTO 변환
     private static ProfileImageResponse ToResponse(ProfileImage image) => new()
     {
         Id = image.Id,
@@ -113,6 +119,7 @@ public class ProfileImagesController : ControllerBase
 
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
+        // SQLite 오류 응답 통일
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);
 
         return StatusCode(StatusCodes.Status500InternalServerError, new { message });

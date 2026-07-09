@@ -4,6 +4,7 @@ using Tenvi.Api.Models.Calendar;
 
 namespace Tenvi.Api.Services;
 
+// Calendar SQLite 저장소
 public class CalendarSqliteStore
 {
     private const string DataDirectoryName = "data";
@@ -17,6 +18,7 @@ public class CalendarSqliteStore
     {
         _logger = logger;
 
+        // DB 파일 경로 준비
         var dataDirectory = Path.Combine(environment.ContentRootPath, DataDirectoryName);
         Directory.CreateDirectory(dataDirectory);
 
@@ -29,6 +31,7 @@ public class CalendarSqliteStore
 
     public string DatabasePath => _databasePath;
 
+    // Calendar 이벤트 테이블 초기화
     public void Initialize()
     {
         try
@@ -60,6 +63,7 @@ public class CalendarSqliteStore
         }
     }
 
+    // 삭제되지 않은 이벤트 목록 조회
     public List<CalendarEventItem> GetEvents()
     {
         using var connection = OpenConnection();
@@ -82,6 +86,7 @@ public class CalendarSqliteStore
         return events;
     }
 
+    // Calendar 이벤트 단건 조회
     public CalendarEventItem? GetEvent(string id)
     {
         using var connection = OpenConnection();
@@ -95,6 +100,7 @@ public class CalendarSqliteStore
         return reader.Read() ? ReadEvent(reader) : null;
     }
 
+    // Calendar 이벤트 생성
     public bool CreateEvent(CalendarEventItem calendarEvent)
     {
         using var connection = OpenConnection();
@@ -130,6 +136,7 @@ public class CalendarSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // Calendar 이벤트 전체 필드 갱신
     public bool UpdateEvent(CalendarEventItem calendarEvent)
     {
         using var connection = OpenConnection();
@@ -153,6 +160,7 @@ public class CalendarSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // SQLite 연결 열기
     private SqliteConnection OpenConnection()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -161,6 +169,7 @@ public class CalendarSqliteStore
         return connection;
     }
 
+    // Calendar 이벤트 SQL 파라미터 매핑
     private static void AddEventParameters(SqliteCommand command, CalendarEventItem calendarEvent)
     {
         command.Parameters.AddWithValue("$id", calendarEvent.Id);
@@ -176,6 +185,7 @@ public class CalendarSqliteStore
 
     private static CalendarEventItem ReadEvent(SqliteDataReader reader)
     {
+        // date 필드 fallback 호환
         var startDate = reader.GetString(reader.GetOrdinal("startDate"));
 
         return new CalendarEventItem
@@ -193,6 +203,7 @@ public class CalendarSqliteStore
         };
     }
 
+    // nullable 날짜 컬럼 읽기
     private static DateTimeOffset? ReadNullableDateTime(SqliteDataReader reader, string columnName)
     {
         var ordinal = reader.GetOrdinal(columnName);
@@ -200,8 +211,10 @@ public class CalendarSqliteStore
         return reader.IsDBNull(ordinal) ? null : ParseDateTime(reader.GetString(ordinal));
     }
 
+    // UTC ISO 문자열 변환
     private static string FormatDateTime(DateTimeOffset value) => value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 
+    // ISO 문자열 DateTimeOffset 복원
     private static DateTimeOffset ParseDateTime(string value) =>
         DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 }

@@ -4,6 +4,7 @@ using Tenvi.Api.Models.Tasks;
 
 namespace Tenvi.Api.Services;
 
+// Tasks SQLite 저장소
 public class TaskSqliteStore
 {
     private const string DataDirectoryName = "data";
@@ -17,6 +18,7 @@ public class TaskSqliteStore
     {
         _logger = logger;
 
+        // DB 파일 경로 준비
         var dataDirectory = Path.Combine(environment.ContentRootPath, DataDirectoryName);
         Directory.CreateDirectory(dataDirectory);
 
@@ -29,6 +31,7 @@ public class TaskSqliteStore
 
     public string DatabasePath => _databasePath;
 
+    // Tasks 테이블 초기화
     public void Initialize()
     {
         try
@@ -58,6 +61,7 @@ public class TaskSqliteStore
         }
     }
 
+    // 삭제되지 않은 Task 목록 조회
     public List<TaskItem> GetTasks()
     {
         using var connection = OpenConnection();
@@ -80,6 +84,7 @@ public class TaskSqliteStore
         return tasks;
     }
 
+    // Task 단건 조회
     public TaskItem? GetTask(string id)
     {
         using var connection = OpenConnection();
@@ -93,6 +98,7 @@ public class TaskSqliteStore
         return reader.Read() ? ReadTask(reader) : null;
     }
 
+    // Task 생성
     public bool CreateTask(TaskItem task)
     {
         using var connection = OpenConnection();
@@ -124,6 +130,7 @@ public class TaskSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // Task 전체 필드 갱신
     public bool UpdateTask(TaskItem task)
     {
         using var connection = OpenConnection();
@@ -145,6 +152,7 @@ public class TaskSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // SQLite 연결 열기
     private SqliteConnection OpenConnection()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -153,6 +161,7 @@ public class TaskSqliteStore
         return connection;
     }
 
+    // Task SQL 파라미터 매핑
     private static void AddTaskParameters(SqliteCommand command, TaskItem task)
     {
         command.Parameters.AddWithValue("$id", task.Id);
@@ -164,6 +173,7 @@ public class TaskSqliteStore
         command.Parameters.AddWithValue("$deletedAt", task.DeletedAt.HasValue ? FormatDateTime(task.DeletedAt.Value) : DBNull.Value);
     }
 
+    // SQLite row Task 모델 변환
     private static TaskItem ReadTask(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -175,6 +185,7 @@ public class TaskSqliteStore
         DeletedAt = ReadNullableDateTime(reader, "deletedAt")
     };
 
+    // nullable 날짜 컬럼 읽기
     private static DateTimeOffset? ReadNullableDateTime(SqliteDataReader reader, string columnName)
     {
         var ordinal = reader.GetOrdinal(columnName);
@@ -182,8 +193,10 @@ public class TaskSqliteStore
         return reader.IsDBNull(ordinal) ? null : ParseDateTime(reader.GetString(ordinal));
     }
 
+    // UTC ISO 문자열 변환
     private static string FormatDateTime(DateTimeOffset value) => value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 
+    // ISO 문자열 DateTimeOffset 복원
     private static DateTimeOffset ParseDateTime(string value) =>
         DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 }

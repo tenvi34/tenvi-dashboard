@@ -4,6 +4,7 @@ using Tenvi.Api.Models.Notes;
 
 namespace Tenvi.Api.Services;
 
+// Notes SQLite 저장소
 public class NoteSqliteStore
 {
     private const string DataDirectoryName = "data";
@@ -17,6 +18,7 @@ public class NoteSqliteStore
     {
         _logger = logger;
 
+        // DB 파일 경로 준비
         var dataDirectory = Path.Combine(environment.ContentRootPath, DataDirectoryName);
         Directory.CreateDirectory(dataDirectory);
 
@@ -29,6 +31,7 @@ public class NoteSqliteStore
 
     public string DatabasePath => _databasePath;
 
+    // Notes 테이블 초기화
     public void Initialize()
     {
         try
@@ -57,6 +60,7 @@ public class NoteSqliteStore
         }
     }
 
+    // 삭제되지 않은 Note 목록 조회
     public List<NoteItem> GetNotes()
     {
         using var connection = OpenConnection();
@@ -79,6 +83,7 @@ public class NoteSqliteStore
         return notes;
     }
 
+    // Note 단건 조회
     public NoteItem? GetNote(string id)
     {
         using var connection = OpenConnection();
@@ -92,6 +97,7 @@ public class NoteSqliteStore
         return reader.Read() ? ReadNote(reader) : null;
     }
 
+    // Note 생성
     public bool CreateNote(NoteItem note)
     {
         using var connection = OpenConnection();
@@ -121,6 +127,7 @@ public class NoteSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // Note 전체 필드 갱신
     public bool UpdateNote(NoteItem note)
     {
         using var connection = OpenConnection();
@@ -141,6 +148,7 @@ public class NoteSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // SQLite 연결 열기
     private SqliteConnection OpenConnection()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -149,6 +157,7 @@ public class NoteSqliteStore
         return connection;
     }
 
+    // Note SQL 파라미터 매핑
     private static void AddNoteParameters(SqliteCommand command, NoteItem note)
     {
         command.Parameters.AddWithValue("$id", note.Id);
@@ -159,6 +168,7 @@ public class NoteSqliteStore
         command.Parameters.AddWithValue("$deletedAt", note.DeletedAt.HasValue ? FormatDateTime(note.DeletedAt.Value) : DBNull.Value);
     }
 
+    // SQLite row Note 모델 변환
     private static NoteItem ReadNote(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -169,6 +179,7 @@ public class NoteSqliteStore
         DeletedAt = ReadNullableDateTime(reader, "deletedAt")
     };
 
+    // nullable 날짜 컬럼 읽기
     private static DateTimeOffset? ReadNullableDateTime(SqliteDataReader reader, string columnName)
     {
         var ordinal = reader.GetOrdinal(columnName);
@@ -176,8 +187,10 @@ public class NoteSqliteStore
         return reader.IsDBNull(ordinal) ? null : ParseDateTime(reader.GetString(ordinal));
     }
 
+    // UTC ISO 문자열 변환
     private static string FormatDateTime(DateTimeOffset value) => value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 
+    // ISO 문자열 DateTimeOffset 복원
     private static DateTimeOffset ParseDateTime(string value) =>
         DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 }

@@ -4,9 +4,11 @@ import { createNote, normalizeNote, parseNotes } from '../../notesLogic.js'
 const DEFAULT_STORAGE_KEY = STORAGE_KEYS.notes
 const getDefaultStorage = () => globalThis.localStorage
 
+// localStorage Notes 원본 복원
 const readNotes = (storage, storageKey) =>
   parseNotes(storage?.getItem(storageKey))
 
+// 기존 Notes 저장 key 유지
 const writeNotes = (storage, storageKey, notes) => {
   storage?.setItem(storageKey, JSON.stringify(notes))
 }
@@ -17,18 +19,22 @@ export const createLocalNoteRepository = ({
   storage = getDefaultStorage(),
   storageKey = DEFAULT_STORAGE_KEY,
 } = {}) => {
+  // 저장소 접근 경로 주입 가능
   const loadNotes = () => readNotes(storage, storageKey)
   const saveNotes = (notes) => writeNotes(storage, storageKey, notes)
 
   return {
+    // 전체 Note 원본 조회
     fetchAllNotes() {
       return loadNotes()
     },
 
+    // 활성 Note 목록 조회
     async fetchNotes() {
       return loadNotes().filter((note) => !note.deletedAt)
     },
 
+    // LOCAL Note 생성
     async createNote(payload) {
       const createdNote = createNote(payload)
 
@@ -41,6 +47,7 @@ export const createLocalNoteRepository = ({
       return createdNote
     },
 
+    // LOCAL Note 수정
     async updateNote(id, payload) {
       const currentNotes = loadNotes()
       const targetNote = findNote(currentNotes, id)
@@ -65,6 +72,7 @@ export const createLocalNoteRepository = ({
       return nextNote
     },
 
+    // LOCAL Note 삭제
     async deleteNote(id) {
       const currentNotes = loadNotes()
 

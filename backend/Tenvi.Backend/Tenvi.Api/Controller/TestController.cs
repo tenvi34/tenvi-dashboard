@@ -10,6 +10,7 @@ public class TestController : ControllerBase
     [HttpPost("echo")]
     public IActionResult Echo([FromBody] EchoRequest? request)
     {
+        // Echo 요청 처리
         // 연결 테스트 입력값 검증
         if (request is null || string.IsNullOrWhiteSpace(request.Message))
         {

@@ -10,6 +10,7 @@ public class HealthController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
+        // 백엔드 상태 응답
         return Ok(new
         {
             ok = true,

@@ -8,43 +8,54 @@ export const BOARD_IMAGES_API_PATH = '/api/board/images'
 export const getBoardPostsUrl = (baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, BOARD_POSTS_API_PATH)
 
+// Board 게시글 단건 URL 결합
 export const getBoardPostUrl = (id, baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, `${BOARD_POSTS_API_PATH}/${encodeURIComponent(id)}`)
 
+// Board 휴지통 목록 URL 결합
 export const getTrashBoardPostsUrl = (baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, `${BOARD_POSTS_API_PATH}/trash`)
 
+// Board 게시글 복원 URL 결합
 export const getBoardPostRestoreUrl = (id, baseUrl = API_BASE_URL) =>
   joinApiPath(
     baseUrl,
     `${BOARD_POSTS_API_PATH}/${encodeURIComponent(id)}/restore`,
   )
 
+// Board 조회수 증가 URL 결합
 export const getBoardPostViewsUrl = (id, baseUrl = API_BASE_URL) =>
   joinApiPath(
     baseUrl,
     `${BOARD_POSTS_API_PATH}/${encodeURIComponent(id)}/views`,
   )
 
+// Board 영구 삭제 URL 결합
 export const getBoardPostPermanentUrl = (id, baseUrl = API_BASE_URL) =>
   joinApiPath(
     baseUrl,
     `${BOARD_POSTS_API_PATH}/${encodeURIComponent(id)}/permanent`,
   )
 
+// Board 카테고리 목록 URL 결합
 export const getBoardCategoriesUrl = (baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, BOARD_CATEGORIES_API_PATH)
 
+// Board 카테고리 단건 URL 결합
 export const getBoardCategoryUrl = (id, baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, `${BOARD_CATEGORIES_API_PATH}/${encodeURIComponent(id)}`)
 
+// Board 이미지 목록 URL 결합
 export const getBoardImagesUrl = (baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, BOARD_IMAGES_API_PATH)
 
+// Board 이미지 단건 URL 결합
 export const getBoardImageUrl = (id, baseUrl = API_BASE_URL) =>
   joinApiPath(baseUrl, `${BOARD_IMAGES_API_PATH}/${encodeURIComponent(id)}`)
 
+// Board API JSON 응답 읽기
 const readJsonResponse = async (response) => {
+  // 삭제 응답 본문 없음
   if (response.status === 204) {
     return null
   }
@@ -52,10 +63,12 @@ const readJsonResponse = async (response) => {
   return response.json()
 }
 
+// Board API 요청 공통 처리
 const requestBoardApi = async (url, options = {}, fetcher = fetch) => {
   const response = await fetcher(url, options)
 
   if (!response.ok) {
+    // 백엔드 오류 메시지 우선 사용
     const errorData = await response.json().catch(() => null)
 
     throw new Error(
@@ -120,6 +133,7 @@ export const updateBoardPost = (
   )
 
 // Board 게시글 삭제
+// Board 게시글 soft delete
 export const softDeleteBoardPost = (
   id,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
@@ -162,6 +176,7 @@ export const increaseBoardPostViews = (
     fetcher,
   )
 
+// Board 게시글 영구 삭제
 export const permanentlyDeleteBoardPost = (
   id,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
@@ -174,16 +189,19 @@ export const permanentlyDeleteBoardPost = (
     fetcher,
   )
 
+// Board 카테고리 목록 조회
 export const fetchBoardCategories = ({
   baseUrl = API_BASE_URL,
   fetcher = fetch,
 } = {}) => requestBoardApi(getBoardCategoriesUrl(baseUrl), {}, fetcher)
 
+// Board 카테고리 단건 조회
 export const fetchBoardCategory = (
   id,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
 ) => requestBoardApi(getBoardCategoryUrl(id, baseUrl), {}, fetcher)
 
+// Board 카테고리 생성
 export const createBoardCategory = (
   payload,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
@@ -198,6 +216,7 @@ export const createBoardCategory = (
     fetcher,
   )
 
+// Board 카테고리 수정
 export const updateBoardCategory = (
   id,
   payload,
@@ -213,21 +232,25 @@ export const updateBoardCategory = (
     fetcher,
   )
 
+// Board 카테고리 삭제
 export const deleteBoardCategory = (
   id,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
 ) => requestBoardApi(getBoardCategoryUrl(id, baseUrl), { method: 'DELETE' }, fetcher)
 
+// Board 이미지 목록 조회
 export const fetchBoardImages = ({
   baseUrl = API_BASE_URL,
   fetcher = fetch,
 } = {}) => requestBoardApi(getBoardImagesUrl(baseUrl), {}, fetcher)
 
+// Board 이미지 단건 조회
 export const fetchBoardImage = (
   id,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
 ) => requestBoardApi(getBoardImageUrl(id, baseUrl), {}, fetcher)
 
+// Board 이미지 생성
 export const createBoardImage = (
   payload,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},
@@ -242,6 +265,7 @@ export const createBoardImage = (
     fetcher,
   )
 
+// Board 이미지 삭제
 export const deleteBoardImage = (
   id,
   { baseUrl = API_BASE_URL, fetcher = fetch } = {},

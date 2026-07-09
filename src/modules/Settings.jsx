@@ -95,7 +95,7 @@ import {
   updateUserProfile,
 } from './userProfileLogic.js'
 
-// Settings ????key
+// Settings 저장 key
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
@@ -108,6 +108,7 @@ const SETTINGS_TABS = [
   { id: 'server', label: '\uC11C\uBC84 \uAD00\uB9AC' },
 ]
 
+// 저장 배열 개수 읽기
 const readStoredCount = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -117,13 +118,14 @@ const readStoredCount = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
-    // ???????????됰Ŧ鍮??fallback
+    // 저장 배열 개수 fallback
     return Array.isArray(parsedValue) ? parsedValue.length : 0
   } catch {
     return 0
   }
 }
 
+// 백업 대상 목록 읽기
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -140,6 +142,7 @@ const readStoredList = (storageKey) => {
   }
 }
 
+// 이미지 파일 data URL 변환
 const readFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -149,6 +152,7 @@ const readFileAsDataUrl = (file) =>
     reader.readAsDataURL(file)
   })
 
+// 프로필 이미지 id 생성
 const createProfileImageId = () => {
   if (globalThis.crypto?.randomUUID) {
     return `profile-image-${globalThis.crypto.randomUUID()}`
@@ -157,10 +161,12 @@ const createProfileImageId = () => {
   return `profile-image-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+// 프로필 localStorage 저장
 const saveProfileToLocalStorage = (profile) => {
   localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(profile))
 }
 
+// Settings 모듈
 function Settings({
   activeTab = 'general',
   language,
@@ -318,7 +324,7 @@ function Settings({
     }
   }, [isProfileSettingsRemote, t.settings.profileRemoteLoadError])
 
-  // LOCAL ?????? ????????汝뷴젆?琉????REMOTE ???뀀맩鍮???癲????????룸챷援????????????ш끽紐???
+  // Board LOCAL 원본 REMOTE 복사
   const handleCopyBoardPostsToRemote = async () => {
     setIsBoardRemoteCopying(true)
     setBoardRemoteCopyStatus(null)
@@ -349,6 +355,7 @@ function Settings({
     }
   }
 
+  // Board 카테고리 REMOTE 복사
   const handleCopyBoardCategoriesToRemote = async () => {
     setIsBoardCategoriesRemoteCopying(true)
     setBoardCategoriesRemoteCopyStatus(null)
@@ -382,6 +389,7 @@ function Settings({
     }
   }
 
+  // Board 이미지 REMOTE 복사
   const handleCopyBoardImagesToRemote = async () => {
     setIsBoardImagesRemoteCopying(true)
     setBoardImagesRemoteCopyStatus(null)
@@ -415,6 +423,7 @@ function Settings({
     }
   }
 
+  // Tasks LOCAL 원본 REMOTE 복사
   const handleCopyTasksToRemote = async () => {
     setIsTasksRemoteCopying(true)
     setTasksRemoteCopyStatus(null)
@@ -445,6 +454,7 @@ function Settings({
     }
   }
 
+  // Notes LOCAL 원본 REMOTE 복사
   const handleCopyNotesToRemote = async () => {
     setIsNotesRemoteCopying(true)
     setNotesRemoteCopyStatus(null)
@@ -475,6 +485,7 @@ function Settings({
     }
   }
 
+  // Map 컬렉션/기록 REMOTE 복사
   const handleCopyMapToRemote = async () => {
     setIsMapRemoteCopying(true)
     setMapRemoteCopyStatus(null)
@@ -505,6 +516,7 @@ function Settings({
     }
   }
 
+  // Calendar 이벤트 REMOTE 복사
   const handleCopyCalendarToRemote = async () => {
     setIsCalendarRemoteCopying(true)
     setCalendarRemoteCopyStatus(null)
@@ -538,6 +550,7 @@ function Settings({
     }
   }
 
+  // Profile 공통 데이터 REMOTE 복사
   const handleCopyProfileToRemote = async () => {
     setIsProfileRemoteCopying(true)
     setProfileRemoteCopyStatus(null)
@@ -564,6 +577,7 @@ function Settings({
     }
   }
 
+  // App Settings REMOTE 복사
   const handleCopySettingsToRemote = async () => {
     setIsSettingsRemoteCopying(true)
     setSettingsRemoteCopyStatus(null)
@@ -590,11 +604,13 @@ function Settings({
     }
   }
 
+  // Profile/Settings 저장 모드 변경
   const handleProfileSettingsModeChange = (mode) => {
     setProfileSettingsStorageMode(saveProfileSettingsStorageMode(mode))
     setProfileStatus(null)
   }
 
+  // 언어 설정 저장
   const handleLanguageChange = (languageId) => {
     onLanguageChange(languageId)
 
@@ -608,6 +624,7 @@ function Settings({
     }
   }
 
+  // 테마 설정 저장
   const handleThemeChange = (themeId) => {
     onThemeChange(themeId)
 
@@ -621,6 +638,7 @@ function Settings({
     }
   }
 
+  // 시작 모듈 설정 저장
   const handleStartModuleChange = (moduleId) => {
     onStartModuleChange(moduleId)
 
@@ -634,13 +652,15 @@ function Settings({
     }
   }
 
+  // Settings 내부 탭 전환
   const handleSettingsTabChange = (tabId) => {
     setActiveSettingsTab(tabId)
     onSettingsTabChange?.(tabId)
   }
 
+  // Tasks/Notes 데이터 초기화 확정
   const handleConfirmReset = () => {
-    // ?????????濡?씀?濾??????
+    // Tasks/Notes 저장 데이터 초기화
     localStorage.removeItem(TASKS_STORAGE_KEY)
     localStorage.removeItem(NOTES_STORAGE_KEY)
     setIsResetConfirmOpen(false)
@@ -649,6 +669,7 @@ function Settings({
 
   void dataVersion
 
+  // 프로필 텍스트 저장
   const handleSaveProfile = async () => {
     const nextProfile = updateUserProfile(
       parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)),
@@ -675,6 +696,7 @@ function Settings({
     }
   }
 
+  // 프로필 이미지 선택 저장
   const handleSelectProfileImage = async (event) => {
     const imageFile = event.target.files?.[0]
 
@@ -714,7 +736,7 @@ function Settings({
           : deleteProfileImage
 
         deleteImage(currentProfile.avatarImageId).catch(() => {
-          // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
+          // 이전 프로필 이미지 정리 실패 무시
         })
       }
     } catch {
@@ -724,6 +746,7 @@ function Settings({
     }
   }
 
+  // 프로필 이미지 연결 해제
   const handleRemoveProfileImage = async () => {
     const currentProfile = parseUserProfile(
       localStorage.getItem(USER_PROFILE_STORAGE_KEY),
@@ -755,11 +778,12 @@ function Settings({
         : deleteProfileImage
 
       deleteImage(currentProfile.avatarImageId).catch(() => {
-            // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
+            // 이전 프로필 이미지 정리 실패 무시
           })
     }
   }
 
+  // 프로필 기본값 초기화
   const handleResetProfile = async () => {
     const currentProfile = parseUserProfile(
       localStorage.getItem(USER_PROFILE_STORAGE_KEY),
@@ -789,12 +813,12 @@ function Settings({
         : deleteProfileImage
 
       deleteImage(currentProfile.avatarImageId).catch(() => {
-            // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
+            // 이전 프로필 이미지 정리 실패 무시
           })
     }
   }
 
-  // JSON ??????꾩룆梨띰쭕?뚢뵾????????????????????롮쾸?椰???⑤챷寃??
+  // 전체 백업 JSON 내보내기
   const handleExportBackup = async () => {
     try {
       const mapPhotoRecords = await serializePhotoRecordsForBackup(
@@ -839,7 +863,7 @@ function Settings({
     }
   }
 
-  // Board ??????熬곣뫖利당춯??쎾퐲??JSON ??????꾩룆梨띰쭕?뚢뵾????????????????????롮쾸?椰???⑤챷寃??
+  // Board 백업 JSON 내보내기
   const handleExportBoardBackup = async () => {
     try {
       const backupPayload = await collectBoardBackupData()
@@ -857,6 +881,7 @@ function Settings({
     }
   }
 
+  // Board 백업 JSON 복원
   const handleRestoreBoardBackup = async (event) => {
     const backupFile = event.target.files?.[0]
 
@@ -900,8 +925,9 @@ function Settings({
     }
   }
 
+  // 검증된 백업 localStorage 반영
   const restoreLocalStorageData = (validatedBackup) => {
-    // ????????key ??????????
+    // 기존 localStorage key 유지
     localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(validatedBackup.tasks))
     localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(validatedBackup.notes))
     if (validatedBackup.hasBoardPosts) {
@@ -927,6 +953,7 @@ function Settings({
     }
   }
 
+  // 전체 백업 JSON 복원
   const handleRestoreBackup = async (event) => {
     const backupFile = event.target.files?.[0]
 
@@ -1004,7 +1031,7 @@ function Settings({
       }
 
       const previousLocalStorageData = {
-        // rollback????????熬곣뫖利당춯??쎾퐲??localStorage snapshot
+        // 복원 실패 rollback snapshot
         tasks: localStorage.getItem(STORAGE_KEYS.tasks),
         notes: localStorage.getItem(STORAGE_KEYS.notes),
         boardPosts: localStorage.getItem(STORAGE_KEYS.boardPosts),
@@ -1054,7 +1081,7 @@ function Settings({
 
         restoreLocalStorageData(validatedBackup)
       } catch {
-        // ???????ㅻ깹???轅붽틓???????????????怨뺤름??rollback
+        // 복원 실패 시 이전 데이터 rollback
         if (previousMapRecords) {
           await replacePhotoArchiveData({
             records: previousMapRecords,
@@ -1136,7 +1163,7 @@ function Settings({
       className={`module-panel settings-module settings-module--${activeSettingsTab}`}
       aria-labelledby="settings-title"
     >
-      {/* Settings ????????썹땟戮녹??諭?? */}
+      {/* Settings 헤더 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.settings.label}</p>
@@ -1144,7 +1171,7 @@ function Settings({
         </div>
       </div>
 
-      {/* Settings ????????ロ깫?????*/}
+      {/* Settings 탭 */}
       <div className="settings-tabs" aria-label="Settings tabs">
         {SETTINGS_TABS.map((tab) => (
           <button
@@ -1161,7 +1188,7 @@ function Settings({
       </div>
 
       <div className="settings-grid">
-        {/* ?????븐뼐???????????????????????*/}
+        {/* 인터페이스 설정 패널 */}
         <section className="settings-panel settings-preference-panel settings-interface-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.language} / {t.settings.theme}</p>
@@ -1200,7 +1227,7 @@ function Settings({
           </div>
         </section>
 
-        {/* ????????????遺얘턁????????????濾?????釉먮폁???????????釉먮폇????*/}
+        {/* 시작 모듈 설정 패널 */}
         <section className="settings-panel settings-preference-panel settings-start-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.defaultStartModule}</p>
@@ -1225,7 +1252,7 @@ function Settings({
           </div>
         </section>
 
-        {/* ???????????????????????????*/}
+        {/* 데이터 요약 패널 */}
         <section className="settings-panel settings-data-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.dataManagement}</p>
@@ -1259,7 +1286,7 @@ function Settings({
           </div>
         </section>
 
-        {/* ??????????????????????熬곣뫖利당춯??쎾퐲??逆????*/}
+        {/* 프로필 설정 패널 */}
         <section className="settings-panel settings-profile-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.profileLabel}</p>
@@ -1355,7 +1382,7 @@ function Settings({
           ) : null}
         </section>
 
-        {/* ??????꾩룆梨띰쭕?뚢뵾???????????????ㅻ깹???轅붽틓??????*/}
+        {/* 백엔드 연결 확인 패널 */}
         <BackendStatus t={t} />
         <BackendEchoTest />
         <section className="settings-panel settings-board-storage-panel">
@@ -1772,7 +1799,7 @@ function Settings({
           ) : null}
         </section>
 
-        {/* ?????????????danger ????????*/}
+        {/* 위험 작업 패널 */}
         <section className="settings-panel settings-danger-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.resetWarningLabel}</p>
@@ -1788,7 +1815,7 @@ function Settings({
           <p className="settings-note">{t.settings.resetRequiresConfirmation}</p>
 
           {isResetConfirmOpen ? (
-            /* ???????????????癲ル슢???????????븐뼐???????????*/
+            /* 초기화 확인 경고 */
             <div className="reset-confirm-panel" role="alert">
               <p className="module-label">{t.settings.resetWarningLabel}</p>
               <h4>{t.settings.resetWarningTitle}</h4>

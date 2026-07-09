@@ -18,6 +18,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet]
+    // Note 목록 조회
     public ActionResult<IEnumerable<NoteItemResponse>> GetNotes()
     {
         try
@@ -31,6 +32,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    // Note 단건 조회
     public ActionResult<NoteItemResponse> GetNote(string id)
     {
         try
@@ -51,8 +53,10 @@ public class NotesController : ControllerBase
     }
 
     [HttpPost]
+    // Note 생성 처리
     public ActionResult<NoteItemResponse> CreateNote([FromBody] NoteItemRequest? request)
     {
+        // 생성 요청 검증
         if (request is null || (string.IsNullOrWhiteSpace(request.Title) && string.IsNullOrWhiteSpace(request.Content)))
         {
             return BadRequest(new { message = "Title or content is required." });
@@ -62,6 +66,7 @@ public class NotesController : ControllerBase
 
         try
         {
+            // LOCAL id 복사 충돌 방지
             if (!string.IsNullOrWhiteSpace(requestedId) && _store.GetNote(requestedId) is not null)
             {
                 return Conflict(new { message = "A note with the same id already exists." });
@@ -92,8 +97,10 @@ public class NotesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // Note 수정 처리
     public ActionResult<NoteItemResponse> UpdateNote(string id, [FromBody] NoteItemRequest? request)
     {
+        // 수정 요청 검증
         if (request is null || (string.IsNullOrWhiteSpace(request.Title) && string.IsNullOrWhiteSpace(request.Content)))
         {
             return BadRequest(new { message = "Title or content is required." });
@@ -126,6 +133,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // Note 삭제 처리
     public IActionResult DeleteNote(string id)
     {
         try
@@ -154,6 +162,7 @@ public class NotesController : ControllerBase
         }
     }
 
+    // Note 응답 DTO 변환
     private static NoteItemResponse ToResponse(NoteItem note) => new()
     {
         Id = note.Id,
@@ -166,6 +175,7 @@ public class NotesController : ControllerBase
 
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
+        // SQLite 오류 응답 통일
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);
 
         return StatusCode(StatusCodes.Status500InternalServerError, new { message });

@@ -4,6 +4,7 @@ using Tenvi.Api.Models.Map;
 
 namespace Tenvi.Api.Services;
 
+// Map SQLite 저장소
 public class MapSqliteStore
 {
     private const string DataDirectoryName = "data";
@@ -17,6 +18,7 @@ public class MapSqliteStore
     {
         _logger = logger;
 
+        // DB 파일 경로 준비
         var dataDirectory = Path.Combine(environment.ContentRootPath, DataDirectoryName);
         Directory.CreateDirectory(dataDirectory);
 
@@ -29,6 +31,7 @@ public class MapSqliteStore
 
     public string DatabasePath => _databasePath;
 
+    // Map 컬렉션/기록 테이블 초기화
     public void Initialize()
     {
         try
@@ -78,6 +81,7 @@ public class MapSqliteStore
         }
     }
 
+    // 컬렉션 최신순 조회
     public List<MapCollectionItem> GetCollections()
     {
         using var connection = OpenConnection();
@@ -96,6 +100,7 @@ public class MapSqliteStore
         return collections;
     }
 
+    // 컬렉션 단건 조회
     public MapCollectionItem? GetCollection(string id)
     {
         using var connection = OpenConnection();
@@ -109,6 +114,7 @@ public class MapSqliteStore
         return reader.Read() ? ReadCollection(reader) : null;
     }
 
+    // 컬렉션 생성
     public bool CreateCollection(MapCollectionItem collection)
     {
         using var connection = OpenConnection();
@@ -140,6 +146,7 @@ public class MapSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // 컬렉션 수정
     public bool UpdateCollection(MapCollectionItem collection)
     {
         using var connection = OpenConnection();
@@ -161,6 +168,7 @@ public class MapSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // 컬렉션 삭제와 record 연결 해제
     public bool DeleteCollection(string id)
     {
         using var connection = OpenConnection();
@@ -168,6 +176,7 @@ public class MapSqliteStore
 
         using var unlinkCommand = connection.CreateCommand();
         unlinkCommand.Transaction = transaction;
+        // 사진 record는 보존
         unlinkCommand.CommandText = """
             UPDATE map_records
             SET collectionId = NULL,
@@ -189,6 +198,7 @@ public class MapSqliteStore
         return deletedCount > 0;
     }
 
+    // 삭제되지 않은 사진 기록 조회
     public List<MapRecordItem> GetRecords()
     {
         using var connection = OpenConnection();
@@ -211,6 +221,7 @@ public class MapSqliteStore
         return records;
     }
 
+    // 사진 기록 단건 조회
     public MapRecordItem? GetRecord(string id)
     {
         using var connection = OpenConnection();
@@ -224,6 +235,7 @@ public class MapSqliteStore
         return reader.Read() ? ReadRecord(reader) : null;
     }
 
+    // 사진 기록 생성
     public bool CreateRecord(MapRecordItem record)
     {
         using var connection = OpenConnection();
@@ -275,6 +287,7 @@ public class MapSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // 사진 기록 전체 필드 갱신
     public bool UpdateRecord(MapRecordItem record)
     {
         using var connection = OpenConnection();
@@ -306,6 +319,7 @@ public class MapSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // SQLite 연결 열기
     private SqliteConnection OpenConnection()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -314,6 +328,7 @@ public class MapSqliteStore
         return connection;
     }
 
+    // 컬렉션 SQL 파라미터 매핑
     private static void AddCollectionParameters(SqliteCommand command, MapCollectionItem collection)
     {
         command.Parameters.AddWithValue("$id", collection.Id);
@@ -325,6 +340,7 @@ public class MapSqliteStore
         command.Parameters.AddWithValue("$updatedAt", FormatDateTime(collection.UpdatedAt));
     }
 
+    // 사진 기록 SQL 파라미터 매핑
     private static void AddRecordParameters(SqliteCommand command, MapRecordItem record)
     {
         command.Parameters.AddWithValue("$id", record.Id);
@@ -346,6 +362,7 @@ public class MapSqliteStore
         command.Parameters.AddWithValue("$deletedAt", record.DeletedAt.HasValue ? FormatDateTime(record.DeletedAt.Value) : DBNull.Value);
     }
 
+    // SQLite row 컬렉션 모델 변환
     private static MapCollectionItem ReadCollection(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -357,6 +374,7 @@ public class MapSqliteStore
         UpdatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("updatedAt")))
     };
 
+    // SQLite row 사진 기록 모델 변환
     private static MapRecordItem ReadRecord(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -378,6 +396,7 @@ public class MapSqliteStore
         DeletedAt = ReadNullableDateTime(reader, "deletedAt")
     };
 
+    // nullable 문자열 컬럼 읽기
     private static string? ReadNullableString(SqliteDataReader reader, string columnName)
     {
         var ordinal = reader.GetOrdinal(columnName);
@@ -385,6 +404,7 @@ public class MapSqliteStore
         return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
     }
 
+    // nullable 날짜 컬럼 읽기
     private static DateTimeOffset? ReadNullableDateTime(SqliteDataReader reader, string columnName)
     {
         var ordinal = reader.GetOrdinal(columnName);
@@ -392,8 +412,10 @@ public class MapSqliteStore
         return reader.IsDBNull(ordinal) ? null : ParseDateTime(reader.GetString(ordinal));
     }
 
+    // UTC ISO 문자열 변환
     private static string FormatDateTime(DateTimeOffset value) => value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 
+    // ISO 문자열 DateTimeOffset 복원
     private static DateTimeOffset ParseDateTime(string value) =>
         DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 }

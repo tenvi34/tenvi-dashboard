@@ -11,6 +11,7 @@ import {
 
 const DEFAULT_STORAGE_KEY = STORAGE_KEYS.boardPosts
 
+// 기본 브라우저 저장소 참조
 const getDefaultStorage = () => globalThis.localStorage
 
 // localStorage Board 원본 배열 복원
@@ -29,18 +30,22 @@ const writePosts = (storage, storageKey, posts) => {
   storage?.setItem(storageKey, JSON.stringify(posts))
 }
 
+// 게시글 id 검색
 const findPost = (posts, postId) => posts.find((post) => post.id === postId) ?? null
 
+// 요청 필드 보정
 const withRequestFields = (post, payload = {}) => ({
   ...post,
   ...(payload.pinned !== undefined ? { pinned: Boolean(payload.pinned) } : {}),
   ...(payload.views !== undefined ? { views: Math.max(0, Number(payload.views) || 0) } : {}),
 })
 
+// Board LOCAL repository 생성
 export const createLocalBoardPostRepository = ({
   storage = getDefaultStorage(),
   storageKey = DEFAULT_STORAGE_KEY,
 } = {}) => {
+  // 저장소 접근 경로 주입 가능
   const loadPosts = () => readPosts(storage, storageKey)
   const savePosts = (posts) => writePosts(storage, storageKey, posts)
 
@@ -50,10 +55,12 @@ export const createLocalBoardPostRepository = ({
       return loadPosts()
     },
 
+    // 활성 게시글 목록 조회
     async fetchPosts() {
       return loadPosts().filter((post) => !post.deletedAt)
     },
 
+    // 휴지통 게시글 목록 조회
     async fetchTrashPosts() {
       return loadPosts().filter((post) => post.deletedAt)
     },
@@ -66,6 +73,7 @@ export const createLocalBoardPostRepository = ({
       return nextPosts
     },
 
+    // LOCAL 게시글 생성
     async createPost(payload) {
       const createdPost = createBoardPost(payload)
 
@@ -79,6 +87,7 @@ export const createLocalBoardPostRepository = ({
       return post
     },
 
+    // LOCAL 게시글 수정
     async updatePost(id, payload) {
       const currentPosts = loadPosts()
       const beforePost = findPost(currentPosts, id)
@@ -102,6 +111,7 @@ export const createLocalBoardPostRepository = ({
       return updatedPost
     },
 
+    // LOCAL 게시글 휴지통 이동
     async softDeletePost(id) {
       const currentPosts = loadPosts()
 
@@ -114,6 +124,7 @@ export const createLocalBoardPostRepository = ({
       return null
     },
 
+    // LOCAL 휴지통 게시글 복원
     async restorePost(id) {
       const currentPosts = loadPosts()
 
@@ -128,6 +139,7 @@ export const createLocalBoardPostRepository = ({
       return restoredPost
     },
 
+    // LOCAL 게시글 영구 삭제
     async permanentlyDeletePost(id) {
       const currentPosts = loadPosts()
 
@@ -140,6 +152,7 @@ export const createLocalBoardPostRepository = ({
       return null
     },
 
+    // LOCAL 조회수 증가
     async increaseViews(id) {
       const currentPosts = loadPosts()
       const beforePost = findPost(currentPosts, id)

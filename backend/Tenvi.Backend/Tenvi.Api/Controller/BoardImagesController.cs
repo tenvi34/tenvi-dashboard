@@ -18,6 +18,7 @@ public class BoardImagesController : ControllerBase
     }
 
     [HttpGet]
+    // Board 이미지 목록 조회
     public ActionResult<IEnumerable<BoardImageResponse>> GetImages()
     {
         try
@@ -31,6 +32,7 @@ public class BoardImagesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    // Board 이미지 단건 조회
     public ActionResult<BoardImageResponse> GetImage(string id)
     {
         try
@@ -46,8 +48,10 @@ public class BoardImagesController : ControllerBase
     }
 
     [HttpPost]
+    // Board 이미지 생성 처리
     public ActionResult<BoardImageResponse> CreateImage([FromBody] BoardImageRequest? request)
     {
+        // data URL 이미지 요청 검증
         if (
             request is null ||
             string.IsNullOrWhiteSpace(request.Id) ||
@@ -62,6 +66,7 @@ public class BoardImagesController : ControllerBase
 
         try
         {
+            // 이미지 id 중복 방지
             if (_store.GetImage(id) is not null)
             {
                 return Conflict(new { message = "A board image with the same id already exists." });
@@ -93,6 +98,7 @@ public class BoardImagesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // Board 이미지 삭제 처리
     public IActionResult DeleteImage(string id)
     {
         try
@@ -105,6 +111,7 @@ public class BoardImagesController : ControllerBase
         }
     }
 
+    // Board 이미지 응답 DTO 변환
     private static BoardImageResponse ToResponse(BoardImage image) => new()
     {
         Id = image.Id,
@@ -117,6 +124,7 @@ public class BoardImagesController : ControllerBase
         CreatedAt = image.CreatedAt
     };
 
+    // 저장소 오류 응답 변환
     private ObjectResult HandleStorageError(Exception exception, string message)
     {
         _logger.LogError(exception, "{Message} DatabasePath: {DatabasePath}", message, _store.DatabasePath);

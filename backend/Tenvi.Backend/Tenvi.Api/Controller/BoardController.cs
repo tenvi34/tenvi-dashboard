@@ -300,6 +300,7 @@ public class BoardController : ControllerBase
     }
 
     // 내부 저장 모델을 프론트엔드 응답 계약으로 변환
+    // 게시글 응답 DTO 변환
     private static BoardPostResponse ToResponse(BoardPost post) => new()
     {
         Id = post.Id,
@@ -327,6 +328,7 @@ public class BoardController : ControllerBase
     }
 
     // 작성자 기본값 보정
+    // 작성자 기본값 보정
     private static string NormalizeAuthor(string? author)
     {
         var normalizedAuthor = author?.Trim();
@@ -335,6 +337,7 @@ public class BoardController : ControllerBase
     }
 
     // 블록 입력 정규화와 이전 content 입력 호환
+    // 블록 목록 정규화
     private static List<BoardBlock> NormalizeBlocks(IEnumerable<BoardBlock>? blocks, string? fallbackContent)
     {
         if (blocks is null)
@@ -357,6 +360,7 @@ public class BoardController : ControllerBase
     }
 
     // 개별 블록 타입별 저장 형태 정리
+    // 블록 단건 정규화
     private static BoardBlock? NormalizeBlock(BoardBlock? block)
     {
         if (block is null)
@@ -396,6 +400,7 @@ public class BoardController : ControllerBase
     }
 
     // 단일 본문 입력을 블록 구조로 맞추는 기본 텍스트 블록
+    // 텍스트 블록 생성
     private static BoardBlock CreateTextBlock(string content) => new()
     {
         Id = Guid.NewGuid().ToString("N"),
@@ -404,10 +409,12 @@ public class BoardController : ControllerBase
     };
 
     // 클라이언트 미전달 시 서버에서 블록 식별자 생성
+    // 블록 id 보정
     private static string NormalizeBlockId(string? id) =>
         string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString("N") : id.Trim();
 
     // 텍스트 블록에서 대표 본문을 재구성
+    // 대표 본문 재구성
     private static string NormalizeContent(string? requestedContent, IEnumerable<BoardBlock> blocks)
     {
         var textContent = string.Join(

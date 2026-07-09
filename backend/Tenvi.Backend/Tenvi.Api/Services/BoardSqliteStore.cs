@@ -88,6 +88,7 @@ public class BoardSqliteStore
         }
     }
 
+    // 게시글 목록 조회
     public List<BoardPost> GetPosts(bool includeDeleted)
     {
         try
@@ -125,6 +126,7 @@ public class BoardSqliteStore
         }
     }
 
+    // 게시글 단건 조회
     public BoardPost? GetPost(string id)
     {
         try
@@ -146,6 +148,7 @@ public class BoardSqliteStore
         }
     }
 
+    // 게시글 생성
     public bool CreatePost(BoardPost post)
     {
         try
@@ -194,6 +197,7 @@ public class BoardSqliteStore
         }
     }
 
+    // 게시글 전체 필드 갱신
     public bool UpdatePost(BoardPost post)
     {
         try
@@ -227,6 +231,7 @@ public class BoardSqliteStore
         }
     }
 
+    // 게시글 물리 삭제
     public bool PermanentlyDeletePost(string id)
     {
         try
@@ -246,6 +251,7 @@ public class BoardSqliteStore
         }
     }
 
+    // 카테고리 목록 조회
     public List<BoardCategory> GetCategories()
     {
         using var connection = OpenConnection();
@@ -264,6 +270,7 @@ public class BoardSqliteStore
         return categories;
     }
 
+    // 카테고리 단건 조회
     public BoardCategory? GetCategory(string id)
     {
         using var connection = OpenConnection();
@@ -277,6 +284,7 @@ public class BoardSqliteStore
         return reader.Read() ? ReadCategory(reader) : null;
     }
 
+    // 카테고리 생성
     public bool CreateCategory(BoardCategory category)
     {
         using var connection = OpenConnection();
@@ -303,6 +311,7 @@ public class BoardSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // 카테고리 수정
     public bool UpdateCategory(BoardCategory category)
     {
         using var connection = OpenConnection();
@@ -321,6 +330,7 @@ public class BoardSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // 카테고리 삭제와 게시글 기본 분류 이동
     public bool DeleteCategory(string id)
     {
         using var connection = OpenConnection();
@@ -349,6 +359,7 @@ public class BoardSqliteStore
         return deletedCount > 0;
     }
 
+    // Board 이미지 목록 조회
     public List<BoardImage> GetImages()
     {
         using var connection = OpenConnection();
@@ -367,6 +378,7 @@ public class BoardSqliteStore
         return images;
     }
 
+    // Board 이미지 단건 조회
     public BoardImage? GetImage(string id)
     {
         using var connection = OpenConnection();
@@ -380,6 +392,7 @@ public class BoardSqliteStore
         return reader.Read() ? ReadImage(reader) : null;
     }
 
+    // Board 이미지 data URL 저장
     public bool CreateImage(BoardImage image)
     {
         using var connection = OpenConnection();
@@ -413,6 +426,7 @@ public class BoardSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // Board 이미지 삭제
     public bool DeleteImage(string id)
     {
         using var connection = OpenConnection();
@@ -424,6 +438,7 @@ public class BoardSqliteStore
         return command.ExecuteNonQuery() > 0;
     }
 
+    // SQLite 연결 열기
     private SqliteConnection OpenConnection()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -448,6 +463,7 @@ public class BoardSqliteStore
         command.Parameters.AddWithValue("$deletedAt", post.DeletedAt.HasValue ? FormatDateTime(post.DeletedAt.Value) : DBNull.Value);
     }
 
+    // 카테고리 파라미터 매핑
     private static void AddCategoryParameters(SqliteCommand command, BoardCategory category)
     {
         command.Parameters.AddWithValue("$id", category.Id);
@@ -457,6 +473,7 @@ public class BoardSqliteStore
         command.Parameters.AddWithValue("$updatedAt", FormatDateTime(category.UpdatedAt));
     }
 
+    // 이미지 파라미터 매핑
     private static void AddImageParameters(SqliteCommand command, BoardImage image)
     {
         command.Parameters.AddWithValue("$id", image.Id);
@@ -469,6 +486,7 @@ public class BoardSqliteStore
         command.Parameters.AddWithValue("$createdAt", FormatDateTime(image.CreatedAt));
     }
 
+    // SQLite row 게시글 모델 변환
     private static BoardPost ReadPost(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -484,6 +502,7 @@ public class BoardSqliteStore
         DeletedAt = ReadNullableDateTime(reader, "deletedAt")
     };
 
+    // SQLite row 카테고리 모델 변환
     private static BoardCategory ReadCategory(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -493,6 +512,7 @@ public class BoardSqliteStore
         UpdatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("updatedAt")))
     };
 
+    // SQLite row 이미지 모델 변환
     private static BoardImage ReadImage(SqliteDataReader reader) => new()
     {
         Id = reader.GetString(reader.GetOrdinal("id")),
@@ -505,6 +525,7 @@ public class BoardSqliteStore
         CreatedAt = ParseDateTime(reader.GetString(reader.GetOrdinal("createdAt")))
     };
 
+    // blocks JSON 복원
     private static List<BoardBlock> ReadBlocks(string blocksJson)
     {
         try
@@ -518,6 +539,7 @@ public class BoardSqliteStore
         }
     }
 
+    // nullable 날짜 컬럼 읽기
     private static DateTimeOffset? ReadNullableDateTime(SqliteDataReader reader, string columnName)
     {
         var ordinal = reader.GetOrdinal(columnName);
@@ -525,8 +547,10 @@ public class BoardSqliteStore
         return reader.IsDBNull(ordinal) ? null : ParseDateTime(reader.GetString(ordinal));
     }
 
+    // UTC ISO 문자열 변환
     private static string FormatDateTime(DateTimeOffset value) => value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 
+    // ISO 문자열 DateTimeOffset 복원
     private static DateTimeOffset ParseDateTime(string value) =>
         DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 }
