@@ -1,40 +1,26 @@
-import { useEffect, useMemo, useState } from 'react'
-import { STORAGE_KEYS } from '../constants/storageKeys.js'
-import { createTask, normalizeDueDate } from './tasksLogic.js'
+﻿import { useMemo, useState } from 'react'
+import { normalizeDueDate } from './tasksLogic.js'
+import useTasks from './tasks/useTasks.js'
 import './Tasks.css'
-
-// 기존 Tasks key 보존
-const STORAGE_KEY = STORAGE_KEYS.tasks
 
 const FILTERS = ['all', 'active', 'completed']
 
 // Tasks 컴포넌트
 function Tasks({ t }) {
-  const [todos, setTodos] = useState(() => {
-    const savedTodos = localStorage.getItem(STORAGE_KEY)
-
-    if (!savedTodos) {
-      return []
-    }
-
-    try {
-      // 손상 데이터 fallback
-      return JSON.parse(savedTodos)
-    } catch {
-      return []
-    }
-  })
+  const {
+    createTask,
+    deleteTask,
+    error: tasksError,
+    loading: tasksLoading,
+    tasks: todos,
+    updateTask,
+  } = useTasks()
   const [newTodo, setNewTodo] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [filter, setFilter] = useState('all')
 
-  // Tasks 단일 저장 원천
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-  }, [todos])
-
   // Task 생성
-  const handleAddTodo = (event) => {
+  const handleAddTodo = async (event) => {
     event.preventDefault()
 
     const title = newTodo.trim()
@@ -43,38 +29,41 @@ function Tasks({ t }) {
       return
     }
 
-    const nextTask = createTask({ dueDate, title })
-
-    if (!nextTask) {
-      return
+    try {
+      await createTask({ dueDate, title })
+      setNewTodo('')
+      setDueDate('')
+    } catch {
+      // 저장 실패 메시지는 hook error로 표시
     }
-
-    setTodos((currentTodos) => [nextTask, ...currentTodos])
-    setNewTodo('')
-    setDueDate('')
   }
 
   // Task 완료 토글
-  const handleToggleTodo = (todoId) => {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo,
-      ),
-    )
+  const handleToggleTodo = async (todo) => {
+    try {
+      await updateTask(todo.id, {
+        ...todo,
+        completed: !todo.completed,
+      })
+    } catch {
+      // 저장 실패 메시지는 hook error로 표시
+    }
   }
 
   // Task 삭제
-  const handleDeleteTodo = (todoId) => {
-    setTodos((currentTodos) =>
-      currentTodos.filter((todo) => todo.id !== todoId),
-    )
+  const handleDeleteTodo = async (todoId) => {
+    try {
+      await deleteTask(todoId)
+    } catch {
+      // 저장 실패 메시지는 hook error로 표시
+    }
   }
 
   const completedCount = todos.filter((todo) => todo.completed).length
   const activeCount = todos.length - completedCount
 
   const filteredTodos = useMemo(() => {
-    // 화면 목록 필터링
+    // 화면 목록 필터만 state로 유지
     if (filter === 'active') {
       return todos.filter((todo) => !todo.completed)
     }
@@ -90,7 +79,6 @@ function Tasks({ t }) {
 
   return (
     <section className="module-panel todo-module" aria-labelledby="todo-title">
-      {/* Tasks 헤더 */}
       <div className="module-header todo-module-header">
         <div>
           <p className="module-label">{t.tasks.label}</p>
@@ -101,7 +89,15 @@ function Tasks({ t }) {
         </p>
       </div>
 
-      {/* Tasks 요약 카드 */}
+      {tasksLoading ? (
+        <p className="board-storage-status">Tasks 데이터를 불러오는 중입니다.</p>
+      ) : null}
+      {tasksError ? (
+        <p className="board-storage-status is-error" role="alert">
+          {tasksError}
+        </p>
+      ) : null}
+
       <div className="status-stack task-stats" aria-label={t.tasks.summaryLabel}>
         <div className="status-card">
           <span>{t.tasks.total}</span>
@@ -117,7 +113,6 @@ function Tasks({ t }) {
         </div>
       </div>
 
-      {/* Task 입력 영역 */}
       <form className="todo-form" onSubmit={handleAddTodo}>
         <label className="sr-only" htmlFor="todo-input">
           {t.tasks.inputLabel}
@@ -142,7 +137,6 @@ function Tasks({ t }) {
         <button type="submit">{t.tasks.add}</button>
       </form>
 
-      {/* Task 필터 버튼 */}
       <div className="todo-filters" aria-label={t.tasks.filtersLabel}>
         {FILTERS.map((item) => (
           <button
@@ -156,7 +150,6 @@ function Tasks({ t }) {
         ))}
       </div>
 
-      {/* Task 목록 */}
       {filteredTodos.length > 0 ? (
         <ul className="todo-list" aria-label={t.tasks.listLabel}>
           {filteredTodos.map((todo) => (
@@ -168,7 +161,7 @@ function Tasks({ t }) {
                 <input
                   type="checkbox"
                   checked={todo.completed}
-                  onChange={() => handleToggleTodo(todo.id)}
+                  onChange={() => handleToggleTodo(todo)}
                 />
                 <span>
                   {todo.title}

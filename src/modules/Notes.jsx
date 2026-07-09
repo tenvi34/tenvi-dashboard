@@ -1,36 +1,21 @@
-import { useEffect, useState } from 'react'
-import { STORAGE_KEYS } from '../constants/storageKeys.js'
+﻿import { useState } from 'react'
+import useNotes from './notes/useNotes.js'
 import './Notes.css'
-
-// Notes key 공유
-const STORAGE_KEY = STORAGE_KEYS.notes
 
 // Notes 컴포넌트
 function Notes({ t }) {
-  const [notes, setNotes] = useState(() => {
-    const savedNotes = localStorage.getItem(STORAGE_KEY)
-
-    if (!savedNotes) {
-      return []
-    }
-
-    try {
-      // 손상 JSON fallback
-      return JSON.parse(savedNotes)
-    } catch {
-      return []
-    }
-  })
+  const {
+    createNote,
+    deleteNote,
+    error: notesError,
+    loading: notesLoading,
+    notes,
+  } = useNotes()
   const [noteTitle, setNoteTitle] = useState('')
   const [noteContent, setNoteContent] = useState('')
 
-  // notes 저장 반영
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes))
-  }, [notes])
-
   // Note 생성
-  const handleAddNote = (event) => {
+  const handleAddNote = async (event) => {
     event.preventDefault()
 
     const title = noteTitle.trim()
@@ -40,25 +25,26 @@ function Notes({ t }) {
       return
     }
 
-    setNotes((currentNotes) => [
-      {
-        id: crypto.randomUUID(),
+    try {
+      await createNote({
         // 기본 제목 fallback
         title: title || t.notes.untitled,
         content,
-        createdAt: new Date().toISOString(),
-      },
-      ...currentNotes,
-    ])
-    setNoteTitle('')
-    setNoteContent('')
+      })
+      setNoteTitle('')
+      setNoteContent('')
+    } catch {
+      // 저장 실패 메시지는 hook error로 표시
+    }
   }
 
   // Note 삭제
-  const handleDeleteNote = (noteId) => {
-    setNotes((currentNotes) =>
-      currentNotes.filter((note) => note.id !== noteId),
-    )
+  const handleDeleteNote = async (noteId) => {
+    try {
+      await deleteNote(noteId)
+    } catch {
+      // 저장 실패 메시지는 hook error로 표시
+    }
   }
 
   // Note 작성 시각 표시
@@ -70,7 +56,6 @@ function Notes({ t }) {
 
   return (
     <section className="module-panel notes-module" aria-labelledby="notes-title">
-      {/* Notes 헤더 */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.notes.label}</p>
@@ -81,7 +66,15 @@ function Notes({ t }) {
         </p>
       </div>
 
-      {/* Note 입력 영역 */}
+      {notesLoading ? (
+        <p className="board-storage-status">Notes 데이터를 불러오는 중입니다.</p>
+      ) : null}
+      {notesError ? (
+        <p className="board-storage-status is-error" role="alert">
+          {notesError}
+        </p>
+      ) : null}
+
       <form className="notes-form" onSubmit={handleAddNote}>
         <label className="sr-only" htmlFor="note-title">
           {t.notes.titleLabel}
@@ -108,7 +101,6 @@ function Notes({ t }) {
         <button type="submit">{t.notes.store}</button>
       </form>
 
-      {/* Note 목록 */}
       {notes.length > 0 ? (
         <ul className="notes-list" aria-label={t.notes.listLabel}>
           {notes.map((note) => (

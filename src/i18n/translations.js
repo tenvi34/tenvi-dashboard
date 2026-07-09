@@ -665,12 +665,39 @@ export const translations = {
       exportBackup: '전체 백업 내보내기',
       importBackup: '전체 백업 복원',
       boardBackupTitle: 'Board 전용 백업',
+      storageModeLabel: 'REMOTE STORAGE',
+      storageModeTitle: '저장소 모드',
+      storageModeNote:
+        '기본값은 Local이며, Remote 선택 시 해당 모듈은 SQLite API를 사용합니다.',
+      storageCopyNote: 'LOCAL 데이터는 삭제하지 않고 REMOTE에 없는 항목만 복사합니다.',
+      storageModeLocal: '기본값 · Local',
+      storageModeRemote: '선택 중 · Remote',
+      boardStorageModeLabel: 'Board 저장소 모드',
+      tasksStorageModeLabel: 'Tasks 저장소 모드',
+      notesStorageModeLabel: 'Notes 저장소 모드',
+      boardStorageDescription: '게시글 목록과 상세 데이터를 저장합니다.',
+      tasksStorageDescription: '할 일 목록과 완료 상태를 저장합니다.',
+      notesStorageDescription: '메모 제목과 본문을 저장합니다.',
       boardRemoteCopy: 'LOCAL 데이터를 REMOTE로 복사',
       boardRemoteCopying: 'REMOTE로 복사 중...',
       boardRemoteCopyEmpty: '복사할 LOCAL 데이터가 없습니다.',
       boardRemoteCopyConnectionError: 'REMOTE API에 연결하지 못해 복사에 실패했습니다.',
       boardRemoteCopyResult: (copied, skipped, failed) =>
         `복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
+      tasksRemoteCopy: 'LOCAL Tasks를 REMOTE로 복사',
+      tasksRemoteCopying: 'Tasks를 REMOTE로 복사 중...',
+      tasksRemoteCopyEmpty: '복사할 LOCAL Tasks 데이터가 없습니다.',
+      tasksRemoteCopyConnectionError:
+        'REMOTE API에 연결하지 못해 Tasks 복사에 실패했습니다.',
+      tasksRemoteCopyResult: (copied, skipped, failed) =>
+        `Tasks 복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
+      notesRemoteCopy: 'LOCAL Notes를 REMOTE로 복사',
+      notesRemoteCopying: 'Notes를 REMOTE로 복사 중...',
+      notesRemoteCopyEmpty: '복사할 LOCAL Notes 데이터가 없습니다.',
+      notesRemoteCopyConnectionError:
+        'REMOTE API에 연결하지 못해 Notes 복사에 실패했습니다.',
+      notesRemoteCopyResult: (copied, skipped, failed) =>
+        `Notes 복사 완료: 성공 ${copied}개, 건너뜀 ${skipped}개, 실패 ${failed}개`,
       exportBoardBackup: 'Board 전용 백업 내보내기',
       importBoardBackup: 'Board 전용 백업 복원',
       boardBackupNote:
@@ -1386,12 +1413,40 @@ export const translations = {
       exportBackup: 'Export Full Backup',
       importBackup: 'Restore Full Backup',
       boardBackupTitle: 'Board Dedicated Backup',
+      storageModeLabel: 'REMOTE STORAGE',
+      storageModeTitle: 'Storage Mode',
+      storageModeNote:
+        'Local is the default. Remote mode stores the selected module through the SQLite API.',
+      storageCopyNote:
+        'LOCAL data is preserved and only missing REMOTE items are copied.',
+      storageModeLocal: 'Default · Local',
+      storageModeRemote: 'Selected · Remote',
+      boardStorageModeLabel: 'Board storage mode',
+      tasksStorageModeLabel: 'Tasks storage mode',
+      notesStorageModeLabel: 'Notes storage mode',
+      boardStorageDescription: 'Stores board post list and detail data.',
+      tasksStorageDescription: 'Stores task list and completion state.',
+      notesStorageDescription: 'Stores note titles and content.',
       boardRemoteCopy: 'Copy LOCAL data to REMOTE',
       boardRemoteCopying: 'Copying to REMOTE...',
       boardRemoteCopyEmpty: 'There is no LOCAL data to copy.',
       boardRemoteCopyConnectionError: 'Copy failed because the REMOTE API is unavailable.',
       boardRemoteCopyResult: (copied, skipped, failed) =>
         `Copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
+      tasksRemoteCopy: 'Copy LOCAL Tasks to REMOTE',
+      tasksRemoteCopying: 'Copying Tasks to REMOTE...',
+      tasksRemoteCopyEmpty: 'There is no LOCAL Tasks data to copy.',
+      tasksRemoteCopyConnectionError:
+        'Tasks copy failed because the REMOTE API is unavailable.',
+      tasksRemoteCopyResult: (copied, skipped, failed) =>
+        `Tasks copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
+      notesRemoteCopy: 'Copy LOCAL Notes to REMOTE',
+      notesRemoteCopying: 'Copying Notes to REMOTE...',
+      notesRemoteCopyEmpty: 'There is no LOCAL Notes data to copy.',
+      notesRemoteCopyConnectionError:
+        'Notes copy failed because the REMOTE API is unavailable.',
+      notesRemoteCopyResult: (copied, skipped, failed) =>
+        `Notes copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
       exportBoardBackup: 'Export Board Dedicated Backup',
       importBoardBackup: 'Restore Board Dedicated Backup',
       boardBackupNote:

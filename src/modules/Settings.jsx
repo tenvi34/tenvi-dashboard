@@ -10,6 +10,18 @@ import {
   saveBoardStorageMode,
 } from './board/boardStorageMode.js'
 import { copyLocalBoardPostsToRemote } from './board/boardRemoteCopy.js'
+import {
+  NOTES_STORAGE_MODES,
+  readNotesStorageMode,
+  saveNotesStorageMode,
+} from './notesStorageMode.js'
+import { copyLocalNotesToRemote } from './notes/notesRemoteCopy.js'
+import {
+  TASKS_STORAGE_MODES,
+  readTasksStorageMode,
+  saveTasksStorageMode,
+} from './tasksStorageMode.js'
+import { copyLocalTasksToRemote } from './tasks/tasksRemoteCopy.js'
 import './Settings.css'
 import {
   getPhotoRecordCount,
@@ -51,21 +63,19 @@ import {
   updateUserProfile,
 } from './userProfileLogic.js'
 
-// Settings 저장 key
+// Settings ????key
 const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
 const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const CALENDAR_EVENTS_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 const USER_PROFILE_STORAGE_KEY = STORAGE_KEYS.userProfile
 
-// 설정 화면 탭 분리 기준
 const SETTINGS_TABS = [
-  { id: 'general', label: '일반설정' },
-  { id: 'backup', label: '백업/복원/초기화' },
-  { id: 'server', label: '서버 관련' },
+  { id: 'general', label: '\uC77C\uBC18 \uC124\uC815' },
+  { id: 'backup', label: '\uBC31\uC5C5/\uBCF5\uC6D0/\uCD08\uAE30\uD654' },
+  { id: 'server', label: '\uC11C\uBC84 \uAD00\uB9AC' },
 ]
 
-// 저장 목록 개수 읽기
 const readStoredCount = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -75,14 +85,13 @@ const readStoredCount = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
-    // 저장소 상태 fallback
+    // ???????????됰Ŧ鍮??fallback
     return Array.isArray(parsedValue) ? parsedValue.length : 0
   } catch {
     return 0
   }
 }
 
-// 백업용 목록 복원
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
 
@@ -99,7 +108,6 @@ const readStoredList = (storageKey) => {
   }
 }
 
-// 백업용 Timer 세션 복원
 const readStoredCompletedSessions = () => {
   const savedValue = localStorage.getItem(STORAGE_KEYS.timerCompletedSessions)
   const parsedValue = Number.parseInt(savedValue, 10)
@@ -107,7 +115,6 @@ const readStoredCompletedSessions = () => {
   return Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue)
 }
 
-// Settings 컴포넌트
 function Settings({
   activeTab = 'general',
   language,
@@ -123,12 +130,22 @@ function Settings({
   const [boardStorageMode, setBoardStorageMode] = useState(() =>
     readBoardStorageMode(),
   )
+  const [tasksStorageMode, setTasksStorageMode] = useState(() =>
+    readTasksStorageMode(),
+  )
+  const [notesStorageMode, setNotesStorageMode] = useState(() =>
+    readNotesStorageMode(),
+  )
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
   const [boardBackupStatus, setBoardBackupStatus] = useState(null)
   const [boardRemoteCopyStatus, setBoardRemoteCopyStatus] = useState(null)
+  const [tasksRemoteCopyStatus, setTasksRemoteCopyStatus] = useState(null)
+  const [notesRemoteCopyStatus, setNotesRemoteCopyStatus] = useState(null)
   const [isBoardRemoteCopying, setIsBoardRemoteCopying] = useState(false)
+  const [isTasksRemoteCopying, setIsTasksRemoteCopying] = useState(false)
+  const [isNotesRemoteCopying, setIsNotesRemoteCopying] = useState(false)
   const [boardImageCount, setBoardImageCount] = useState(0)
   const [mapPhotoCount, setMapPhotoCount] = useState(0)
   const [profileStatus, setProfileStatus] = useState(null)
@@ -146,7 +163,6 @@ function Settings({
   useEffect(() => {
     let isMounted = true
 
-    // Map 기록 개수 반영
     getPhotoRecordCount()
       .then((count) => {
         if (isMounted) {
@@ -159,7 +175,6 @@ function Settings({
         }
       })
 
-    // Board 이미지 IndexedDB 개수 반영
     getAllBoardImages()
       .then((images) => {
         if (isMounted) {
@@ -177,7 +192,7 @@ function Settings({
     }
   }, [dataVersion])
 
-  // LOCAL 원본은 유지하고 REMOTE 게시글만 추가
+  // LOCAL ?????? ????????汝뷴젆?琉????REMOTE ???뀀맩鍮???癲????????룸챷援????????????ш끽紐???
   const handleCopyBoardPostsToRemote = async () => {
     setIsBoardRemoteCopying(true)
     setBoardRemoteCopyStatus(null)
@@ -208,24 +223,81 @@ function Settings({
     }
   }
 
+  const handleCopyTasksToRemote = async () => {
+    setIsTasksRemoteCopying(true)
+    setTasksRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalTasksToRemote()
+
+      if (result.total === 0) {
+        setTasksRemoteCopyStatus({ type: 'info', message: t.settings.tasksRemoteCopyEmpty })
+        return
+      }
+
+      setTasksRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: t.settings.tasksRemoteCopyResult(
+          result.copied,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setTasksRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.tasksRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsTasksRemoteCopying(false)
+    }
+  }
+
+  const handleCopyNotesToRemote = async () => {
+    setIsNotesRemoteCopying(true)
+    setNotesRemoteCopyStatus(null)
+
+    try {
+      const result = await copyLocalNotesToRemote()
+
+      if (result.total === 0) {
+        setNotesRemoteCopyStatus({ type: 'info', message: t.settings.notesRemoteCopyEmpty })
+        return
+      }
+
+      setNotesRemoteCopyStatus({
+        type: result.failed > 0 ? 'error' : 'success',
+        message: t.settings.notesRemoteCopyResult(
+          result.copied,
+          result.skipped,
+          result.failed,
+        ),
+      })
+    } catch {
+      setNotesRemoteCopyStatus({
+        type: 'error',
+        message: t.settings.notesRemoteCopyConnectionError,
+      })
+    } finally {
+      setIsNotesRemoteCopying(false)
+    }
+  }
+
   const handleSettingsTabChange = (tabId) => {
     setActiveSettingsTab(tabId)
     onSettingsTabChange?.(tabId)
   }
 
-  // Tasks/Notes 초기화
   const handleConfirmReset = () => {
-    // 앱 설정 유지
+    // ?????????濡?씀?濾??????
     localStorage.removeItem(TASKS_STORAGE_KEY)
     localStorage.removeItem(NOTES_STORAGE_KEY)
     setIsResetConfirmOpen(false)
     setDataVersion((currentVersion) => currentVersion + 1)
   }
 
-  // reset 후 개수 갱신
   void dataVersion
 
-  // 로컬 프로필 저장
   const handleSaveProfile = () => {
     const nextProfile = updateUserProfile(
       parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)),
@@ -241,7 +313,6 @@ function Settings({
     setDataVersion((currentVersion) => currentVersion + 1)
   }
 
-  // 프로필 이미지 선택 즉시 IndexedDB와 프로필 key 갱신
   const handleSelectProfileImage = async (event) => {
     const imageFile = event.target.files?.[0]
 
@@ -265,7 +336,7 @@ function Settings({
 
       if (currentProfile.avatarImageId) {
         deleteProfileImage(currentProfile.avatarImageId).catch(() => {
-          // 새 이미지 반영을 우선하고 이전 이미지 정리는 후처리
+          // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
         })
       }
     } catch {
@@ -290,12 +361,11 @@ function Settings({
 
     if (currentProfile.avatarImageId) {
       deleteProfileImage(currentProfile.avatarImageId).catch(() => {
-        // 프로필 fallback 전환을 우선하고 이미지 정리는 후처리
-      })
+            // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
+          })
     }
   }
 
-  // 로컬 프로필 기본값 복원
   const handleResetProfile = () => {
     const currentProfile = parseUserProfile(
       localStorage.getItem(USER_PROFILE_STORAGE_KEY),
@@ -309,12 +379,12 @@ function Settings({
 
     if (currentProfile.avatarImageId) {
       deleteProfileImage(currentProfile.avatarImageId).catch(() => {
-        // 기본 프로필 복원을 우선하고 이미지 정리는 후처리
-      })
+            // ????癲ル슣?? ????????됰꽡????ш끽維곩ㅇ????????????癲ル슢??쭕? ???怨룹쓱
+          })
     }
   }
 
-  // JSON 백업 내보내기
+  // JSON ??????꾩룆梨띰쭕?뚢뵾????????????????????롮쾸?椰???⑤챷寃??
   const handleExportBackup = async () => {
     try {
       const mapPhotoRecords = await serializePhotoRecordsForBackup(
@@ -360,7 +430,7 @@ function Settings({
     }
   }
 
-  // Board 전용 JSON 백업 내보내기
+  // Board ??????熬곣뫖利당춯??쎾퐲??JSON ??????꾩룆梨띰쭕?뚢뵾????????????????????롮쾸?椰???⑤챷寃??
   const handleExportBoardBackup = async () => {
     try {
       const backupPayload = await collectBoardBackupData()
@@ -378,7 +448,6 @@ function Settings({
     }
   }
 
-  // Board 전용 JSON 백업 복원
   const handleRestoreBoardBackup = async (event) => {
     const backupFile = event.target.files?.[0]
 
@@ -422,9 +491,8 @@ function Settings({
     }
   }
 
-  // JSON 백업 복원
   const restoreLocalStorageData = (validatedBackup) => {
-    // 기존 key 구조 유지
+    // ????????key ??????????
     localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(validatedBackup.tasks))
     localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(validatedBackup.notes))
     if (validatedBackup.hasBoardPosts) {
@@ -463,7 +531,6 @@ function Settings({
 
     try {
       const backupPayload = JSON.parse(await backupFile.text())
-      // 백업 형식 사전 검증
       const validatedBackup = validateBackupPayload(backupPayload)
 
       if (!validatedBackup) {
@@ -471,7 +538,6 @@ function Settings({
         return
       }
 
-      // 저장소 변경 전 검증
       const collectionRestorePlan = validatedBackup.hasMapPhotoCollections
         ? preparePhotoCollectionsForRestore(validatedBackup.mapPhotoCollections)
         : null
@@ -533,7 +599,7 @@ function Settings({
       }
 
       const previousLocalStorageData = {
-        // rollback용 현재 localStorage snapshot
+        // rollback????????熬곣뫖利당춯??쎾퐲??localStorage snapshot
         tasks: localStorage.getItem(STORAGE_KEYS.tasks),
         notes: localStorage.getItem(STORAGE_KEYS.notes),
         boardPosts: localStorage.getItem(STORAGE_KEYS.boardPosts),
@@ -556,8 +622,7 @@ function Settings({
         : null
 
       try {
-        // 백업 종류별 Map 교체 범위
-        if (
+                if (
           validatedBackup.hasMapPhotoRecords &&
           validatedBackup.hasMapPhotoCollections
         ) {
@@ -575,7 +640,6 @@ function Settings({
           )
 
           await replacePhotoArchiveData({
-            // 사라진 컬렉션 연결 해제
             records: (await getPhotoRecords()).map((record) => ({
               ...record,
               collectionId: restoredCollectionIds.has(record.collectionId)
@@ -588,7 +652,7 @@ function Settings({
 
         restoreLocalStorageData(validatedBackup)
       } catch {
-        // 복원 실패 rollback
+        // ???????ㅻ깹???轅붽틓???????????????怨뺤름??rollback
         if (previousMapRecords) {
           await replacePhotoArchiveData({
             records: previousMapRecords,
@@ -670,7 +734,7 @@ function Settings({
       className={`module-panel settings-module settings-module--${activeSettingsTab}`}
       aria-labelledby="settings-title"
     >
-      {/* Settings 헤더 */}
+      {/* Settings ????????썹땟戮녹??諭?? */}
       <div className="module-header">
         <div>
           <p className="module-label">{t.settings.label}</p>
@@ -678,8 +742,8 @@ function Settings({
         </div>
       </div>
 
-      {/* Settings 그리드 */}
-      <div className="settings-tabs" aria-label="설정 탭">
+      {/* Settings ????????ロ깫?????*/}
+      <div className="settings-tabs" aria-label="Settings tabs">
         {SETTINGS_TABS.map((tab) => (
           <button
             className={`settings-tab ${
@@ -695,7 +759,7 @@ function Settings({
       </div>
 
       <div className="settings-grid">
-        {/* 언어 선택 */}
+        {/* ?????븐뼐???????????????????????*/}
         <section className="settings-panel settings-preference-panel settings-interface-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.language} / {t.settings.theme}</p>
@@ -709,8 +773,7 @@ function Settings({
                 }`}
                 key={languageId}
                 type="button"
-                // App 저장 흐름
-                onClick={() => onLanguageChange(languageId)}
+                // App ?????????                onClick={() => onLanguageChange(languageId)}
               >
                 {t.languages[languageId]}
               </button>
@@ -735,7 +798,7 @@ function Settings({
           </div>
         </section>
 
-        {/* 기본 시작 모듈 */}
+        {/* ????????????遺얘턁????????????濾?????釉먮폁???????????釉먮폇????*/}
         <section className="settings-panel settings-preference-panel settings-start-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.defaultStartModule}</p>
@@ -752,8 +815,7 @@ function Settings({
                 }`}
                 key={moduleId}
                 type="button"
-                // 다음 로드 시작 모듈
-                onClick={() => onStartModuleChange(moduleId)}
+                // ???????濡?씀?濾??????????????節뗭젔??????遺얘턁????????????濾?????釉먮폁???????????釉먮폇????                onClick={() => onStartModuleChange(moduleId)}
               >
                 {t.modules[moduleId]}
               </button>
@@ -761,7 +823,7 @@ function Settings({
           </div>
         </section>
 
-        {/* 저장 데이터 현황 */}
+        {/* ???????????????????????????*/}
         <section className="settings-panel settings-data-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.dataManagement}</p>
@@ -795,7 +857,7 @@ function Settings({
           </div>
         </section>
 
-        {/* 로컬 사용자 프로필 */}
+        {/* ??????????????????????熬곣뫖利당춯??쎾퐲??逆????*/}
         <section className="settings-panel settings-profile-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.profileLabel}</p>
@@ -891,61 +953,161 @@ function Settings({
           ) : null}
         </section>
 
-        {/* 백업/복원 */}
+        {/* ??????꾩룆梨띰쭕?뚢뵾???????????????ㅻ깹???轅붽틓??????*/}
         <BackendStatus t={t} />
         <BackendEchoTest />
         <section className="settings-panel settings-board-storage-panel">
           <div className="settings-board-storage-copy">
             <div className="settings-panel-header">
-              <p className="module-label">BOARD STORAGE</p>
-              <h3>게시글 저장소 모드</h3>
+              <p className="module-label">{t.settings.storageModeLabel}</p>
+              <h3>{t.settings.storageModeTitle}</h3>
             </div>
             <p className="settings-note settings-board-storage-note">
-              기본값은 Local이며, 변경 후 Board 재진입 시 적용됩니다.
-              <span>Remote 이미지도 현재 브라우저에만 저장됩니다.</span>
+              {t.settings.storageModeNote}
+              <span>{t.settings.storageCopyNote}</span>
             </p>
           </div>
-          <div className="settings-board-storage-control">
-            <div
-              className="settings-options settings-board-storage-options"
-              aria-label="Board 저장소 모드"
-              role="group"
-            >
-              {Object.values(BOARD_STORAGE_MODES).map((mode) => (
-                <button
-                  aria-pressed={boardStorageMode === mode}
-                  className={`settings-option ${boardStorageMode === mode ? 'is-active' : ''}`}
-                  key={mode}
-                  type="button"
-                  onClick={() => setBoardStorageMode(saveBoardStorageMode(mode))}
+
+          <div className="settings-storage-grid">
+            <div className="settings-storage-row">
+              <div>
+                <strong>{t.modules.board}</strong>
+                <span>{t.settings.boardStorageDescription}</span>
+              </div>
+              <div className="settings-board-storage-control">
+                <div
+                  className="settings-options settings-board-storage-options"
+                  aria-label={t.settings.boardStorageModeLabel}
+                  role="group"
                 >
-                  {mode === BOARD_STORAGE_MODES.local ? 'Local' : 'Remote'}
+                  {Object.values(BOARD_STORAGE_MODES).map((mode) => (
+                    <button
+                      aria-pressed={boardStorageMode === mode}
+                      className={`settings-option ${boardStorageMode === mode ? 'is-active' : ''}`}
+                      key={mode}
+                      type="button"
+                      onClick={() => setBoardStorageMode(saveBoardStorageMode(mode))}
+                    >
+                      {mode === BOARD_STORAGE_MODES.local ? 'Local' : 'Remote'}
+                    </button>
+                  ))}
+                </div>
+                <span className={`settings-board-storage-badge is-${boardStorageMode}`}>
+                  {boardStorageMode === BOARD_STORAGE_MODES.local
+                    ? t.settings.storageModeLocal
+                    : t.settings.storageModeRemote}
+                </span>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isBoardRemoteCopying}
+                  onClick={handleCopyBoardPostsToRemote}
+                >
+                  {isBoardRemoteCopying
+                    ? t.settings.boardRemoteCopying
+                    : t.settings.boardRemoteCopy}
                 </button>
-              ))}
+              </div>
+              {boardRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${boardRemoteCopyStatus.type}`}>
+                  {boardRemoteCopyStatus.message}
+                </p>
+              ) : null}
             </div>
-            <span className={`settings-board-storage-badge is-${boardStorageMode}`}>
-              {boardStorageMode === BOARD_STORAGE_MODES.local
-                ? '기본값 · Local'
-                : '선택 중 · Remote'}
-            </span>
-            <button
-              className="settings-option settings-board-copy-button"
-              type="button"
-              disabled={isBoardRemoteCopying}
-              onClick={handleCopyBoardPostsToRemote}
-            >
-              {isBoardRemoteCopying
-                ? t.settings.boardRemoteCopying
-                : t.settings.boardRemoteCopy}
-            </button>
+
+            <div className="settings-storage-row">
+              <div>
+                <strong>{t.modules.tasks}</strong>
+                <span>{t.settings.tasksStorageDescription}</span>
+              </div>
+              <div className="settings-board-storage-control">
+                <div
+                  className="settings-options settings-board-storage-options"
+                  aria-label={t.settings.tasksStorageModeLabel}
+                  role="group"
+                >
+                  {Object.values(TASKS_STORAGE_MODES).map((mode) => (
+                    <button
+                      aria-pressed={tasksStorageMode === mode}
+                      className={`settings-option ${tasksStorageMode === mode ? 'is-active' : ''}`}
+                      key={mode}
+                      type="button"
+                      onClick={() => setTasksStorageMode(saveTasksStorageMode(mode))}
+                    >
+                      {mode === TASKS_STORAGE_MODES.local ? 'Local' : 'Remote'}
+                    </button>
+                  ))}
+                </div>
+                <span className={`settings-board-storage-badge is-${tasksStorageMode}`}>
+                  {tasksStorageMode === TASKS_STORAGE_MODES.local
+                    ? t.settings.storageModeLocal
+                    : t.settings.storageModeRemote}
+                </span>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isTasksRemoteCopying}
+                  onClick={handleCopyTasksToRemote}
+                >
+                  {isTasksRemoteCopying
+                    ? t.settings.tasksRemoteCopying
+                    : t.settings.tasksRemoteCopy}
+                </button>
+              </div>
+              {tasksRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${tasksRemoteCopyStatus.type}`}>
+                  {tasksRemoteCopyStatus.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="settings-storage-row">
+              <div>
+                <strong>{t.modules.notes}</strong>
+                <span>{t.settings.notesStorageDescription}</span>
+              </div>
+              <div className="settings-board-storage-control">
+                <div
+                  className="settings-options settings-board-storage-options"
+                  aria-label={t.settings.notesStorageModeLabel}
+                  role="group"
+                >
+                  {Object.values(NOTES_STORAGE_MODES).map((mode) => (
+                    <button
+                      aria-pressed={notesStorageMode === mode}
+                      className={`settings-option ${notesStorageMode === mode ? 'is-active' : ''}`}
+                      key={mode}
+                      type="button"
+                      onClick={() => setNotesStorageMode(saveNotesStorageMode(mode))}
+                    >
+                      {mode === NOTES_STORAGE_MODES.local ? 'Local' : 'Remote'}
+                    </button>
+                  ))}
+                </div>
+                <span className={`settings-board-storage-badge is-${notesStorageMode}`}>
+                  {notesStorageMode === NOTES_STORAGE_MODES.local
+                    ? t.settings.storageModeLocal
+                    : t.settings.storageModeRemote}
+                </span>
+                <button
+                  className="settings-option settings-board-copy-button"
+                  type="button"
+                  disabled={isNotesRemoteCopying}
+                  onClick={handleCopyNotesToRemote}
+                >
+                  {isNotesRemoteCopying
+                    ? t.settings.notesRemoteCopying
+                    : t.settings.notesRemoteCopy}
+                </button>
+              </div>
+              {notesRemoteCopyStatus ? (
+                <p className={`backup-status settings-board-copy-status is-${notesRemoteCopyStatus.type}`}>
+                  {notesRemoteCopyStatus.message}
+                </p>
+              ) : null}
+            </div>
           </div>
-          {boardRemoteCopyStatus ? (
-            <p className={`backup-status settings-board-copy-status is-${boardRemoteCopyStatus.type}`}>
-              {boardRemoteCopyStatus.message}
-            </p>
-          ) : null}
-        </section>
-        <BoardApiTest />
+        </section>        <BoardApiTest />
 
         <div className="settings-action-stack">
         <section className="settings-panel settings-backup-panel">
@@ -1023,7 +1185,7 @@ function Settings({
           ) : null}
         </section>
 
-        {/* 데이터 삭제 danger 패널 */}
+        {/* ?????????????danger ????????*/}
         <section className="settings-panel settings-danger-panel">
           <div className="settings-panel-header">
             <p className="module-label">{t.settings.resetWarningLabel}</p>
@@ -1039,7 +1201,7 @@ function Settings({
           <p className="settings-note">{t.settings.resetRequiresConfirmation}</p>
 
           {isResetConfirmOpen ? (
-            /* 데이터 초기화 확인 */
+            /* ???????????????癲ル슢???????????븐뼐???????????*/
             <div className="reset-confirm-panel" role="alert">
               <p className="module-label">{t.settings.resetWarningLabel}</p>
               <h4>{t.settings.resetWarningTitle}</h4>
