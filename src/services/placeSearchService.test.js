@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   clearPlaceSearchCache,
   createAddressSummary,
@@ -43,6 +43,28 @@ describe('placeSearchService', () => {
   it('drops results without usable coordinates or display names', () => {
     expect(normalizePlaceSearchResult({ display_name: 'No coordinates' })).toBeNull()
     expect(normalizePlaceSearchResult({ lat: '33', lon: '130' })).toBeNull()
+    expect(normalizePlaceSearchResult({ lat: '91', lon: '130', display_name: 'Invalid' })).toBeNull()
+  })
+
+  it('serializes concurrent searches, recovers after failure and reuses cache', async () => {
+    vi.useFakeTimers()
+    try {
+      clearPlaceSearchCache()
+      const calls = []
+      const fetcher = vi.fn(async () => {
+        calls.push(Date.now())
+        if (calls.length === 1) throw new Error('offline')
+        return { ok: true, json: async () => [] }
+      })
+      const first = searchPlaces('first', { fetcher }).catch((error) => error.message)
+      const second = searchPlaces('second', { fetcher })
+      await vi.runAllTimersAsync()
+      expect(await first).toBe('offline')
+      expect(await second).toEqual([])
+      expect(calls[1] - calls[0]).toBeGreaterThanOrEqual(1000)
+      expect(await searchPlaces('second', { fetcher })).toEqual([])
+      expect(fetcher).toHaveBeenCalledTimes(2)
+    } finally { vi.useRealTimers(); clearPlaceSearchCache() }
   })
 
   it('creates a compact address summary from Nominatim address fields', () => {

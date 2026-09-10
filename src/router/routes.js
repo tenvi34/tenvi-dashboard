@@ -8,10 +8,12 @@ export const MODULE_PATHS = {
   notes: '/notes',
   settings: '/settings',
   tasks: '/tasks',
+  travel: '/travel',
 }
 
 // URL에서 활성 모듈 계산
 export const getModuleFromPathname = (pathname) => {
+  if (pathname === '/travel' || pathname.startsWith('/travel/')) return 'travel'
   if (pathname.startsWith('/board')) return 'board'
   if (pathname.startsWith('/settings')) return 'settings'
 

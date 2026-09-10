@@ -8,6 +8,8 @@ export const PLACE_SEARCH_SCOPES = {
 }
 const cache = new Map()
 let lastRequestTime = 0
+// Map/Travel 동시 호출도 하나의 큐에서 처리하여 요청 간격 유지
+let searchQueue = Promise.resolve()
 
 const wait = (milliseconds) =>
   new Promise((resolve) => {
@@ -39,7 +41,7 @@ export const normalizePlaceSearchResult = (result) => {
   const longitude = Number(result?.lon)
   const displayName = String(result?.display_name ?? '').trim()
 
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !displayName) {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180 || !displayName) {
     return null
   }
 
@@ -65,7 +67,7 @@ export const clearPlaceSearchCache = () => {
 }
 
 // Nominatim provider 계약
-export const searchPlaces = async (
+const executePlaceSearch = async (
   query,
   { fetcher = fetch, language = 'en', scope = 'all' } = {},
 ) => {
@@ -101,13 +103,14 @@ export const searchPlaces = async (
   if (countryCode) {
     searchParams.set('countrycodes', countryCode)
   }
+  // 실패한 요청도 제한에 포함되도록 시작 시각 기록
+  lastRequestTime = Date.now()
   const response = await fetcher(`${NOMINATIM_SEARCH_URL}?${searchParams}`, {
+    signal: AbortSignal.timeout(15000),
     headers: {
       'Accept-Language': language,
     },
   })
-
-  lastRequestTime = Date.now()
 
   if (!response.ok) {
     throw new Error('Place search failed.')
@@ -122,4 +125,11 @@ export const searchPlaces = async (
   cache.set(cacheKey, normalizedResults)
 
   return normalizedResults
+}
+
+export const searchPlaces = (query, options) => {
+  const request = searchQueue.then(() => executePlaceSearch(query, options))
+  // 실패한 요청이 다음 검색을 막지 않도록 큐 복구
+  searchQueue = request.catch(() => {})
+  return request
 }

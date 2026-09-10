@@ -1,7 +1,10 @@
+import { travelTranslations } from './travelTranslations.js'
+
 // 언어 key 구조
 // 동적 문구 함수
 export const translations = {
   ko: {
+    travel: travelTranslations.ko,
     app: {
       status: '온라인',
       statusLabel: '시스템 상태',
@@ -25,6 +28,7 @@ export const translations = {
       board: '게시판',
       calendar: '캘린더',
       map: '지도',
+      travel: '여행',
       settings: '설정',
     },
     common: {
@@ -745,6 +749,7 @@ export const translations = {
     },
   },
   en: {
+    travel: travelTranslations.en,
     app: {
       status: 'Online',
       statusLabel: 'System status',
@@ -768,6 +773,7 @@ export const translations = {
       board: 'Board',
       calendar: 'Calendar',
       map: 'Map',
+      travel: 'Travel',
       settings: 'Settings',
     },
     common: {

@@ -23,6 +23,16 @@ npm install
 npm run dev
 ```
 
+프론트엔드와 백엔드를 한 터미널에서 함께 실행하려면 (.NET 9 SDK 필요):
+
+```bash
+npm run dev:all
+```
+
+프론트는 `http://localhost:5173`, 백엔드는 `http://localhost:5032`에서 실행됩니다. `Ctrl+C`로 둘 다 종료하며, 한 서버가 실패하면 함께 시작한 다른 서버도 종료합니다. 이미 해당 포트에서 실행 중인 서버가 있다면 먼저 종료하세요. 기존 `npm run dev`는 프론트만 실행합니다.
+
+PowerShell에서 `npm.ps1` 실행 정책 오류가 발생하면 `npm.cmd run dev:all`을 사용하세요. 서버를 실행하지 않고 필요한 파일과 SDK를 확인하려면 `npm.cmd run dev:all -- --check`를 실행하세요.
+
 백엔드 API 주소는 Vite 환경변수로 설정합니다. 기본값은 `http://localhost:5032`이며, 로컬에서 변경이 필요하면 `.env.example`을 참고해 `.env`에 아래 값을 설정하세요.
 
 ```txt
