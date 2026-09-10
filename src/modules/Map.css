@@ -2002,3 +2002,91 @@
   outline: none;
   box-shadow: var(--focus-ring);
 }
+
+/* 앨범: 왼쪽은 목록과 지도, 오른쪽은 독립적인 상세 정보 */
+.album-module { font-size: var(--font-size-body); }
+.album-map-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-base);
+}
+.album-map-toolbar small { color: var(--text-muted); font-size: var(--font-size-label); line-height: 1.5; }
+.album-module .map-mode-body { height: auto; }
+.album-module .map-archive-layout { height: auto; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.album-primary-column { display: grid; gap: var(--space-4); align-content: start; min-width: 0; }
+.album-module .map-archive-layout[data-mode='explore'][data-has-selection='true'] {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+}
+.album-module .map-control-panel { order: 1; overflow: visible; }
+.album-module .map-detail-column { order: 2; max-height: none; overflow: visible; padding: 0; }
+.album-module .map-left-scroll { overflow: visible; flex: none; }
+.album-module .map-view-panel {
+  order: 3;
+  grid-column: 1 / -1;
+  height: 430px;
+  min-height: 0;
+  max-height: none;
+}
+.album-module .map-view-panel[hidden] { display: none; }
+.album-module .photo-map { height: 100%; min-height: 0; }
+
+/* 썸네일을 크게 노출하는 사진 격자. 선택/미리보기 동작은 기존 컴포넌트 유지 */
+.album-module .map-record-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); gap: var(--space-3); }
+.album-module .map-record-button {
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-2);
+  border-left-width: 1px;
+}
+.album-module .map-record-thumb { display: block; width: 100%; height: 160px; object-fit: cover; }
+.album-module .map-record-button strong { font-size: var(--font-size-body); line-height: 1.4; }
+.album-module .map-record-button small { font-size: var(--font-size-caption); }
+
+/* 펼치기/필터/편집/삭제는 같은 컨트롤 크기를 사용 */
+.album-module button:is(.map-primary-button, .map-secondary-button, .map-delete-button, .map-mode-tab) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: var(--control-height-default);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  font-family: inherit;
+  font-size: var(--font-size-control);
+  font-weight: 700;
+  line-height: 1.25;
+}
+.album-module .map-edit-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.album-module .map-edit-actions button { width: 100%; }
+.album-module .map-detail-panel { gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-panel); background: var(--surface-base); }
+.album-module .map-detail-preview { display: block; max-height: 300px; object-fit: contain; background: var(--surface-raised); }
+.album-module .map-detail-copy h3 { font-size: var(--font-size-card-title); line-height: 1.4; }
+.album-module .map-detail-copy p { font-size: var(--font-size-body); line-height: 1.5; }
+.album-module .map-coordinate-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); margin: 0; }
+.album-module .map-coordinate-panel > div { gap: var(--space-1); padding: var(--space-2) var(--space-3); border-left-width: 1px; min-width: 0; }
+.album-module .map-coordinate-panel > div:nth-child(-n+3) { grid-column: 1 / -1; }
+.album-module .map-coordinate-panel dt { font-size: var(--font-size-caption); line-height: 1.4; letter-spacing: 0; }
+.album-module .map-coordinate-panel dd { margin: 0; font-size: var(--font-size-control); line-height: 1.5; overflow-wrap: anywhere; }
+.album-module .map-coordinate-panel > div:first-child dd { font-size: var(--font-size-body); }
+.album-module .map-field input,
+.album-module .map-field select,
+.album-module .map-field textarea { font-size: var(--font-size-control); }
+
+@media (min-width: 861px) {
+  .album-module .map-archive-layout[data-mode='explore'][data-has-selection='false'] .map-detail-column { display: none; }
+}
+@media (max-width: 860px) {
+  .album-module .map-archive-layout[data-mode='explore'][data-mobile-view='detail'] .album-primary-column { display: none; }
+  .album-module .map-archive-layout[data-mode='explore'][data-has-selection] { grid-template-columns: minmax(0, 1fr); }
+  .album-module .map-view-panel { height: 360px; }
+  .album-module .map-detail-column { grid-column: 1; }
+  .album-map-toolbar { align-items: flex-start; }
+}

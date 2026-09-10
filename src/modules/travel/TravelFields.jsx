@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { acknowledgeTravelDraft, readTravelDraft, rememberTravelDraft } from './travelDrafts.js'
 
 // 생성은 제출, 기존 항목은 blur 시 자동 저장하는 공통 편집기
-export default function TravelFields({ initial, fields, onSave, t, autoSave = false, validate, draftKey, extraComponent: ExtraComponent, extraProps }) {
+export default function TravelFields({ initial, fields, onSave, t, autoSave = false, validate, draftKey, beforeComponent: BeforeComponent, extraComponent: ExtraComponent, extraProps }) {
   const [restored] = useState(() => readTravelDraft(draftKey))
   const [draft, setDraft] = useState(restored?.value || initial)
   const [error, setError] = useState(restored ? 'recoveredDraft' : '')
@@ -42,6 +42,7 @@ export default function TravelFields({ initial, fields, onSave, t, autoSave = fa
     await request.finally(() => setPending((count) => count - 1))
   }
   return <form className="travel-editor" ref={form} onSubmit={(event) => { event.preventDefault(); save() }}>
+    {BeforeComponent && <BeforeComponent t={t} commit={(patch) => { const next = change(patch); if (autoSave) save(next) }} />}
     <div className="travel-fields">
       {fields.map(({ key, label, type = 'text', options, ...attributes }) => <label key={key} className={type === 'textarea' ? 'travel-wide' : ''}>
         <span>{label}</span>

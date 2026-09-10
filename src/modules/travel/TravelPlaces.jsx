@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { searchPlaces } from '../../services/placeSearchService.js'
 import TravelFields from './TravelFields.jsx'
+import TravelAddressPaste from './TravelAddressPaste.jsx'
+import TravelGoogleMapsLink from './TravelGoogleMapsLink.jsx'
 import { forgetTravelDraft } from './travelDrafts.js'
 import { TravelLocationPicker } from './TravelMap.jsx'
 import { createTravelId, filterTravelPlaces, hasPlaceLocation, PLACE_CATEGORIES, PLACE_PRIORITIES, removeTravelPlace } from './travelLogic.js'
@@ -14,7 +16,7 @@ const searchCategory = (result) => {
   return result.category === 'tourism' ? 'sightseeing' : 'other'
 }
 
-function PlaceLocation({ draft, change, commit, t, language }) {
+function PlaceLocation({ draft, change, commit, t, language, region }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [searchState, setSearchState] = useState('')
@@ -37,8 +39,10 @@ function PlaceLocation({ draft, change, commit, t, language }) {
     <div className="travel-toolbar">
       <label>{t.searchQuery}<input value={query} maxLength={300} onChange={(event) => setQuery(event.target.value)}
         onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); search() } }} /></label>
+      <TravelGoogleMapsLink query={query.trim() ? [query.trim(), region].filter(Boolean).join(' ') : ''} place={draft} region={region} t={t} search />
       <button type="button" disabled={!query.trim() || searchState === 'searching'} onClick={search}>{searchState === 'searching' ? t.searching : t.search}</button>
     </div>
+    <small>{t.googleMapsHint}</small>
     {searchState && <p role="status">{t[searchState]}</p>}
     {results.length > 0 && <ul className="travel-search-results">{results.map((result) => <li key={result.id}>
       <button type="button" onClick={() => {
@@ -85,7 +89,7 @@ export function TravelPlaceEditor({ place, category = 'other', data, update, onC
     return result
   }
   return <TravelFields initial={initial} fields={fields} onSave={save} autoSave={!!place} draftKey={place ? `place:${place.id}` : undefined} t={t}
-    extraComponent={PlaceLocation} extraProps={{ t, language }} />
+    beforeComponent={TravelAddressPaste} extraComponent={PlaceLocation} extraProps={{ t, language, region: data.trip.region }} />
 }
 
 export default function TravelPlaces({ data, update, t, language }) {
@@ -108,12 +112,13 @@ export default function TravelPlaces({ data, update, t, language }) {
     </div>}
     {!data.places.length && <p className="travel-empty">{t.noPlaces}</p>}
     {!!data.places.length && !places.length && <p>{t.noResults}</p>}
-    <div className="travel-card-grid">{places.map((place) => <article className="travel-card" key={place.id}>
+    <div className={`travel-card-grid travel-place-grid${editor && editor !== 'new' ? ' has-editor' : ''}`}>{places.map((place) => <article className={`travel-card travel-place-card${editor === place.id ? ' is-editing' : ''}`} key={place.id}>
       <div className="travel-card-heading"><h3>{place.name}</h3><span className="travel-badge">{t.categories[place.category]}</span></div>
       <p>{place.region || place.address}</p>
       <div className="travel-actions"><span className="travel-badge">{t.priorities[place.priority]}</span>
         <span>{scheduledIds.has(place.id) ? t.scheduled : t.unscheduled}</span>{place.onHold && <span className="travel-badge">{t.onHold}</span>}</div>
-      {place.memo && <p className="travel-memo">{place.memo}</p>}
+      <p className="travel-memo travel-place-memo">{place.memo}</p>
+      <div className="travel-actions travel-place-link"><TravelGoogleMapsLink place={place} region={data.trip.region} t={t} /></div>
       {editor === place.id ? <>
         <TravelPlaceEditor place={place} data={data} update={update} t={t} language={language} />
         <button type="button" onClick={() => setEditor(null)}>{t.cancel}</button>

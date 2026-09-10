@@ -24,9 +24,18 @@
 .travel-section { display: grid; gap: var(--space-4); min-width: 0; }
 .travel-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; align-items: start; }
 .travel-card { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border-default); background: var(--surface-base); border-radius: var(--radius-panel); min-width: 0; overflow-wrap: anywhere; }
+/* 보관함 카드는 메모 유무와 관계없이 같은 높이, 링크와 작업 버튼은 하단 정렬 */
+.travel-place-grid { align-items: stretch; grid-auto-rows: 1fr; }
+.travel-place-card { display: flex; flex-direction: column; }
+.travel-place-card .travel-place-memo { min-height: 3.2em; max-height: 4.8em; overflow-y: auto; }
+.travel-place-link { margin-top: auto; }
+.travel-place-grid.has-editor { grid-auto-rows: auto; }
+.travel-place-card.is-editing { grid-column: 1 / -1; }
 .travel-badge { display: inline-flex; align-items: center; width: fit-content; font-size: 12px; border-radius: var(--radius-pill); background: var(--surface-selected); padding: 4px 10px; }
 .travel-empty { padding: 46px 22px; text-align: center; border: 1px dashed var(--border-default); border-radius: var(--radius-panel); }
 .travel-editor { display: grid; gap: 16px; min-width: 0; }
+.travel-address-paste { display: grid; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-control); background: var(--surface-selected); }
+.travel-address-paste textarea { min-height: 64px; }
 .travel-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .travel-module label { display: grid; gap: 6px; font-size: 13px; min-width: 0; }
 .travel-module input:not([type=file]), .travel-module select, .travel-module textarea { box-sizing: border-box; width: 100%; min-width: 0; border: 1px solid var(--border-default); border-radius: var(--radius-control); background: var(--surface-raised); color: var(--text-primary); min-height: 40px; padding: 9px 10px; font: inherit; }
@@ -54,6 +63,12 @@
 .travel-file-button input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
 .travel-module .travel-error { color: var(--color-danger); overflow-wrap: anywhere; }
 .travel-footnote { padding-top: 16px; border-top: 1px solid var(--border-default); font-size: 12px; }
+/* 외부 링크도 기존 보조 버튼과 같은 높이/포커스 사용 */
+.travel-module .travel-external-link { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); box-sizing: border-box; min-height: var(--control-height-default); padding: var(--space-2) var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-control); background: var(--surface-raised); color: var(--color-primary); font-size: var(--font-size-control); font-weight: 700; line-height: 1.2; text-decoration: none; }
+.travel-module .travel-external-link:hover { background: var(--surface-selected); border-color: var(--border-active); }
+.travel-module .travel-external-link:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.travel-module .travel-map-hint { color: var(--text-muted); font-size: var(--font-size-label); }
+.travel-map-canvas .travel-external-link { background: #f8fafc; color: #245bdb; border-color: #d9e2ec; }
 @media (max-width: 600px) {
   .travel-fields { grid-template-columns: 1fr; }
   .travel-card { padding: 14px; }

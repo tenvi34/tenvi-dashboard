@@ -1436,8 +1436,10 @@ function Map({ t }) {
   // 지도 모드 상태
   // 모드 전환 화면 분기
   const [activeMapMode, setActiveMapMode] = useState('explore')
+  // 앨범은 사진 목록으로 시작하고 사용자가 요청할 때만 지도 생성
+  const [isMapExpanded, setIsMapExpanded] = useState(false)
   // 모바일 Map 보기 상태
-  const [activeMobileMapView, setActiveMobileMapView] = useState('map')
+  const [activeMobileMapView, setActiveMobileMapView] = useState('list')
   const [hasMobileMapViewInteraction, setHasMobileMapViewInteraction] = useState(false)
   const {
     analyzeBulkPhotoFiles,
@@ -1734,6 +1736,7 @@ function Map({ t }) {
   }
 
   const handleSelectPlace = (place) => {
+    setIsMapExpanded(true)
     if (editDraft) {
       setEditDraft((currentDraft) => applySearchLocationToDraft(currentDraft, place))
       setViewportRequest(createViewportRequest('search-select', place))
@@ -1851,6 +1854,7 @@ function Map({ t }) {
   const handleChangeMobileMapView = (nextView) => {
     setHasMobileMapViewInteraction(true)
     setActiveMobileMapView(nextView)
+    if (nextView === 'map') setIsMapExpanded(true)
   }
 
   const handleSelectRecordFromList = (recordId) => {
@@ -1921,7 +1925,7 @@ function Map({ t }) {
   }
 
   return (
-    <section className="module-panel map-module" aria-labelledby="map-title">
+    <section className="module-panel map-module album-module" aria-labelledby="map-title">
       <div className="module-header">
         <div>
           <p className="module-label">{t.map.label}</p>
@@ -1932,6 +1936,15 @@ function Map({ t }) {
 
       {/* 모드 전환 탭 */}
       <MapModeTabs activeMode={activeMapMode} onChangeMode={setActiveMapMode} t={t} />
+      <div className="album-map-toolbar">
+        <button className="map-secondary-button" type="button" aria-expanded={isMapExpanded}
+          aria-controls="album-map-panel" onClick={() => {
+            const expanded = !isMapExpanded
+            setIsMapExpanded(expanded)
+            handleChangeMobileMapView(expanded ? 'map' : 'list')
+          }}>{isMapExpanded ? t.map.collapseMap : t.map.expandMap}</button>
+        <small>{t.map.albumMapHint}</small>
+      </div>
       {activeMapMode === 'explore' ? (
         <MobileMapViewTabs
           activeView={mobileMapView}
@@ -1968,7 +1981,10 @@ function Map({ t }) {
           className="map-archive-layout"
           data-mobile-view={mobileMapView}
           data-mode={activeMapMode}
+          data-has-selection={Boolean(activeRecord)}
         >
+        {/* 사진 목록과 지도를 같은 열에 묶어 상세 높이에 따른 빈 공간 방지 */}
+        <div className="album-primary-column">
         <aside className="map-control-panel">
           {/* 탐색 모드 */}
           {activeMapMode === 'explore' ? (
@@ -2036,6 +2052,8 @@ function Map({ t }) {
         </aside>
 
         <section
+          id="album-map-panel"
+          hidden={!isMapExpanded}
           className={`map-view-panel ${
             activeMapMode === 'explore' && activeRecord && !editDraft
               ? 'has-mobile-preview'
@@ -2053,7 +2071,7 @@ function Map({ t }) {
               {t.map.fitAllMarkers}
             </button>
           ) : null}
-          <MapContainer
+          {isMapExpanded && <MapContainer
             center={DEFAULT_CENTER}
             className="photo-map"
             scrollWheelZoom
@@ -2067,7 +2085,7 @@ function Map({ t }) {
               shouldFitBounds={shouldFitBounds}
               target={focusTarget}
             />
-            <MapResizeController watchValue={`${activeMapMode}-${mobileMapView}`} />
+            <MapResizeController watchValue={`${activeMapMode}-${mobileMapView}-${Boolean(activeRecord)}`} />
             <ManualLocationPicker
               disabled={!canPickLocation}
               onPickLocation={handlePickLocation}
@@ -2150,7 +2168,7 @@ function Map({ t }) {
                 </Popup>
               </Marker>
             ) : null}
-          </MapContainer>
+          </MapContainer>}
           {activeMapMode === 'explore' && !editDraft ? (
             <MobileMapPreviewCard
               collectionName={
@@ -2176,6 +2194,7 @@ function Map({ t }) {
         </section>
 
         {/* 상세 패널 */}
+        </div>
         {activeMapMode === 'explore' ? (
           <aside className="map-detail-column">
             {editDraft ? (
