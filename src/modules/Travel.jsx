@@ -102,16 +102,16 @@ export default function Travel({ t: translations, language }) {
     const result = await state.add(cloneTravelData(record, `${record.trip.name.slice(0, 180)}${t.copySuffix}`))
     if (result) navigate(`/travel/${result.trip.id}`)
   }
-  if (state.loading) return <section className="travel-module"><p role="status">{t.loading}</p></section>
-  return <section className="travel-module" aria-label={t.title}>
-    <header className="travel-header"><div><p className="module-label">TRAVEL</p><h1>{t.title}</h1><p>{t.description}</p></div>
-      <span role="status" aria-live="polite">{state.pending ? t.saving : state.saved && !state.error ? t.saved : ''}</span>
+  if (state.loading) return <section className="module-panel travel-module"><p role="status">{t.loading}</p></section>
+  return <section className="module-panel travel-module" aria-labelledby="travel-title">
+    <header className="module-header travel-header"><div><p className="module-label">TRAVEL</p><h2 id="travel-title">{t.title}</h2><p className="travel-description">{t.description}</p></div>
+      <span className="module-meta" role="status" aria-live="polite">{state.pending ? t.saving : state.saved && !state.error ? t.saved : ''}</span>
     </header>
     {state.error && <div className="travel-error" role="alert">{t[state.error]}
       {(state.error === 'loadError' || state.error === 'tripMissing') && <button type="button" onClick={state.refresh}>{t.retry}</button>}</div>}
     {fileError && <p className="travel-error" role="alert">{t[fileError]}</p>}
     <div className="travel-toolbar">
-      {tripId ? <button type="button" onClick={() => navigate('/travel')}>← {t.back}</button> : <button type="button" onClick={() => setEditor('new')} disabled={state.error === 'loadError'}>{t.newTrip}</button>}
+      {tripId ? <button type="button" onClick={() => navigate('/travel')}>← {t.back}</button> : <button className="travel-primary" type="button" onClick={() => setEditor('new')} disabled={state.error === 'loadError'}>{t.newTrip}</button>}
       <label className="travel-file-button">{t.import}<input type="file" accept=".json,application/json" onChange={importFile} disabled={!!state.pending || state.error === 'loadError'} /></label>
       {data && <><button type="button" onClick={() => download(data)} disabled={!!state.pending}>{t.export}</button>
         <button type="button" onClick={() => duplicate(data)} disabled={!!state.pending}>{t.duplicate}</button>
