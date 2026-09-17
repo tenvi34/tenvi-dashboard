@@ -1345,8 +1345,8 @@
 .settings-module--server .settings-grid {
   grid-template-areas:
     'backend backend-test'
-    'board-storage .'
-    'board-api-test .';
+    'board-storage board-storage'
+    'board-api-test board-api-test';
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -1362,7 +1362,9 @@
 }
 
 .settings-board-copy-button {
-  white-space: nowrap;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .settings-board-copy-status {
@@ -1412,7 +1414,10 @@
 
 .settings-storage-grid {
   display: grid;
+  /* 사이드바를 제외한 실제 가용 너비에 맞춘 저장소 카드 배치 */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: var(--space-2);
+  align-items: start;
 }
 
 .settings-storage-row {
@@ -1423,6 +1428,15 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-control);
   background: var(--surface-raised);
+}
+
+.settings-module--server .board-api-test__actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-module--server .backend-echo-test__form {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
 }
 
 .settings-storage-row > div:first-child {
