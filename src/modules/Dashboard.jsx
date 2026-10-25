@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import './Dashboard.css'
+import { Link } from 'react-router-dom'
+import ModuleIcon from '../components/ModuleIcon.jsx'
+import { getModulePath } from '../router/routes.js'
 
 import { loadDashboardData } from '../services/dashboardDataService.js'
 import { getMapArchiveSummary } from '../services/photoArchiveSummaryService.js'
@@ -213,32 +216,28 @@ function Dashboard({
     )
   }
 
+  // 별도 탭을 열지 않아도 오늘 일정과 최근 기록에 접근 가능한 첫 화면
   const renderOverviewTab = () => (
-    <>
-      {/* 개요 탭 */}
-      <div className="dashboard-tab-grid dashboard-overview-grid">
-        <section className="summary-panel dashboard-overview-panel">
-          <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.overviewMetrics}</p>
-            <h3>{t.dashboard.quickStatus}</h3>
-          </div>
-          <dl className="dashboard-compact-list dashboard-overview-list">
-            <div>
-              <dt>{t.dashboard.todayEvents}</dt>
-              <dd>{allTodayEvents.length || (nextEvent ? 1 : 0)}</dd>
-            </div>
-            <div>
-              <dt>{t.dashboard.totalBoardPosts}</dt>
-              <dd>{boardPosts.length}</dd>
-            </div>
-            <div>
-              <dt>{t.dashboard.totalMapRecords}</dt>
-              <dd>{mapPhotoCount}</dd>
-            </div>
-          </dl>
+    <div className="dashboard-overview-content">
+      <div className="dashboard-stat-grid">
+        {[
+          [t.dashboard.todayEvents, allTodayEvents.length],
+          [t.dashboard.totalBoardPosts, boardPosts.length],
+          [t.dashboard.totalMapRecords, mapSummaryState.status === MAP_SUMMARY_STATUS.ready ? mapPhotoCount : '—'],
+        ].map(([label, count]) => <div className="dashboard-stat" key={label}><span>{label}</span><strong>{count}</strong></div>)}
+      </div>
+      <div className="dashboard-today-grid">
+        <section className="summary-panel">
+          <div className="dashboard-section-heading"><h3>{t.dashboard.todayEvents}</h3><Link to="/calendar">{t.dashboard.viewAll} →</Link></div>
+          {renderTodayScheduleList()}
+          {nextEvent && <div className="summary-list dashboard-calendar-next"><p className="summary-list-title">{t.dashboard.nextEvent}</p>{renderNextEvent()}</div>}
+        </section>
+        <section className="summary-panel">
+          <div className="dashboard-section-heading"><h3>{t.dashboard.recentBoardPosts}</h3><Link to="/board">{t.dashboard.viewAll} →</Link></div>
+          {renderBoardPostList()}
         </section>
       </div>
-    </>
+    </div>
   )
 
   const renderWorkTab = () => (
@@ -372,6 +371,12 @@ function Dashboard({
 
   return (
     <section className="module-panel dashboard-module" aria-label={t.modules.dashboard}>
+      <header className="dashboard-heading"><div><h2>{t.dashboard.homeTitle}</h2><p className="page-description">{t.dashboard.homeDescription}</p></div>
+        <time className="dashboard-date" dateTime={new Date().toLocaleDateString('en-CA')}>{new Intl.DateTimeFormat(language, { month: 'long', day: 'numeric', weekday: 'long' }).format(new Date())}</time>
+      </header>
+      <nav className="quick-launch" aria-label={t.dashboard.quickLaunch}>
+        {['board', 'calendar', 'map', 'travel'].map((id) => <Link key={id} to={getModulePath(id)}><ModuleIcon name={id} /><div><strong>{t.modules[id]}</strong><small>{t.dashboard.shortcuts[id]}</small></div></Link>)}
+      </nav>
       {loading && <p role="status">{t.dashboard.summaryLoading}</p>}
       {failedModules.length > 0 && <div role="alert">
         <p>{t.dashboard.summaryLoadError(failedModules.map((id) => t.modules[id]).join(', '))}</p>
@@ -384,6 +389,7 @@ function Dashboard({
             className={`dashboard-tab ${
               activeDashboardTab === tabId ? 'is-active' : ''
             }`}
+            aria-current={activeDashboardTab === tabId ? 'page' : undefined}
             key={tabId}
             type="button"
             onClick={() => setActiveDashboardTab(tabId)}

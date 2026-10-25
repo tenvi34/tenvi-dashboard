@@ -1,0 +1,137 @@
+/* 여행 전용 작업 공간. 공통 experience 스타일보다 명시적인 범위로 레거시 간격 제한 */
+.tenvi-dashboard.tenvi-app .travel-workspace { gap: 16px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-header { margin: 0; flex-direction: row; align-items: flex-start; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-header h2 { font-size: clamp(20px, 2.3vw, 27px); margin: 0; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-header .module-label { display: none; }
+.tenvi-app .travel-workspace .travel-header .travel-description { margin-top: 5px; font-size: 13px; }
+.tenvi-app .travel-header-tools { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
+/* 열린 헤더 메뉴를 sticky 작업 바(z-index: 25) 위에 표시 */
+.tenvi-app .travel-workspace .travel-header .more-actions[open] { z-index: 30; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-back-link { padding: 0; min-height: 26px; justify-content: flex-start; border: 0; background: transparent; width: fit-content; color: var(--text-muted); font-size: 12px; }
+.tenvi-app .travel-detail { display: grid; gap: 18px; min-width: 0; }
+.tenvi-app .travel-commandbar { position: sticky; top: 0; z-index: 25; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 8px; background: var(--surface-base); border-bottom: 1px solid var(--border-default); }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-commandbar .travel-tabs { margin: 0; border: 0; gap: 20px; min-width: 0; }
+.tenvi-app .travel-quick-create { display: flex; gap: 8px; flex-shrink: 0; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-quick-create button { white-space: nowrap; min-height: 36px; padding: 7px 12px; font-size: 13px; }
+.tenvi-app .travel-workspace .travel-section { gap: 16px; }
+.tenvi-app .travel-library-toolbar { align-items: center; }
+.tenvi-app .travel-library-toolbar small { flex: 1; font-size: 12px; }
+.tenvi-app .travel-split-view { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 18px; align-items: start; min-width: 0; }
+.tenvi-app .travel-list-surface, .tenvi-app .travel-surface { border: 1px solid var(--border-default); border-radius: 12px; background: var(--surface-base); min-width: 0; }
+.tenvi-app .travel-surface { display: grid; gap: 16px; padding: 20px; }
+.tenvi-app .travel-list-caption { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border-default); font-size: 12px; color: var(--text-muted); }
+.tenvi-app .travel-list-caption strong { color: var(--text-secondary); font-weight: 600; }
+.tenvi-app .travel-compact-list { list-style: none; margin: 0; padding: 0; }
+.tenvi-app .travel-compact-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 79px; border-bottom: 1px solid var(--border-default); }
+.tenvi-app .travel-compact-row:last-child { border-bottom: 0; }
+.tenvi-app .travel-compact-row.is-selected { background: var(--surface-selected); }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-compact-row .travel-row-main { display: grid; gap: 3px; justify-content: stretch; flex: 1; text-align: left; padding: 2px 0; min-width: 0; min-height: 50px; background: transparent; border: 0; border-radius: 3px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-compact-row .travel-row-main:hover { background: transparent; border: 0; }
+.tenvi-app .travel-row-main strong { color: var(--text-primary); font-size: 14px; font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
+.tenvi-app .travel-row-main span, .tenvi-app .travel-row-main small { display: block; font-size: 12px; color: var(--text-muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.tenvi-app .travel-row-main small { font-size: 11px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-compact-row .travel-row-edit { min-height: 34px; padding: 6px 10px; font-size: 12px; color: var(--color-primary); background: var(--surface-base); flex-shrink: 0; }
+.tenvi-app .travel-inspector { position: sticky; top: 72px; max-height: calc(100dvh - 100px); overflow-y: auto; }
+.tenvi-app .travel-inspector-heading { display: flex; align-items: flex-start; gap: 12px; justify-content: space-between; }
+.tenvi-app .travel-inspector-heading h3 { font-size: 18px; line-height: 1.5; overflow-wrap: anywhere; }
+.tenvi-app .travel-eyebrow { color: var(--text-muted); font-size: 11px; margin-bottom: 4px; }
+.tenvi-app .travel-detail-list { margin: 0; display: grid; gap: 10px; }
+.tenvi-app .travel-detail-list > div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; font-size: 13px; }
+.tenvi-app .travel-detail-list dt { color: var(--text-muted); }
+.tenvi-app .travel-detail-list dd { margin: 0; overflow-wrap: anywhere; color: var(--text-secondary); }
+.tenvi-app .travel-inspector-memo { font-size: 13px; max-height: 180px; overflow-y: auto; background: var(--surface-raised); padding: 12px; border-radius: 8px; }
+.tenvi-app .travel-inspector-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.tenvi-app .travel-inspector-empty { color: var(--text-muted); font-size: 13px; padding-block: 20px; }
+.tenvi-app .travel-list-toolbar { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+.tenvi-app .travel-list-toolbar .travel-search-field { flex: 1; min-width: 180px; }
+.tenvi-app .travel-list-toolbar > label:not(.travel-search-field) { min-width: 160px; }
+.tenvi-app .travel-result-count { color: var(--text-muted); font-size: 12px; padding-bottom: 12px; }
+.tenvi-app .travel-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 12px; border-top: 1px solid var(--border-default); color: var(--text-muted); font-size: 12px; }
+.tenvi-app .travel-day-strip { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-day-strip button { display: grid; justify-content: start; gap: 3px; text-align: left; flex: 1 0 100px; padding: 10px 12px; }
+.tenvi-app .travel-day-strip strong { font-size: 13px; }
+.tenvi-app .travel-day-strip span, .tenvi-app .travel-day-strip small { font-size: 11px; color: var(--text-muted); }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-day-strip .is-active { background: var(--surface-selected); border-color: var(--color-primary); color: var(--color-primary); }
+.tenvi-app .travel-day-toolbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.tenvi-app .travel-day-toolbar h3 { font-size: 16px; }
+.tenvi-app .travel-day-toolbar h3 small { font-size: 12px; margin-left: 8px; font-weight: 400; color: var(--text-muted); }
+.tenvi-app .travel-day-toolbar > div > span { font-size: 12px; color: var(--text-muted); }
+.tenvi-app .travel-day-jump > span { white-space: nowrap; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-day-jump select { width: auto; min-width: 80px; }
+.tenvi-app .travel-workspace .travel-day-jump { display: flex; flex-direction: row; align-items: center; gap: 8px; font-size: 12px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-day-jump select { min-height: 36px; padding-block: 6px; }
+.tenvi-app .travel-slot-time { display: grid; gap: 5px; flex: 0 0 48px; text-align: center; }
+.tenvi-app .travel-slot-time strong { color: var(--color-primary); font-size: 13px; font-variant-numeric: tabular-nums; }
+.tenvi-app .travel-slot-time small { font-size: 10px; color: var(--text-muted); }
+.tenvi-app .travel-context-hint { color: var(--text-muted); font-size: 12px; }
+.tenvi-app .travel-disclosure { border: 1px solid var(--border-default); border-radius: 9px; padding: 10px 12px; }
+.tenvi-app .travel-disclosure > summary { cursor: pointer; color: var(--text-secondary); font-size: 13px; font-weight: 550; min-height: 25px; }
+.tenvi-app .travel-disclosure[open] > summary { margin-bottom: 14px; }
+.tenvi-app .travel-disclosure > .travel-actions { margin-bottom: 12px; }
+.tenvi-app .travel-overview-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-overview-stats button { display: flex; align-items: center; gap: 14px; text-align: left; padding: 16px; }
+.tenvi-app .travel-overview-stats strong { font-size: 25px; color: var(--text-primary); }
+.tenvi-app .travel-overview-stats span { color: var(--text-muted); font-size: 13px; }
+.tenvi-app .travel-overview-grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); align-items: start; }
+.tenvi-app .travel-day-overview { display: grid; gap: 8px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-day-overview button { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px; text-align: left; }
+.tenvi-app .travel-day-overview span, .tenvi-app .travel-day-overview small { font-size: 12px; color: var(--text-muted); }
+/* modal 상단/저장 버튼은 항상 보이고 본문만 스크롤. 부모 목록 높이 증가 없음 */
+.tenvi-app .travel-editor-dialog { margin: 0 0 0 auto; inset: 0; width: min(540px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; padding: 0; border: 0; border-left: 1px solid var(--border-default); background: var(--surface-base); color: var(--text-primary); box-shadow: -12px 0 50px #0003; }
+.tenvi-app .travel-editor-dialog::backdrop { background: #060b1777; }
+.tenvi-app .travel-editor-heading { position: sticky; top: 0; z-index: 3; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; background: var(--surface-base); padding: 20px 24px; border-bottom: 1px solid var(--border-default); }
+.tenvi-app .travel-editor-heading h3 { font-size: 19px; }
+.tenvi-app .travel-editor-heading p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.tenvi-app .travel-editor-body { display: grid; align-content: start; gap: 16px; padding: 20px 24px; }
+.tenvi-app .travel-editor-day { font-size: 12px; color: var(--color-primary); margin-bottom: 18px; }
+.tenvi-app .travel-editor-dialog .travel-fields { gap: 14px; }
+.tenvi-app .travel-editor-dialog .travel-editor-footer { position: sticky; bottom: -20px; z-index: 2; background: var(--surface-base); padding: 16px 0; border-top: 1px solid var(--border-default); }
+.tenvi-app .travel-editor-footer small { font-size: 11px; color: var(--text-muted); flex: 1 1 190px; }
+.tenvi-app .travel-editor-footer .travel-error { flex-basis: 100%; }
+.tenvi-app .travel-editor-dialog .travel-location { padding: 0; border: 0; }
+.tenvi-app .travel-editor-dialog .travel-toolbar > label { flex: 1 1 100%; }
+@media (max-width: 1150px) {
+  .tenvi-app .travel-commandbar { flex-wrap: wrap; }
+  .tenvi-app .travel-split-view { grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr); }
+}
+@media (max-width: 860px) {
+  .tenvi-dashboard.tenvi-app .travel-workspace .travel-header { flex-direction: column; gap: 10px; }
+  .tenvi-app .travel-header-tools { width: 100%; justify-content: space-between; }
+  .tenvi-app .travel-commandbar { top: 0; padding: 8px 0; gap: 6px; }
+  .tenvi-app .travel-quick-create { width: 100%; }
+  .tenvi-app .travel-quick-create button { flex: 1; }
+  .tenvi-app .travel-commandbar .travel-tabs { width: 100%; }
+  .tenvi-app .travel-split-view, .tenvi-app .travel-overview-grid { grid-template-columns: 1fr; }
+  .tenvi-app .travel-inspector { position: static; max-height: none; }
+  .tenvi-app .travel-day-toolbar { flex-wrap: wrap; }
+  .tenvi-app .travel-list-caption span { display: none; }
+  .tenvi-app .travel-overview-stats button { flex-direction: column; gap: 4px; }
+  .tenvi-app .travel-overview-stats span { font-size: 11px; }
+  .tenvi-app .travel-editor-dialog .travel-fields { grid-template-columns: 1fr; }
+  .tenvi-app .travel-editor-heading { padding: 16px 18px; }
+  .tenvi-app .travel-editor-body { padding: 18px; }
+  .tenvi-app .travel-compact-row { padding: 10px; gap: 8px; }
+  .tenvi-app .travel-day-strip button { flex-basis: 94px; }
+  .tenvi-app .travel-list-toolbar > label:not(.travel-search-field) { min-width: 140px; flex: 1; }
+}
+/* 모바일은 상세를 화면 아래에 늘리지 않고 dialog로 즉시 열기 */
+@media (max-width: 860px) {
+  .tenvi-app .travel-workspace .travel-split-view > .travel-inspector { display: none; }
+}
+.tenvi-app .travel-workspace .travel-schedule-list .travel-compact-row { min-height: 64px; padding-block: 7px; }
+.tenvi-dashboard.tenvi-app .travel-workspace .travel-schedule-list .travel-row-main { min-height: 45px; }
+.tenvi-app .travel-editor-dialog .travel-inspector-heading .travel-eyebrow { display: none; }
+
+.tenvi-app .travel-required-marker { color: var(--color-danger); }
+
+/* 스크롤 패널 하단 메뉴는 위로 펼쳐 추가 스크롤 없이 작업 노출 */
+.tenvi-app .travel-workspace .travel-inspector .more-actions-content,
+.tenvi-app .travel-workspace .travel-editor-dialog .more-actions-content {
+  top: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: auto;
+}
+
+/* 단일 삭제 작업은 작은 직접 버튼으로 노출 */
+.tenvi-dashboard.tenvi-app .travel-workspace button.travel-schedule-delete { justify-self: start; width: fit-content; min-height: 34px; padding: 6px 12px; font-size: 13px; }

@@ -69,11 +69,8 @@ const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const CALENDAR_EVENTS_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 const USER_PROFILE_STORAGE_KEY = STORAGE_KEYS.userProfile
 
-const SETTINGS_TABS = [
-  { id: 'general', label: '\uC77C\uBC18 \uC124\uC815' },
-  { id: 'backup', label: '\uBC31\uC5C5/\uBCF5\uC6D0' },
-  { id: 'server', label: '\uC11C\uBC84 \uAD00\uB9AC' },
-]
+// 언어 변경 시에도 동일한 탭 ID와 설정 URL 유지
+const SETTINGS_TABS = [{ id: 'general' }, { id: 'backup' }, { id: 'server' }]
 
 // 저장 배열 개수 읽기
 const readStoredCount = (storageKey) => {
@@ -706,7 +703,7 @@ function Settings({
             type="button"
             onClick={() => handleSettingsTabChange(tab.id)}
           >
-            {tab.label}
+            {t.settings.tabs[tab.id]}
           </button>
         ))}
       </div>

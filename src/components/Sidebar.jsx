@@ -1,30 +1,18 @@
-// 사이드바 컴포넌트
-function Sidebar({ activeModule, modules, onModuleChange, t }) {
-  return (
-    <aside className="tenvi-sidebar" aria-label="TENVI modules">
-      {/* Sidebar 라벨 */}
-      <div className="sidebar-header">
-        <p className="module-label">{t.sidebar.label}</p>
-        <h2>{t.sidebar.title}</h2>
-      </div>
+import { Link } from 'react-router-dom'
+import { getModulePath } from '../router/routes.js'
+import ModuleIcon from './ModuleIcon.jsx'
 
-      {/* 모듈 전환 버튼 */}
-      <nav className="sidebar-nav">
-        {modules.map((module) => (
-          <button
-            className={`sidebar-button ${
-              activeModule === module.id ? 'is-active' : ''
-            }`}
-            key={module.id}
-            type="button"
-            onClick={() => onModuleChange(module.id)}
-          >
-            <span>{t.modules[module.id]}</span>
-          </button>
-        ))}
-      </nav>
-    </aside>
-  )
+function Sidebar({ activeModule, modules, t }) {
+  return <aside className="tenvi-sidebar" aria-label={t.sidebar.label}>
+    <div className="sidebar-header"><p className="module-label">{t.sidebar.title}</p></div>
+    <nav className="sidebar-nav">
+      {modules.map((module) => <Link key={module.id} to={getModulePath(module.id)}
+        className={`sidebar-button ${activeModule === module.id ? 'is-active' : ''} ${module.id === 'settings' ? 'sidebar-settings' : ''}`}
+        aria-current={activeModule === module.id ? 'page' : undefined}>
+        <ModuleIcon name={module.id} /><span>{t.modules[module.id]}</span>
+      </Link>)}
+    </nav>
+    <p className="sidebar-footnote">{t.app.personalSpace}</p>
+  </aside>
 }
-
 export default Sidebar

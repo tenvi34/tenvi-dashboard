@@ -6,6 +6,9 @@ export const translations = {
   ko: {
     travel: travelTranslations.ko,
     app: {
+      personalSpace: '나만의 워크스페이스',
+      skipToContent: '본문으로 바로가기',
+      moreActions: '추가 작업',
       status: '온라인',
       statusLabel: '시스템 상태',
       languageLabel: '언어 선택',
@@ -18,7 +21,7 @@ export const translations = {
     },
     sidebar: {
       label: '모듈 인덱스',
-      title: '컨트롤',
+      title: '워크스페이스',
     },
     modules: {
       dashboard: '대시보드',
@@ -35,6 +38,11 @@ export const translations = {
       retry: '다시 시도',
     },
     dashboard: {
+      homeTitle: '나의 대시보드',
+      homeDescription: '오늘의 일정을 확인하고, 다음 계획을 시작하세요.',
+      viewAll: '전체 보기',
+      quickLaunch: '바로 시작하기',
+      shortcuts: { travel: '여행 계획하기', map: '사진 기록 보기', calendar: '일정 확인하기', board: '생각 기록하기' },
       summaryLoading: '요약 데이터를 불러오는 중…',
       summaryLoadError: (modules) => `요약 데이터를 불러오지 못했습니다: ${modules}`,
       label: '대시보드',
@@ -81,7 +89,7 @@ export const translations = {
       tabsLabel: 'Dashboard 탭',
       tabs: {
         overview: '개요',
-        work: '작업',
+        work: '일정',
         archive: '기록',
         system: '시스템',
       },
@@ -417,6 +425,7 @@ export const translations = {
       locale: 'ko-KR',
     },
     settings: {
+      tabs: { general: '일반', backup: '백업 및 복원', server: '저장소 및 서버' },
       label: '설정',
       title: '설정',
       message: '대시보드 환경 설정을 위한 설정 모듈입니다.',
@@ -560,6 +569,9 @@ export const translations = {
   en: {
     travel: travelTranslations.en,
     app: {
+      personalSpace: 'Your personal workspace',
+      skipToContent: 'Skip to content',
+      moreActions: 'More actions',
       status: 'Online',
       statusLabel: 'System status',
       languageLabel: 'Language selector',
@@ -572,7 +584,7 @@ export const translations = {
     },
     sidebar: {
       label: 'Module Index',
-      title: 'Control',
+      title: 'Workspace',
     },
     modules: {
       dashboard: 'Dashboard',
@@ -589,6 +601,11 @@ export const translations = {
       retry: 'Retry',
     },
     dashboard: {
+      homeTitle: 'Your dashboard',
+      homeDescription: 'Check your day and make room for your next plan.',
+      viewAll: 'View all',
+      quickLaunch: 'Get started',
+      shortcuts: { travel: 'Plan your next trip', map: 'Explore your photos', calendar: 'See your schedule', board: 'Write something new' },
       summaryLoading: 'Loading summary data…',
       summaryLoadError: (modules) => `Could not load summary data: ${modules}`,
       label: 'Dashboard',
@@ -636,7 +653,7 @@ export const translations = {
       tabsLabel: 'Dashboard tabs',
       tabs: {
         overview: 'Overview',
-        work: 'Work',
+        work: 'Schedule',
         archive: 'Archive',
         system: 'System',
       },
@@ -981,6 +998,7 @@ export const translations = {
       locale: 'en',
     },
     settings: {
+      tabs: { general: 'General', backup: 'Backup & restore', server: 'Storage & server' },
       label: 'Settings',
       title: 'Settings',
       message: 'Settings module is standing by for dashboard preferences.',

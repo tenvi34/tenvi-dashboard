@@ -1,6 +1,7 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import MobileTabBar from '../components/MobileTabBar.jsx'
 import Sidebar from '../components/Sidebar.jsx'
+import ModuleIcon from '../components/ModuleIcon.jsx'
 import { translations } from '../i18n/translations.js'
 import { getModuleFromPathname, getModulePath } from '../router/routes.js'
 
@@ -15,12 +16,12 @@ const MODULES = [
 
 const MOBILE_TAB_MODULES = [
   { id: 'dashboard' },
+  { id: 'travel' },
+  { id: 'calendar' },
   { id: 'map' },
 ]
 
 const MOBILE_MORE_MODULES = [
-  { id: 'travel' },
-  { id: 'calendar' },
   { id: 'board' },
   { id: 'settings' },
 ]
@@ -38,46 +39,31 @@ function AppLayout({ appContext }) {
   }
 
   return (
-    <main className={`tenvi-dashboard theme-${theme}`}>
-      <div className="tenvi-grid" aria-hidden="true"></div>
+    <main className={`tenvi-dashboard tenvi-app theme-${theme}`}>
+      <a className="skip-link" href="#module-content">{t.app.skipToContent}</a>
 
       <section className="tenvi-shell" aria-labelledby="tenvi-title">
         <header className="tenvi-header">
-          <div>
-            <h1 id="tenvi-title">TENVI</h1>
-          </div>
-          <div className="header-controls">
-            <div className="language-switch" aria-label={t.app.languageLabel}>
-              {Object.keys(translations).map((languageId) => (
-                <button
-                  className={`language-button ${
-                    language === languageId ? 'is-active' : ''
-                  }`}
-                  key={languageId}
-                  type="button"
-                  onClick={() => setLanguage(languageId)}
-                >
-                  {t.languages[languageId]}
-                </button>
-              ))}
-            </div>
-            <div className="system-status" aria-label={t.app.statusLabel}>
-              <span className="status-dot"></span>
-              <span>{t.app.status}</span>
-            </div>
-          </div>
+          <div className="app-brand"><span className="brand-mark" aria-hidden="true">T</span><div><h1 id="tenvi-title">TENVI</h1><span>{t.app.personalSpace}</span></div></div>
+          <div className="app-location"><ModuleIcon name={activeModule} /><span>{activeModuleLabel}</span></div>
+          <label className="app-language"><span>{t.app.languageLabel}</span>
+            <select aria-label={t.app.languageLabel} value={language} onChange={(event) => setLanguage(event.target.value)}>
+              {Object.keys(translations).map((id) => <option key={id} value={id}>{t.languages[id]}</option>)}
+            </select>
+          </label>
         </header>
 
         <section className="tenvi-workspace">
           <Sidebar
             activeModule={activeModule}
             modules={MODULES}
-            onModuleChange={handleModuleChange}
             t={t}
           />
 
           <section
             className="module-stage"
+            id="module-content"
+            tabIndex={-1}
             aria-label={`${activeModuleLabel} ${t.app.stageLabel}`}
           >
             <Outlet context={{ ...appContext, onModuleChange: handleModuleChange }} />
@@ -85,10 +71,10 @@ function AppLayout({ appContext }) {
         </section>
 
         <MobileTabBar
+          key={activeModule}
           activeModule={activeModule}
           moreModules={MOBILE_MORE_MODULES}
           modules={MOBILE_TAB_MODULES}
-          onModuleChange={handleModuleChange}
           t={t}
         />
       </section>

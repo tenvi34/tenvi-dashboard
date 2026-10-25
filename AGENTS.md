@@ -4,7 +4,7 @@
 
 - This project is TENVI, a personal AI dashboard.
 - TENVI is built with React + Vite.
-- Keep the existing TENVI HUD design tone: dark, cybernetic, module-based, readable, and restrained.
+- Keep TENVI a clean, restrained dark app with subtle cybernetic cues. Prioritize readable typography, clear action hierarchy, and comfortable spacing. Preserve the optional standard/light theme. See docs/design.md.
 
 ## Architecture
 

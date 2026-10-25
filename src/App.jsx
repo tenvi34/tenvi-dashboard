@@ -6,6 +6,7 @@ import { loadRemoteAppSettings } from './modules/profileSettingsRemoteCopy.js'
 import { START_MODULES } from './modules/settingsBackup.js'
 import AppRouter from './router/AppRouter.jsx'
 import './App.css'
+import './styles/experience.css'
 
 const THEMES = ['dark', 'standard']
 
@@ -67,6 +68,7 @@ function App() {
   }, [])
 
   useEffect(() => {
+    document.documentElement.lang = language
     localStorage.setItem(STORAGE_KEYS.language, language)
   }, [language])
 

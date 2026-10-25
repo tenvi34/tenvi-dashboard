@@ -1,3 +1,4 @@
+import MoreActions from '../../components/MoreActions.jsx'
 import UserAvatar from '../../components/UserAvatar.jsx'
 import BoardCategoryManager from './BoardCategoryManager.jsx'
 import BoardTrash from './BoardTrash.jsx'
@@ -50,25 +51,12 @@ function BoardList({
   return (
     <>
       <div className="board-toolbar">
-        <div>
-          <p className="module-label">{t.board.archiveLabel}</p>
-          <h3>{t.board.listTitle}</h3>
-        </div>
         <div className="board-toolbar-actions">
-          <button
-            type="button"
-            className="board-secondary-button"
-            onClick={onTrashToggle}
-          >
-            {t.board.trash} {trashedPosts.length}
-          </button>
-          <button
-            type="button"
-            className="board-primary-button board-write-button"
-            onClick={onOpenWrite}
-          >
-            {t.board.write}
-          </button>
+          <button type="button" className="board-primary-button board-write-button" onClick={onOpenWrite}>{t.board.write}</button>
+          <MoreActions label={t.app.moreActions}>
+            <button type="button" className="board-secondary-button" onClick={onCategoryManagerToggle}>{t.board.categoryManage}</button>
+            <button type="button" className="board-secondary-button" onClick={onTrashToggle}>{t.board.trash} {trashedPosts.length}</button>
+          </MoreActions>
         </div>
       </div>
 
@@ -82,7 +70,7 @@ function BoardList({
         />
       ) : null}
 
-      <section className="board-section board-list-panel">
+      <section className="board-section board-list-panel" aria-label={t.board.listTitle}>
         <div className="board-list-controls">
           <div className="board-category-filter" aria-label={t.board.categoryFilterLabel}>
             <button
@@ -107,13 +95,7 @@ function BoardList({
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="board-secondary-button board-category-toggle"
-            onClick={onCategoryManagerToggle}
-          >
-            {t.board.categoryManage}
-          </button>
+
 
           <div className="board-list-summary">
             <span className="board-count">
@@ -154,6 +136,46 @@ function BoardList({
             t={t}
           />
         ) : null}
+
+        <div className="board-search-panel board-search-panel-bottom" role="search">
+          <label className="board-search-field">
+            <span>{t.board.searchLabel}</span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => onSearchQueryChange(event.target.value)}
+              placeholder={t.board.searchPlaceholder}
+            />
+          </label>
+
+          <div
+            className="board-search-scope"
+            aria-label={t.board.searchScopeLabel}
+          >
+            {searchScopes.map((scope) => (
+              <button
+                type="button"
+                className={`board-scope-button ${
+                  searchScope === scope ? 'is-active' : ''
+                }`}
+                key={scope}
+                onClick={() => onSearchScopeChange(scope)}
+              >
+                {t.board.searchScopes[scope]}
+              </button>
+            ))}
+          </div>
+
+          {hasSearchQuery ? (
+            <button
+              type="button"
+              className="board-secondary-button board-search-clear"
+              onClick={() => onSearchQueryChange('')}
+            >
+              {t.board.clearSearch}
+            </button>
+          ) : null}
+        </div>
 
         {sortedPosts.length > 0 ? (
           <div className="board-title-list">
@@ -213,45 +235,7 @@ function BoardList({
           </div>
         )}
 
-        <div className="board-search-panel board-search-panel-bottom" role="search">
-          <label className="board-search-field">
-            <span>{t.board.searchLabel}</span>
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => onSearchQueryChange(event.target.value)}
-              placeholder={t.board.searchPlaceholder}
-            />
-          </label>
 
-          <div
-            className="board-search-scope"
-            aria-label={t.board.searchScopeLabel}
-          >
-            {searchScopes.map((scope) => (
-              <button
-                type="button"
-                className={`board-scope-button ${
-                  searchScope === scope ? 'is-active' : ''
-                }`}
-                key={scope}
-                onClick={() => onSearchScopeChange(scope)}
-              >
-                {t.board.searchScopes[scope]}
-              </button>
-            ))}
-          </div>
-
-          {hasSearchQuery ? (
-            <button
-              type="button"
-              className="board-secondary-button board-search-clear"
-              onClick={() => onSearchQueryChange('')}
-            >
-              {t.board.clearSearch}
-            </button>
-          ) : null}
-        </div>
       </section>
     </>
   )
