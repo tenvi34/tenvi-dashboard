@@ -1,3 +1,5 @@
+import { validateBackupExtras } from './settings/backupExtras.js'
+
 export const START_MODULES = ['dashboard', 'board']
 export const HUD_EFFECTS = ['normal', 'reduced']
 export const THEMES = ['dark', 'standard']
@@ -7,7 +9,6 @@ export const BACKUP_TYPE = 'tenvi-dashboard-backup'
 export const BACKUP_VERSION = 1
 
 // 백업 파일명 생성
-// 백업 파일명 생성
 export const createBackupFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
 
@@ -15,11 +16,9 @@ export const createBackupFileName = () => {
 }
 
 // 순수 객체 검증
-// 순수 객체 검증
 const isPlainObject = (value) =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
 
-// 백업 payload 정규화
 // 백업 payload 검증과 정규화
 export const validateBackupPayload = (backupPayload) => {
   if (!isPlainObject(backupPayload)) {
@@ -102,7 +101,11 @@ export const validateBackupPayload = (backupPayload) => {
     return null
   }
 
+  let extras
+  try { extras = validateBackupExtras(backupPayload.data) } catch { return null }
+
   return {
+    ...extras,
     boardPosts: hasBoardPosts ? boardPosts : undefined,
     calendarEvents: hasCalendarEvents ? calendarEvents : undefined,
     hasBoardPosts,

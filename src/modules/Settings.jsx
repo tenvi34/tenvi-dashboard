@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import useSettingsBackup from './settings/useSettingsBackup.js'
+import SettingsBackupPanels from './settings/SettingsBackupPanels.jsx'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import UserAvatar from '../components/UserAvatar.jsx'
 import {
@@ -7,9 +9,7 @@ import {
   fetchRemoteProfile,
   saveRemoteProfile,
 } from '../api/profileApi.js'
-import BackendEchoTest from './BackendEchoTest.jsx'
 import BackendStatus from './BackendStatus.jsx'
-import BoardApiTest from './BoardApiExtendedTest.jsx'
 import {
   BOARD_STORAGE_MODES,
   readBoardStorageMode,
@@ -43,45 +43,26 @@ import {
   saveRemoteSettingValue,
 } from './profileSettingsRemoteCopy.js'
 import './Settings.css'
-import {
-  getPhotoRecordCount,
-  getPhotoRecords,
-  replacePhotoArchiveData,
-  replacePhotoRecords,
-} from '../services/photoArchiveRepository.js'
-import {
-  preparePhotoCollectionsForRestore,
-  preparePhotoRecordsForRestore,
-  serializePhotoCollectionsForBackup,
-  serializePhotoRecordsForBackup,
-} from '../services/photoArchiveBackupService.js'
-import { getPhotoCollections } from '../services/photoCollectionRepository.js'
-import {
-  collectBoardBackupData,
-  downloadBoardBackupFile,
-  parseBoardBackupFile,
-  restoreBoardBackupData,
-} from './boardBackupLogic.js'
+import { getPhotoRecordCount } from '../services/photoArchiveRepository.js'
 import { getAllBoardImages } from './boardImageStore.js'
 import {
   deleteProfileImage,
   saveProfileImage,
 } from './profileImageStore.js'
 import {
-  BACKUP_APP,
-  BACKUP_TYPE,
-  BACKUP_VERSION,
-  createBackupFileName,
   LANGUAGES,
   START_MODULES,
   THEMES,
-  validateBackupPayload,
 } from './settingsBackup.js'
 import {
   parseUserProfile,
   resetUserProfile,
   updateUserProfile,
 } from './userProfileLogic.js'
+
+// 배포 번들에는 데이터 변경용 개발 도구를 포함하지 않음
+const DeveloperTools = import.meta.env.DEV
+  ? lazy(() => import('./settings/SettingsDeveloperTools.jsx')) : null
 
 // Settings 저장 key
 const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
@@ -108,23 +89,6 @@ const readStoredCount = (storageKey) => {
     return Array.isArray(parsedValue) ? parsedValue.length : 0
   } catch {
     return 0
-  }
-}
-
-// 백업 대상 목록 읽기
-const readStoredList = (storageKey) => {
-  const savedValue = localStorage.getItem(storageKey)
-
-  if (!savedValue) {
-    return []
-  }
-
-  try {
-    const parsedValue = JSON.parse(savedValue)
-
-    return Array.isArray(parsedValue) ? parsedValue : []
-  } catch {
-    return []
   }
 }
 
@@ -179,8 +143,6 @@ function Settings({
   )
   // 백업 복원과 프로필 변경 후 저장소 요약 갱신
   const [dataVersion, setDataVersion] = useState(0)
-  const [backupStatus, setBackupStatus] = useState(null)
-  const [boardBackupStatus, setBoardBackupStatus] = useState(null)
   const [boardRemoteCopyStatus, setBoardRemoteCopyStatus] = useState(null)
   const [boardCategoriesRemoteCopyStatus, setBoardCategoriesRemoteCopyStatus] =
     useState(null)
@@ -205,8 +167,6 @@ function Settings({
   const [profileForm, setProfileForm] = useState(() =>
     parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)),
   )
-  const backupFileInputRef = useRef(null)
-  const boardBackupFileInputRef = useRef(null)
   const profileImageInputRef = useRef(null)
   const boardPostCount = readStoredCount(BOARD_POSTS_STORAGE_KEY)
   const calendarEventCount = readStoredCount(CALENDAR_EVENTS_STORAGE_KEY)
@@ -719,339 +679,8 @@ function Settings({
     }
   }
 
-  // 전체 백업 JSON 내보내기
-  const handleExportBackup = async () => {
-    try {
-      const mapPhotoRecords = await serializePhotoRecordsForBackup(
-        await getPhotoRecords(),
-      )
-      const mapPhotoCollections = serializePhotoCollectionsForBackup(
-        await getPhotoCollections(),
-      )
-      const backupPayload = {
-        app: BACKUP_APP,
-        type: BACKUP_TYPE,
-        version: BACKUP_VERSION,
-        createdAt: new Date().toISOString(),
-        data: {
-          boardPosts: readStoredList(STORAGE_KEYS.boardPosts),
-          calendarEvents: readStoredList(STORAGE_KEYS.calendarEvents),
-          language,
-          startModule,
-          theme,
-          mapPhotoCollections,
-          mapPhotoRecords,
-          userProfile: parseUserProfile(
-            localStorage.getItem(USER_PROFILE_STORAGE_KEY),
-          ),
-        },
-      }
-      const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
-        type: 'application/json',
-      })
-      const backupUrl = URL.createObjectURL(backupBlob)
-      const downloadLink = document.createElement('a')
-
-      downloadLink.href = backupUrl
-      downloadLink.download = createBackupFileName()
-      downloadLink.click()
-      URL.revokeObjectURL(backupUrl)
-      setBackupStatus({ type: 'success', message: t.settings.backupExported })
-    } catch {
-      setBackupStatus({ type: 'error', message: t.settings.backupReadError })
-    }
-  }
-
-  // Board 백업 JSON 내보내기
-  const handleExportBoardBackup = async () => {
-    try {
-      const backupPayload = await collectBoardBackupData()
-
-      downloadBoardBackupFile(backupPayload)
-      setBoardBackupStatus({
-        type: 'success',
-        message: t.settings.boardBackupExported,
-      })
-    } catch {
-      setBoardBackupStatus({
-        type: 'error',
-        message: t.settings.boardBackupReadError,
-      })
-    }
-  }
-
-  // Board 백업 JSON 복원
-  const handleRestoreBoardBackup = async (event) => {
-    const backupFile = event.target.files?.[0]
-
-    if (!backupFile) {
-      return
-    }
-
-    try {
-      const backupPayload = await parseBoardBackupFile(backupFile)
-
-      if (!backupPayload) {
-        setBoardBackupStatus({
-          type: 'error',
-          message: t.settings.boardBackupInvalid,
-        })
-        return
-      }
-
-      if (!window.confirm(t.settings.boardRestoreConfirmMessage)) {
-        setBoardBackupStatus({
-          type: 'info',
-          message: t.settings.restoreCancelled,
-        })
-        return
-      }
-
-      await restoreBoardBackupData(backupPayload)
-      setProfileForm(parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)))
-      setBoardBackupStatus({
-        type: 'success',
-        message: t.settings.boardBackupRestored,
-      })
-      setDataVersion((currentVersion) => currentVersion + 1)
-    } catch {
-      setBoardBackupStatus({
-        type: 'error',
-        message: t.settings.boardBackupReadError,
-      })
-    } finally {
-      event.target.value = ''
-    }
-  }
-
-  // 검증된 백업 localStorage 반영
-  const restoreLocalStorageData = (validatedBackup) => {
-    // 기존 localStorage key 유지
-    if (validatedBackup.hasBoardPosts) {
-      localStorage.setItem(
-        STORAGE_KEYS.boardPosts,
-        JSON.stringify(validatedBackup.boardPosts),
-      )
-    }
-    if (validatedBackup.hasCalendarEvents) {
-      localStorage.setItem(
-        STORAGE_KEYS.calendarEvents,
-        JSON.stringify(validatedBackup.calendarEvents),
-      )
-    }
-    localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
-    localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
-    localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
-    if (validatedBackup.hasUserProfile) {
-      localStorage.setItem(
-        STORAGE_KEYS.userProfile,
-        JSON.stringify(parseUserProfile(JSON.stringify(validatedBackup.userProfile))),
-      )
-    }
-  }
-
-  // 전체 백업 JSON 복원
-  const handleRestoreBackup = async (event) => {
-    const backupFile = event.target.files?.[0]
-
-    if (!backupFile) {
-      return
-    }
-
-    try {
-      const backupPayload = JSON.parse(await backupFile.text())
-      const validatedBackup = validateBackupPayload(backupPayload)
-
-      if (!validatedBackup) {
-        setBackupStatus({ type: 'error', message: t.settings.backupInvalid })
-        return
-      }
-
-      const collectionRestorePlan = validatedBackup.hasMapPhotoCollections
-        ? preparePhotoCollectionsForRestore(validatedBackup.mapPhotoCollections)
-        : null
-      const mapRestorePlan = validatedBackup.hasMapPhotoRecords
-        ? await preparePhotoRecordsForRestore(
-            validatedBackup.mapPhotoRecords,
-            collectionRestorePlan?.restoredCollections ?? null,
-          )
-        : null
-
-      if (!window.confirm(t.settings.restoreConfirmMessage)) {
-        setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
-        return
-      }
-
-      if (mapRestorePlan?.damagedCount > 0) {
-        const shouldContinueWithValidMapRecords = window.confirm(
-          t.settings.restoreDamagedMapConfirm(
-            mapRestorePlan.totalCount,
-            mapRestorePlan.validCount,
-            mapRestorePlan.damagedCount,
-          ),
-        )
-
-        if (!shouldContinueWithValidMapRecords) {
-          setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
-          return
-        }
-      }
-
-      if (collectionRestorePlan?.damagedCount > 0) {
-        const shouldContinueWithValidCollections = window.confirm(
-          t.settings.restoreDamagedMapCollectionsConfirm(
-            collectionRestorePlan.totalCount,
-            collectionRestorePlan.validCount,
-            collectionRestorePlan.damagedCount,
-          ),
-        )
-
-        if (!shouldContinueWithValidCollections) {
-          setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
-          return
-        }
-      }
-
-      if (
-        (validatedBackup.hasMapPhotoRecords ||
-          validatedBackup.hasMapPhotoCollections) &&
-        !window.confirm(
-          t.settings.restoreMapReplaceConfirm(
-            mapRestorePlan?.totalCount ?? 0,
-            mapRestorePlan?.validCount ?? 0,
-            mapRestorePlan?.damagedCount ?? 0,
-          ),
-        )
-      ) {
-        setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
-        return
-      }
-
-      const previousLocalStorageData = {
-        // 복원 실패 rollback snapshot
-        boardPosts: localStorage.getItem(STORAGE_KEYS.boardPosts),
-        calendarEvents: localStorage.getItem(STORAGE_KEYS.calendarEvents),
-        language: localStorage.getItem(STORAGE_KEYS.language),
-        startModule: localStorage.getItem(STORAGE_KEYS.startModule),
-        theme: localStorage.getItem(STORAGE_KEYS.theme),
-        userProfile: localStorage.getItem(STORAGE_KEYS.userProfile),
-      }
-      const shouldTouchMapArchive =
-        validatedBackup.hasMapPhotoRecords || validatedBackup.hasMapPhotoCollections
-      const previousMapRecords = shouldTouchMapArchive
-        ? await getPhotoRecords()
-        : null
-      const previousCollections = shouldTouchMapArchive
-        ? await getPhotoCollections()
-        : null
-
-      try {
-                if (
-          validatedBackup.hasMapPhotoRecords &&
-          validatedBackup.hasMapPhotoCollections
-        ) {
-          await replacePhotoArchiveData({
-            records: mapRestorePlan.restoredRecords,
-            collections: collectionRestorePlan.restoredCollections,
-          })
-        } else if (validatedBackup.hasMapPhotoRecords) {
-          await replacePhotoRecords(mapRestorePlan.restoredRecords)
-        } else if (validatedBackup.hasMapPhotoCollections) {
-          const restoredCollectionIds = new Set(
-            collectionRestorePlan.restoredCollections.map(
-              (collection) => collection.id,
-            ),
-          )
-
-          await replacePhotoArchiveData({
-            records: (await getPhotoRecords()).map((record) => ({
-              ...record,
-              collectionId: restoredCollectionIds.has(record.collectionId)
-                ? record.collectionId
-                : null,
-            })),
-            collections: collectionRestorePlan.restoredCollections,
-          })
-        }
-
-        restoreLocalStorageData(validatedBackup)
-      } catch {
-        // 복원 실패 시 이전 데이터 rollback
-        if (previousMapRecords) {
-          await replacePhotoArchiveData({
-            records: previousMapRecords,
-            collections: previousCollections ?? undefined,
-          })
-        } else if (previousCollections) {
-          await replacePhotoArchiveData({
-            records: await getPhotoRecords(),
-            collections: previousCollections,
-          })
-        }
-
-        Object.entries(previousLocalStorageData).forEach(([key, value]) => {
-          const storageKey = STORAGE_KEYS[key]
-
-          if (value === null) {
-            localStorage.removeItem(storageKey)
-            return
-          }
-
-          localStorage.setItem(storageKey, value)
-        })
-
-        setBackupStatus({
-          type: 'error',
-          message: t.settings.restoreRollbackError,
-        })
-        return
-      }
-
-      onLanguageChange(validatedBackup.language)
-      onStartModuleChange(validatedBackup.startModule)
-      onThemeChange(validatedBackup.theme)
-      if (validatedBackup.hasUserProfile) {
-        setProfileForm(parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)))
-      }
-      setDataVersion((currentVersion) => currentVersion + 1)
-
-      if (!validatedBackup.hasMapPhotoRecords) {
-        setBackupStatus({
-          type: 'success',
-          message: `${t.settings.restoreComplete} ${t.settings.restoreMapKept}`,
-        })
-      } else if (mapRestorePlan.damagedCount > 0) {
-        setBackupStatus({
-          type: 'success',
-          message: t.settings.restoreCompleteWithDamagedMap(
-            mapRestorePlan.validCount,
-            mapRestorePlan.damagedCount,
-          ),
-        })
-      } else if (collectionRestorePlan?.damagedCount > 0) {
-        setBackupStatus({
-          type: 'success',
-          message: `${
-            mapRestorePlan
-              ? t.settings.restoreCompleteWithMap(mapRestorePlan.validCount)
-              : t.settings.restoreComplete
-          } ${t.settings.restoreDamagedMapCollectionsSkipped(
-            collectionRestorePlan.validCount,
-            collectionRestorePlan.damagedCount,
-          )}`,
-        })
-      } else {
-        setBackupStatus({
-          type: 'success',
-          message: t.settings.restoreCompleteWithMap(mapRestorePlan.validCount),
-        })
-      }
-    } catch {
-      setBackupStatus({ type: 'error', message: t.settings.backupReadError })
-    } finally {
-      event.target.value = ''
-    }
-  }
+  const backup = useSettingsBackup({ language, startModule, theme, t,
+    onLanguageChange, onStartModuleChange, onThemeChange, setProfileForm, setDataVersion })
 
   return (
     <section
@@ -1271,7 +900,7 @@ function Settings({
 
         {/* 백엔드 연결 확인 패널 */}
         <BackendStatus t={t} />
-        <BackendEchoTest />
+
         <section className="settings-panel settings-board-storage-panel">
           <div className="settings-board-storage-copy">
             <div className="settings-panel-header">
@@ -1516,85 +1145,10 @@ function Settings({
               ) : null}
             </div>
           </div>
-        </section>        <BoardApiTest />
-
-        <div className="settings-action-stack">
-        <section className="settings-panel settings-backup-panel">
-          <div className="settings-panel-header">
-            <p className="module-label">{t.settings.backupLabel}</p>
-            <h3>{t.settings.backupTitle}</h3>
-          </div>
-          <div className="backup-actions">
-            <button
-              className="settings-option"
-              type="button"
-              onClick={handleExportBackup}
-            >
-              {t.settings.exportBackup}
-            </button>
-            <button
-              className="settings-option"
-              type="button"
-              onClick={() => backupFileInputRef.current?.click()}
-            >
-              {t.settings.importBackup}
-            </button>
-          </div>
-          <input
-            ref={backupFileInputRef}
-            className="backup-file-input"
-            type="file"
-            accept="application/json,.json"
-            aria-label={t.settings.importBackup}
-            onChange={handleRestoreBackup}
-          />
-          <p className="settings-note">{t.settings.backupNote}</p>
-          <p className="settings-note">{t.settings.mapBackupNote}</p>
-          {backupStatus ? (
-            <p className={`backup-status is-${backupStatus.type}`}>
-              {backupStatus.message}
-            </p>
-          ) : null}
         </section>
+        {DeveloperTools && activeSettingsTab === 'server' && <Suspense fallback={null}><DeveloperTools t={t} /></Suspense>}
 
-        <section className="settings-panel settings-board-backup-panel">
-          <div className="settings-panel-header">
-            <p className="module-label">{t.settings.backupLabel}</p>
-            <h3>{t.settings.boardBackupTitle}</h3>
-          </div>
-          <div className="backup-actions">
-            <button
-              className="settings-option"
-              type="button"
-              onClick={handleExportBoardBackup}
-            >
-              {t.settings.exportBoardBackup}
-            </button>
-            <button
-              className="settings-option"
-              type="button"
-              onClick={() => boardBackupFileInputRef.current?.click()}
-            >
-              {t.settings.importBoardBackup}
-            </button>
-          </div>
-          <input
-            ref={boardBackupFileInputRef}
-            className="backup-file-input"
-            type="file"
-            accept="application/json,.json"
-            aria-label={t.settings.importBoardBackup}
-            onChange={handleRestoreBoardBackup}
-          />
-          <p className="settings-note">{t.settings.boardBackupNote}</p>
-          {boardBackupStatus ? (
-            <p className={`backup-status is-${boardBackupStatus.type}`}>
-              {boardBackupStatus.message}
-            </p>
-          ) : null}
-        </section>
-
-        </div>
+        <SettingsBackupPanels t={t} {...backup} />
       </div>
     </section>
   )

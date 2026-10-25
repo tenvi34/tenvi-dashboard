@@ -125,7 +125,7 @@ npm run lint
 - 백엔드 Health API 연결 상태 확인
 - 서버 관련 탭에서 Board Local/Remote 저장소 모드 선택
 - 로컬 사용자 프로필 편집
-- 전체 앱 JSON 백업/복원
+- 로컬 데이터 JSON 백업/복원(여행·타이머·프로필 이미지 포함, Remote 서버 제외)
 - Board 전용 JSON 백업/복원
 
 ## 백엔드 실행과 Board Remote 모드
@@ -246,7 +246,7 @@ src/
     imageUtils.js
 ```
 
-모듈 전환은 React state 기반이며 React Router는 사용하지 않습니다.
+모듈 전환은 React Router 기반이며 URL과 브라우저 뒤로/앞으로 이동을 지원합니다.
 
 ## localStorage
 

@@ -5,7 +5,7 @@ import { travelRepository, TRAVEL_DATABASE_NAME } from './travelRepository.js'
 // IndexedDB 이벤트를 직접 제어하여 request 성공과 transaction 확정의 차이 검증
 const harness = () => {
   const readRequest = {}
-  const store = { add: vi.fn(), put: vi.fn(), delete: vi.fn(), get: vi.fn(() => readRequest), getAll: vi.fn(() => readRequest) }
+  const store = { clear: vi.fn(), add: vi.fn(), put: vi.fn(), delete: vi.fn(), get: vi.fn(() => readRequest), getAll: vi.fn(() => readRequest) }
   const tx = { objectStore: vi.fn(() => store), abort: vi.fn(() => queueMicrotask(() => tx.onabort())) }
   const database = { transaction: vi.fn(() => tx), close: vi.fn() }
   const openRequest = { result: database }
@@ -93,4 +93,24 @@ describe('Travel repository transaction boundaries', () => {
     h.readRequest.onsuccess()
     await rejected
   })
+  it('replaces trips in one transaction and resolves only after commit', async () => {
+    const h = harness()
+    const trip = createTripData({ name: 'Restore' })
+    const resolved = vi.fn()
+    const pending = travelRepository.replaceAll([trip]).then(resolved)
+    await flush()
+    expect(h.store.clear).toHaveBeenCalledOnce()
+    expect(h.store.add).toHaveBeenCalledWith(trip)
+    expect(resolved).not.toHaveBeenCalled()
+    h.tx.oncomplete()
+    await pending
+    expect(resolved).toHaveBeenCalledWith([trip])
+  })
+  it('validates all trips before clearing existing data', () => {
+    const h = harness()
+    expect(() => travelRepository.replaceAll([{}])).toThrow('invalidData')
+    expect(h.store.clear).not.toHaveBeenCalled()
+    expect(h.open).not.toHaveBeenCalled()
+  })
+
 })

@@ -129,3 +129,10 @@ export const deleteProfileImage = async (imageId) => {
     store.delete(imageId)
   })
 }
+
+// 전체 백업 복원과 실패 복구에서 이미지 목록을 원자적으로 교체
+export const replaceProfileImages = (images) =>
+  runProfileImageTransaction('readwrite', (store) => {
+    store.clear()
+    images.forEach((image) => store.put(image))
+  })

@@ -31,8 +31,12 @@ export const translations = {
     common: {
       delete: '삭제',
       systemMessage: '시스템 메시지',
+      loadingSettings: '설정을 불러오는 중…',
+      retry: '다시 시도',
     },
     dashboard: {
+      summaryLoading: '요약 데이터를 불러오는 중…',
+      summaryLoadError: (modules) => `요약 데이터를 불러오지 못했습니다: ${modules}`,
       label: '대시보드',
       title: '개요',
       message: '향후 시스템 위젯을 배치할 대시보드 모듈입니다.',
@@ -449,9 +453,10 @@ export const translations = {
       profileNote:
         '닉네임은 새 Board 게시글의 작성자 기본값으로 사용됩니다. 기존 게시글 작성자는 변경하지 않습니다.',
       backupLabel: '백업/복원',
-      backupTitle: 'TENVI 전체 백업',
-      exportBackup: '전체 백업 내보내기',
-      importBackup: '전체 백업 복원',
+      backupTitle: '로컬 데이터 백업',
+      developerTools: 'DEV · API 개발 도구',
+      exportBackup: '로컬 백업 내보내기',
+      importBackup: '로컬 백업 복원',
       boardBackupTitle: 'Board 전용 백업',
       storageModeLabel: 'REMOTE STORAGE',
       storageModeTitle: '저장소 모드',
@@ -524,14 +529,14 @@ export const translations = {
         'Could not load REMOTE Profile, so LOCAL values are kept.',
       profileRemoteSaveError: 'Could not save REMOTE Profile.',
       backupNote:
-        'Board 게시글, Calendar 일정, 언어, 시작 모듈, 테마 설정, Map 사진 기록을 백업합니다. Board 이미지, 카테고리, 임시저장은 Board 전용 백업을 사용하세요.',
+        '이 브라우저의 Board 게시글, Calendar 일정, 여행, 타이머 완료 횟수, 프로필·이미지, 언어·테마·시작 설정, Map 사진 기록을 백업합니다. Remote 서버 데이터는 포함하지 않습니다. Board 이미지·카테고리·임시저장은 Board 전용 백업을 사용하세요.',
       mapBackupNote:
         'Map 백업에는 미리보기 이미지와 위치 기록이 포함됩니다. 사진 수가 많으면 JSON 파일 용량이 커질 수 있습니다.',
       backupExported: '백업 파일을 생성했습니다.',
       backupInvalid: '올바른 TENVI 백업 파일이 아닙니다.',
       backupReadError: 'JSON 파일을 읽을 수 없습니다.',
       restoreConfirmMessage:
-        '현재 TENVI 데이터가 백업 파일의 데이터로 덮어써질 수 있습니다. 복원할까요?',
+        '백업에 포함된 로컬 데이터(여행·프로필 이미지 포함)를 교체합니다. Remote 서버는 변경하지 않으며, 구 백업에 없는 항목은 유지합니다. 복원할까요?',
       restoreMapReplaceConfirm: (total, valid, damaged) =>
         `백업 파일에는 Map 사진 기록 ${total}개가 포함되어 있습니다. ${valid}개는 복원 가능하고 ${damaged}개는 손상되어 복원할 수 없습니다. 이 백업의 Map 사진 기록으로 현재 Map 기록이 교체될 수 있습니다. 계속 복원할까요?`,
       restoreDamagedMapConfirm: (total, valid, damaged) =>
@@ -580,8 +585,12 @@ export const translations = {
     common: {
       delete: 'Delete',
       systemMessage: 'System Message',
+      loadingSettings: 'Loading settings…',
+      retry: 'Retry',
     },
     dashboard: {
+      summaryLoading: 'Loading summary data…',
+      summaryLoadError: (modules) => `Could not load summary data: ${modules}`,
       label: 'Dashboard',
       title: 'Overview',
       message: 'Dashboard module is ready for future system widgets.',
@@ -1008,9 +1017,10 @@ export const translations = {
       profileNote:
         'Nickname is used as the default author for new Board posts. Existing post authors are not changed.',
       backupLabel: 'Backup/Restore',
-      backupTitle: 'Full TENVI Backup',
-      exportBackup: 'Export Full Backup',
-      importBackup: 'Restore Full Backup',
+      backupTitle: 'Local Data Backup',
+      developerTools: 'DEV · API tools',
+      exportBackup: 'Export Local Backup',
+      importBackup: 'Restore Local Backup',
       boardBackupTitle: 'Board Dedicated Backup',
       storageModeLabel: 'REMOTE STORAGE',
       storageModeTitle: 'Storage Mode',
@@ -1055,7 +1065,7 @@ export const translations = {
       exportBoardBackup: 'Export Board Dedicated Backup',
       importBoardBackup: 'Restore Board Dedicated Backup',
       boardBackupNote:
-        'Board posts are already included in the full TENVI backup. This backup also preserves Board categories, drafts, local profile, and IndexedDB Board images.',
+        'Board posts are already included in the local data backup. This backup also preserves Board categories, drafts, local profile, and IndexedDB Board images.',
       boardBackupExported: 'Board backup file has been created.',
       boardBackupInvalid: 'This is not a valid Board backup file.',
       boardBackupRestored:
@@ -1095,14 +1105,14 @@ export const translations = {
       },
       mapData: 'Album photo records',
       backupNote:
-        'Backs up Board posts, Calendar events, language, start module, theme settings, and Map photo records. Use the Board dedicated backup for Board images, categories, and drafts.',
+        'Backs up this browser’s Board posts, Calendar events, trips, completed timer sessions, profile and images, language, theme, start module, and Map records. Remote server data is excluded. Use the Board dedicated backup for Board images, categories, and drafts.',
       mapBackupNote:
         'Map backups include preview images and location records. The JSON file can become large when many photos are stored.',
       backupExported: 'Backup file has been created.',
       backupInvalid: 'This is not a valid TENVI backup file.',
       backupReadError: 'Could not read the JSON file.',
       restoreConfirmMessage:
-        'Current TENVI data may be overwritten with the backup file data. Restore now?',
+        'Replace the local data included in this backup, including trips and profile images? Remote data is unchanged. Fields absent from older backups are kept.',
       restoreMapReplaceConfirm: (total, valid, damaged) =>
         `This backup contains ${total} Map photo records. ${valid} can be restored and ${damaged} are damaged. Current Map records may be replaced with the Map records in this backup. Continue restore?`,
       restoreDamagedMapConfirm: (total, valid, damaged) =>

@@ -1,5 +1,5 @@
-import { getPhotoRecords } from './photoArchiveRepository.js'
-import { getPhotoCollections } from './photoCollectionRepository.js'
+import { readMapStorageMode } from '../modules/mapStorageMode.js'
+import { localMapRepository, remoteMapRepository } from '../modules/map/repositories/index.js'
 
 const LOCATION_SOURCE_KEYS = ['exif', 'manual', 'search']
 
@@ -106,10 +106,13 @@ export const createMapArchiveSummary = (records = [], collections = []) => {
 }
 
 // Dashboard Map 요약 조회
-export const getMapArchiveSummary = async () => {
+export const getMapArchiveSummary = async ({
+  mode = readMapStorageMode(), localRepository = localMapRepository, remoteRepository = remoteMapRepository,
+} = {}) => {
+  const repository = mode === 'remote' ? remoteRepository : localRepository
   const [records, collections] = await Promise.all([
-    getPhotoRecords(),
-    getPhotoCollections(),
+    repository.fetchRecords(),
+    repository.fetchCollections(),
   ])
 
   return createMapArchiveSummary(records, collections)

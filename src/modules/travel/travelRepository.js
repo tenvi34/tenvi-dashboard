@@ -58,5 +58,17 @@ export const travelRepository = {
       } catch (error) { fail(error) }
     }
   }),
+  // 전체 백업 복원은 기존 ID와 내부 참조를 보존하며 한 트랜잭션에서 교체
+  replaceAll: (records) => {
+    const validated = records.map(validateTravelData)
+    if (new Set(validated.map((data) => data.trip.id)).size !== validated.length) {
+      throw new Error('invalidData')
+    }
+    return transaction('readwrite', (store, done) => {
+      store.clear()
+      validated.forEach((data) => store.add(data))
+      done(validated)
+    })
+  },
   remove: (tripId) => transaction('readwrite', (store, done) => { store.delete(tripId); done(tripId) }),
 }

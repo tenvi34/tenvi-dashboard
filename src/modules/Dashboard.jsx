@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './Dashboard.css'
 
-import { STORAGE_KEYS } from '../constants/storageKeys.js'
+import { loadDashboardData } from '../services/dashboardDataService.js'
 import { getMapArchiveSummary } from '../services/photoArchiveSummaryService.js'
 import {
   getCalendarEventDateLabel,
@@ -12,22 +12,6 @@ import {
 } from './calendarLogic.js'
 
 const DASHBOARD_TABS = ['overview', 'work', 'archive', 'system']
-
-// Dashboard 저장 목록 읽기
-const readStoredList = (storageKey) => {
-  const savedValue = localStorage.getItem(storageKey)
-
-  if (!savedValue) {
-    return []
-  }
-
-  try {
-    const parsedValue = JSON.parse(savedValue)
-    return Array.isArray(parsedValue) ? parsedValue : []
-  } catch {
-    return []
-  }
-}
 
 const getBoardPostTime = (post) => {
   const time = new Date(post.createdAt).getTime()
@@ -46,13 +30,20 @@ function Dashboard({
   t,
   theme = 'dark',
 }) {
+  const [refreshCount, setRefreshCount] = useState(0)
   const [activeDashboardTab, setActiveDashboardTab] = useState('overview')
   const [mapSummaryState, setMapSummaryState] = useState({
     data: null,
     status: MAP_SUMMARY_STATUS.loading,
   })
-  const boardPosts = readStoredList(STORAGE_KEYS.boardPosts)
-  const calendarEvents = readStoredList(STORAGE_KEYS.calendarEvents)
+  const [summaryData, setSummaryData] = useState({ boardPosts: [], calendarEvents: [], failedModules: [], loading: true })
+  const { boardPosts, calendarEvents, failedModules, loading } = summaryData
+  useEffect(() => {
+    let mounted = true
+    loadDashboardData().then((data) => { if (mounted) setSummaryData({ ...data, loading: false }) })
+      .catch(() => { if (mounted) setSummaryData({ boardPosts: [], calendarEvents: [], failedModules: ['board', 'calendar'], loading: false }) })
+    return () => { mounted = false }
+  }, [refreshCount])
   // Calendar 요약 재배치
   const allTodayEvents = getTodayEvents(calendarEvents)
   const todayEvents = allTodayEvents.slice(0, 3)
@@ -103,7 +94,12 @@ function Dashboard({
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [refreshCount])
+
+  const handleRetry = () => {
+    setSummaryData((current) => ({ ...current, loading: true, failedModules: [] }))
+    setRefreshCount((count) => count + 1)
+  }
 
   const renderEmptyState = (message) => (
     <div className="empty-state compact-empty" role="status">
@@ -376,6 +372,11 @@ function Dashboard({
 
   return (
     <section className="module-panel dashboard-module" aria-label={t.modules.dashboard}>
+      {loading && <p role="status">{t.dashboard.summaryLoading}</p>}
+      {failedModules.length > 0 && <div role="alert">
+        <p>{t.dashboard.summaryLoadError(failedModules.map((id) => t.modules[id]).join(', '))}</p>
+        <button type="button" onClick={handleRetry}>{t.common.retry}</button>
+      </div>}
       {/* Dashboard 탭 */}
       <div className="dashboard-tabs" aria-label={t.dashboard.tabsLabel}>
         {DASHBOARD_TABS.map((tabId) => (
@@ -393,7 +394,7 @@ function Dashboard({
       </div>
 
       <div className="dashboard-tab-panel">
-        {tabRenderers[activeDashboardTab]()}
+        {!loading && failedModules.length === 0 ? tabRenderers[activeDashboardTab]() : null}
       </div>
     </section>
   )

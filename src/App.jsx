@@ -10,6 +10,7 @@ import './App.css'
 const THEMES = ['dark', 'standard']
 
 function App() {
+  const [settingsReady, setSettingsReady] = useState(() => readProfileSettingsStorageMode() !== 'remote')
   const [startModule, setStartModule] = useState(() => {
     const savedStartModule = localStorage.getItem(STORAGE_KEYS.startModule)
 
@@ -58,6 +59,7 @@ function App() {
       .catch(() => {
         // REMOTE 서버가 없으면 기존 LOCAL 설정으로 기동
       })
+      .finally(() => { if (isMounted) setSettingsReady(true) })
 
     return () => {
       isMounted = false
@@ -90,6 +92,9 @@ function App() {
     [language, startModule, t, theme],
   )
 
+  if (!settingsReady) {
+    return <main className={`tenvi-dashboard theme-${theme}`}><p role="status">{t.common.loadingSettings}</p></main>
+  }
   return <AppRouter appContext={appContext} />
 }
 

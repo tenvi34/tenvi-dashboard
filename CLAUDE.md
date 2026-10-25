@@ -16,18 +16,16 @@
 - `README.md`: 프로젝트 전체 개요, 실행/테스트/빌드 방법, 모듈 요약
 - `docs/board.md`: Board 모듈 상세 구조와 데이터 흐름
 - `docs/profile.md`: 로컬 사용자 프로필과 `UserAvatar` 구조
-- `docs/backup.md`: 전체 백업과 Board 전용 백업 구조
+- `docs/backup.md`: 로컬 데이터 백업과 Board 전용 백업 구조
 - `docs/function-reference.md`: 주요 컴포넌트, helper, 저장소 함수 빠른 참조
 
 ## 현재 주요 모듈
 
 - Dashboard
-- Command
-- Tasks
-- Notes
 - Board
 - Calendar
 - Map
+- Travel
 - Timer
 - Settings
 

@@ -11,8 +11,8 @@
 
 ### `src/App.jsx`
 
-- `App`: TENVI 전체 shell 컴포넌트. 모듈 목록, `activeModule`, 언어, 시작 모듈, HUD 효과, 테마를 관리하고 각 모듈에 props를 전달한다.
-- 모듈 전환은 React state 기반이며 React Router를 사용하지 않는다.
+- `App`: 공유 언어·시작 모듈·테마를 관리한다. Remote 공통 설정을 복원한 뒤 Router를 생성하고, 서버 오류나 8초 초과 시 로컬 설정을 사용한다.
+- 모듈 전환은 React Router 기반이다. `src/router/AppRouter.jsx`, `routes.js`, `src/layouts/AppLayout.jsx`에서 라우트와 메뉴를 관리한다.
 - 공유 설정은 `STORAGE_KEYS.language`, `STORAGE_KEYS.startModule`, `STORAGE_KEYS.hudEffect`, `STORAGE_KEYS.theme`를 통해 localStorage와 연결된다.
 
 ### 공통 컴포넌트

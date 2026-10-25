@@ -4,18 +4,20 @@
 
 TENVI에는 두 종류의 백업/복원이 있습니다.
 
-1. Settings의 전체 앱 JSON 백업/복원
+1. Settings의 로컬 데이터 JSON 백업/복원
 2. Settings의 Board 전용 JSON 백업/복원
 
 이 문서는 현재 코드 기준 구현 상태와 백업 대상, 복원 정책을 정리합니다.
 
-## 전체 앱 백업/복원
+## 로컬 데이터 백업/복원
 
 관련 파일:
 
 ```txt
 src/modules/Settings.jsx
 src/modules/settingsBackup.js
+src/modules/settings/useSettingsBackup.js
+src/modules/settings/backupExtras.js
 src/modules/settingsBackup.test.js
 src/services/photoArchiveBackupService.js
 src/services/photoArchiveBackupService.test.js
@@ -33,10 +35,12 @@ src/services/photoArchiveBackupService.test.js
 tenvi-backup-YYYY-MM-DD.json
 ```
 
-현재 전체 앱 백업에 포함되는 data 필드:
+현재 로컬 데이터 백업에 포함되는 data 필드:
 
 - `boardPosts`
 - `calendarEvents`
+- `travelTrips`
+- `profileImages`
 - `timerCompletedSessions`
 - `language`
 - `startModule`
@@ -47,8 +51,9 @@ tenvi-backup-YYYY-MM-DD.json
 
 주의:
 
-- 전체 앱 백업에는 localStorage 프로필 객체(`userProfile`)가 포함됩니다.
-- 현재 코드 기준 전체 앱 백업에는 IndexedDB `profileImages`가 포함되지 않습니다.
+- 로컬 데이터 백업에는 localStorage 프로필 객체(`userProfile`)가 포함됩니다.
+- 로컬 백업은 IndexedDB 여행과 프로필 이미지를 포함합니다. Remote 서버 데이터는 포함하지 않습니다.
+- 구 v1 백업에 새 필드가 없으면 여행·프로필 이미지·타이머 데이터를 유지합니다. 명시적인 빈 배열은 해당 로컬 목록을 비웁니다.
 - Map 사진 기록은 `photoArchiveBackupService.js`에서 preview Blob을 dataUrl로 직렬화합니다.
 
 ## 전체 앱 복원 정책
@@ -75,7 +80,7 @@ tenvi-backup-YYYY-MM-DD.json
 - 손상된 Map record/collection이 있을 경우 추가 확인
 - Map 데이터 교체 확인
 
-복원 실패 시 가능한 범위에서 이전 localStorage/Map 데이터를 rollback합니다.
+복원 실패 시 localStorage, Map, 여행, 프로필 이미지를 저장소별로 독립 복구합니다. 서로 다른 IndexedDB 간에는 단일 원자적 트랜잭션을 제공하지 않으므로 브라우저 종료·저장소 장애 상황의 완전한 복구는 보장하지 않습니다.
 
 ## Board 전용 백업/복원
 
@@ -177,7 +182,7 @@ tenvi-board-backup-YYYYMMDD-HHmmss.json
 
 - Board 전용 복원은 덮어쓰기 방식입니다.
 - Board 백업 병합 복원은 없습니다.
-- 전체 앱 백업에는 현재 코드 기준 프로필 이미지 IndexedDB 데이터가 포함되지 않습니다.
+- 로컬 데이터 백업에는 현재 코드 기준 프로필 이미지 IndexedDB 데이터가 포함되지 않습니다.
 - 브라우저 저장소 용량 제한은 브라우저 정책을 따릅니다.
 
 ## 테스트

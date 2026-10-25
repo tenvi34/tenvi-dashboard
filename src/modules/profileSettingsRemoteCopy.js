@@ -78,7 +78,16 @@ export const normalizeRemoteAppSettings = (settings = []) => {
 // REMOTE 공통 설정 로드
 export const loadRemoteAppSettings = async ({
   fetchSettings = fetchRemoteAppSettings,
-} = {}) => normalizeRemoteAppSettings(await fetchSettings())
+} = {}) => {
+  let timeoutId
+  try {
+    const settings = await Promise.race([
+      fetchSettings(),
+      new Promise((_, reject) => { timeoutId = setTimeout(() => reject(new Error('Settings timeout')), 8000) }),
+    ])
+    return normalizeRemoteAppSettings(settings)
+  } finally { clearTimeout(timeoutId) }
+}
 
 // REMOTE 설정 단건 저장
 export const saveRemoteSettingValue = (key, value) =>
@@ -90,7 +99,7 @@ export const saveRemoteSettingValue = (key, value) =>
 const readLocalAppSettings = () => ({
   language: readStoredSetting(STORAGE_KEYS.language, 'ko'),
   theme: readStoredSetting(STORAGE_KEYS.theme, 'dark'),
-  // ??? ?? ??? REMOTE? ?? ???? ??? ??
+  // 종료된 시작 모듈의 REMOTE 재복사 방지
   startModule: normalizeRemoteAppSettings([{
     key: 'startModule',
     valueJson: JSON.stringify(readStoredSetting(STORAGE_KEYS.startModule, 'dashboard')),
