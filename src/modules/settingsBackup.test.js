@@ -13,10 +13,8 @@ const createValidBackup = (overrides = {}) => ({
   version: BACKUP_VERSION,
   createdAt: '2026-05-14T00:00:00.000Z',
   data: {
-    tasks: [{ id: 1, title: 'Task', completed: false }],
-    notes: [{ id: 1, title: 'Note', content: 'Memo' }],
     language: 'ko',
-    startModule: 'tasks',
+    startModule: 'dashboard',
     hudEffect: 'normal',
     theme: 'hud',
     ...overrides,
@@ -26,8 +24,6 @@ const createValidBackup = (overrides = {}) => ({
 describe('settingsBackup validateBackupPayload', () => {
   it('accepts a valid TENVI backup payload', () => {
     expect(validateBackupPayload(createValidBackup())).toEqual({
-      tasks: [{ id: 1, title: 'Task', completed: false }],
-      notes: [{ id: 1, title: 'Note', content: 'Memo' }],
       boardPosts: undefined,
       calendarEvents: undefined,
       hasBoardPosts: false,
@@ -38,7 +34,7 @@ describe('settingsBackup validateBackupPayload', () => {
       mapPhotoCollections: undefined,
       mapPhotoRecords: undefined,
       language: 'ko',
-      startModule: 'tasks',
+      startModule: 'dashboard',
       // 구 백업의 'hud' 테마는 'dark'로 정규화됨
       theme: 'dark',
       userProfile: undefined,
@@ -150,8 +146,6 @@ describe('settingsBackup validateBackupPayload', () => {
   })
 
   it('rejects payloads with invalid data shapes', () => {
-    expect(validateBackupPayload(createValidBackup({ tasks: {} }))).toBe(null)
-    expect(validateBackupPayload(createValidBackup({ notes: {} }))).toBe(null)
     expect(validateBackupPayload(createValidBackup({ boardPosts: {} }))).toBe(null)
     expect(validateBackupPayload(createValidBackup({ calendarEvents: {} }))).toBe(
       null,
@@ -167,9 +161,6 @@ describe('settingsBackup validateBackupPayload', () => {
 
   it('rejects values outside supported app settings', () => {
     expect(validateBackupPayload(createValidBackup({ language: 'jp' }))).toBe(null)
-    expect(validateBackupPayload(createValidBackup({ startModule: 'timer' }))).toBe(
-      null,
-    )
     expect(validateBackupPayload(createValidBackup({ hudEffect: 'max' }))).toBe(
       null,
     )
@@ -178,8 +169,13 @@ describe('settingsBackup validateBackupPayload', () => {
     )
   })
 
+  it('falls back to Dashboard for an unavailable saved module', () => {
+    const restored = validateBackupPayload(createValidBackup({ startModule: 'retired-module' }))
+    expect(restored.startModule).toBe('dashboard')
+  })
+
   it('keeps the supported default start modules explicit', () => {
-    expect(START_MODULES).toEqual(['dashboard', 'tasks', 'notes', 'board', 'command'])
+    expect(START_MODULES).toEqual(['dashboard', 'board'])
     expect(START_MODULES).not.toContain('calendar')
   })
 })

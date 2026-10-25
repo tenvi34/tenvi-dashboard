@@ -90,7 +90,11 @@ export const saveRemoteSettingValue = (key, value) =>
 const readLocalAppSettings = () => ({
   language: readStoredSetting(STORAGE_KEYS.language, 'ko'),
   theme: readStoredSetting(STORAGE_KEYS.theme, 'dark'),
-  startModule: readStoredSetting(STORAGE_KEYS.startModule, 'tasks'),
+  // ??? ?? ??? REMOTE? ?? ???? ??? ??
+  startModule: normalizeRemoteAppSettings([{
+    key: 'startModule',
+    valueJson: JSON.stringify(readStoredSetting(STORAGE_KEYS.startModule, 'dashboard')),
+  }]).startModule ?? 'dashboard',
   hudEffect: readStoredSetting(STORAGE_KEYS.hudEffect, 'normal'),
 })
 

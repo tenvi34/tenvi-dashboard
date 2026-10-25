@@ -167,7 +167,7 @@ describe('calendarLogic', () => {
     })
   })
 
-  it('keeps Dashboard and Command schedule label formats stable', () => {
+  it('keeps Dashboard schedule label formats stable', () => {
     expect(getCalendarEventDateLabel(events[0])).toBe('2026.05.14')
     expect(getCalendarEventDateLabel(rangedEvent)).toBe(
       '2026.05.14 ~ 2026.05.18',

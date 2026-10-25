@@ -7,7 +7,7 @@
 - `App.jsx`가 언어, 테마, 시작 모듈을 관리하고 `Outlet context`로 전달한다. Travel 상태는 모듈 안에서 관리한다.
 - 사이드바와 모바일 더보기는 `AppLayout.jsx`의 모듈 목록을 공유한다. Travel을 두 목록에 추가했다.
 - 스타일은 `src/styles`의 공통 테마 토큰과 모듈별 CSS로 구성된다. Travel도 기존 dark/standard 테마 토큰을 사용한다.
-- Tasks/Notes/Board 등은 local/remote repository, Calendar는 localStorage/API 흐름을 사용한다. Map은 기존 사진·컬렉션 IndexedDB와 API 저장 흐름을 갖고 있다.
+- Board 등은 local/remote repository, Calendar는 localStorage/API 흐름을 사용한다. Map은 기존 사진·컬렉션 IndexedDB와 API 저장 흐름을 갖고 있다.
 - `backend/Tenvi.Backend`에는 ASP.NET API 및 SQLite store 구현이 이미 있다. Travel에는 백엔드를 연결하지 않았다.
 - 설치되어 있던 Leaflet, react-leaflet, React Router와 공통 `placeSearchService.js`를 재사용했다. 새 의존성이나 package manager 파일 변경은 없다.
 
@@ -87,7 +87,7 @@ Nominatim은 사용자 검색 버튼으로만 호출하며 자동완성을 사�
 - `src/i18n/translations.js`: 기존 한영 구조에 Travel 문구 연결.
 - `src/services/placeSearchService.js`, `placeSearchService.test.js`: 공용 검색 동시 호출 간격, 실패 후 재시도, timeout, 좌표 범위 검증.
 
-`App.jsx`, Tasks, Notes, Board, Calendar, Map 모듈 및 백엔드는 수정하지 않았다.
+`App.jsx`, Board, Calendar, Map 모듈 및 백엔드는 수정하지 않았다.
 
 ## 검증 및 남은 확인
 
@@ -113,7 +113,7 @@ Nominatim은 사용자 검색 버튼으로만 호출하며 자동완성을 사�
 10. 저장소 차단/용량 오류 시 성공 표시가 나오지 않는지 확인. 실패한 편집기를 닫았다 열어 입력 복구/재저장 확인.
 11. 오프라인에서 기존 여행 CRUD 및 수동 장소 등록 확인. 검색/지도 오류가 다른 기능을 막지 않는지 확인.
 12. 한국어/영어, dark/standard 테마, 좁은 모바일 화면과 더보기 메뉴, 키보드 포커스 확인.
-13. 기존 Tasks/Notes/Board/Calendar/Map 저장 및 이동 흐름 회귀 확인.
+13. 기존 Board/Calendar/Map 저장 및 이동 흐름 회귀 확인.
 
 ## 미구현과 다음 단계
 

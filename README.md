@@ -1,6 +1,6 @@
 ﻿# TENVI Dashboard
 
-TENVI Dashboard는 React + Vite 기반의 개인용 로컬 대시보드입니다. 서버 로그인 없이 브라우저 저장소를 사용하며, Tasks, Notes, Board, Calendar, Command, Timer, Map, Settings 모듈을 하나의 HUD 스타일 작업 공간으로 제공합니다.
+TENVI Dashboard는 React + Vite 기반의 개인용 로컬 대시보드입니다. 서버 로그인 없이 브라우저 저장소를 사용하며, Board, Calendar, Timer, Map, Settings 모듈을 하나의 HUD 스타일 작업 공간으로 제공합니다.
 
 자세한 Board 구조는 [docs/board.md](docs/board.md), 로컬 사용자 프로필은 [docs/profile.md](docs/profile.md), 백업/복원 정책은 [docs/backup.md](docs/backup.md)를 참고하세요.
 
@@ -70,19 +70,8 @@ npm run lint
 
 ### Dashboard
 
-- Tasks, Notes, Board, Calendar, Timer, Map 데이터를 요약해서 표시합니다.
+- Board, Calendar, Timer, Map 데이터를 요약해서 표시합니다.
 - Dashboard 자체 데이터는 별도 저장하지 않고 다른 모듈 저장소를 읽어 요약합니다.
-
-### Tasks
-
-- 작업 추가, 완료, 삭제, 필터링
-- due date 기반 Calendar/Dashboard 연동
-- `todo-manager-lite.todos` localStorage key 사용
-
-### Notes
-
-- 노트 추가, 삭제
-- `tenvi.notes` localStorage key 사용
 
 ### Board
 
@@ -113,12 +102,6 @@ npm run lint
 - 기존 date-only 일정 fallback 유지
 - `tenvi.calendar.events` localStorage key 사용
 
-### Command
-
-- 저장된 Tasks, Notes, Board, Calendar, Timer, Settings 데이터를 분석
-- 규칙 기반 명령 실행
-- 최근 명령 history는 현재 세션 state로만 유지
-
 ### Timer
 
 - Focus/Break 타이머
@@ -144,7 +127,6 @@ npm run lint
 - 로컬 사용자 프로필 편집
 - 전체 앱 JSON 백업/복원
 - Board 전용 JSON 백업/복원
-- Tasks/Notes 데이터 초기화
 
 ## 백엔드 실행과 Board Remote 모드
 
@@ -272,8 +254,6 @@ src/
 
 | 데이터 | key |
 | --- | --- |
-| Tasks | `todo-manager-lite.todos` |
-| Notes | `tenvi.notes` |
 | Board 게시글 | `tenvi.board.posts` |
 | Board 저장소 모드 (`local`/`remote`) | `tenvi.board.storageMode` |
 | Board 카테고리 | `tenvi.board.categories` |

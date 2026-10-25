@@ -35,8 +35,6 @@ tenvi-backup-YYYY-MM-DD.json
 
 현재 전체 앱 백업에 포함되는 data 필드:
 
-- `tasks`
-- `notes`
 - `boardPosts`
 - `calendarEvents`
 - `timerCompletedSessions`
@@ -61,8 +59,6 @@ tenvi-backup-YYYY-MM-DD.json
 
 | 데이터 | 저장소 |
 | --- | --- |
-| Tasks | `todo-manager-lite.todos` |
-| Notes | `tenvi.notes` |
 | Board posts | `tenvi.board.posts` |
 | Calendar events | `tenvi.calendar.events` |
 | Timer sessions | `tenvi.timer.completedSessions` |

@@ -6,9 +6,6 @@ import { getModuleFromPathname, getModulePath } from '../router/routes.js'
 
 const MODULES = [
   { id: 'dashboard' },
-  { id: 'command' },
-  { id: 'tasks' },
-  { id: 'notes' },
   { id: 'board' },
   { id: 'calendar' },
   { id: 'map' },
@@ -18,8 +15,6 @@ const MODULES = [
 
 const MOBILE_TAB_MODULES = [
   { id: 'dashboard' },
-  { id: 'tasks' },
-  { id: 'notes' },
   { id: 'map' },
 ]
 
@@ -27,7 +22,6 @@ const MOBILE_MORE_MODULES = [
   { id: 'travel' },
   { id: 'calendar' },
   { id: 'board' },
-  { id: 'command' },
   { id: 'settings' },
 ]
 

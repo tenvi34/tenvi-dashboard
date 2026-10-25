@@ -1,4 +1,4 @@
-export const START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']
+export const START_MODULES = ['dashboard', 'board']
 export const HUD_EFFECTS = ['normal', 'reduced']
 export const THEMES = ['dark', 'standard']
 export const LANGUAGES = ['ko', 'en']
@@ -41,9 +41,7 @@ export const validateBackupPayload = (backupPayload) => {
     language,
     boardPosts,
     calendarEvents,
-    notes,
     startModule,
-    tasks,
     theme = 'dark',
   } = backupPayload.data
   const hasMapPhotoRecords = Object.prototype.hasOwnProperty.call(
@@ -73,10 +71,8 @@ export const validateBackupPayload = (backupPayload) => {
   const normalizedTheme = theme === 'hud' ? 'dark' : theme
 
   if (
-    !Array.isArray(tasks) ||
-    !Array.isArray(notes) ||
     !LANGUAGES.includes(language) ||
-    !START_MODULES.includes(startModule) ||
+    typeof startModule !== 'string' ||
     !isHudEffectValid ||
     !THEMES.includes(normalizedTheme)
   ) {
@@ -121,9 +117,8 @@ export const validateBackupPayload = (backupPayload) => {
     mapPhotoRecords: hasMapPhotoRecords
       ? backupPayload.data.mapPhotoRecords
       : undefined,
-    notes,
-    startModule,
-    tasks,
+    // 종료된 모듈을 지정한 구 백업의 시작 화면 보정
+    startModule: START_MODULES.includes(startModule) ? startModule : 'dashboard',
     theme: normalizedTheme,
     userProfile: hasUserProfile ? backupPayload.data.userProfile : undefined,
   }

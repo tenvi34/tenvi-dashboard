@@ -3,10 +3,10 @@ import { STORAGE_KEYS } from './constants/storageKeys.js'
 import { isSupportedLanguage, translations } from './i18n/translations.js'
 import { readProfileSettingsStorageMode } from './modules/profileSettingsStorageMode.js'
 import { loadRemoteAppSettings } from './modules/profileSettingsRemoteCopy.js'
+import { START_MODULES } from './modules/settingsBackup.js'
 import AppRouter from './router/AppRouter.jsx'
 import './App.css'
 
-const START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']
 const THEMES = ['dark', 'standard']
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
     const savedStartModule = localStorage.getItem(STORAGE_KEYS.startModule)
 
     // 시작 모듈 localStorage 호환
-    return START_MODULES.includes(savedStartModule) ? savedStartModule : 'tasks'
+    return START_MODULES.includes(savedStartModule) ? savedStartModule : 'dashboard'
   })
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem(STORAGE_KEYS.theme)

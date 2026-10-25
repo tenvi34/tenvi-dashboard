@@ -10,7 +10,6 @@ import {
   getScheduledDateCount,
   getTodayEvents,
 } from './calendarLogic.js'
-import { getTodayDueTasks } from './tasksLogic.js'
 
 const DASHBOARD_TABS = ['overview', 'work', 'archive', 'system']
 
@@ -30,12 +29,6 @@ const readStoredList = (storageKey) => {
   }
 }
 
-// Notes 작성 시각 변환
-const getNoteTime = (note) => {
-  const time = new Date(note.createdAt).getTime()
-  return Number.isNaN(time) ? 0 : time
-}
-
 const getBoardPostTime = (post) => {
   const time = new Date(post.createdAt).getTime()
   return Number.isNaN(time) ? 0 : time
@@ -49,7 +42,7 @@ const MAP_SUMMARY_STATUS = {
 
 function Dashboard({
   language = 'ko',
-  startModule = 'tasks',
+  startModule = 'dashboard',
   t,
   theme = 'dark',
 }) {
@@ -58,24 +51,14 @@ function Dashboard({
     data: null,
     status: MAP_SUMMARY_STATUS.loading,
   })
-  const tasks = readStoredList(STORAGE_KEYS.tasks)
-  const notes = readStoredList(STORAGE_KEYS.notes)
   const boardPosts = readStoredList(STORAGE_KEYS.boardPosts)
   const calendarEvents = readStoredList(STORAGE_KEYS.calendarEvents)
-  const completedTasks = tasks.filter((task) => task.completed).length
-  const activeTasks = tasks.length - completedTasks
-  const activeTaskList = tasks.filter((task) => !task.completed).slice(0, 4)
   // Calendar 요약 재배치
   const allTodayEvents = getTodayEvents(calendarEvents)
   const todayEvents = allTodayEvents.slice(0, 3)
-  const allTodayDueTasks = getTodayDueTasks(tasks)
-  const todayDueTasks = allTodayDueTasks.slice(0, 3)
   const monthEvents = getMonthEvents(calendarEvents)
   const scheduledDateCount = getScheduledDateCount(monthEvents)
   const nextEvent = getNextEvent(calendarEvents)
-  const recentNotes = [...notes]
-    .sort((firstNote, secondNote) => getNoteTime(secondNote) - getNoteTime(firstNote))
-    .slice(0, 3)
   const recentBoardPosts = [...boardPosts]
     .sort(
       (firstPost, secondPost) =>
@@ -129,25 +112,11 @@ function Dashboard({
     </div>
   )
 
-  const renderNoteList = (items = recentNotes) =>
-    items.length > 0 ? (
-      <ul>
-        {items.map((note) => (
-          <li className="recent-note" key={note.id}>
-            <strong>{note.title || t.notes.untitled}</strong>
-            {note.content ? <span>{note.content}</span> : null}
-          </li>
-        ))}
-      </ul>
-    ) : (
-      renderEmptyState(t.dashboard.noRecentNotes)
-    )
-
   const renderBoardPostList = () =>
     recentBoardPosts.length > 0 ? (
       <ul>
         {recentBoardPosts.map((post) => (
-          <li className="recent-note" key={post.id}>
+          <li className="summary-list-item" key={post.id}>
             <strong>{post.title}</strong>
             {post.author ? <span>{post.author}</span> : null}
           </li>
@@ -161,7 +130,7 @@ function Dashboard({
     todayEvents.length > 0 ? (
       <ul>
         {todayEvents.map((calendarEvent) => (
-          <li className="recent-note" key={calendarEvent.id}>
+          <li className="summary-list-item" key={calendarEvent.id}>
             <strong>{calendarEvent.title}</strong>
             {calendarEvent.memo ? <span>{calendarEvent.memo}</span> : null}
           </li>
@@ -171,23 +140,10 @@ function Dashboard({
       renderEmptyState(t.dashboard.noTodayEvents)
     )
 
-  const renderDueTaskList = () =>
-    todayDueTasks.length > 0 ? (
-      <ul>
-        {todayDueTasks.map((task) => (
-          <li className="recent-note" key={task.id}>
-            <strong>{task.title}</strong>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      renderEmptyState(t.dashboard.noTodayDueTasks)
-    )
-
   const renderNextEvent = () =>
     nextEvent ? (
       <ul>
-        <li className="recent-note">
+        <li className="summary-list-item">
           <strong>
             {getCalendarEventDateLabel(nextEvent)} - {nextEvent.title}
           </strong>
@@ -243,11 +199,11 @@ function Dashboard({
           </div>
         </div>
 
-        <div className="recent-notes">
-          <p className="recent-notes-title">{t.dashboard.recentMapRecords}</p>
+        <div className="summary-list">
+          <p className="summary-list-title">{t.dashboard.recentMapRecords}</p>
           <ul>
             {mapSummary.recentPhotoRecords.map((record) => (
-              <li className="recent-note" key={record.id}>
+              <li className="summary-list-item" key={record.id}>
                 <strong>{record.title || t.dashboard.untitledMapRecord}</strong>
                 <span>
                   {record.collectionName || t.map.unassignedCollection} /{' '}
@@ -272,20 +228,8 @@ function Dashboard({
           </div>
           <dl className="dashboard-compact-list dashboard-overview-list">
             <div>
-              <dt>{t.dashboard.activeTasks}</dt>
-              <dd>{activeTasks}</dd>
-            </div>
-            <div>
-              <dt>{t.dashboard.completedTasks}</dt>
-              <dd>{completedTasks}</dd>
-            </div>
-            <div>
               <dt>{t.dashboard.todayEvents}</dt>
               <dd>{allTodayEvents.length || (nextEvent ? 1 : 0)}</dd>
-            </div>
-            <div>
-              <dt>{t.dashboard.totalNotes}</dt>
-              <dd>{notes.length}</dd>
             </div>
             <div>
               <dt>{t.dashboard.totalBoardPosts}</dt>
@@ -307,45 +251,6 @@ function Dashboard({
       <div className="dashboard-tab-grid dashboard-work-grid">
         <section className="summary-panel dashboard-work-panel">
           <div className="summary-panel-header">
-            <p className="module-label">{t.dashboard.tasksSummary}</p>
-            <h3>{t.modules.tasks}</h3>
-          </div>
-          <dl className="dashboard-compact-list dashboard-work-list">
-            <div>
-              <dt>{t.dashboard.totalTasks}</dt>
-              <dd>{tasks.length}</dd>
-            </div>
-            <div>
-              <dt>{t.dashboard.activeTasks}</dt>
-              <dd>{activeTasks}</dd>
-            </div>
-            <div>
-              <dt>{t.dashboard.completedTasks}</dt>
-              <dd>{completedTasks}</dd>
-            </div>
-          </dl>
-          <div className="recent-notes">
-            <p className="recent-notes-title">{t.dashboard.activeTaskList}</p>
-            {activeTaskList.length > 0 ? (
-              <ul>
-                {activeTaskList.map((task) => (
-                  <li className="recent-note" key={task.id}>
-                    <strong>{task.title}</strong>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              renderEmptyState(t.command.noActiveTasks)
-            )}
-          </div>
-          <div className="recent-notes dashboard-due-tasks">
-            <p className="recent-notes-title">{t.dashboard.todayDueTasks}</p>
-            {renderDueTaskList()}
-          </div>
-        </section>
-
-        <section className="summary-panel dashboard-work-panel">
-          <div className="summary-panel-header">
             <p className="module-label">{t.dashboard.calendarSummary}</p>
             <h3>{t.modules.calendar}</h3>
           </div>
@@ -363,12 +268,12 @@ function Dashboard({
               <dd>{scheduledDateCount}</dd>
             </div>
           </dl>
-          <div className="recent-notes">
-            <p className="recent-notes-title">{t.dashboard.todayEvents}</p>
+          <div className="summary-list">
+            <p className="summary-list-title">{t.dashboard.todayEvents}</p>
             {renderTodayScheduleList()}
           </div>
-          <div className="recent-notes dashboard-calendar-next">
-            <p className="recent-notes-title">{t.dashboard.nextEvent}</p>
+          <div className="summary-list dashboard-calendar-next">
+            <p className="summary-list-title">{t.dashboard.nextEvent}</p>
             {renderNextEvent()}
           </div>
         </section>
@@ -383,22 +288,6 @@ function Dashboard({
         <section className="summary-panel">
           <div className="summary-panel-header">
             <div>
-              <p className="module-label">{t.dashboard.notesSummary}</p>
-              <h3>{t.modules.notes}</h3>
-            </div>
-            <span className="dashboard-count-chip">
-              {t.dashboard.totalNotes} {notes.length}
-            </span>
-          </div>
-          <div className="recent-notes" aria-label={t.dashboard.recentNotes}>
-            <p className="recent-notes-title">{t.dashboard.recentNotes}</p>
-            {renderNoteList()}
-          </div>
-        </section>
-
-        <section className="summary-panel">
-          <div className="summary-panel-header">
-            <div>
               <p className="module-label">{t.dashboard.boardSummary}</p>
               <h3>{t.modules.board}</h3>
             </div>
@@ -406,8 +295,8 @@ function Dashboard({
               {t.dashboard.totalBoardPosts} {boardPosts.length}
             </span>
           </div>
-          <div className="recent-notes" aria-label={t.dashboard.recentBoardPosts}>
-            <p className="recent-notes-title">{t.dashboard.recentBoardPosts}</p>
+          <div className="summary-list" aria-label={t.dashboard.recentBoardPosts}>
+            <p className="summary-list-title">{t.dashboard.recentBoardPosts}</p>
             {renderBoardPostList()}
           </div>
         </section>
@@ -460,14 +349,6 @@ function Dashboard({
             <span className="dashboard-system-tag">STORE</span>
           </div>
           <dl className="dashboard-compact-list dashboard-system-list">
-            <div>
-              <dt>{t.dashboard.totalTasks}</dt>
-              <dd>{tasks.length}</dd>
-            </div>
-            <div>
-              <dt>{t.dashboard.totalNotes}</dt>
-              <dd>{notes.length}</dd>
-            </div>
             <div>
               <dt>{t.dashboard.totalBoardPosts}</dt>
               <dd>{boardPosts.length}</dd>

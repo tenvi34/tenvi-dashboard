@@ -42,18 +42,6 @@ import {
   copyLocalSettingsToRemote,
   saveRemoteSettingValue,
 } from './profileSettingsRemoteCopy.js'
-import {
-  NOTES_STORAGE_MODES,
-  readNotesStorageMode,
-  saveNotesStorageMode,
-} from './notesStorageMode.js'
-import { copyLocalNotesToRemote } from './notes/notesRemoteCopy.js'
-import {
-  TASKS_STORAGE_MODES,
-  readTasksStorageMode,
-  saveTasksStorageMode,
-} from './tasksStorageMode.js'
-import { copyLocalTasksToRemote } from './tasks/tasksRemoteCopy.js'
 import './Settings.css'
 import {
   getPhotoRecordCount,
@@ -96,15 +84,13 @@ import {
 } from './userProfileLogic.js'
 
 // Settings 저장 key
-const TASKS_STORAGE_KEY = STORAGE_KEYS.tasks
-const NOTES_STORAGE_KEY = STORAGE_KEYS.notes
 const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
 const CALENDAR_EVENTS_STORAGE_KEY = STORAGE_KEYS.calendarEvents
 const USER_PROFILE_STORAGE_KEY = STORAGE_KEYS.userProfile
 
 const SETTINGS_TABS = [
   { id: 'general', label: '\uC77C\uBC18 \uC124\uC815' },
-  { id: 'backup', label: '\uBC31\uC5C5/\uBCF5\uC6D0/\uCD08\uAE30\uD654' },
+  { id: 'backup', label: '\uBC31\uC5C5/\uBCF5\uC6D0' },
   { id: 'server', label: '\uC11C\uBC84 \uAD00\uB9AC' },
 ]
 
@@ -182,12 +168,6 @@ function Settings({
   const [boardStorageMode, setBoardStorageMode] = useState(() =>
     readBoardStorageMode(),
   )
-  const [tasksStorageMode, setTasksStorageMode] = useState(() =>
-    readTasksStorageMode(),
-  )
-  const [notesStorageMode, setNotesStorageMode] = useState(() =>
-    readNotesStorageMode(),
-  )
   const [mapStorageMode, setMapStorageMode] = useState(() =>
     readMapStorageMode(),
   )
@@ -197,7 +177,7 @@ function Settings({
   const [profileSettingsStorageMode, setProfileSettingsStorageMode] = useState(
     () => readProfileSettingsStorageMode(),
   )
-  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
+  // 백업 복원과 프로필 변경 후 저장소 요약 갱신
   const [dataVersion, setDataVersion] = useState(0)
   const [backupStatus, setBackupStatus] = useState(null)
   const [boardBackupStatus, setBoardBackupStatus] = useState(null)
@@ -206,8 +186,6 @@ function Settings({
     useState(null)
   const [boardImagesRemoteCopyStatus, setBoardImagesRemoteCopyStatus] =
     useState(null)
-  const [tasksRemoteCopyStatus, setTasksRemoteCopyStatus] = useState(null)
-  const [notesRemoteCopyStatus, setNotesRemoteCopyStatus] = useState(null)
   const [mapRemoteCopyStatus, setMapRemoteCopyStatus] = useState(null)
   const [calendarRemoteCopyStatus, setCalendarRemoteCopyStatus] = useState(null)
   const [profileRemoteCopyStatus, setProfileRemoteCopyStatus] = useState(null)
@@ -217,8 +195,6 @@ function Settings({
     useState(false)
   const [isBoardImagesRemoteCopying, setIsBoardImagesRemoteCopying] =
     useState(false)
-  const [isTasksRemoteCopying, setIsTasksRemoteCopying] = useState(false)
-  const [isNotesRemoteCopying, setIsNotesRemoteCopying] = useState(false)
   const [isMapRemoteCopying, setIsMapRemoteCopying] = useState(false)
   const [isCalendarRemoteCopying, setIsCalendarRemoteCopying] = useState(false)
   const [isProfileRemoteCopying, setIsProfileRemoteCopying] = useState(false)
@@ -232,8 +208,6 @@ function Settings({
   const backupFileInputRef = useRef(null)
   const boardBackupFileInputRef = useRef(null)
   const profileImageInputRef = useRef(null)
-  const taskCount = readStoredCount(TASKS_STORAGE_KEY)
-  const noteCount = readStoredCount(NOTES_STORAGE_KEY)
   const boardPostCount = readStoredCount(BOARD_POSTS_STORAGE_KEY)
   const calendarEventCount = readStoredCount(CALENDAR_EVENTS_STORAGE_KEY)
   const isProfileSettingsRemote =
@@ -423,68 +397,6 @@ function Settings({
     }
   }
 
-  // Tasks LOCAL 원본 REMOTE 복사
-  const handleCopyTasksToRemote = async () => {
-    setIsTasksRemoteCopying(true)
-    setTasksRemoteCopyStatus(null)
-
-    try {
-      const result = await copyLocalTasksToRemote()
-
-      if (result.total === 0) {
-        setTasksRemoteCopyStatus({ type: 'info', message: t.settings.tasksRemoteCopyEmpty })
-        return
-      }
-
-      setTasksRemoteCopyStatus({
-        type: result.failed > 0 ? 'error' : 'success',
-        message: t.settings.tasksRemoteCopyResult(
-          result.copied,
-          result.skipped,
-          result.failed,
-        ),
-      })
-    } catch {
-      setTasksRemoteCopyStatus({
-        type: 'error',
-        message: t.settings.tasksRemoteCopyConnectionError,
-      })
-    } finally {
-      setIsTasksRemoteCopying(false)
-    }
-  }
-
-  // Notes LOCAL 원본 REMOTE 복사
-  const handleCopyNotesToRemote = async () => {
-    setIsNotesRemoteCopying(true)
-    setNotesRemoteCopyStatus(null)
-
-    try {
-      const result = await copyLocalNotesToRemote()
-
-      if (result.total === 0) {
-        setNotesRemoteCopyStatus({ type: 'info', message: t.settings.notesRemoteCopyEmpty })
-        return
-      }
-
-      setNotesRemoteCopyStatus({
-        type: result.failed > 0 ? 'error' : 'success',
-        message: t.settings.notesRemoteCopyResult(
-          result.copied,
-          result.skipped,
-          result.failed,
-        ),
-      })
-    } catch {
-      setNotesRemoteCopyStatus({
-        type: 'error',
-        message: t.settings.notesRemoteCopyConnectionError,
-      })
-    } finally {
-      setIsNotesRemoteCopying(false)
-    }
-  }
-
   // Map 컬렉션/기록 REMOTE 복사
   const handleCopyMapToRemote = async () => {
     setIsMapRemoteCopying(true)
@@ -658,17 +570,6 @@ function Settings({
     onSettingsTabChange?.(tabId)
   }
 
-  // Tasks/Notes 데이터 초기화 확정
-  const handleConfirmReset = () => {
-    // Tasks/Notes 저장 데이터 초기화
-    localStorage.removeItem(TASKS_STORAGE_KEY)
-    localStorage.removeItem(NOTES_STORAGE_KEY)
-    setIsResetConfirmOpen(false)
-    setDataVersion((currentVersion) => currentVersion + 1)
-  }
-
-  void dataVersion
-
   // 프로필 텍스트 저장
   const handleSaveProfile = async () => {
     const nextProfile = updateUserProfile(
@@ -833,8 +734,6 @@ function Settings({
         version: BACKUP_VERSION,
         createdAt: new Date().toISOString(),
         data: {
-          tasks: readStoredList(STORAGE_KEYS.tasks),
-          notes: readStoredList(STORAGE_KEYS.notes),
           boardPosts: readStoredList(STORAGE_KEYS.boardPosts),
           calendarEvents: readStoredList(STORAGE_KEYS.calendarEvents),
           language,
@@ -928,8 +827,6 @@ function Settings({
   // 검증된 백업 localStorage 반영
   const restoreLocalStorageData = (validatedBackup) => {
     // 기존 localStorage key 유지
-    localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(validatedBackup.tasks))
-    localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(validatedBackup.notes))
     if (validatedBackup.hasBoardPosts) {
       localStorage.setItem(
         STORAGE_KEYS.boardPosts,
@@ -1032,8 +929,6 @@ function Settings({
 
       const previousLocalStorageData = {
         // 복원 실패 rollback snapshot
-        tasks: localStorage.getItem(STORAGE_KEYS.tasks),
-        notes: localStorage.getItem(STORAGE_KEYS.notes),
         boardPosts: localStorage.getItem(STORAGE_KEYS.boardPosts),
         calendarEvents: localStorage.getItem(STORAGE_KEYS.calendarEvents),
         language: localStorage.getItem(STORAGE_KEYS.language),
@@ -1260,14 +1155,6 @@ function Settings({
           </div>
           <div className="data-metrics">
             <div className="data-metric">
-              <span>{t.settings.tasksData}</span>
-              <strong>{taskCount}</strong>
-            </div>
-            <div className="data-metric">
-              <span>{t.settings.notesData}</span>
-              <strong>{noteCount}</strong>
-            </div>
-            <div className="data-metric">
               <span>{t.settings.boardData}</span>
               <strong>{boardPostCount}</strong>
             </div>
@@ -1470,98 +1357,6 @@ function Settings({
               {boardImagesRemoteCopyStatus ? (
                 <p className={`backup-status settings-board-copy-status is-${boardImagesRemoteCopyStatus.type}`}>
                   {boardImagesRemoteCopyStatus.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="settings-storage-row">
-              <div>
-                <strong>{t.modules.tasks}</strong>
-                <span>{t.settings.tasksStorageDescription}</span>
-              </div>
-              <div className="settings-board-storage-control">
-                <div
-                  className="settings-options settings-board-storage-options"
-                  aria-label={t.settings.tasksStorageModeLabel}
-                  role="group"
-                >
-                  {Object.values(TASKS_STORAGE_MODES).map((mode) => (
-                    <button
-                      aria-pressed={tasksStorageMode === mode}
-                      className={`settings-option ${tasksStorageMode === mode ? 'is-active' : ''}`}
-                      key={mode}
-                      type="button"
-                      onClick={() => setTasksStorageMode(saveTasksStorageMode(mode))}
-                    >
-                      {mode === TASKS_STORAGE_MODES.local ? 'Local' : 'Remote'}
-                    </button>
-                  ))}
-                </div>
-                <span className={`settings-board-storage-badge is-${tasksStorageMode}`}>
-                  {tasksStorageMode === TASKS_STORAGE_MODES.local
-                    ? t.settings.storageModeLocal
-                    : t.settings.storageModeRemote}
-                </span>
-                <button
-                  className="settings-option settings-board-copy-button"
-                  type="button"
-                  disabled={isTasksRemoteCopying}
-                  onClick={handleCopyTasksToRemote}
-                >
-                  {isTasksRemoteCopying
-                    ? t.settings.tasksRemoteCopying
-                    : t.settings.tasksRemoteCopy}
-                </button>
-              </div>
-              {tasksRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${tasksRemoteCopyStatus.type}`}>
-                  {tasksRemoteCopyStatus.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="settings-storage-row">
-              <div>
-                <strong>{t.modules.notes}</strong>
-                <span>{t.settings.notesStorageDescription}</span>
-              </div>
-              <div className="settings-board-storage-control">
-                <div
-                  className="settings-options settings-board-storage-options"
-                  aria-label={t.settings.notesStorageModeLabel}
-                  role="group"
-                >
-                  {Object.values(NOTES_STORAGE_MODES).map((mode) => (
-                    <button
-                      aria-pressed={notesStorageMode === mode}
-                      className={`settings-option ${notesStorageMode === mode ? 'is-active' : ''}`}
-                      key={mode}
-                      type="button"
-                      onClick={() => setNotesStorageMode(saveNotesStorageMode(mode))}
-                    >
-                      {mode === NOTES_STORAGE_MODES.local ? 'Local' : 'Remote'}
-                    </button>
-                  ))}
-                </div>
-                <span className={`settings-board-storage-badge is-${notesStorageMode}`}>
-                  {notesStorageMode === NOTES_STORAGE_MODES.local
-                    ? t.settings.storageModeLocal
-                    : t.settings.storageModeRemote}
-                </span>
-                <button
-                  className="settings-option settings-board-copy-button"
-                  type="button"
-                  disabled={isNotesRemoteCopying}
-                  onClick={handleCopyNotesToRemote}
-                >
-                  {isNotesRemoteCopying
-                    ? t.settings.notesRemoteCopying
-                    : t.settings.notesRemoteCopy}
-                </button>
-              </div>
-              {notesRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${notesRemoteCopyStatus.type}`}>
-                  {notesRemoteCopyStatus.message}
                 </p>
               ) : null}
             </div>
@@ -1799,46 +1594,6 @@ function Settings({
           ) : null}
         </section>
 
-        {/* 위험 작업 패널 */}
-        <section className="settings-panel settings-danger-panel">
-          <div className="settings-panel-header">
-            <p className="module-label">{t.settings.resetWarningLabel}</p>
-            <h3>{t.settings.resetWarningTitle}</h3>
-          </div>
-          <button
-            className="reset-button"
-            type="button"
-            onClick={() => setIsResetConfirmOpen(true)}
-          >
-            {t.settings.resetData}
-          </button>
-          <p className="settings-note">{t.settings.resetRequiresConfirmation}</p>
-
-          {isResetConfirmOpen ? (
-            /* 초기화 확인 경고 */
-            <div className="reset-confirm-panel" role="alert">
-              <p className="module-label">{t.settings.resetWarningLabel}</p>
-              <h4>{t.settings.resetWarningTitle}</h4>
-              <p>{t.settings.resetWarningMessage}</p>
-              <div className="reset-actions">
-                <button
-                  className="reset-button confirm-reset-button"
-                  type="button"
-                  onClick={handleConfirmReset}
-                >
-                  {t.settings.confirmReset}
-                </button>
-                <button
-                  className="settings-option"
-                  type="button"
-                  onClick={() => setIsResetConfirmOpen(false)}
-                >
-                  {t.settings.cancelReset}
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </section>
         </div>
       </div>
     </section>

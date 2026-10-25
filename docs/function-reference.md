@@ -133,7 +133,7 @@
 
 ### `src/modules/Settings.jsx`
 
-- 언어, 시작 모듈, HUD 효과, 테마, 로컬 프로필, 데이터 백업/복원, Tasks/Notes 초기화 UI를 담당한다.
+- 언어, 시작 모듈, HUD 효과, 테마, 로컬 프로필, 데이터 백업/복원 UI를 담당한다.
 - 전체 앱 백업과 Board 전용 백업 UI가 함께 있다.
 
 ### `src/modules/settingsBackup.js`
@@ -142,7 +142,7 @@
 
 주요 export:
 
-- `START_MODULES = ['dashboard', 'tasks', 'notes', 'board', 'command']`
+- `START_MODULES = ['dashboard', 'board']`
 - `HUD_EFFECTS = ['normal', 'reduced']`
 - `THEMES = ['dark', 'standard']`
 - `LANGUAGES = ['ko', 'en']`
@@ -201,9 +201,7 @@ Map 사진/컬렉션 백업 직렬화와 복원 검증을 담당한다.
 
 ## 기타 주요 모듈 로직
 
-- `src/modules/tasksLogic.js`: task 생성, 마감일 정규화, 날짜별 task 조회/집계.
 - `src/modules/calendarLogic.js`: 날짜 key, 월간 calendar cell, 단일/기간 일정 정규화와 조회.
-- `src/modules/commandLogic.js`: Command Console 명령 파싱, 저장 데이터 분석, 결과 생성.
 - `src/modules/timerLogic.js`: focus/break timer 시간 변환과 표시 형식.
 - `src/modules/mapLogic.js`: Map 사진 record/collection 입력 정규화, 위치 데이터 처리, 필터링.
 - `src/modules/bulkPhotoUploadLogic.js`: Map bulk 업로드 분석 결과, 위치 보정, 저장 후보 생성.
@@ -217,8 +215,6 @@ Map 사진/컬렉션 백업 직렬화와 복원 검증을 담당한다.
 
 | 이름 | 실제 key |
 | --- | --- |
-| `tasks` | `todo-manager-lite.todos` |
-| `notes` | `tenvi.notes` |
 | `language` | `tenvi.language` |
 | `startModule` | `tenvi.startModule` |
 | `hudEffect` | `tenvi.hudEffect` |

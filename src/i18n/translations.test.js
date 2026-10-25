@@ -8,32 +8,12 @@ const requiredTopLevelKeys = [
   'sidebar',
   'modules',
   'common',
-  'command',
   'dashboard',
-  'tasks',
-  'notes',
   'calendar',
   'map',
   'settings',
 ]
 
-// Command 번역 key 동기화 목록
-const requiredCommandKeys = [
-  'helpTitle',
-  'recommendTaskResult',
-  'searchTasksResult',
-  'dataStatusResult',
-  'openModuleResult',
-  'todaySchedulesResult',
-  'thisMonthSchedulesResult',
-  'searchSchedulesResult',
-  'nextScheduleResult',
-  'scheduleStatusResult',
-  'todayTasksResult',
-  'todayDueTasks',
-  'noTodayDueTasks',
-  'examples',
-]
 
 // Calendar 번역 key 동기화 목록
 const requiredCalendarKeys = [
@@ -46,7 +26,6 @@ const requiredCalendarKeys = [
   'memoLabel',
   'addEvent',
   'eventsForDate',
-  'dueTasksForDate',
   'monthlyCalendar',
   'previousMonth',
   'nextMonth',
@@ -57,7 +36,6 @@ const requiredCalendarKeys = [
   'eventCount',
   'fullMoon',
   'noEvents',
-  'noDueTasks',
   'dateRangeError',
   'dateRangeHint',
   'rangeBadge',
@@ -98,9 +76,7 @@ const requiredDashboardKeys = [
   'nextEvent',
   'monthEvents',
   'scheduledDays',
-  'todayDueTasks',
   'noTodayEvents',
-  'noTodayDueTasks',
   'noNextEvent',
   'tabsLabel',
   'tabs',
@@ -108,7 +84,6 @@ const requiredDashboardKeys = [
   'quickStatus',
   'priorityItems',
   'recentHighlights',
-  'activeTaskList',
   'systemSummary',
   'currentSettings',
   'currentLanguage',
@@ -119,11 +94,6 @@ const requiredDashboardKeys = [
   'totalSchedules',
 ]
 
-// Tasks 번역 key 동기화 목록
-const requiredTasksKeys = [
-  'dueDateLabel',
-  'dueDateValue',
-]
 
 // Map 번역 key 동기화 목록
 const requiredMapKeys = [
@@ -288,11 +258,6 @@ describe('translations', () => {
     })
   })
 
-  it.each(['ko', 'en'])('has required command keys for %s', (language) => {
-    requiredCommandKeys.forEach((key) => {
-      expect(translations[language].command).toHaveProperty(key)
-    })
-  })
 
   it.each(['ko', 'en'])('has required calendar keys for %s', (language) => {
     requiredCalendarKeys.forEach((key) => {
@@ -306,11 +271,6 @@ describe('translations', () => {
     })
   })
 
-  it.each(['ko', 'en'])('has required task due date keys for %s', (language) => {
-    requiredTasksKeys.forEach((key) => {
-      expect(translations[language].tasks).toHaveProperty(key)
-    })
-  })
 
   it.each(['ko', 'en'])('has required map keys for %s', (language) => {
     requiredMapKeys.forEach((key) => {

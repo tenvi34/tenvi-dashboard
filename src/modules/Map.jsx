@@ -559,7 +559,7 @@ function BulkUploadList({
 }) {
   return (
     <div className="map-bulk-list-section">
-      <p className="recent-notes-title">{title}</p>
+      <p className="summary-list-title">{title}</p>
       {items.length > 0 ? (
         <ul className="map-bulk-file-list">
           {items.slice(0, 20).map((item) => (

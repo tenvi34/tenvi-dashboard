@@ -191,26 +191,19 @@
 .analysis-panel,
 .analysis-metric,
 .analysis-section,
-.command-history,
 .timer-duration-settings label,
 .timer-display-panel,
 .timer-stat,
-.lap-panel,
-.todo-item,
-.note-item {
+.lap-panel {
   border-radius: var(--radius-control);
 }
 
 .status-card,
 .analysis-panel,
-.command-history,
 .timer-display-panel,
 .lap-panel {
   padding: 14px;
 }
-
-.todo-list,
-.notes-list,
 .analysis-sections,
 .lap-panel ol {
   gap: 8px;
@@ -283,7 +276,7 @@
       bottom: 0;
       left: 0;
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 4px;
       min-height: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom));
       padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
@@ -341,7 +334,6 @@
     .dashboard-overview-grid,
     .dashboard-overview-list,
     .summary-metrics,
-    .task-stats,
     .settings-grid {
       grid-template-columns: 1fr;
     }
@@ -351,26 +343,15 @@
     .summary-metric,
     .analysis-panel,
     .analysis-section,
-    .command-history,
     .timer-display-panel,
-    .settings-panel,
-    .todo-item,
-    .note-item {
+    .settings-panel {
       min-width: 0;
     }
-
-  .todo-list,
-    .notes-list,
     .analysis-sections,
     .lap-panel ol,
     .map-left-scroll,
     .map-detail-column {
       overflow-y: visible;
-    }
-
-  .todo-item,
-    .note-item {
-      overflow-wrap: anywhere;
     }
 
   .sidebar-nav {

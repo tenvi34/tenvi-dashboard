@@ -3,11 +3,6 @@
   gap: 12px;
 }
 
-.task-stats {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 18px;
-}
-
 .status-card {
   display: flex;
   align-items: center;
@@ -89,7 +84,7 @@
   line-height: 1;
 }
 
-.recent-notes-title {
+.summary-list-title {
   color: var(--muted-cyan);
   font-size: 13px;
   font-weight: 700;
@@ -98,7 +93,7 @@
   margin-bottom: 10px;
 }
 
-.recent-notes ul {
+.summary-list ul {
   display: grid;
   gap: 10px;
   list-style: none;
@@ -106,7 +101,7 @@
   margin: 0;
 }
 
-.recent-note {
+.summary-list-item {
   display: grid;
   gap: 6px;
   padding: 12px;
@@ -116,13 +111,13 @@
   background: var(--surface);
 }
 
-.recent-note strong {
+.summary-list-item strong {
   color: #f4fdff;
   font-size: 15px;
   overflow-wrap: anywhere;
 }
 
-.recent-note span {
+.summary-list-item span {
   color: #b8dbe7;
   font-size: 14px;
   overflow: hidden;
@@ -229,7 +224,7 @@
   min-height: 0;
 }
 
-.dashboard-archive-grid .recent-notes {
+.dashboard-archive-grid .summary-list {
   align-content: start;
 }
 
@@ -417,16 +412,16 @@
   font-size: 32px;
 }
 
-.recent-notes {
+.summary-list {
   display: grid;
   gap: 10px;
 }
 
-.recent-notes-title {
+.summary-list-title {
   margin: 0;
 }
 
-.recent-note {
+.summary-list-item {
   min-width: 0;
   padding: 11px 12px;
 }
@@ -744,22 +739,22 @@
   font-size: var(--font-size-section-title);
 }
 
-.dashboard-module .recent-notes {
+.dashboard-module .summary-list {
   gap: var(--space-2);
 }
 
-.dashboard-module .recent-notes-title {
+.dashboard-module .summary-list-title {
   color: var(--text-muted);
   font-size: var(--font-size-label);
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
-.dashboard-module .recent-notes ul {
+.dashboard-module .summary-list ul {
   gap: var(--space-2);
 }
 
-.dashboard-module .recent-note {
+.dashboard-module .summary-list-item {
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border-default);
@@ -768,12 +763,12 @@
   background: var(--surface-raised);
 }
 
-.dashboard-module .recent-note strong {
+.dashboard-module .summary-list-item strong {
   color: var(--text-primary);
   font-size: var(--font-size-body);
 }
 
-.dashboard-module .recent-note span {
+.dashboard-module .summary-list-item span {
   color: var(--text-muted);
   font-size: var(--font-size-label);
 }

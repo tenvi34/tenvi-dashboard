@@ -303,7 +303,7 @@ function Timer({ t }) {
 
           {/* Stopwatch lap 기록 */}
           <section className="lap-panel" aria-label={t.timer.lapRecords}>
-            <p className="recent-notes-title">{t.timer.lapRecords}</p>
+            <p className="summary-list-title">{t.timer.lapRecords}</p>
             {laps.length > 0 ? (
               <ol>
                 {laps.map((lapMilliseconds, index) => (
@@ -314,7 +314,7 @@ function Timer({ t }) {
                 ))}
               </ol>
             ) : (
-              <p className="command-history-empty">{t.timer.noLaps}</p>
+              <p className="timer-empty">{t.timer.noLaps}</p>
             )}
           </section>
         </>

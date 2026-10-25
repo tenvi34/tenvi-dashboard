@@ -2,12 +2,9 @@
 export const MODULE_PATHS = {
   board: '/board',
   calendar: '/calendar',
-  command: '/command',
   dashboard: '/dashboard',
   map: '/map',
-  notes: '/notes',
   settings: '/settings',
-  tasks: '/tasks',
   travel: '/travel',
 }
 

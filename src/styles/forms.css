@@ -1,9 +1,4 @@
-/* TENVI forms styles */
 
-.todo-form input,
-.command-form input,
-.notes-form input,
-.notes-form textarea,
 .calendar-form input,
 .calendar-form textarea,
 .calendar-month-selectors select {
@@ -22,20 +17,10 @@
     box-shadow 0.18s ease,
     background 0.18s ease;
 }
-
-.todo-form input::placeholder,
-.command-form input::placeholder,
-.notes-form input::placeholder,
-.notes-form textarea::placeholder,
 .calendar-form input::placeholder,
 .calendar-form textarea::placeholder {
   color: rgba(190, 229, 240, 0.48);
 }
-
-.todo-form input:focus,
-.command-form input:focus,
-.notes-form input:focus,
-.notes-form textarea:focus,
 .calendar-form input:focus,
 .calendar-form textarea:focus,
 .calendar-month-selectors select:focus {
@@ -44,11 +29,6 @@
   box-shadow: 0 0 0 3px rgba(90, 212, 255, 0.12);
   background: rgba(4, 14, 28, 0.95);
 }
-
-.todo-form input,
-.command-form input,
-.notes-form input,
-.notes-form textarea,
 .calendar-form input,
 .calendar-form textarea,
 .calendar-month-selectors select,
@@ -67,11 +47,6 @@
   font-size: 13px;
   line-height: 1.35;
 }
-
-.todo-form input::placeholder,
-.command-form input::placeholder,
-.notes-form input::placeholder,
-.notes-form textarea::placeholder,
 .calendar-form input::placeholder,
 .calendar-form textarea::placeholder,
 .map-field input::placeholder,
@@ -79,11 +54,6 @@
 .map-search-form input::placeholder {
   color: rgba(190, 229, 240, 0.5);
 }
-
-.todo-form input:focus,
-.command-form input:focus,
-.notes-form input:focus,
-.notes-form textarea:focus,
 .calendar-form input:focus,
 .calendar-form textarea:focus,
 .calendar-month-selectors select:focus,
@@ -101,15 +71,7 @@
 
 /* PC/모바일 분기 */
 @media (max-width: 860px) {
-  .todo-form,
-    .command-form {
-      grid-template-columns: 1fr;
-    }
 
-  .todo-form input,
-    .command-form input,
-    .notes-form input,
-    .notes-form textarea,
     .calendar-form input,
     .calendar-form textarea,
     .calendar-month-selectors select,
@@ -125,8 +87,6 @@
 }
 
 @media (max-width: 560px) {
-  .todo-form,
-    .command-form,
     .calendar-layout,
     .calendar-date-range,
     .map-layout,
@@ -137,9 +97,7 @@
     .map-collection-actions,
     .map-search-controls,
     .map-search-form,
-    .todo-item,
-    .calendar-event-item,
-    .note-item {
+    .calendar-event-item {
       grid-template-columns: 1fr;
     }
 }

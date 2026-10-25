@@ -101,10 +101,6 @@
   background: var(--neon);
   box-shadow: 0 0 12px var(--neon);
 }
-
-.todo-form button,
-.command-form button,
-.notes-form button,
 .calendar-form button,
 .filter-button,
 .delete-button,
@@ -121,15 +117,11 @@
     background 0.18s ease,
     color 0.18s ease;
 }
-
-.todo-form button,
-.command-form button,
-.notes-form button,
 .calendar-form button {
   min-height: 48px;
 }
 
-/* Tasks 필터와 목록 */
+/* 공용 필터와 목록 */
 .filter-button {
   min-height: 40px;
   color: #aacbd8;
@@ -149,10 +141,6 @@
   border-color: rgba(255, 102, 134, 0.28);
   padding: 8px 12px;
 }
-
-.todo-form button:hover,
-.command-form button:hover,
-.notes-form button:hover,
 .calendar-form button:hover,
 .calendar-nav-button:hover,
 .filter-button:hover,
@@ -165,10 +153,6 @@
   border-color: rgba(255, 102, 134, 0.5);
   box-shadow: 0 0 18px rgba(255, 102, 134, 0.12);
 }
-
-.todo-form button:focus-visible,
-.command-form button:focus-visible,
-.notes-form button:focus-visible,
 .calendar-form button:focus-visible,
 .calendar-nav-button:focus-visible,
 .language-button:focus-visible,
@@ -179,19 +163,12 @@
   outline: 2px solid var(--neon);
   outline-offset: 2px;
 }
-
-.todo-form button:active,
-.command-form button:active,
-.notes-form button:active,
 .calendar-form button:active,
 .filter-button:active,
 .delete-button:active,
 .sidebar-button:active {
   transform: translateY(0);
 }
-
-/* 공통 버튼 계층 */
-.command-form button,
 .timer-button,
 .map-primary-button,
 .map-search-form button {
@@ -208,14 +185,10 @@
   font-weight: 800;
   line-height: 1;
 }
-
-.todo-form button,
-.notes-form button,
 .calendar-form button,
 .timer-button.secondary,
 .settings-option,
 .calendar-nav-button,
-.command-link-button,
 .map-secondary-button,
 .map-add-toggle-button,
 .map-collection-toggle,
@@ -277,15 +250,10 @@
   font-weight: 800;
   line-height: 1;
 }
-
-.todo-form button:hover,
-.command-form button:hover,
-.notes-form button:hover,
 .calendar-form button:hover,
 .timer-button:hover,
 .settings-option:hover,
 .calendar-nav-button:hover,
-.command-link-button:hover,
 .map-primary-button:hover:not(:disabled),
 .map-secondary-button:hover:not(:disabled),
 .map-search-form button:hover:not(:disabled),
@@ -309,15 +277,10 @@
   border-color: rgba(255, 102, 134, 0.5);
   box-shadow: 0 0 18px rgba(255, 102, 134, 0.12);
 }
-
-.todo-form button:focus-visible,
-.command-form button:focus-visible,
-.notes-form button:focus-visible,
 .calendar-form button:focus-visible,
 .timer-button:focus-visible,
 .settings-option:focus-visible,
 .calendar-nav-button:focus-visible,
-.command-link-button:focus-visible,
 .map-primary-button:focus-visible,
 .map-secondary-button:focus-visible,
 .map-search-form button:focus-visible,
@@ -331,15 +294,10 @@
   outline: 2px solid var(--neon);
   outline-offset: 2px;
 }
-
-.todo-form button:active,
-.command-form button:active,
-.notes-form button:active,
 .calendar-form button:active,
 .timer-button:active,
 .settings-option:active,
 .calendar-nav-button:active,
-.command-link-button:active,
 .map-primary-button:active,
 .map-secondary-button:active,
 .filter-button:active,
@@ -359,8 +317,7 @@
     .timer-tab,
     .map-mode-tab,
     .settings-option,
-    .calendar-nav-button,
-    .command-link-button {
+    .calendar-nav-button {
       min-height: 42px;
     }
 
@@ -450,10 +407,6 @@
       border-radius: var(--radius-control);
       white-space: nowrap;
     }
-
-  .todo-form button,
-    .command-form button,
-    .notes-form button,
     .calendar-form button,
     .timer-button,
     .map-primary-button,
@@ -463,16 +416,13 @@
     .reset-button {
       min-height: 42px;
     }
-
-  .todo-filters,
     .timer-controls,
     .timer-stats,
     .settings-options,
     .settings-options-grid,
     .data-metrics,
     .settings-data-panel .data-metrics,
-    .backup-actions,
-    .reset-actions {
+    .backup-actions {
       gap: 8px;
     }
 
@@ -487,7 +437,6 @@
 }
 
 @media (max-width: 560px) {
-  .task-stats,
     .dashboard-summary-grid,
     .dashboard-archive-grid,
     .dashboard-overview-list,
@@ -501,9 +450,6 @@
     .sidebar-nav {
       grid-template-columns: 1fr;
     }
-
-  .todo-form button,
-    .command-form button,
     .calendar-form button,
     .map-primary-button,
     .map-add-toggle-button,

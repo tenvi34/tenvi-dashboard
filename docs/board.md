@@ -511,4 +511,3 @@ npm run lint
 - 댓글 기능과 UserAvatar 재사용
 - 이미지 caption 필드 추가 여부 검토
 - Dashboard 최근 게시글 카드 강화
-- Command Console의 Board 검색/요약 명령 확장
