@@ -18,10 +18,7 @@ const normalizeCollectionId = (collectionId, collections = []) => {
     return null
   }
 
-  if (
-    collections.length > 0 &&
-    !collections.some((collection) => collection.id === collectionId)
-  ) {
+  if (collections.length > 0 && !collections.some((collection) => collection.id === collectionId)) {
     return null
   }
 
@@ -132,9 +129,7 @@ export const validateMapCollectionBackupRecordShape = (collection) => {
     startDate: String(collection.startDate ?? ''),
     endDate: String(collection.endDate ?? ''),
     createdAt: String(collection.createdAt ?? new Date().toISOString()),
-    updatedAt: String(
-      collection.updatedAt ?? collection.createdAt ?? new Date().toISOString(),
-    ),
+    updatedAt: String(collection.updatedAt ?? collection.createdAt ?? new Date().toISOString()),
   }
 }
 
@@ -144,9 +139,7 @@ export const serializePhotoCollectionsForBackup = (collections) =>
 
 // 컬렉션 복원 요약
 export const preparePhotoCollectionsForRestore = (backupCollections) => {
-  const totalCount = Array.isArray(backupCollections)
-    ? backupCollections.length
-    : 0
+  const totalCount = Array.isArray(backupCollections) ? backupCollections.length : 0
   const restoredCollections = []
   let damagedCount = 0
 
@@ -161,12 +154,12 @@ export const preparePhotoCollectionsForRestore = (backupCollections) => {
   }
 
   backupCollections.forEach((collection) => {
-    const normalizedCollection =
-      validateMapCollectionBackupRecordShape(collection)
+    const normalizedCollection = validateMapCollectionBackupRecordShape(collection)
 
     if (!normalizedCollection) {
       // 유효 항목만 복원 후보
       damagedCount += 1
+
       return
     }
 
@@ -182,10 +175,7 @@ export const preparePhotoCollectionsForRestore = (backupCollections) => {
 }
 
 // 이미지 Blob 복원 요약
-export const preparePhotoRecordsForRestore = async (
-  backupRecords,
-  collections = [],
-) => {
+export const preparePhotoRecordsForRestore = async (backupRecords, collections = []) => {
   const totalCount = Array.isArray(backupRecords) ? backupRecords.length : 0
   const restoredRecords = []
   let damagedCount = 0
@@ -211,9 +201,7 @@ export const preparePhotoRecordsForRestore = async (
 
     try {
       // Blob 복원 사전 확인
-      const previewImageBlob = await dataUrlToBlob(
-        normalizedRecord.previewImageDataUrl,
-      )
+      const previewImageBlob = await dataUrlToBlob(normalizedRecord.previewImageDataUrl)
 
       const { previewImageDataUrl, ...restorableRecord } = normalizedRecord
 

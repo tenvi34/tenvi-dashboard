@@ -10,10 +10,7 @@ import {
   updateRemoteMapCollection,
   updateRemoteMapRecord,
 } from '../../../api/mapApi.js'
-import {
-  blobToDataUrl,
-  dataUrlToBlob,
-} from '../../../services/photoArchiveBackupService.js'
+import { blobToDataUrl, dataUrlToBlob } from '../../../services/photoArchiveBackupService.js'
 
 // REMOTE 컬렉션 응답 보정
 const normalizeRemoteCollection = (collection) => ({
@@ -75,18 +72,20 @@ const toRemoteCollectionPayload = (collection) => ({
   updatedAt: collection.updatedAt,
 })
 
-export const createRemoteMapRepository = (mapApi = {
-  createRemoteMapCollection,
-  createRemoteMapRecord,
-  deleteRemoteMapCollection,
-  deleteRemoteMapRecord,
-  fetchMapCollection,
-  fetchMapCollections,
-  fetchMapRecord,
-  fetchMapRecords,
-  updateRemoteMapCollection,
-  updateRemoteMapRecord,
-}) => ({
+export const createRemoteMapRepository = (
+  mapApi = {
+    createRemoteMapCollection,
+    createRemoteMapRecord,
+    deleteRemoteMapCollection,
+    deleteRemoteMapRecord,
+    fetchMapCollection,
+    fetchMapCollections,
+    fetchMapRecord,
+    fetchMapRecords,
+    updateRemoteMapCollection,
+    updateRemoteMapRecord,
+  },
+) => ({
   // REMOTE 사진 기록 목록 조회
   async fetchRecords() {
     // preview Blob 복원 포함
@@ -102,9 +101,7 @@ export const createRemoteMapRepository = (mapApi = {
 
   // REMOTE 사진 기록 생성
   async createRecord(payload) {
-    const createdRecord = await mapApi.createRemoteMapRecord(
-      await toRemoteRecordPayload(payload),
-    )
+    const createdRecord = await mapApi.createRemoteMapRecord(await toRemoteRecordPayload(payload))
 
     return fromRemoteRecord(createdRecord)
   },
@@ -172,9 +169,7 @@ export const createRemoteMapRepository = (mapApi = {
 
   // REMOTE 컬렉션 수정
   async updateCollection(id, payload) {
-    return normalizeRemoteCollection(
-      await mapApi.updateRemoteMapCollection(id, payload),
-    )
+    return normalizeRemoteCollection(await mapApi.updateRemoteMapCollection(id, payload))
   },
 
   // REMOTE 컬렉션 삭제

@@ -62,14 +62,9 @@ export const collectBoardBackupData = async ({
   storage = localStorage,
 } = {}) => {
   const localStorageData = Object.fromEntries(
-    BOARD_BACKUP_STORAGE_KEYS.map((storageKey) => [
-      storageKey,
-      storage.getItem(storageKey),
-    ]),
+    BOARD_BACKUP_STORAGE_KEYS.map((storageKey) => [storageKey, storage.getItem(storageKey)]),
   )
-  const boardImages = (await readBoardImages())
-    .map(normalizeBoardImageBackupRecord)
-    .filter(Boolean)
+  const boardImages = (await readBoardImages()).map(normalizeBoardImageBackupRecord).filter(Boolean)
   const profileImages = (await readProfileImages())
     .map(normalizeProfileImageBackupRecord)
     .filter(Boolean)
@@ -160,6 +155,7 @@ export const restoreBoardBackupData = async (
   Object.entries(validatedBackup.localStorage).forEach(([storageKey, value]) => {
     if (value === null) {
       storage.removeItem(storageKey)
+
       return
     }
 

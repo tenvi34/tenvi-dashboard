@@ -122,19 +122,17 @@ export const createBoardCategory = ({
 export const normalizeBoardCategories = (categories = []) => {
   const now = new Date().toISOString()
   const sourceCategories =
-    Array.isArray(categories) && categories.length > 0
-      ? categories
-      : DEFAULT_BOARD_CATEGORIES
+    Array.isArray(categories) && categories.length > 0 ? categories : DEFAULT_BOARD_CATEGORIES
   const normalizedCategories = sourceCategories
-        .map((category) =>
-          createBoardCategory({
-            createdAt: category?.createdAt || now,
-            id: category?.id,
-            isDefault: Boolean(category?.isDefault),
-            name: category?.name,
-          }),
-        )
-        .filter(Boolean)
+    .map((category) =>
+      createBoardCategory({
+        createdAt: category?.createdAt || now,
+        id: category?.id,
+        isDefault: Boolean(category?.isDefault),
+        name: category?.name,
+      }),
+    )
+    .filter(Boolean)
   const categoryMap = new Map()
 
   normalizedCategories.forEach((category) => {
@@ -174,12 +172,13 @@ export const parseBoardCategories = (rawCategories) => {
 
 // Board 카테고리 이름 중복 확인
 const hasDuplicateCategoryName = (categories, name, ignoreCategoryId = '') => {
-  const normalizedName = String(name ?? '').trim().toLowerCase()
+  const normalizedName = String(name ?? '')
+    .trim()
+    .toLowerCase()
 
   return categories.some(
     (category) =>
-      category.id !== ignoreCategoryId &&
-      category.name.trim().toLowerCase() === normalizedName,
+      category.id !== ignoreCategoryId && category.name.trim().toLowerCase() === normalizedName,
   )
 }
 
@@ -247,9 +246,7 @@ export const movePostsToDefaultCategory = (
     return {
       ...post,
       categoryId:
-        currentCategoryId === removedCategoryId
-          ? DEFAULT_BOARD_CATEGORY_ID
-          : currentCategoryId,
+        currentCategoryId === removedCategoryId ? DEFAULT_BOARD_CATEGORY_ID : currentCategoryId,
     }
   })
 
@@ -260,16 +257,11 @@ export const moveBoardPostsToCategoryFallback = (
   fallbackCategoryId = DEFAULT_BOARD_CATEGORY_ID,
 ) =>
   posts.map((post) =>
-    post.categoryId === categoryId
-      ? { ...post, categoryId: fallbackCategoryId }
-      : post,
+    post.categoryId === categoryId ? { ...post, categoryId: fallbackCategoryId } : post,
   )
 
 // Board 카테고리 이름 조회
-export const getBoardCategoryName = (
-  categoryId,
-  categories = DEFAULT_BOARD_CATEGORIES,
-) => {
+export const getBoardCategoryName = (categoryId, categories = DEFAULT_BOARD_CATEGORIES) => {
   const normalizedCategories = normalizeBoardCategories(categories)
   const category = normalizedCategories.find((item) => item.id === categoryId)
   const fallbackCategory = normalizedCategories.find(
@@ -322,7 +314,9 @@ export const parseBoardDraft = (rawDraft) => {
     return {
       author: String(parsedDraft.author ?? ''),
       blocks: normalizeBoardBlocks(parsedDraft.blocks, parsedDraft.content),
-      categoryId: String(parsedDraft.categoryId ?? parsedDraft.category ?? DEFAULT_BOARD_CATEGORY_ID),
+      categoryId: String(
+        parsedDraft.categoryId ?? parsedDraft.category ?? DEFAULT_BOARD_CATEGORY_ID,
+      ),
       savedAt: String(parsedDraft.savedAt ?? ''),
       title: String(parsedDraft.title ?? ''),
     }
@@ -398,15 +392,10 @@ export const parseBoardPosts = (rawPosts, fallbackPosts = []) => {
 }
 
 // Board 게시글 삭제
-export const deleteBoardPost = (posts, postId) =>
-  posts.filter((post) => post.id !== postId)
+export const deleteBoardPost = (posts, postId) => posts.filter((post) => post.id !== postId)
 
 // Board 게시글 휴지통 이동
-export const moveBoardPostToTrash = (
-  posts,
-  postId,
-  deletedAt = new Date().toISOString(),
-) =>
+export const moveBoardPostToTrash = (posts, postId, deletedAt = new Date().toISOString()) =>
   posts.map((post) =>
     post.id === postId
       ? {
@@ -512,6 +501,7 @@ const compareBoardPostPinned = (a, b) => {
 // 게시글 정렬
 export const sortBoardPosts = (posts = [], sortMode = 'latest') => {
   const copiedPosts = [...posts]
+
   const withPinnedFirst = (comparePosts) =>
     copiedPosts.sort((a, b) => compareBoardPostPinned(a, b) || comparePosts(a, b))
 
@@ -524,15 +514,13 @@ export const sortBoardPosts = (posts = [], sortMode = 'latest') => {
 
   // 조회수순
   if (sortMode === 'views') {
-    return withPinnedFirst(
-      (a, b) => (b.views ?? 0) - (a.views ?? 0),
-    )
+    return withPinnedFirst((a, b) => (b.views ?? 0) - (a.views ?? 0))
   }
 
   // 제목순
   if (sortMode === 'title') {
-    return withPinnedFirst(
-      (a, b) => String(a.title ?? '').localeCompare(String(b.title ?? ''), 'ko'),
+    return withPinnedFirst((a, b) =>
+      String(a.title ?? '').localeCompare(String(b.title ?? ''), 'ko'),
     )
   }
 

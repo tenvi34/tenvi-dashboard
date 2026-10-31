@@ -120,10 +120,7 @@ describe('createMapArchiveSummary', () => {
       }),
     ]
     const summary = createMapArchiveSummary(
-      [
-        createRecord({ collectionId: 'older' }),
-        createRecord({ collectionId: 'newer' }),
-      ],
+      [createRecord({ collectionId: 'older' }), createRecord({ collectionId: 'newer' })],
       collections,
     )
 
@@ -136,10 +133,7 @@ describe('createMapArchiveSummary', () => {
 
   it('ignores missing collectionId references for representative collection', () => {
     const summary = createMapArchiveSummary(
-      [
-        createRecord({ collectionId: 'missing' }),
-        createRecord({ collectionId: null }),
-      ],
+      [createRecord({ collectionId: 'missing' }), createRecord({ collectionId: null })],
       [createCollection({ id: 'known', name: 'Known' })],
     )
 

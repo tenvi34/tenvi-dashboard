@@ -4,7 +4,12 @@ import useAppViewContext from './useAppViewContext.js'
 function BoardListView() {
   const { t } = useAppViewContext()
 
-  return <Board routeView="list" t={t} />
+  return (
+    <Board
+      routeView="list"
+      t={t}
+    />
+  )
 }
 
 export default BoardListView

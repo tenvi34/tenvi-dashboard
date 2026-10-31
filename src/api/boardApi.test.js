@@ -26,13 +26,11 @@ describe('boardApi', () => {
       json: vi.fn().mockResolvedValue(posts),
     })
 
-    await expect(
-      fetchBoardPosts({ baseUrl: 'http://localhost:5032', fetcher }),
-    ).resolves.toBe(posts)
-    expect(fetcher).toHaveBeenCalledWith(
-      getBoardPostsUrl('http://localhost:5032'),
-      {},
+    await expect(fetchBoardPosts({ baseUrl: 'http://localhost:5032', fetcher })).resolves.toBe(
+      posts,
     )
+
+    expect(fetcher).toHaveBeenCalledWith(getBoardPostsUrl('http://localhost:5032'), {})
   })
 
   it('fetches trash board posts', async () => {
@@ -42,13 +40,11 @@ describe('boardApi', () => {
       json: vi.fn().mockResolvedValue(posts),
     })
 
-    await expect(
-      fetchTrashBoardPosts({ baseUrl: 'http://localhost:5032', fetcher }),
-    ).resolves.toBe(posts)
-    expect(fetcher).toHaveBeenCalledWith(
-      getTrashBoardPostsUrl('http://localhost:5032'),
-      {},
+    await expect(fetchTrashBoardPosts({ baseUrl: 'http://localhost:5032', fetcher })).resolves.toBe(
+      posts,
     )
+
+    expect(fetcher).toHaveBeenCalledWith(getTrashBoardPostsUrl('http://localhost:5032'), {})
   })
 
   it('fetches one board post', async () => {
@@ -64,10 +60,8 @@ describe('boardApi', () => {
         fetcher,
       }),
     ).resolves.toBe(post)
-    expect(fetcher).toHaveBeenCalledWith(
-      getBoardPostUrl('post/1', 'http://localhost:5032'),
-      {},
-    )
+
+    expect(fetcher).toHaveBeenCalledWith(getBoardPostUrl('post/1', 'http://localhost:5032'), {})
   })
 
   it('creates a board post', async () => {
@@ -84,6 +78,7 @@ describe('boardApi', () => {
         fetcher,
       }),
     ).resolves.toBe(created)
+
     expect(fetcher).toHaveBeenCalledWith(
       getBoardPostsUrl('http://localhost:5032'),
       expect.objectContaining({
@@ -107,6 +102,7 @@ describe('boardApi', () => {
         fetcher,
       }),
     ).resolves.toBe(updated)
+
     expect(fetcher).toHaveBeenCalledWith(
       getBoardPostUrl('post-1', 'http://localhost:5032'),
       expect.objectContaining({
@@ -128,10 +124,10 @@ describe('boardApi', () => {
         fetcher,
       }),
     ).resolves.toBeNull()
-    expect(fetcher).toHaveBeenCalledWith(
-      getBoardPostUrl('post-1', 'http://localhost:5032'),
-      { method: 'DELETE' },
-    )
+
+    expect(fetcher).toHaveBeenCalledWith(getBoardPostUrl('post-1', 'http://localhost:5032'), {
+      method: 'DELETE',
+    })
   })
 
   it('keeps deleteBoardPost as a soft delete alias', async () => {
@@ -161,6 +157,7 @@ describe('boardApi', () => {
         fetcher,
       }),
     ).resolves.toBe(restored)
+
     expect(fetcher).toHaveBeenCalledWith(
       getBoardPostRestoreUrl('post-1', 'http://localhost:5032'),
       { method: 'PATCH' },
@@ -180,10 +177,10 @@ describe('boardApi', () => {
         fetcher,
       }),
     ).resolves.toBe(viewedPost)
-    expect(fetcher).toHaveBeenCalledWith(
-      getBoardPostViewsUrl('post-1', 'http://localhost:5032'),
-      { method: 'PATCH' },
-    )
+
+    expect(fetcher).toHaveBeenCalledWith(getBoardPostViewsUrl('post-1', 'http://localhost:5032'), {
+      method: 'PATCH',
+    })
   })
 
   it('permanently deletes a board post', async () => {
@@ -198,6 +195,7 @@ describe('boardApi', () => {
         fetcher,
       }),
     ).resolves.toBeNull()
+
     expect(fetcher).toHaveBeenCalledWith(
       getBoardPostPermanentUrl('post-1', 'http://localhost:5032'),
       { method: 'DELETE' },
@@ -212,10 +210,7 @@ describe('boardApi', () => {
     })
 
     await expect(
-      createBoardPost(
-        { title: '' },
-        { baseUrl: 'http://localhost:5032', fetcher },
-      ),
+      createBoardPost({ title: '' }, { baseUrl: 'http://localhost:5032', fetcher }),
     ).rejects.toThrow('Title is required.')
   })
 })

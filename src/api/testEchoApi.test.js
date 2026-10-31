@@ -19,16 +19,14 @@ describe('fetchTestEcho', () => {
         fetcher,
       }),
     ).resolves.toBe(echoPayload)
-    expect(fetcher).toHaveBeenCalledWith(
-      getTestEchoUrl('http://localhost:5032'),
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: 'ping message' }),
+
+    expect(fetcher).toHaveBeenCalledWith(getTestEchoUrl('http://localhost:5032'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
+      body: JSON.stringify({ message: 'ping message' }),
+    })
   })
 
   it('throws the backend error message for a bad request', async () => {

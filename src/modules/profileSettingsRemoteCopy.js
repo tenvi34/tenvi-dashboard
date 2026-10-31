@@ -76,17 +76,21 @@ export const normalizeRemoteAppSettings = (settings = []) => {
 }
 
 // REMOTE 공통 설정 로드
-export const loadRemoteAppSettings = async ({
-  fetchSettings = fetchRemoteAppSettings,
-} = {}) => {
+export const loadRemoteAppSettings = async ({ fetchSettings = fetchRemoteAppSettings } = {}) => {
   let timeoutId
+
   try {
     const settings = await Promise.race([
       fetchSettings(),
-      new Promise((_, reject) => { timeoutId = setTimeout(() => reject(new Error('Settings timeout')), 8000) }),
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Settings timeout')), 8000)
+      }),
     ])
+
     return normalizeRemoteAppSettings(settings)
-  } finally { clearTimeout(timeoutId) }
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
 
 // REMOTE 설정 단건 저장
@@ -100,10 +104,13 @@ const readLocalAppSettings = () => ({
   language: readStoredSetting(STORAGE_KEYS.language, 'ko'),
   theme: readStoredSetting(STORAGE_KEYS.theme, 'dark'),
   // 종료된 시작 모듈의 REMOTE 재복사 방지
-  startModule: normalizeRemoteAppSettings([{
-    key: 'startModule',
-    valueJson: JSON.stringify(readStoredSetting(STORAGE_KEYS.startModule, 'dashboard')),
-  }]).startModule ?? 'dashboard',
+  startModule:
+    normalizeRemoteAppSettings([
+      {
+        key: 'startModule',
+        valueJson: JSON.stringify(readStoredSetting(STORAGE_KEYS.startModule, 'dashboard')),
+      },
+    ]).startModule ?? 'dashboard',
   hudEffect: readStoredSetting(STORAGE_KEYS.hudEffect, 'normal'),
 })
 
@@ -182,11 +189,13 @@ export const copyLocalSettingsToRemote = async ({
     if (!remoteSettingsByKey.has(setting.key)) {
       result.copied += 1
       changedPayload.push(setting)
+
       return
     }
 
     if (remoteSettingsByKey.get(setting.key) === setting.valueJson) {
       result.skipped += 1
+
       return
     }
 

@@ -2,14 +2,8 @@
   localBoardCategoryRepository,
   remoteBoardCategoryRepository,
 } from './boardCategoryRepository.js'
-import {
-  localBoardImageRepository,
-  remoteBoardImageRepository,
-} from './boardImageRepository.js'
-import {
-  localBoardPostRepository,
-  remoteBoardPostRepository,
-} from './repositories/index.js'
+import { localBoardImageRepository, remoteBoardImageRepository } from './boardImageRepository.js'
+import { localBoardPostRepository, remoteBoardPostRepository } from './repositories/index.js'
 
 const toRemotePayload = (post) => ({
   id: post.id,
@@ -48,9 +42,7 @@ export const copyLocalBoardPostsToRemote = async ({
     remoteRepository.fetchPosts(),
     remoteRepository.fetchTrashPosts(),
   ])
-  const remoteIds = new Set(
-    [...remotePosts, ...remoteTrashPosts].map((post) => String(post.id)),
-  )
+  const remoteIds = new Set([...remotePosts, ...remoteTrashPosts].map((post) => String(post.id)))
 
   for (const post of localPosts) {
     if (remoteIds.has(String(post.id))) {
@@ -91,10 +83,7 @@ export const copyLocalBoardCategoriesToRemote = async ({
     }
 
     try {
-      await remoteRepository.replaceCategories(
-        [...remoteCategories, category],
-        remoteCategories,
-      )
+      await remoteRepository.replaceCategories([...remoteCategories, category], remoteCategories)
       remoteIds.add(String(category.id))
       remoteCategories.push(category)
       result.copied += 1

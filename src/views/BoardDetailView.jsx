@@ -4,7 +4,12 @@ import useAppViewContext from './useAppViewContext.js'
 function BoardDetailView() {
   const { t } = useAppViewContext()
 
-  return <Board routeView="detail" t={t} />
+  return (
+    <Board
+      routeView="detail"
+      t={t}
+    />
+  )
 }
 
 export default BoardDetailView

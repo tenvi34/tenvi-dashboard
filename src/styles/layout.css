@@ -232,135 +232,135 @@
 /* PC/모바일 분기 */
 @media (max-width: 860px) {
   .tenvi-header,
-    .tenvi-workspace,
-    .module-header {
-      grid-template-columns: 1fr;
-    }
+  .tenvi-workspace,
+  .module-header {
+    grid-template-columns: 1fr;
+  }
 
   .tenvi-header {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 16px;
-      padding: 18px;
-      margin-bottom: 14px;
-    }
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
 
   .tenvi-header h1 {
-      font-size: clamp(42px, 18vw, 78px);
-    }
+    font-size: clamp(42px, 18vw, 78px);
+  }
 
   .header-controls {
-      justify-content: flex-start;
-      width: 100%;
-    }
+    justify-content: flex-start;
+    width: 100%;
+  }
 
   .language-switch {
-      flex-wrap: wrap;
-      border-radius: var(--radius-control);
-    }
+    flex-wrap: wrap;
+    border-radius: var(--radius-control);
+  }
 
   .tenvi-workspace {
-      display: grid;
-      gap: 0;
-    }
+    display: grid;
+    gap: 0;
+  }
 
   /* 모바일 하단 탭바 */
   .tenvi-sidebar {
-      display: none;
-    }
+    display: none;
+  }
 
   .mobile-tabbar {
-      position: fixed;
-      z-index: 3000;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 4px;
-      min-height: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom));
-      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-      border-top: 1px solid var(--line);
-      background: rgba(3, 8, 16, 0.94);
-      box-shadow: 0 -12px 28px rgba(45, 125, 255, 0.14);
-      backdrop-filter: blur(16px);
-    }
+    position: fixed;
+    z-index: 3000;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    min-height: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom));
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: rgba(3, 8, 16, 0.94);
+    box-shadow: 0 -12px 28px rgba(45, 125, 255, 0.14);
+    backdrop-filter: blur(16px);
+  }
 
   .mobile-tabbar-more {
-      position: relative;
-      min-width: 0;
-    }
+    position: relative;
+    min-width: 0;
+  }
 
   .mobile-tabbar-menu {
-      position: absolute;
-      right: 0;
-      bottom: calc(100% + 8px);
-      display: grid;
-      gap: 6px;
-      width: min(180px, calc(100vw - 24px));
-      padding: 8px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-control);
-      background: rgba(3, 8, 16, 0.96);
-      box-shadow: 0 -10px 30px rgba(45, 125, 255, 0.18);
-      backdrop-filter: blur(16px);
-    }
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    display: grid;
+    gap: 6px;
+    width: min(180px, calc(100vw - 24px));
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: rgba(3, 8, 16, 0.96);
+    box-shadow: 0 -10px 30px rgba(45, 125, 255, 0.18);
+    backdrop-filter: blur(16px);
+  }
 
   .module-panel {
-      padding: 18px;
-    }
+    padding: 18px;
+  }
 
   .module-stage {
-      padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
-    }
+    padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  }
 
   .module-header {
-      align-items: stretch;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding-bottom: 14px;
-    }
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+  }
 
   .module-header h2 {
-      font-size: 22px;
-    }
+    font-size: 22px;
+  }
 
   .module-meta {
-      overflow-wrap: anywhere;
-    }
+    overflow-wrap: anywhere;
+  }
 
   .dashboard-tab-grid,
-    .dashboard-overview-grid,
-    .dashboard-overview-list,
-    .summary-metrics,
-    .settings-grid {
-      grid-template-columns: 1fr;
-    }
+  .dashboard-overview-grid,
+  .dashboard-overview-list,
+  .summary-metrics,
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
 
   .status-card,
-    .summary-panel,
-    .summary-metric,
-    .analysis-panel,
-    .analysis-section,
-    .timer-display-panel,
-    .settings-panel {
-      min-width: 0;
-    }
-    .analysis-sections,
-    .lap-panel ol,
-    .map-left-scroll,
-    .map-detail-column {
-      overflow-y: visible;
-    }
+  .summary-panel,
+  .summary-metric,
+  .analysis-panel,
+  .analysis-section,
+  .timer-display-panel,
+  .settings-panel {
+    min-width: 0;
+  }
+  .analysis-sections,
+  .lap-panel ol,
+  .map-left-scroll,
+  .map-detail-column {
+    overflow-y: visible;
+  }
 
   .sidebar-nav {
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    }
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
   .module-panel {
-      padding: 18px;
-    }
+    padding: 18px;
+  }
 }

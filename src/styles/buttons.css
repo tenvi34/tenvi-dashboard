@@ -312,149 +312,149 @@
 /* PC/모바일 분기 */
 @media (max-width: 860px) {
   .language-button,
-    .filter-button,
-    .dashboard-tab,
-    .timer-tab,
-    .map-mode-tab,
-    .settings-option,
-    .calendar-nav-button {
-      min-height: 42px;
-    }
+  .filter-button,
+  .dashboard-tab,
+  .timer-tab,
+  .map-mode-tab,
+  .settings-option,
+  .calendar-nav-button {
+    min-height: 42px;
+  }
 
   .mobile-tabbar-button {
-      min-width: 0;
-      min-height: 52px;
-      border: 1px solid rgba(90, 212, 255, 0.18);
-      border-radius: 8px;
-      padding: 6px 5px;
-      color: #aacbd8;
-      background: rgba(2, 9, 18, 0.64);
-      font: inherit;
-      font-size: 12px;
-      font-weight: 800;
-      line-height: 1.15;
-      cursor: pointer;
-      transition:
-        border-color 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease,
-        color 0.18s ease;
-    }
+    min-width: 0;
+    min-height: 52px;
+    border: 1px solid rgba(90, 212, 255, 0.18);
+    border-radius: 8px;
+    padding: 6px 5px;
+    color: #aacbd8;
+    background: rgba(2, 9, 18, 0.64);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.15;
+    cursor: pointer;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      background 0.18s ease,
+      color 0.18s ease;
+  }
 
   .mobile-tabbar-button span {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   .mobile-tabbar-button.is-active {
-      color: #f4fdff;
-      border-color: var(--line-strong);
-      background:
-        linear-gradient(180deg, rgba(90, 212, 255, 0.2), rgba(45, 125, 255, 0.1)),
-        rgba(90, 212, 255, 0.08);
-      box-shadow: inset 0 0 16px rgba(90, 212, 255, 0.12);
-    }
+    color: #f4fdff;
+    border-color: var(--line-strong);
+    background:
+      linear-gradient(180deg, rgba(90, 212, 255, 0.2), rgba(45, 125, 255, 0.1)),
+      rgba(90, 212, 255, 0.08);
+    box-shadow: inset 0 0 16px rgba(90, 212, 255, 0.12);
+  }
 
   .mobile-tabbar-button:focus-visible {
-      outline: 2px solid var(--neon);
-      outline-offset: 2px;
-    }
+    outline: 2px solid var(--neon);
+    outline-offset: 2px;
+  }
 
   .mobile-tabbar-more-button {
-      width: 100%;
-    }
+    width: 100%;
+  }
 
   .mobile-tabbar-menu-button {
-      width: 100%;
-      min-height: 44px;
-      border: 1px solid rgba(90, 212, 255, 0.18);
-      border-radius: 7px;
-      padding: 0 12px;
-      color: #dff8ff;
-      background: rgba(2, 9, 18, 0.64);
-      font: inherit;
-      font-size: 13px;
-      font-weight: 800;
-      text-align: left;
-      cursor: pointer;
-    }
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(90, 212, 255, 0.18);
+    border-radius: 7px;
+    padding: 0 12px;
+    color: #dff8ff;
+    background: rgba(2, 9, 18, 0.64);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+  }
 
   .mobile-tabbar-menu-button.is-active {
-      color: #f4fdff;
-      border-color: var(--line-strong);
-      background: rgba(90, 212, 255, 0.14);
-    }
+    color: #f4fdff;
+    border-color: var(--line-strong);
+    background: rgba(90, 212, 255, 0.14);
+  }
 
   .mobile-tabbar-menu-button:focus-visible {
-      outline: 2px solid var(--neon);
-      outline-offset: 2px;
-    }
+    outline: 2px solid var(--neon);
+    outline-offset: 2px;
+  }
 
   .dashboard-tabs,
-    .map-mode-tabs {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 10px;
-      -webkit-overflow-scrolling: touch;
-    }
+  .map-mode-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
 
   .dashboard-tab,
-    .map-mode-tab {
-      flex: 0 0 auto;
-      border-bottom: 1px solid transparent;
-      border-radius: var(--radius-control);
-      white-space: nowrap;
-    }
-    .calendar-form button,
-    .timer-button,
-    .map-primary-button,
-    .map-secondary-button,
-    .map-search-form button,
-    .delete-button,
-    .reset-button {
-      min-height: 42px;
-    }
-    .timer-controls,
-    .timer-stats,
-    .settings-options,
-    .settings-options-grid,
-    .data-metrics,
-    .settings-data-panel .data-metrics,
-    .backup-actions {
-      gap: 8px;
-    }
+  .map-mode-tab {
+    flex: 0 0 auto;
+    border-bottom: 1px solid transparent;
+    border-radius: var(--radius-control);
+    white-space: nowrap;
+  }
+  .calendar-form button,
+  .timer-button,
+  .map-primary-button,
+  .map-secondary-button,
+  .map-search-form button,
+  .delete-button,
+  .reset-button {
+    min-height: 42px;
+  }
+  .timer-controls,
+  .timer-stats,
+  .settings-options,
+  .settings-options-grid,
+  .data-metrics,
+  .settings-data-panel .data-metrics,
+  .backup-actions {
+    gap: 8px;
+  }
 
   .sidebar-button {
-      justify-content: center;
-    }
+    justify-content: center;
+  }
 
   .sidebar-button::before,
-    .sidebar-button::after {
-      display: none;
-    }
+  .sidebar-button::after {
+    display: none;
+  }
 }
 
 @media (max-width: 560px) {
-    .dashboard-summary-grid,
-    .dashboard-archive-grid,
-    .dashboard-overview-list,
-    .map-source-grid,
-    .settings-grid,
-    .summary-metrics,
-    .timer-duration-settings,
-    .timer-tabs,
-    .timer-controls,
-    .timer-stats,
-    .sidebar-nav {
-      grid-template-columns: 1fr;
-    }
-    .calendar-form button,
-    .map-primary-button,
-    .map-add-toggle-button,
-    .delete-button {
-      width: 100%;
-      min-height: 42px;
-    }
+  .dashboard-summary-grid,
+  .dashboard-archive-grid,
+  .dashboard-overview-list,
+  .map-source-grid,
+  .settings-grid,
+  .summary-metrics,
+  .timer-duration-settings,
+  .timer-tabs,
+  .timer-controls,
+  .timer-stats,
+  .sidebar-nav {
+    grid-template-columns: 1fr;
+  }
+  .calendar-form button,
+  .map-primary-button,
+  .map-add-toggle-button,
+  .delete-button {
+    width: 100%;
+    min-height: 42px;
+  }
 }

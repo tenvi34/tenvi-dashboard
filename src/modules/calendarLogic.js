@@ -25,8 +25,7 @@ const isDateKey = (dateKey) => {
 }
 
 // 월 일수 계산
-export const getDaysInMonth = (year, month) =>
-  new Date(year, month + 1, 0).getDate()
+export const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate()
 
 // 월 이동 날짜 보정
 export const getClampedDateKey = (year, month, day) => {
@@ -53,16 +52,12 @@ const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 export const isFullMoonDate = (dateKey) => {
   const { day, month, year } = parseDateKey(dateKey)
   const targetDateUtcNoon = Date.UTC(year, month, day, 12)
-  const daysSinceReference =
-    (targetDateUtcNoon - FULL_MOON_REFERENCE_UTC) / DAY_IN_MILLISECONDS
+  const daysSinceReference = (targetDateUtcNoon - FULL_MOON_REFERENCE_UTC) / DAY_IN_MILLISECONDS
   const cyclePosition =
-    ((daysSinceReference % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) %
-    SYNODIC_MONTH_DAYS
+    ((daysSinceReference % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) % SYNODIC_MONTH_DAYS
 
   // 평균 주기 근사값
-  return (
-    cyclePosition <= 0.5 || cyclePosition >= SYNODIC_MONTH_DAYS - 0.5
-  )
+  return cyclePosition <= 0.5 || cyclePosition >= SYNODIC_MONTH_DAYS - 0.5
 }
 
 // 월간 그리드 생성
@@ -96,8 +91,7 @@ export const isValidCalendarDateRange = (startDate, endDate = startDate) =>
 
 export const getCalendarEventStartDate = (event) => event.startDate || event.date
 
-export const getCalendarEventEndDate = (event) =>
-  event.endDate || event.startDate || event.date
+export const getCalendarEventEndDate = (event) => event.endDate || event.startDate || event.date
 
 // 기존 일정 호환 처리
 export const normalizeCalendarEvent = (event) => {
@@ -173,8 +167,7 @@ export const getCalendarEventDateLabel = (event) =>
 
 // 기간 포함 판단
 export const eventOccursOnDate = (event, dateKey) =>
-  getCalendarEventStartDate(event) <= dateKey &&
-  getCalendarEventEndDate(event) >= dateKey
+  getCalendarEventStartDate(event) <= dateKey && getCalendarEventEndDate(event) >= dateKey
 
 export const getDateKeysBetween = (startDateKey, endDateKey = startDateKey) => {
   if (!isValidCalendarDateRange(startDateKey, endDateKey)) {
@@ -227,14 +220,10 @@ export const getCalendarDayRangeMeta = (events, dateKey) => {
   const positions = events
     .map((event) => getCalendarEventRangePosition(event, dateKey))
     .filter(Boolean)
-  const rangePositions = positions.filter(
-    (position) => position !== RANGE_POSITION.single,
+  const rangePositions = positions.filter((position) => position !== RANGE_POSITION.single)
+  const periodPosition = [RANGE_POSITION.start, RANGE_POSITION.end, RANGE_POSITION.middle].find(
+    (position) => rangePositions.includes(position),
   )
-  const periodPosition = [
-    RANGE_POSITION.start,
-    RANGE_POSITION.end,
-    RANGE_POSITION.middle,
-  ].find((position) => rangePositions.includes(position))
 
   return {
     classNames: [
@@ -279,8 +268,7 @@ export const getNextEvent = (events, currentDate = new Date()) => {
       const firstStartDate = getCalendarEventStartDate(firstEvent)
       const secondStartDate = getCalendarEventStartDate(secondEvent)
       const firstNextDate = firstStartDate > todayKey ? firstStartDate : todayKey
-      const secondNextDate =
-        secondStartDate > todayKey ? secondStartDate : todayKey
+      const secondNextDate = secondStartDate > todayKey ? secondStartDate : todayKey
 
       if (firstNextDate !== secondNextDate) {
         return firstNextDate.localeCompare(secondNextDate)
@@ -301,22 +289,13 @@ export const countEventsByDate = (events) =>
   }, {})
 
 // Calendar 이벤트 생성
-export const createCalendarEvent = ({
-  date,
-  endDate = date,
-  memo,
-  startDate = date,
-  title,
-}) => {
+export const createCalendarEvent = ({ date, endDate = date, memo, startDate = date, title }) => {
   const normalizedTitle = title.trim()
   const normalizedMemo = memo.trim()
   const normalizedStartDate = startDate || date
   const normalizedEndDate = endDate || normalizedStartDate
 
-  if (
-    !isValidCalendarDateRange(normalizedStartDate, normalizedEndDate) ||
-    !normalizedTitle
-  ) {
+  if (!isValidCalendarDateRange(normalizedStartDate, normalizedEndDate) || !normalizedTitle) {
     return null
   }
 

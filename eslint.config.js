@@ -17,5 +17,9 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // 짧은 조건문도 블록을 명시하여 분기 범위 유지
+      curly: ['error', 'all'],
+    },
   },
 ])

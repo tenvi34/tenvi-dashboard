@@ -40,20 +40,14 @@ export const createBulkPhotoAnalysisItem = ({
 
 // 원래 위치가 없던 항목만 추출
 export const getBulkMissingLocationItems = (items = []) =>
-  items.filter(
-    (item) =>
-      item?.originalStatus === 'missing-location' && item.status !== 'failed',
-  )
+  items.filter((item) => item?.originalStatus === 'missing-location' && item.status !== 'failed')
 
 // 위치 일괄 적용 가능 항목
 export const getBulkLocationAssignableItems = (items = []) =>
   items.filter((item) => item?.status !== 'failed')
 
 // 위치 누락 항목 선택 토글
-export const toggleBulkMissingLocationSelection = (
-  selectedIds = [],
-  itemId,
-) => {
+export const toggleBulkMissingLocationSelection = (selectedIds = [], itemId) => {
   if (selectedIds.includes(itemId)) {
     return selectedIds.filter((selectedId) => selectedId !== itemId)
   }
@@ -73,16 +67,11 @@ export const selectAllBulkLocationAssignableItems = (items = []) =>
 export const clearBulkMissingLocationSelection = () => []
 
 // 선택 항목에 수동/검색 위치 적용
-export const applyLocationToBulkItems = (
-  items = [],
-  selectedIds = [],
-  location = {},
-) => {
+export const applyLocationToBulkItems = (items = [], selectedIds = [], location = {}) => {
   const selectedIdSet = new Set(selectedIds)
   const latitude = Number(location.latitude)
   const longitude = Number(location.longitude)
-  const locationSource =
-    location.locationSource === 'search' ? 'search' : 'manual'
+  const locationSource = location.locationSource === 'search' ? 'search' : 'manual'
 
   return items.map((item) => {
     if (!selectedIdSet.has(item.id) || item.status === 'failed') {
@@ -104,8 +93,7 @@ export const createBulkUploadSummary = (items = []) =>
   items.reduce(
     (summary, item) => {
       const status = normalizeBulkUploadItemStatus(item?.status)
-      const summaryKey =
-        status === 'missing-location' ? 'missingLocation' : status
+      const summaryKey = status === 'missing-location' ? 'missingLocation' : status
 
       return {
         ...summary,

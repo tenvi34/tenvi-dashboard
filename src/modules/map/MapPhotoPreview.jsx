@@ -30,13 +30,25 @@ function PhotoPreview({ alt, blob, className }) {
     return null
   }
 
-  return <img ref={imageRef} alt={alt} className={className} />
+  return (
+    <img
+      ref={imageRef}
+      alt={alt}
+      className={className}
+    />
+  )
 }
 
 // 클릭 가능한 사진 미리보기
 function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
   if (!blob) {
-    return <PhotoPreview alt={alt} blob={blob} className={className} />
+    return (
+      <PhotoPreview
+        alt={alt}
+        blob={blob}
+        className={className}
+      />
+    )
   }
 
   return (
@@ -46,7 +58,11 @@ function PhotoPreviewButton({ alt, blob, className, onOpen, t }) {
       aria-label={t.map.openPhotoPreview}
       onClick={() => onOpen({ alt, blob })}
     >
-      <PhotoPreview alt={alt} blob={blob} className={className} />
+      <PhotoPreview
+        alt={alt}
+        blob={blob}
+        className={className}
+      />
     </button>
   )
 }
@@ -65,7 +81,10 @@ function PhotoLightbox({ photo, onClose, t }) {
       aria-label={t.map.photoPreviewLabel}
       onClick={onClose}
     >
-      <div className="map-photo-lightbox-body" onClick={(event) => event.stopPropagation()}>
+      <div
+        className="map-photo-lightbox-body"
+        onClick={(event) => event.stopPropagation()}
+      >
         <button
           className="map-photo-lightbox-close"
           type="button"

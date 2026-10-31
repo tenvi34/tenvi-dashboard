@@ -85,9 +85,8 @@ describe('boardBackupLogic', () => {
       version: BOARD_BACKUP_VERSION,
       exportedAt: '2026-06-22T00:00:00.000Z',
     })
-    expect(Object.keys(backupPayload.localStorage)).toEqual(
-      BOARD_BACKUP_STORAGE_KEYS,
-    )
+
+    expect(Object.keys(backupPayload.localStorage)).toEqual(BOARD_BACKUP_STORAGE_KEYS)
     expect(backupPayload.indexedDb.boardImages).toHaveLength(1)
     expect(backupPayload.indexedDb.profileImages).toHaveLength(1)
   })
@@ -98,12 +97,10 @@ describe('boardBackupLogic', () => {
       type: BOARD_BACKUP_TYPE,
       version: BOARD_BACKUP_VERSION,
     })
-    expect(validateBoardBackupData({ ...createValidBoardBackup(), type: 'bad' })).toBe(
-      null,
-    )
-    expect(
-      validateBoardBackupData({ ...createValidBoardBackup(), version: 999 }),
-    ).toBe(null)
+
+    expect(validateBoardBackupData({ ...createValidBoardBackup(), type: 'bad' })).toBe(null)
+
+    expect(validateBoardBackupData({ ...createValidBoardBackup(), version: 999 })).toBe(null)
   })
 
   it('rejects malformed backup JSON shapes', () => {
@@ -115,6 +112,7 @@ describe('boardBackupLogic', () => {
         localStorage: { [STORAGE_KEYS.boardPosts]: [] },
       }),
     ).toBe(null)
+
     expect(
       validateBoardBackupData({
         ...createValidBoardBackup(),
@@ -158,9 +156,7 @@ describe('boardBackupLogic', () => {
     })
 
     expect(restoredBackup.indexedDb.boardImages).toHaveLength(1)
-    expect(putImages).toHaveBeenCalledWith([
-      expect.objectContaining({ id: 'board-image-1' }),
-    ])
+    expect(putImages).toHaveBeenCalledWith([expect.objectContaining({ id: 'board-image-1' })])
     expect(putProfileImageRecords).toHaveBeenCalledWith([])
   })
 

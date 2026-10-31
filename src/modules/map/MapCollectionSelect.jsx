@@ -9,7 +9,10 @@ function PhotoCollectionSelect({ collections, onChange, t, value }) {
       >
         <option value="">{t.map.unassignedCollection}</option>
         {collections.map((collection) => (
-          <option key={collection.id} value={collection.id}>
+          <option
+            key={collection.id}
+            value={collection.id}
+          >
             {collection.name}
           </option>
         ))}

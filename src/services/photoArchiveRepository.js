@@ -144,9 +144,7 @@ export const createPhotoRecords = async (recordInputs) => {
 }
 
 export const updatePhotoRecord = async (id, patch) => {
-  const currentRecord = await runStoreTransaction('readonly', (store) =>
-    store.get(id),
-  )
+  const currentRecord = await runStoreTransaction('readonly', (store) => store.get(id))
 
   if (!currentRecord) {
     // 삭제된 record 방어
@@ -217,5 +215,4 @@ export const replacePhotoArchiveData = async ({ records, collections }) => {
 }
 
 // 사진 record 전체 교체
-export const replacePhotoRecords = async (records) =>
-  replacePhotoArchiveData({ records })
+export const replacePhotoRecords = async (records) => replacePhotoArchiveData({ records })

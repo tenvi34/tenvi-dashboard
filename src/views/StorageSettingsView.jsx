@@ -13,7 +13,9 @@ function StorageSettingsView() {
       language={language}
       onLanguageChange={setLanguage}
       onSettingsTabChange={(tabId) => {
-        if (tabId === 'general') navigate('/settings')
+        if (tabId === 'general') {
+          navigate('/settings')
+        }
       }}
       onStartModuleChange={setStartModule}
       onThemeChange={setTheme}

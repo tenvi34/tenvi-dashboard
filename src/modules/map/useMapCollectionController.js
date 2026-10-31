@@ -16,9 +16,7 @@ function useMapCollectionController({
   setStatusMessage,
   t,
 }) {
-  const [collectionDraft, setCollectionDraft] = useState(() =>
-    normalizePhotoCollectionInput(),
-  )
+  const [collectionDraft, setCollectionDraft] = useState(() => normalizePhotoCollectionInput())
   // 편집 중인 컬렉션 id
   const [editingCollectionId, setEditingCollectionId] = useState('')
 
@@ -41,6 +39,7 @@ function useMapCollectionController({
 
     if (!isPhotoCollectionInputValid(normalizedInput)) {
       setError(t.map.collectionNameRequired)
+
       return
     }
 
@@ -65,14 +64,9 @@ function useMapCollectionController({
         )
         setStatusMessage(t.map.collectionUpdated)
       } else {
-        const createdCollection = await mapRepository.createCollection(
-          normalizedInput,
-        )
+        const createdCollection = await mapRepository.createCollection(normalizedInput)
 
-        setCollections((currentCollections) => [
-          createdCollection,
-          ...currentCollections,
-        ])
+        setCollections((currentCollections) => [createdCollection, ...currentCollections])
         setStatusMessage(t.map.collectionCreated)
       }
 
@@ -100,20 +94,22 @@ function useMapCollectionController({
       setCollections((currentCollections) =>
         currentCollections.filter((item) => item.id !== collection.id),
       )
+
       setRecords((currentRecords) =>
         currentRecords.map((record) =>
-          record.collectionId === collection.id
-            ? { ...record, collectionId: null }
-            : record,
+          record.collectionId === collection.id ? { ...record, collectionId: null } : record,
         ),
       )
+
       setSelectedCollectionFilter((currentFilter) =>
         currentFilter === collection.id ? COLLECTION_FILTER_UNASSIGNED : currentFilter,
       )
+
       // 삭제 중인 draft 방어
       if (editingCollectionId === collection.id) {
         resetCollectionDraft()
       }
+
       setStatusMessage(t.map.collectionDeleted)
     } catch {
       setError(t.map.collectionDeleteError)

@@ -32,6 +32,7 @@ const formatCheckedAt = (checkedAt) => {
   }
 
   const padDatePart = (value) => String(value).padStart(2, '0')
+
   const datePart = [
     checkedDate.getFullYear(),
     padDatePart(checkedDate.getMonth() + 1),
@@ -50,8 +51,7 @@ function BackendStatus({ t }) {
   const [status, setStatus] = useState(STATUS.checking)
   const [health, setHealth] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
-  const backendStatusText =
-    t.settings.backendStatus ?? DEFAULT_BACKEND_STATUS_TEXT
+  const backendStatusText = t.settings.backendStatus ?? DEFAULT_BACKEND_STATUS_TEXT
   const healthUrl = getBackendHealthUrl()
 
   const checkBackendHealth = useCallback(async () => {
@@ -87,9 +87,7 @@ function BackendStatus({ t }) {
       <div
         className={`backend-status__card backend-status__state backend-status__state--${status}`}
       >
-        {status === STATUS.checking ? (
-          <p>{backendStatusText.checking}</p>
-        ) : null}
+        {status === STATUS.checking ? <p>{backendStatusText.checking}</p> : null}
 
         {status === STATUS.connected ? (
           <dl className="backend-status__details">
@@ -107,9 +105,7 @@ function BackendStatus({ t }) {
             </div>
             <div>
               <dt>CheckedAt</dt>
-              <dd className="backend-status__checked-at">
-                {formatCheckedAt(health?.checkedAt)}
-              </dd>
+              <dd className="backend-status__checked-at">{formatCheckedAt(health?.checkedAt)}</dd>
             </div>
           </dl>
         ) : null}
@@ -121,8 +117,7 @@ function BackendStatus({ t }) {
             </p>
             <p>{backendStatusText.failedHint}</p>
             <p>
-              {backendStatusText.expectedUrl}:{' '}
-              <code>{healthUrl}</code>
+              {backendStatusText.expectedUrl}: <code>{healthUrl}</code>
             </p>
             {errorMessage ? <p>{errorMessage}</p> : null}
           </div>

@@ -1,7 +1,4 @@
-import {
-  createRemoteCalendarEvent,
-  fetchCalendarEvents,
-} from '../api/calendarApi.js'
+import { createRemoteCalendarEvent, fetchCalendarEvents } from '../api/calendarApi.js'
 import { STORAGE_KEYS } from '../constants/storageKeys.js'
 import { readCalendarEvents } from './calendarLogic.js'
 

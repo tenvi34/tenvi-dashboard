@@ -6,6 +6,7 @@ const LOCATION_SOURCE_KEYS = ['exif', 'manual', 'search']
 // 날짜 정렬용 timestamp fallback
 const getTimestamp = (value) => {
   const timestamp = new Date(value).getTime()
+
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
@@ -107,7 +108,9 @@ export const createMapArchiveSummary = (records = [], collections = []) => {
 
 // Dashboard Map 요약 조회
 export const getMapArchiveSummary = async ({
-  mode = readMapStorageMode(), localRepository = localMapRepository, remoteRepository = remoteMapRepository,
+  mode = readMapStorageMode(),
+  localRepository = localMapRepository,
+  remoteRepository = remoteMapRepository,
 } = {}) => {
   const repository = mode === 'remote' ? remoteRepository : localRepository
   const [records, collections] = await Promise.all([

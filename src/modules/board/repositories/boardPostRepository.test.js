@@ -47,6 +47,7 @@ describe('localBoardPostRepository', () => {
       pinned: true,
       views: 0,
     })
+
     expect(storage.setItem).toHaveBeenCalledWith(
       STORAGE_KEYS.boardPosts,
       expect.stringContaining('Local title'),
@@ -64,10 +65,7 @@ describe('localBoardPostRepository', () => {
 
     expect(repository.replacePosts(posts)).toBe(posts)
     expect(repository.fetchAllPosts()).toEqual(posts)
-    expect(storage.setItem).toHaveBeenCalledWith(
-      STORAGE_KEYS.boardPosts,
-      JSON.stringify(posts),
-    )
+    expect(storage.setItem).toHaveBeenCalledWith(STORAGE_KEYS.boardPosts, JSON.stringify(posts))
   })
 
   it('updates posts through boardLogic normalization', async () => {
@@ -93,6 +91,7 @@ describe('localBoardPostRepository', () => {
       categoryId: 'notice',
       blocks: [{ id: 'block-1', type: 'text', content: 'Updated body' }],
     })
+
     expect(repository.fetchAllPosts()).toMatchObject([
       { id: createdPost.id, title: 'After', content: 'Updated body' },
     ])
@@ -155,9 +154,7 @@ describe('localBoardPostRepository', () => {
 
     expect(restoredPost.deletedAt).toBeUndefined()
     expect(repository.fetchAllPosts()[0]).not.toHaveProperty('deletedAt')
-    await expect(repository.fetchPosts()).resolves.toMatchObject([
-      { id: createdPost.id },
-    ])
+    await expect(repository.fetchPosts()).resolves.toMatchObject([{ id: createdPost.id }])
   })
 
   it('permanently deletes posts', async () => {
@@ -186,9 +183,7 @@ describe('localBoardPostRepository', () => {
 
     expect(viewedPost.views).toBe(1)
     expect(viewedPost.updatedAt).toBe(createdPost.updatedAt)
-    expect(repository.fetchAllPosts()).toMatchObject([
-      { id: createdPost.id, views: 1 },
-    ])
+    expect(repository.fetchAllPosts()).toMatchObject([{ id: createdPost.id, views: 1 }])
   })
 })
 
@@ -209,7 +204,9 @@ describe('remoteBoardPostRepository', () => {
     await expect(repository.fetchPosts()).resolves.toEqual([{ id: 'active' }])
     await expect(repository.fetchTrashPosts()).resolves.toEqual([{ id: 'trash' }])
     await expect(repository.createPost({ title: 'New' })).resolves.toEqual({ id: 'created' })
-    await expect(repository.updatePost('post-1', { title: 'Edit' })).resolves.toEqual({ id: 'updated' })
+    await expect(repository.updatePost('post-1', { title: 'Edit' })).resolves.toEqual({
+      id: 'updated',
+    })
     await expect(repository.softDeletePost('post-1')).resolves.toBeNull()
     await expect(repository.restorePost('post-1')).resolves.toEqual({ id: 'restored' })
     await expect(repository.permanentlyDeletePost('post-1')).resolves.toBeNull()

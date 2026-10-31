@@ -1430,10 +1430,7 @@
   display: grid;
   justify-items: center;
   align-items: start;
-  padding:
-    calc(18px + env(safe-area-inset-top))
-    18px
-    calc(18px + env(safe-area-inset-bottom));
+  padding: calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1806,7 +1803,6 @@
     font-size: var(--font-size-body);
     line-height: 1.8;
   }
-
 }
 
 /* 공통 입력 스타일 */

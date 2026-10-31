@@ -98,13 +98,14 @@ function BoardForm({
           </div>
 
           {!isEditMode && draftPickerOpen ? (
-            <div className="board-draft-picker" aria-label={t.board.draftPickerLabel}>
+            <div
+              className="board-draft-picker"
+              aria-label={t.board.draftPickerLabel}
+            >
               <div className="board-draft-picker-header">
                 <p className="module-label">{t.board.draftPickerLabel}</p>
                 <div className="board-draft-picker-actions">
-                  <span className="board-count">
-                    {t.board.draftCount(draftList.length)}
-                  </span>
+                  <span className="board-count">{t.board.draftCount(draftList.length)}</span>
                   <button
                     type="button"
                     className="board-secondary-button"
@@ -123,7 +124,10 @@ function BoardForm({
                     const savedAt = formatDraftSavedAt(draft.savedAt)
 
                     return (
-                      <div className="board-draft-item" key={draft.id}>
+                      <div
+                        className="board-draft-item"
+                        key={draft.id}
+                      >
                         <button
                           type="button"
                           className={`board-draft-load-button ${
@@ -141,9 +145,7 @@ function BoardForm({
                           </span>
                           <div className="board-draft-item-meta">
                             {hasImages ? (
-                              <em className="board-draft-image-badge">
-                                {t.board.imageDraftBadge}
-                              </em>
+                              <em className="board-draft-image-badge">{t.board.imageDraftBadge}</em>
                             ) : null}
                             {savedAt ? <small>{t.board.draftSavedAt(savedAt)}</small> : null}
                           </div>
@@ -173,7 +175,10 @@ function BoardForm({
                 onChange={(event) => onCategoryChange(event.target.value, !isEditMode)}
               >
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
+                  <option
+                    key={category.id}
+                    value={category.id}
+                  >
                     {category.name}
                   </option>
                 ))}
@@ -213,7 +218,10 @@ function BoardForm({
           </div>
 
           {formError ? (
-            <p className="board-form-message" role="alert">
+            <p
+              className="board-form-message"
+              role="alert"
+            >
               {formError}
             </p>
           ) : null}

@@ -185,10 +185,9 @@ describe('boardLogic', () => {
         [{ id: 'block-2', type: 'image', imageId: 'board-image-2' }],
       ),
     ).toEqual(['board-image-1'])
+
     expect(
-      getBoardImageIds([
-        { id: 'block-1', type: 'image', src: 'data:image/png;base64,abc' },
-      ]),
+      getBoardImageIds([{ id: 'block-1', type: 'image', src: 'data:image/png;base64,abc' }]),
     ).toEqual([])
   })
 
@@ -265,6 +264,7 @@ describe('boardLogic', () => {
       'question',
       'image',
     ])
+
     expect(normalizeBoardCategories()[0]).toMatchObject({
       id: 'general',
       name: '일반',
@@ -273,12 +273,12 @@ describe('boardLogic', () => {
   })
 
   it('parses board categories safely from storage JSON', () => {
-    expect(parseBoardCategories('broken-json').map((category) => category.id)).toContain(
-      'general',
-    )
-    expect(parseBoardCategories(JSON.stringify({ id: 'bad' })).map((category) => category.id)).toContain(
-      'general',
-    )
+    expect(parseBoardCategories('broken-json').map((category) => category.id)).toContain('general')
+
+    expect(
+      parseBoardCategories(JSON.stringify({ id: 'bad' })).map((category) => category.id),
+    ).toContain('general')
+
     expect(
       parseBoardCategories(
         JSON.stringify([{ id: 'travel', name: '여행', createdAt: '2026-06-17' }]),
@@ -363,10 +363,7 @@ describe('boardLogic', () => {
       categoryId: 'daily',
     }
 
-    const nextPosts = moveBoardPostsToCategoryFallback(
-      [targetPost, untouchedPost],
-      'dev',
-    )
+    const nextPosts = moveBoardPostsToCategoryFallback([targetPost, untouchedPost], 'dev')
 
     expect(nextPosts[0]).toEqual({ ...targetPost, categoryId: 'general' })
     expect(nextPosts[1]).toBe(untouchedPost)
@@ -421,21 +418,20 @@ describe('boardLogic', () => {
       },
     ]
 
-    expect(sortBoardPosts(posts).map((post) => post.id)).toEqual([
-      'post-2',
-      'post-3',
-      'post-1',
-    ])
+    expect(sortBoardPosts(posts).map((post) => post.id)).toEqual(['post-2', 'post-3', 'post-1'])
+
     expect(sortBoardPosts(posts, 'oldest').map((post) => post.id)).toEqual([
       'post-1',
       'post-3',
       'post-2',
     ])
+
     expect(sortBoardPosts(posts, 'views').map((post) => post.id)).toEqual([
       'post-3',
       'post-1',
       'post-2',
     ])
+
     expect(sortBoardPosts(posts, 'title').map((post) => post.id)).toEqual([
       'post-2',
       'post-1',
@@ -492,21 +488,20 @@ describe('boardLogic', () => {
       },
     ]
 
-    expect(sortBoardPosts(posts).map((post) => post.id)).toEqual([
-      'post-3',
-      'post-2',
-      'post-1',
-    ])
+    expect(sortBoardPosts(posts).map((post) => post.id)).toEqual(['post-3', 'post-2', 'post-1'])
+
     expect(sortBoardPosts(posts, 'oldest').map((post) => post.id)).toEqual([
       'post-2',
       'post-3',
       'post-1',
     ])
+
     expect(sortBoardPosts(posts, 'views').map((post) => post.id)).toEqual([
       'post-3',
       'post-2',
       'post-1',
     ])
+
     expect(sortBoardPosts(posts, 'title').map((post) => post.id)).toEqual([
       'post-3',
       'post-2',
@@ -515,9 +510,7 @@ describe('boardLogic', () => {
   })
 
   it('creates and parses board draft data without changing block shape', () => {
-    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue(
-      '2026-06-17T00:00:00.000Z',
-    )
+    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2026-06-17T00:00:00.000Z')
 
     const draft = createBoardDraft({
       author: 'TENVI',
@@ -565,9 +558,7 @@ describe('boardLogic', () => {
       { id: 'post-2', title: 'Second post' },
     ]
 
-    expect(deleteBoardPost(posts, 'post-1')).toEqual([
-      { id: 'post-2', title: 'Second post' },
-    ])
+    expect(deleteBoardPost(posts, 'post-1')).toEqual([{ id: 'post-2', title: 'Second post' }])
     expect(posts).toHaveLength(2)
   })
 
@@ -606,6 +597,7 @@ describe('boardLogic', () => {
       { id: 'post-1', title: 'First post', categoryId: 'general', views: 3 },
       { id: 'post-2', title: 'Second post' },
     ])
+
     expect(increaseBoardPostViews(posts, 'post-2')).toEqual([
       { id: 'post-1', title: 'First post', views: 2 },
       { id: 'post-2', title: 'Second post', categoryId: 'general', views: 1 },
@@ -638,6 +630,7 @@ describe('boardLogic', () => {
       createdAt: '2026-06-15T00:00:00.000Z',
       views: 3,
     })
+
     expect(updatedPosts[0].blocks[0]).toMatchObject({
       type: 'text',
       content: 'New content',

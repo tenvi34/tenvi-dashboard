@@ -18,6 +18,7 @@ export const localBoardCategoryRepository = {
     const nextCategories = normalizeBoardCategories(categories)
 
     localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(nextCategories))
+
     return nextCategories
   },
 }
@@ -32,9 +33,7 @@ export const remoteBoardCategoryRepository = {
   async replaceCategories(nextCategories) {
     const normalizedNext = normalizeBoardCategories(nextCategories)
     const normalizedPrevious = await fetchBoardCategories()
-    const previousById = new Map(
-      normalizedPrevious.map((category) => [category.id, category]),
-    )
+    const previousById = new Map(normalizedPrevious.map((category) => [category.id, category]))
     const nextById = new Map(normalizedNext.map((category) => [category.id, category]))
 
     for (const category of normalizedNext) {

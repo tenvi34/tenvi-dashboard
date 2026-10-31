@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  DEFAULT_BOARD_CATEGORY_ID,
-  moveBoardPostsToCategoryFallback,
-} from '../boardLogic.js'
+import { DEFAULT_BOARD_CATEGORY_ID, moveBoardPostsToCategoryFallback } from '../boardLogic.js'
 import { readBoardStorageMode } from './boardStorageMode.js'
 import { localBoardPostRepository } from './repositories/localBoardPostRepository.js'
 import { remoteBoardPostRepository } from './repositories/remoteBoardPostRepository.js'
 
-const REMOTE_ERROR_MESSAGE =
-  'Board 서버에 연결할 수 없어 이번 화면에서는 Local 모드로 동작합니다.'
+const REMOTE_ERROR_MESSAGE = 'Board 서버에 연결할 수 없어 이번 화면에서는 Local 모드로 동작합니다.'
+
 /* 이전 local 전용 구현 참고용 보존
 const boardPostRepository = localBoardPostRepository
 
@@ -153,7 +150,7 @@ function useBoardPosts() {
   // Board 재진입 시 Settings에서 저장한 모드 반영
   const [storageMode] = useState(() => readBoardStorageMode())
   const repository = useMemo(
-    () => storageMode === 'remote' ? remoteBoardPostRepository : localBoardPostRepository,
+    () => (storageMode === 'remote' ? remoteBoardPostRepository : localBoardPostRepository),
     [storageMode],
   )
   const [posts, setPostsState] = useState(() =>
@@ -163,9 +160,7 @@ function useBoardPosts() {
   const [error, setError] = useState(null)
   const [isLocalFallback, setIsLocalFallback] = useState(false)
   // REMOTE 장애 시 LOCAL 저장소 사용
-  const actionRepository = isLocalFallback
-    ? localBoardPostRepository
-    : repository
+  const actionRepository = isLocalFallback ? localBoardPostRepository : repository
 
   // 원격 active/trash 응답을 기존 단일 posts 배열로 결합
   // active/trash 목록 동기화
@@ -173,10 +168,12 @@ function useBoardPosts() {
     if (storageMode === 'local') {
       setPostsState(localBoardPostRepository.fetchAllPosts())
       setError(null)
+
       return
     }
 
     setLoading(true)
+
     try {
       const [active, trash] = await Promise.all([
         repository.fetchPosts(),
@@ -207,17 +204,25 @@ function useBoardPosts() {
 
   // 저장 작업 후 목록 재조회
   const runAction = async (action) => {
-    if (!isLocalFallback) setError(null)
+    if (!isLocalFallback) {
+      setError(null)
+    }
+
     try {
       const result = await action()
+
       if (isLocalFallback) {
         setPostsState(localBoardPostRepository.fetchAllPosts())
       } else {
         await refreshPosts()
       }
+
       return result
     } catch (actionError) {
-      if (storageMode === 'remote') setError(REMOTE_ERROR_MESSAGE)
+      if (storageMode === 'remote') {
+        setError(REMOTE_ERROR_MESSAGE)
+      }
+
       throw actionError
     }
   }
@@ -228,9 +233,11 @@ function useBoardPosts() {
     setPostsState((currentPosts) => {
       const value = typeof updater === 'function' ? updater(currentPosts) : updater
       const nextPosts = Array.isArray(value) ? value : []
+
       if (storageMode === 'local' || isLocalFallback) {
         localBoardPostRepository.replacePosts(nextPosts)
       }
+
       return nextPosts
     })
   }
@@ -248,8 +255,7 @@ function useBoardPosts() {
   const restorePost = (id) => runAction(() => actionRepository.restorePost(id))
 
   // 휴지통 게시글 영구 삭제
-  const permanentlyDeletePost = (id) =>
-    runAction(() => actionRepository.permanentlyDeletePost(id))
+  const permanentlyDeletePost = (id) => runAction(() => actionRepository.permanentlyDeletePost(id))
 
   // 게시글 조회수 증가
   const increasePostViews = (id) => runAction(() => actionRepository.increaseViews(id))
@@ -257,7 +263,11 @@ function useBoardPosts() {
   // 게시글 상단 고정 토글
   const togglePostPinned = (id) => {
     const post = posts.find((item) => item.id === id)
-    if (!post) return Promise.reject(new Error('Board post not found.'))
+
+    if (!post) {
+      return Promise.reject(new Error('Board post not found.'))
+    }
+
     return updatePost(id, {
       author: post.author,
       title: post.title,
@@ -274,21 +284,30 @@ function useBoardPosts() {
     fallbackCategoryId = DEFAULT_BOARD_CATEGORY_ID,
   ) => {
     const nextPosts = moveBoardPostsToCategoryFallback(posts, categoryId, fallbackCategoryId)
+
     if (storageMode === 'local' || isLocalFallback) {
       localBoardPostRepository.replacePosts(nextPosts)
       setPostsState(nextPosts)
+
       return nextPosts
     }
 
     const movedPosts = nextPosts.filter((post, index) => post !== posts[index])
-    await runAction(() => Promise.all(movedPosts.map((post) => repository.updatePost(post.id, {
-      author: post.author,
-      title: post.title,
-      content: post.content,
-      categoryId: post.categoryId,
-      blocks: post.blocks,
-      pinned: post.pinned === true,
-    }))))
+    await runAction(() =>
+      Promise.all(
+        movedPosts.map((post) =>
+          repository.updatePost(post.id, {
+            author: post.author,
+            title: post.title,
+            content: post.content,
+            categoryId: post.categoryId,
+            blocks: post.blocks,
+            pinned: post.pinned === true,
+          }),
+        ),
+      ),
+    )
+
     return nextPosts
   }
 

@@ -16,6 +16,7 @@ const formatServerTime = (serverTime) => {
   }
 
   const padDatePart = (value) => String(value).padStart(2, '0')
+
   const datePart = [
     parsedDate.getFullYear(),
     padDatePart(parsedDate.getMonth() + 1),
@@ -61,7 +62,10 @@ function BackendEchoTest() {
         <h3>백엔드 Echo 테스트</h3>
       </div>
 
-      <form className="backend-echo-test__form" onSubmit={handleSubmit}>
+      <form
+        className="backend-echo-test__form"
+        onSubmit={handleSubmit}
+      >
         <label className="settings-field">
           <span>Message</span>
           <input
@@ -93,9 +97,7 @@ function BackendEchoTest() {
         </dl>
       ) : null}
 
-      {errorMessage ? (
-        <p className="backend-echo-test__error">{errorMessage}</p>
-      ) : null}
+      {errorMessage ? <p className="backend-echo-test__error">{errorMessage}</p> : null}
     </section>
   )
 }

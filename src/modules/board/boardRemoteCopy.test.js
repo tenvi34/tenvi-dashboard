@@ -21,6 +21,7 @@ describe('copyLocalBoardPostsToRemote', () => {
       skipped: 0,
       failed: 0,
     })
+
     expect(repositories.remoteRepository.createPost).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'local-1' }),
     )

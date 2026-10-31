@@ -18,6 +18,7 @@ const DASHBOARD_TABS = ['overview', 'work', 'archive', 'system']
 
 const getBoardPostTime = (post) => {
   const time = new Date(post.createdAt).getTime()
+
   return Number.isNaN(time) ? 0 : time
 }
 
@@ -27,25 +28,42 @@ const MAP_SUMMARY_STATUS = {
   ready: 'ready',
 }
 
-function Dashboard({
-  language = 'ko',
-  startModule = 'dashboard',
-  t,
-  theme = 'dark',
-}) {
+function Dashboard({ language = 'ko', startModule = 'dashboard', t, theme = 'dark' }) {
   const [refreshCount, setRefreshCount] = useState(0)
   const [activeDashboardTab, setActiveDashboardTab] = useState('overview')
   const [mapSummaryState, setMapSummaryState] = useState({
     data: null,
     status: MAP_SUMMARY_STATUS.loading,
   })
-  const [summaryData, setSummaryData] = useState({ boardPosts: [], calendarEvents: [], failedModules: [], loading: true })
+  const [summaryData, setSummaryData] = useState({
+    boardPosts: [],
+    calendarEvents: [],
+    failedModules: [],
+    loading: true,
+  })
   const { boardPosts, calendarEvents, failedModules, loading } = summaryData
   useEffect(() => {
     let mounted = true
-    loadDashboardData().then((data) => { if (mounted) setSummaryData({ ...data, loading: false }) })
-      .catch(() => { if (mounted) setSummaryData({ boardPosts: [], calendarEvents: [], failedModules: ['board', 'calendar'], loading: false }) })
-    return () => { mounted = false }
+    loadDashboardData()
+      .then((data) => {
+        if (mounted) {
+          setSummaryData({ ...data, loading: false })
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setSummaryData({
+            boardPosts: [],
+            calendarEvents: [],
+            failedModules: ['board', 'calendar'],
+            loading: false,
+          })
+        }
+      })
+
+    return () => {
+      mounted = false
+    }
   }, [refreshCount])
   // Calendar 요약 재배치
   const allTodayEvents = getTodayEvents(calendarEvents)
@@ -54,10 +72,7 @@ function Dashboard({
   const scheduledDateCount = getScheduledDateCount(monthEvents)
   const nextEvent = getNextEvent(calendarEvents)
   const recentBoardPosts = [...boardPosts]
-    .sort(
-      (firstPost, secondPost) =>
-        getBoardPostTime(secondPost) - getBoardPostTime(firstPost),
-    )
+    .sort((firstPost, secondPost) => getBoardPostTime(secondPost) - getBoardPostTime(firstPost))
     .slice(0, 3)
   const mapSummary = mapSummaryState.data
   const hasMapRecords = Number(mapSummary?.totalPhotoRecords) > 0
@@ -105,7 +120,10 @@ function Dashboard({
   }
 
   const renderEmptyState = (message) => (
-    <div className="empty-state compact-empty" role="status">
+    <div
+      className="empty-state compact-empty"
+      role="status"
+    >
       <span>{t.common.systemMessage}</span>
       <p>{message}</p>
     </div>
@@ -115,7 +133,10 @@ function Dashboard({
     recentBoardPosts.length > 0 ? (
       <ul>
         {recentBoardPosts.map((post) => (
-          <li className="summary-list-item" key={post.id}>
+          <li
+            className="summary-list-item"
+            key={post.id}
+          >
             <strong>{post.title}</strong>
             {post.author ? <span>{post.author}</span> : null}
           </li>
@@ -129,7 +150,10 @@ function Dashboard({
     todayEvents.length > 0 ? (
       <ul>
         {todayEvents.map((calendarEvent) => (
-          <li className="summary-list-item" key={calendarEvent.id}>
+          <li
+            className="summary-list-item"
+            key={calendarEvent.id}
+          >
             <strong>{calendarEvent.title}</strong>
             {calendarEvent.memo ? <span>{calendarEvent.memo}</span> : null}
           </li>
@@ -179,7 +203,10 @@ function Dashboard({
           </div>
         </div>
 
-        <div className="map-source-grid" aria-label={t.dashboard.mapLocationSources}>
+        <div
+          className="map-source-grid"
+          aria-label={t.dashboard.mapLocationSources}
+        >
           <div>
             <span>{t.dashboard.mapSourceExif}</span>
             <strong>{mapSummary.locationSourceCounts.exif}</strong>
@@ -202,7 +229,10 @@ function Dashboard({
           <p className="summary-list-title">{t.dashboard.recentMapRecords}</p>
           <ul>
             {mapSummary.recentPhotoRecords.map((record) => (
-              <li className="summary-list-item" key={record.id}>
+              <li
+                className="summary-list-item"
+                key={record.id}
+              >
                 <strong>{record.title || t.dashboard.untitledMapRecord}</strong>
                 <span>
                   {record.collectionName || t.map.unassignedCollection} /{' '}
@@ -223,17 +253,39 @@ function Dashboard({
         {[
           [t.dashboard.todayEvents, allTodayEvents.length],
           [t.dashboard.totalBoardPosts, boardPosts.length],
-          [t.dashboard.totalMapRecords, mapSummaryState.status === MAP_SUMMARY_STATUS.ready ? mapPhotoCount : '—'],
-        ].map(([label, count]) => <div className="dashboard-stat" key={label}><span>{label}</span><strong>{count}</strong></div>)}
+          [
+            t.dashboard.totalMapRecords,
+            mapSummaryState.status === MAP_SUMMARY_STATUS.ready ? mapPhotoCount : '—',
+          ],
+        ].map(([label, count]) => (
+          <div
+            className="dashboard-stat"
+            key={label}
+          >
+            <span>{label}</span>
+            <strong>{count}</strong>
+          </div>
+        ))}
       </div>
       <div className="dashboard-today-grid">
         <section className="summary-panel">
-          <div className="dashboard-section-heading"><h3>{t.dashboard.todayEvents}</h3><Link to="/calendar">{t.dashboard.viewAll} →</Link></div>
+          <div className="dashboard-section-heading">
+            <h3>{t.dashboard.todayEvents}</h3>
+            <Link to="/calendar">{t.dashboard.viewAll} →</Link>
+          </div>
           {renderTodayScheduleList()}
-          {nextEvent && <div className="summary-list dashboard-calendar-next"><p className="summary-list-title">{t.dashboard.nextEvent}</p>{renderNextEvent()}</div>}
+          {nextEvent && (
+            <div className="summary-list dashboard-calendar-next">
+              <p className="summary-list-title">{t.dashboard.nextEvent}</p>
+              {renderNextEvent()}
+            </div>
+          )}
         </section>
         <section className="summary-panel">
-          <div className="dashboard-section-heading"><h3>{t.dashboard.recentBoardPosts}</h3><Link to="/board">{t.dashboard.viewAll} →</Link></div>
+          <div className="dashboard-section-heading">
+            <h3>{t.dashboard.recentBoardPosts}</h3>
+            <Link to="/board">{t.dashboard.viewAll} →</Link>
+          </div>
           {renderBoardPostList()}
         </section>
       </div>
@@ -290,7 +342,10 @@ function Dashboard({
               {t.dashboard.totalBoardPosts} {boardPosts.length}
             </span>
           </div>
-          <div className="summary-list" aria-label={t.dashboard.recentBoardPosts}>
+          <div
+            className="summary-list"
+            aria-label={t.dashboard.recentBoardPosts}
+          >
             <p className="summary-list-title">{t.dashboard.recentBoardPosts}</p>
             {renderBoardPostList()}
           </div>
@@ -370,25 +425,63 @@ function Dashboard({
   }
 
   return (
-    <section className="module-panel dashboard-module" aria-label={t.modules.dashboard}>
-      <header className="dashboard-heading"><div><h2>{t.dashboard.homeTitle}</h2><p className="page-description">{t.dashboard.homeDescription}</p></div>
-        <time className="dashboard-date" dateTime={new Date().toLocaleDateString('en-CA')}>{new Intl.DateTimeFormat(language, { month: 'long', day: 'numeric', weekday: 'long' }).format(new Date())}</time>
+    <section
+      className="module-panel dashboard-module"
+      aria-label={t.modules.dashboard}
+    >
+      <header className="dashboard-heading">
+        <div>
+          <h2>{t.dashboard.homeTitle}</h2>
+          <p className="page-description">{t.dashboard.homeDescription}</p>
+        </div>
+        <time
+          className="dashboard-date"
+          dateTime={new Date().toLocaleDateString('en-CA')}
+        >
+          {new Intl.DateTimeFormat(language, {
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+          }).format(new Date())}
+        </time>
       </header>
-      <nav className="quick-launch" aria-label={t.dashboard.quickLaunch}>
-        {['board', 'calendar', 'map', 'travel'].map((id) => <Link key={id} to={getModulePath(id)}><ModuleIcon name={id} /><div><strong>{t.modules[id]}</strong><small>{t.dashboard.shortcuts[id]}</small></div></Link>)}
+      <nav
+        className="quick-launch"
+        aria-label={t.dashboard.quickLaunch}
+      >
+        {['board', 'calendar', 'map', 'travel'].map((id) => (
+          <Link
+            key={id}
+            to={getModulePath(id)}
+          >
+            <ModuleIcon name={id} />
+            <div>
+              <strong>{t.modules[id]}</strong>
+              <small>{t.dashboard.shortcuts[id]}</small>
+            </div>
+          </Link>
+        ))}
       </nav>
       {loading && <p role="status">{t.dashboard.summaryLoading}</p>}
-      {failedModules.length > 0 && <div role="alert">
-        <p>{t.dashboard.summaryLoadError(failedModules.map((id) => t.modules[id]).join(', '))}</p>
-        <button type="button" onClick={handleRetry}>{t.common.retry}</button>
-      </div>}
+      {failedModules.length > 0 && (
+        <div role="alert">
+          <p>{t.dashboard.summaryLoadError(failedModules.map((id) => t.modules[id]).join(', '))}</p>
+          <button
+            type="button"
+            onClick={handleRetry}
+          >
+            {t.common.retry}
+          </button>
+        </div>
+      )}
       {/* Dashboard 탭 */}
-      <div className="dashboard-tabs" aria-label={t.dashboard.tabsLabel}>
+      <div
+        className="dashboard-tabs"
+        aria-label={t.dashboard.tabsLabel}
+      >
         {DASHBOARD_TABS.map((tabId) => (
           <button
-            className={`dashboard-tab ${
-              activeDashboardTab === tabId ? 'is-active' : ''
-            }`}
+            className={`dashboard-tab ${activeDashboardTab === tabId ? 'is-active' : ''}`}
             aria-current={activeDashboardTab === tabId ? 'page' : undefined}
             key={tabId}
             type="button"

@@ -7,7 +7,5 @@ export const CALENDAR_STORAGE_MODES = STORAGE_MODES
 export const readCalendarStorageMode = (storage = globalThis.localStorage) =>
   readStorageMode(STORAGE_KEYS.calendarStorageMode, storage)
 
-export const saveCalendarStorageMode = (
-  mode,
-  storage = globalThis.localStorage,
-) => saveStorageMode(STORAGE_KEYS.calendarStorageMode, mode, storage)
+export const saveCalendarStorageMode = (mode, storage = globalThis.localStorage) =>
+  saveStorageMode(STORAGE_KEYS.calendarStorageMode, mode, storage)

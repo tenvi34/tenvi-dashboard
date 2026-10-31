@@ -1,6 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { cloneTravelData, createTripData, exportTravelJson, filterTravelPlaces, getDaySchedules, getTravelDayCount,
-  getTravelDayDate, getTravelRouteStops, importTravelJson, moveTravelSchedule, removeTravelPlace, tripDateError, validateTravelData } from './travelLogic.js'
+import {
+  cloneTravelData,
+  createTripData,
+  exportTravelJson,
+  filterTravelPlaces,
+  getDaySchedules,
+  getTravelDayCount,
+  getTravelDayDate,
+  getTravelRouteStops,
+  importTravelJson,
+  moveTravelSchedule,
+  removeTravelPlace,
+  tripDateError,
+  validateTravelData,
+} from './travelLogic.js'
 import { travelTranslations } from '../../i18n/travelTranslations.js'
 import { getModuleFromPathname, getModulePath } from '../../router/routes.js'
 
@@ -8,14 +21,47 @@ import { getModuleFromPathname, getModulePath } from '../../router/routes.js'
 const fixture = () => {
   const data = createTripData({ name: 'My trip', startDate: '2028-02-28', endDate: '2028-03-01' })
   const tripId = data.trip.id
-  const place = (id, category = 'other') => ({ id, tripId, name: id, region: '', address: '', memo: '', category,
-    priority: 'must', onHold: false, latitude: 35, longitude: 139, provider: 'manual', providerPlaceId: '' })
-  data.places = [place('hotel', 'lodging'), place('park', 'sightseeing'), { ...place('cafe', 'cafe'), latitude: null, longitude: null }]
-  data.schedules = ['a', 'b', 'c'].map((id, order) => ({ id, tripId, day: 1, order, title: '', startTime: '', durationMinutes: null,
-    memo: `note-${id}`, placeId: order === 0 ? 'park' : null, candidateGroupId: null }))
+
+  const place = (id, category = 'other') => ({
+    id,
+    tripId,
+    name: id,
+    region: '',
+    address: '',
+    memo: '',
+    category,
+    priority: 'must',
+    onHold: false,
+    latitude: 35,
+    longitude: 139,
+    provider: 'manual',
+    providerPlaceId: '',
+  })
+
+  data.places = [
+    place('hotel', 'lodging'),
+    place('park', 'sightseeing'),
+    { ...place('cafe', 'cafe'), latitude: null, longitude: null },
+  ]
+
+  data.schedules = ['a', 'b', 'c'].map((id, order) => ({
+    id,
+    tripId,
+    day: 1,
+    order,
+    title: '',
+    startTime: '',
+    durationMinutes: null,
+    memo: `note-${id}`,
+    placeId: order === 0 ? 'park' : null,
+    candidateGroupId: null,
+  }))
   data.settings.lodgingPlaceId = 'hotel'
-  data.candidateGroups = [{ id: 'lunch', tripId, name: 'Lunch options', placeIds: ['park', 'cafe'] }]
+  data.candidateGroups = [
+    { id: 'lunch', tripId, name: 'Lunch options', placeIds: ['park', 'cafe'] },
+  ]
   data.schedules[1].candidateGroupId = 'lunch'
+
   return data
 }
 
@@ -28,6 +74,7 @@ describe('Travel data and relationships', () => {
     expect(getTravelDayCount(data)).toBe(1)
     expect(data.settings.lodgingPlaceId).toBeNull()
   })
+
   it('supports leap days and rejects reversed or nonexistent dates', () => {
     const data = fixture()
     expect(getTravelDayCount(data)).toBe(3)
@@ -37,6 +84,7 @@ describe('Travel data and relationships', () => {
     expect(tripDateError({ startDate: '2028-03-01', endDate: '2028-02-28' })).toBe('invalidDates')
     expect(tripDateError({ startDate: '', endDate: '2028-03-01' })).toBe('')
   })
+
   it('preserves itinerary when dates are shortened or cleared', () => {
     const data = fixture()
     data.schedules[0].day = 5
@@ -47,6 +95,7 @@ describe('Travel data and relationships', () => {
     expect(getTravelDayCount(data)).toBe(5)
     expect(data.schedules).toHaveLength(3)
   })
+
   it('duplicates every entity ID and remaps place, lodging and candidate references', () => {
     const source = fixture()
     const copy = cloneTravelData(source)
@@ -60,6 +109,7 @@ describe('Travel data and relationships', () => {
     copy.places[0].name = 'Changed'
     expect(source.places[0].name).toBe('hotel')
   })
+
   it('deleting a place preserves slots and notes, and clears candidate/lodging references', () => {
     const source = fixture()
     const removed = validateTravelData(removeTravelPlace(source, 'park'))
@@ -70,6 +120,7 @@ describe('Travel data and relationships', () => {
     expect(removeTravelPlace(removed, 'hotel').settings.lodgingPlaceId).toBeNull()
     expect(source.places).toHaveLength(3)
   })
+
   it('moves itinerary order and DAY without removing the saved place', () => {
     const source = fixture()
     const reordered = moveTravelSchedule(source, 'a', 1, 1)
@@ -79,6 +130,7 @@ describe('Travel data and relationships', () => {
     expect(getDaySchedules(moved, 2)[0].placeId).toBe('park')
     expect(moved.places).toEqual(source.places)
   })
+
   it('filters scheduled, unscheduled, category and DAY independently', () => {
     const data = fixture()
     expect(filterTravelPlaces(data, 'scheduled').map((place) => place.id)).toEqual(['park'])
@@ -89,9 +141,14 @@ describe('Travel data and relationships', () => {
     expect(filterTravelPlaces(data, 'onHold')[0].id).toBe('park')
     expect(data.schedules[0].placeId).toBe('park')
   })
+
   it('builds future routing stops from place references and optional lodging', () => {
     const data = fixture()
-    expect(getTravelRouteStops(data, 1).map((place) => place.id)).toEqual(['hotel', 'park', 'hotel'])
+    expect(getTravelRouteStops(data, 1).map((place) => place.id)).toEqual([
+      'hotel',
+      'park',
+      'hotel',
+    ])
     data.settings.lodgingPlaceId = null
     expect(getTravelRouteStops(data, 1).map((place) => place.id)).toEqual(['park'])
   })
@@ -108,28 +165,62 @@ describe('Travel backup validation', () => {
     expect(restored.schedules[0].memo).toBe('note-a')
     expect(exportTravelJson(source)).toBe(json)
   })
+
   it.each([
-    (data) => { data.schedules[0].placeId = 'missing' },
-    (data) => { data.places[0].tripId = 'another-trip' },
-    (data) => { data.places[0].latitude = '35' },
-    (data) => { data.places[0].longitude = 181 },
-    (data) => { data.places[1].id = data.places[0].id },
-    (data) => { data.schedules[0].day = 0 },
-    (data) => { data.schedules[0].startTime = '24:15' },
-    (data) => { data.schedules[0].durationMinutes = -1 },
-    (data) => { data.settings.lodgingPlaceId = 'park' },
-    (data) => { data.candidateGroups[0].placeIds = ['missing'] },
-    (data) => { data.trip.name = '   ' },
-    (data) => { data.trip.startDate = '2028-02-31' },
-    (data) => { data.schemaVersion = 2 },
+    (data) => {
+      data.schedules[0].placeId = 'missing'
+    },
+    (data) => {
+      data.places[0].tripId = 'another-trip'
+    },
+    (data) => {
+      data.places[0].latitude = '35'
+    },
+    (data) => {
+      data.places[0].longitude = 181
+    },
+    (data) => {
+      data.places[1].id = data.places[0].id
+    },
+    (data) => {
+      data.schedules[0].day = 0
+    },
+    (data) => {
+      data.schedules[0].startTime = '24:15'
+    },
+    (data) => {
+      data.schedules[0].durationMinutes = -1
+    },
+    (data) => {
+      data.settings.lodgingPlaceId = 'park'
+    },
+    (data) => {
+      data.candidateGroups[0].placeIds = ['missing']
+    },
+    (data) => {
+      data.trip.name = '   '
+    },
+    (data) => {
+      data.trip.startDate = '2028-02-31'
+    },
+    (data) => {
+      data.schemaVersion = 2
+    },
   ])('rejects damaged data before it can reach persistence (%#)', (damage) => {
     const data = fixture()
     damage(data)
-    expect(() => importTravelJson(JSON.stringify({ format: 'tenvi.travel', version: 1, data }))).toThrow('invalidData')
+    expect(() =>
+      importTravelJson(JSON.stringify({ format: 'tenvi.travel', version: 1, data })),
+    ).toThrow('invalidData')
   })
-  it.each(['{', '{}', 'null', '[]', '{"format":"other","version":1}'])('rejects invalid JSON or foreign format %s', (json) => {
-    expect(() => importTravelJson(json)).toThrow('invalidData')
-  })
+
+  it.each(['{', '{}', 'null', '[]', '{"format":"other","version":1}'])(
+    'rejects invalid JSON or foreign format %s',
+    (json) => {
+      expect(() => importTravelJson(json)).toThrow('invalidData')
+    },
+  )
+
   it('discards unrecognized input fields', () => {
     const data = fixture()
     data.trip.untrusted = 'ignored'
@@ -145,9 +236,13 @@ describe('Travel integration', () => {
     expect(getModuleFromPathname('/traveler')).toBe('dashboard')
     expect(getModuleFromPathname('/board/posts/1')).toBe('board')
   })
+
   it('keeps all Korean and English Travel labels aligned', () => {
-    const keys = (value, prefix = '') => Object.entries(value).flatMap(([key, child]) =>
-      child && typeof child === 'object' ? keys(child, `${prefix}${key}.`) : `${prefix}${key}`)
+    const keys = (value, prefix = '') =>
+      Object.entries(value).flatMap(([key, child]) =>
+        child && typeof child === 'object' ? keys(child, `${prefix}${key}.`) : `${prefix}${key}`,
+      )
+
     expect(keys(travelTranslations.ko)).toEqual(keys(travelTranslations.en))
   })
 })

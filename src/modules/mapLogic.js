@@ -1,11 +1,6 @@
 import exifr from 'exifr'
 
-const DATE_CANDIDATE_KEYS = [
-  'DateTimeOriginal',
-  'CreateDate',
-  'ModifyDate',
-  'DateTime',
-]
+const DATE_CANDIDATE_KEYS = ['DateTimeOriginal', 'CreateDate', 'ModifyDate', 'DateTime']
 const LOCATION_SOURCES = ['exif', 'manual', 'search']
 export const COLLECTION_FILTER_ALL = 'all'
 export const COLLECTION_FILTER_UNASSIGNED = 'unassigned'
@@ -26,10 +21,7 @@ export const normalizePhotoRecordCollectionId = (record, collections = []) => {
     return null
   }
 
-  if (
-    collections.length > 0 &&
-    !collections.some((collection) => collection.id === collectionId)
-  ) {
+  if (collections.length > 0 && !collections.some((collection) => collection.id === collectionId)) {
     return null
   }
 
@@ -49,11 +41,7 @@ export const isPhotoCollectionInputValid = (input = {}) =>
   Boolean(normalizePhotoCollectionInput(input).name)
 
 // 컬렉션 필터 계산
-export const filterPhotoRecordsByCollection = (
-  records,
-  collections,
-  selectedFilter,
-) => {
+export const filterPhotoRecordsByCollection = (records, collections, selectedFilter) => {
   if (selectedFilter === COLLECTION_FILTER_ALL) {
     return records
   }
@@ -71,7 +59,10 @@ export const filterPhotoRecordsByCollection = (
 }
 
 // EXIF 날짜 정규화
-const normalizeSearchText = (value) => String(value ?? '').trim().toLowerCase()
+const normalizeSearchText = (value) =>
+  String(value ?? '')
+    .trim()
+    .toLowerCase()
 
 // legacy source 분류
 export const normalizeLocationSourceForFilter = (source) =>
@@ -90,9 +81,7 @@ export const filterPhotoRecordsBySearchAndLocation = (
       [record?.title, record?.memo, record?.originalFileName].some((value) =>
         normalizeSearchText(value).includes(normalizedQuery),
       )
-    const normalizedSource = normalizeLocationSourceForFilter(
-      record?.locationSource,
-    )
+    const normalizedSource = normalizeLocationSourceForFilter(record?.locationSource)
     const matchesSource =
       locationSourceFilter === LOCATION_SOURCE_FILTER_ALL ||
       normalizedSource === locationSourceFilter
@@ -222,9 +211,9 @@ export const applyManualLocationToDraft = (draft, latitude, longitude) => {
 export const isPhotoDraftReadyToSave = (draft) =>
   Boolean(
     draft?.previewImageBlob &&
-      draft.status === 'located' &&
-      isValidCoordinate(Number(draft.latitude)) &&
-      isValidCoordinate(Number(draft.longitude)),
+    draft.status === 'located' &&
+    isValidCoordinate(Number(draft.latitude)) &&
+    isValidCoordinate(Number(draft.longitude)),
   )
 
 // 편집 draft 복사
@@ -250,9 +239,9 @@ export const createEditDraft = (record) => {
 export const isEditDraftReadyToSave = (editDraft) =>
   Boolean(
     editDraft?.id &&
-      editDraft.status === 'located' &&
-      isValidCoordinate(Number(editDraft.latitude)) &&
-      isValidCoordinate(Number(editDraft.longitude)),
+    editDraft.status === 'located' &&
+    isValidCoordinate(Number(editDraft.latitude)) &&
+    isValidCoordinate(Number(editDraft.longitude)),
   )
 
 // update patch 변환

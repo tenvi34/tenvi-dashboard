@@ -41,6 +41,7 @@ const canvasToBlob = (canvas, mimeType, quality) =>
       (blob) => {
         if (blob) {
           resolve(blob)
+
           return
         }
 
@@ -54,11 +55,7 @@ const canvasToBlob = (canvas, mimeType, quality) =>
 // IndexedDB 미리보기 Blob
 export const createPreviewImageBlob = async (
   file,
-  {
-    maxSize = DEFAULT_MAX_SIZE,
-    mimeType = DEFAULT_MIME_TYPE,
-    quality = DEFAULT_QUALITY,
-  } = {},
+  { maxSize = DEFAULT_MAX_SIZE, mimeType = DEFAULT_MIME_TYPE, quality = DEFAULT_QUALITY } = {},
 ) => {
   const image = await loadImageFromFile(file)
   const { height, width } = calculatePreviewSize(

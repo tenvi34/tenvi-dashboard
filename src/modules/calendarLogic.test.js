@@ -80,9 +80,7 @@ describe('calendarLogic', () => {
   it('reads only valid calendar events from storage', () => {
     expect(readCalendarEvents('not-json')).toEqual([])
     expect(readCalendarEvents(JSON.stringify({}))).toEqual([])
-    expect(readCalendarEvents(JSON.stringify([...events, { id: 'broken' }]))).toEqual(
-      events,
-    )
+    expect(readCalendarEvents(JSON.stringify([...events, { id: 'broken' }]))).toEqual(events)
   })
 
   it('ignores non-array calendar payloads from storage', () => {
@@ -101,11 +99,13 @@ describe('calendarLogic', () => {
       startDate: '2026-05-14',
       endDate: '2026-05-14',
     })
+
     expect(normalizeCalendarEvent(legacyRangedEvent)).toMatchObject({
       date: '2026-05-14',
       startDate: '2026-05-14',
       endDate: '2026-05-16',
     })
+
     expect(normalizeCalendarEvent(rangedEvent)).toMatchObject({
       date: '2026-05-14',
       startDate: '2026-05-14',
@@ -126,19 +126,13 @@ describe('calendarLogic', () => {
   })
 
   it('calculates range display positions for month cells', () => {
-    expect(getCalendarEventRangePosition(rangedEvent, '2026-05-14')).toBe(
-      RANGE_POSITION.start,
-    )
-    expect(getCalendarEventRangePosition(rangedEvent, '2026-05-16')).toBe(
-      RANGE_POSITION.middle,
-    )
-    expect(getCalendarEventRangePosition(rangedEvent, '2026-05-18')).toBe(
-      RANGE_POSITION.end,
-    )
+    expect(getCalendarEventRangePosition(rangedEvent, '2026-05-14')).toBe(RANGE_POSITION.start)
+
+    expect(getCalendarEventRangePosition(rangedEvent, '2026-05-16')).toBe(RANGE_POSITION.middle)
+
+    expect(getCalendarEventRangePosition(rangedEvent, '2026-05-18')).toBe(RANGE_POSITION.end)
     expect(getCalendarEventRangePosition(rangedEvent, '2026-05-19')).toBe(null)
-    expect(getCalendarEventRangePosition(events[0], '2026-05-14')).toBe(
-      RANGE_POSITION.single,
-    )
+    expect(getCalendarEventRangePosition(events[0], '2026-05-14')).toBe(RANGE_POSITION.single)
   })
 
   it('builds range metadata without marking single-day events as periods', () => {
@@ -149,15 +143,15 @@ describe('calendarLogic', () => {
       periodPosition: null,
       rangeEventCount: 0,
     })
-    expect(
-      getCalendarDayRangeMeta([events[1], rangedEvent], '2026-05-15'),
-    ).toMatchObject({
+
+    expect(getCalendarDayRangeMeta([events[1], rangedEvent], '2026-05-15')).toMatchObject({
       classNames: ['has-range-events', 'period-middle'],
       hasRangeEvents: true,
       hasSingleDayEvents: true,
       periodPosition: RANGE_POSITION.middle,
       rangeEventCount: 1,
     })
+
     expect(getCalendarDayRangeMeta([legacyRangedEvent], '2026-05-16')).toMatchObject({
       classNames: ['has-range-events', 'period-end'],
       hasRangeEvents: true,
@@ -169,9 +163,7 @@ describe('calendarLogic', () => {
 
   it('keeps Dashboard schedule label formats stable', () => {
     expect(getCalendarEventDateLabel(events[0])).toBe('2026.05.14')
-    expect(getCalendarEventDateLabel(rangedEvent)).toBe(
-      '2026.05.14 ~ 2026.05.18',
-    )
+    expect(getCalendarEventDateLabel(rangedEvent)).toBe('2026.05.14 ~ 2026.05.18')
   })
 
   it('uses the provided date when filtering today events', () => {
@@ -197,12 +189,10 @@ describe('calendarLogic', () => {
       title: 'Deep work',
       memo: 'Draft',
     })
-    expect(
-      createCalendarEvent({ date: '2026-05-14', title: '   ', memo: '' }),
-    ).toBe(null)
-    expect(
-      createCalendarEvent({ date: '', title: 'Deep work', memo: '' }),
-    ).toBe(null)
+
+    expect(createCalendarEvent({ date: '2026-05-14', title: '   ', memo: '' })).toBe(null)
+
+    expect(createCalendarEvent({ date: '', title: 'Deep work', memo: '' })).toBe(null)
     expect(isValidCalendarDateRange('2026-05-16', '2026-05-14')).toBe(false)
     expect(
       createCalendarEvent({

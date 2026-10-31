@@ -38,7 +38,10 @@ function BoardCategoryManager({
       </div>
 
       {categoryError ? (
-        <p className="board-form-message" role="alert">
+        <p
+          className="board-form-message"
+          role="alert"
+        >
           {categoryError}
         </p>
       ) : null}
@@ -50,14 +53,15 @@ function BoardCategoryManager({
           const isGeneral = category.id === DEFAULT_BOARD_CATEGORY_ID
 
           return (
-            <div className="board-category-item" key={category.id}>
+            <div
+              className="board-category-item"
+              key={category.id}
+            >
               {isEditing ? (
                 <input
                   type="text"
                   value={editingCategoryName}
-                  onChange={(event) =>
-                    onEditingCategoryNameChange(event.target.value)
-                  }
+                  onChange={(event) => onEditingCategoryNameChange(event.target.value)}
                 />
               ) : (
                 <span>{category.name}</span>

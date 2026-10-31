@@ -1,7 +1,4 @@
-import {
-  localMapRepository,
-  remoteMapRepository,
-} from './repositories/index.js'
+import { localMapRepository, remoteMapRepository } from './repositories/index.js'
 
 const createCopyCount = (total) => ({
   total,
@@ -62,9 +59,7 @@ export const copyLocalMapDataToRemote = async ({
     remoteRepository.fetchCollections(),
     remoteRepository.fetchRecords(),
   ])
-  const remoteCollectionIds = new Set(
-    remoteCollections.map((collection) => String(collection.id)),
-  )
+  const remoteCollectionIds = new Set(remoteCollections.map((collection) => String(collection.id)))
   const remoteRecordIds = new Set(remoteRecords.map((record) => String(record.id)))
 
   for (const collection of localCollections) {

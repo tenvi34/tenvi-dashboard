@@ -3,12 +3,7 @@ import { API_BASE_URL, joinApiPath } from './client.js'
 export const APP_SETTINGS_API_PATH = '/api/app-settings'
 
 // REMOTE 동기화 허용 설정 key
-export const REMOTE_APP_SETTING_KEYS = [
-  'language',
-  'theme',
-  'startModule',
-  'hudEffect',
-]
+export const REMOTE_APP_SETTING_KEYS = ['language', 'theme', 'startModule', 'hudEffect']
 
 // App Settings API URL 결합
 export const getAppSettingsUrl = (baseUrl = API_BASE_URL) =>
@@ -36,26 +31,18 @@ const requestAppSettingsApi = async (url, options = {}, fetcher = fetch) => {
     // 백엔드 오류 메시지 우선 사용
     const errorData = await response.json().catch(() => null)
 
-    throw new Error(
-      errorData?.message ??
-        `App Settings API request failed with ${response.status}`,
-    )
+    throw new Error(errorData?.message ?? `App Settings API request failed with ${response.status}`)
   }
 
   return readJsonResponse(response)
 }
 
 // 공통 설정 전체 조회
-export const fetchRemoteAppSettings = ({
-  baseUrl = API_BASE_URL,
-  fetcher = fetch,
-} = {}) => requestAppSettingsApi(getAppSettingsUrl(baseUrl), {}, fetcher)
+export const fetchRemoteAppSettings = ({ baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestAppSettingsApi(getAppSettingsUrl(baseUrl), {}, fetcher)
 
 // 공통 설정 전체 저장
-export const saveRemoteAppSettings = (
-  settings,
-  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
-) =>
+export const saveRemoteAppSettings = (settings, { baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
   requestAppSettingsApi(
     getAppSettingsUrl(baseUrl),
     {
@@ -67,10 +54,8 @@ export const saveRemoteAppSettings = (
   )
 
 // 공통 설정 단건 조회
-export const fetchRemoteAppSetting = (
-  key,
-  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
-) => requestAppSettingsApi(getAppSettingUrl(key, baseUrl), {}, fetcher)
+export const fetchRemoteAppSetting = (key, { baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestAppSettingsApi(getAppSettingUrl(key, baseUrl), {}, fetcher)
 
 // 공통 설정 단건 저장
 export const saveRemoteAppSetting = (

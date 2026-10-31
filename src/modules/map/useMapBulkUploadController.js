@@ -36,11 +36,8 @@ function useMapBulkUploadController({
 }) {
   const bulkCancelRef = useRef(false)
   // bulk 분석/저장 상태 분리
-  const [bulkUpload, setBulkUpload] = useState(() =>
-    createInitialBulkUploadState(),
-  )
-  const [selectedMissingLocationItemIds, setSelectedMissingLocationItemIds] =
-    useState([])
+  const [bulkUpload, setBulkUpload] = useState(() => createInitialBulkUploadState())
+  const [selectedMissingLocationItemIds, setSelectedMissingLocationItemIds] = useState([])
   const [bulkAssignedLocation, setBulkAssignedLocation] = useState(null)
   const [bulkSaveReport, setBulkSaveReport] = useState(null)
 
@@ -74,6 +71,7 @@ function useMapBulkUploadController({
           ...currentUpload,
           status: 'cancelled',
         }))
+
         return
       }
 
@@ -146,9 +144,7 @@ function useMapBulkUploadController({
 
   const handleSelectAllBulkLocationTargets = () => {
     // 같은 위치 전체 선택
-    setSelectedMissingLocationItemIds(
-      selectAllBulkLocationAssignableItems(bulkUpload.items),
-    )
+    setSelectedMissingLocationItemIds(selectAllBulkLocationAssignableItems(bulkUpload.items))
   }
 
   const handleClearMissingLocationSelection = () => {
@@ -158,6 +154,7 @@ function useMapBulkUploadController({
   const applyBulkLocationToSelection = async (location) => {
     if (selectedMissingLocationItemIds.length === 0) {
       setError(t.map.bulkSelectLocationTargetsFirst)
+
       return
     }
 
@@ -203,6 +200,7 @@ function useMapBulkUploadController({
       items: applyLocationToBulkItems(itemsWithPreview, successfulIds, location),
       saveResult: null,
     }))
+
     setBulkAssignedLocation({
       ...location,
       appliedCount: successfulIds.length,
@@ -221,13 +219,11 @@ function useMapBulkUploadController({
   }
 
   const handleSaveBulkLocatedPhotos = async () => {
-    const recordInputs = createBulkPhotoRecordInputs(
-      bulkUpload.items,
-      bulkUpload.collectionId,
-    )
+    const recordInputs = createBulkPhotoRecordInputs(bulkUpload.items, bulkUpload.collectionId)
 
     if (recordInputs.length === 0) {
       setError(t.map.bulkNoSaveCandidates)
+
       return
     }
 
@@ -250,9 +246,7 @@ function useMapBulkUploadController({
       setActiveRecordId(saveResult.savedRecords[0]?.id ?? '')
       setViewportRequest(createViewportRequest('fit-all'))
       setBulkUpload(createInitialBulkUploadState())
-      setStatusMessage(
-        t.map.bulkSaveComplete(saveResult.successCount, saveResult.failedCount),
-      )
+      setStatusMessage(t.map.bulkSaveComplete(saveResult.successCount, saveResult.failedCount))
     } catch {
       setError(t.map.bulkSaveError)
       setBulkUpload((currentUpload) => ({

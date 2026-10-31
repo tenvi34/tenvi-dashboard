@@ -1,0 +1,24 @@
+# Dependencies and generated files
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+outputs/
+package-lock.json
+
+# Backend uses its existing C# formatting conventions
+backend/
+
+# Documentation and binary assets keep their existing formatting
+*.md
+public/
+src/assets/
+
+# Private configuration and stored user data
+.env
+.env.*
+data/
+*.db
+*.sqlite
+*.sqlite3

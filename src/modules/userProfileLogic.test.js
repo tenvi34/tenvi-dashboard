@@ -24,15 +24,14 @@ describe('userProfileLogic', () => {
     expect(parseUserProfile('broken-json', '2026-06-22T00:00:00.000Z')).toEqual(
       createDefaultUserProfile('2026-06-22T00:00:00.000Z'),
     )
+
     expect(parseUserProfile('[]', '2026-06-22T00:00:00.000Z')).toEqual(
       createDefaultUserProfile('2026-06-22T00:00:00.000Z'),
     )
   })
 
   it('trims nickname and uses TENVI when nickname is empty', () => {
-    expect(normalizeUserProfile({ nickname: '  Local Pilot  ' }).nickname).toBe(
-      'Local Pilot',
-    )
+    expect(normalizeUserProfile({ nickname: '  Local Pilot  ' }).nickname).toBe('Local Pilot')
     expect(normalizeUserProfile({ nickname: '   ' }).nickname).toBe('TENVI')
   })
 

@@ -51,8 +51,7 @@ function Calendar({ t }) {
   const [endDate, setEndDate] = useState(initialDate)
   const [formMessage, setFormMessage] = useState('')
   const [isLoadingEvents, setIsLoadingEvents] = useState(storageMode === 'remote')
-  const remoteLoadingMessage =
-    t.calendar.remoteLoading ?? 'Loading REMOTE Calendar events.'
+  const remoteLoadingMessage = t.calendar.remoteLoading ?? 'Loading REMOTE Calendar events.'
   const remoteLoadErrorMessage =
     t.calendar.remoteLoadError ?? 'Could not load REMOTE Calendar events.'
   const remoteSaveErrorMessage =
@@ -68,10 +67,7 @@ function Calendar({ t }) {
       calendarCells.reduce((rangeMetaMap, cell) => {
         if (cell) {
           // 기간 일정 indicator 계산
-          rangeMetaMap[cell.dateKey] = getCalendarDayRangeMeta(
-            events,
-            cell.dateKey,
-          )
+          rangeMetaMap[cell.dateKey] = getCalendarDayRangeMeta(events, cell.dateKey)
         }
 
         return rangeMetaMap
@@ -153,11 +149,7 @@ function Calendar({ t }) {
   const moveVisibleMonth = (offset) => {
     const selected = parseDateKey(selectedDate)
     const nextMonth = getAdjacentMonth(visibleYear, visibleMonth, offset)
-    const nextDateKey = getClampedDateKey(
-      nextMonth.year,
-      nextMonth.month,
-      selected.day,
-    )
+    const nextDateKey = getClampedDateKey(nextMonth.year, nextMonth.month, selected.day)
 
     setVisibleYear(nextMonth.year)
     setVisibleMonth(nextMonth.month)
@@ -199,6 +191,7 @@ function Calendar({ t }) {
 
     if (!isValidCalendarDateRange(startDate, endDate)) {
       setFormMessage(t.calendar.dateRangeError)
+
       return
     }
 
@@ -212,15 +205,14 @@ function Calendar({ t }) {
 
     if (!nextEvent) {
       setFormMessage(t.calendar.dateRangeError)
+
       return
     }
 
     try {
       if (storageMode === 'remote') {
         const createdEvent = await createRemoteCalendarEvent(nextEvent)
-        const nextEvents = readCalendarEvents(
-          JSON.stringify([...events, createdEvent]),
-        )
+        const nextEvents = readCalendarEvents(JSON.stringify([...events, createdEvent]))
 
         persistEvents(nextEvents)
       } else {
@@ -299,7 +291,10 @@ function Calendar({ t }) {
 
           {/* 선택 날짜 일정 목록 */}
           {isLoadingEvents ? (
-            <div className="empty-state compact-empty" role="status">
+            <div
+              className="empty-state compact-empty"
+              role="status"
+            >
               <span>{t.common.systemMessage}</span>
               <p>{remoteLoadingMessage}</p>
             </div>
@@ -308,9 +303,7 @@ function Calendar({ t }) {
               {selectedEvents.map((calendarEvent) => (
                 <li
                   className={`calendar-event-item ${
-                    isRangedCalendarEvent(calendarEvent)
-                      ? 'calendar-event-item-range'
-                      : ''
+                    isRangedCalendarEvent(calendarEvent) ? 'calendar-event-item-range' : ''
                   }`}
                   key={calendarEvent.id}
                 >
@@ -319,9 +312,7 @@ function Calendar({ t }) {
                       <h3>{calendarEvent.title}</h3>
                       {isRangedCalendarEvent(calendarEvent) ? (
                         // 기간 라벨 표시
-                        <span className="calendar-event-badge">
-                          {t.calendar.rangeBadge}
-                        </span>
+                        <span className="calendar-event-badge">{t.calendar.rangeBadge}</span>
                       ) : null}
                     </div>
                     <p className="calendar-event-date">
@@ -340,7 +331,10 @@ function Calendar({ t }) {
               ))}
             </ul>
           ) : (
-            <div className="empty-state compact-empty" role="status">
+            <div
+              className="empty-state compact-empty"
+              role="status"
+            >
               <span>{t.common.systemMessage}</span>
               <p>{t.calendar.noEvents}</p>
             </div>
@@ -352,7 +346,10 @@ function Calendar({ t }) {
             className="calendar-form"
             onSubmit={handleAddEvent}
           >
-            <label className="sr-only" htmlFor="calendar-title-input">
+            <label
+              className="sr-only"
+              htmlFor="calendar-title-input"
+            >
               {t.calendar.titleLabel}
             </label>
             <input
@@ -363,7 +360,10 @@ function Calendar({ t }) {
               placeholder={t.calendar.titlePlaceholder}
             />
 
-            <label className="sr-only" htmlFor="calendar-memo-input">
+            <label
+              className="sr-only"
+              htmlFor="calendar-memo-input"
+            >
               {t.calendar.memoLabel}
             </label>
             <textarea
@@ -397,7 +397,10 @@ function Calendar({ t }) {
             <p className="calendar-form-hint">{t.calendar.dateRangeHint}</p>
 
             {formMessage ? (
-              <p className="calendar-form-message" role="alert">
+              <p
+                className="calendar-form-message"
+                role="alert"
+              >
                 {formMessage}
               </p>
             ) : null}
@@ -432,9 +435,15 @@ function Calendar({ t }) {
             <div className="calendar-month-selectors">
               <label>
                 <span>{t.calendar.year}</span>
-                <select value={visibleYear} onChange={handleYearChange}>
+                <select
+                  value={visibleYear}
+                  onChange={handleYearChange}
+                >
                   {YEAR_RANGE.map((year) => (
-                    <option key={year} value={year}>
+                    <option
+                      key={year}
+                      value={year}
+                    >
                       {year}
                     </option>
                   ))}
@@ -442,9 +451,15 @@ function Calendar({ t }) {
               </label>
               <label>
                 <span>{t.calendar.month}</span>
-                <select value={visibleMonth} onChange={handleMonthChange}>
+                <select
+                  value={visibleMonth}
+                  onChange={handleMonthChange}
+                >
                   {MONTHS.map((month) => (
-                    <option key={month} value={month}>
+                    <option
+                      key={month}
+                      value={month}
+                    >
                       {t.calendar.monthValue(month + 1)}
                     </option>
                   ))}
@@ -462,14 +477,20 @@ function Calendar({ t }) {
           </div>
 
           {/* 요일 헤더 */}
-          <div className="calendar-weekdays" aria-hidden="true">
+          <div
+            className="calendar-weekdays"
+            aria-hidden="true"
+          >
             {t.calendar.weekdays.map((weekday) => (
               <span key={weekday}>{weekday}</span>
             ))}
           </div>
 
           {/* 월간 달력 셀 */}
-          <div className="calendar-legend" aria-label={t.calendar.legendLabel}>
+          <div
+            className="calendar-legend"
+            aria-label={t.calendar.legendLabel}
+          >
             <span>
               <i className="calendar-legend-dot"></i>
               {t.calendar.singleEventLegend}
@@ -506,7 +527,8 @@ function Calendar({ t }) {
                     cell.dateKey === selectedDate ? 'is-selected' : ''
                   } ${cell.dateKey === todayDate ? 'is-today' : ''} ${
                     eventCounts[cell.dateKey] ? 'has-events' : ''
-                  } ${isFullMoonDate(cell.dateKey) ? 'is-full-moon' : ''
+                  } ${
+                    isFullMoonDate(cell.dateKey) ? 'is-full-moon' : ''
                   } ${rangeMeta.classNames.join(' ')}`}
                   key={cell.dateKey}
                   type="button"
@@ -515,20 +537,14 @@ function Calendar({ t }) {
                     eventCounts[cell.dateKey]
                       ? `, ${t.calendar.eventCount(eventCounts[cell.dateKey])}`
                       : ''
-                  }${
-                    rangeMeta.hasRangeEvents
-                      ? `, ${t.calendar.rangeEventLegend}`
-                      : ''
-                  }`}
+                  }${rangeMeta.hasRangeEvents ? `, ${t.calendar.rangeEventLegend}` : ''}`}
                 >
                   <span>{cell.day}</span>
                   {rangeMeta.hasRangeEvents ? (
                     // 일정 indicator 구분
                     <span className="calendar-range-indicator"></span>
                   ) : null}
-                  {eventCounts[cell.dateKey] ? (
-                    <strong>{eventCounts[cell.dateKey]}</strong>
-                  ) : null}
+                  {eventCounts[cell.dateKey] ? <strong>{eventCounts[cell.dateKey]}</strong> : null}
                   {isFullMoonDate(cell.dateKey) ? (
                     <span
                       className="calendar-moon"

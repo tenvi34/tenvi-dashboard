@@ -19,17 +19,11 @@ const getFallbackInitial = (nickname) => {
 }
 
 // IndexedDB 프로필 이미지를 표시하는 공용 아바타
-function UserAvatar({
-  avatarImageId = '',
-  className = '',
-  nickname = 'TENVI',
-  size = 'md',
-}) {
+function UserAvatar({ avatarImageId = '', className = '', nickname = 'TENVI', size = 'md' }) {
   const [loadedImage, setLoadedImage] = useState({ id: '', src: '' })
   const fallbackInitial = getFallbackInitial(nickname)
   const sizeClassName = AVATAR_SIZE_CLASS[size] ?? AVATAR_SIZE_CLASS.md
-  const imageSource =
-    avatarImageId && loadedImage.id === avatarImageId ? loadedImage.src : ''
+  const imageSource = avatarImageId && loadedImage.id === avatarImageId ? loadedImage.src : ''
 
   // avatarImageId 변경 시 저장소에서 data URL 복원
   useEffect(() => {
@@ -42,9 +36,7 @@ function UserAvatar({
     }
 
     const imageLoader =
-      readProfileSettingsStorageMode() === 'remote'
-        ? fetchProfileImage
-        : getProfileImage
+      readProfileSettingsStorageMode() === 'remote' ? fetchProfileImage : getProfileImage
 
     imageLoader(avatarImageId)
       .then((imageRecord) => {

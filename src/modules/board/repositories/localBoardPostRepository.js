@@ -47,6 +47,7 @@ export const createLocalBoardPostRepository = ({
 } = {}) => {
   // 저장소 접근 경로 주입 가능
   const loadPosts = () => readPosts(storage, storageKey)
+
   const savePosts = (posts) => writePosts(storage, storageKey, posts)
 
   return {

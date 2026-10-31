@@ -29,10 +29,7 @@ function useBoardDetailImages(selectedPost) {
 
         setDetailImagePreviews(
           Object.fromEntries(
-            Object.entries(imagesById).map(([imageId, image]) => [
-              imageId,
-              image.dataUrl,
-            ]),
+            Object.entries(imagesById).map(([imageId, image]) => [imageId, image.dataUrl]),
           ),
         )
       })

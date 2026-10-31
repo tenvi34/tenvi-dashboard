@@ -85,6 +85,7 @@ function BoardApiCompactTest() {
   const handleUpdate = async () => {
     if (!selectedPostId) {
       setErrorMessage('Select a post to update.')
+
       return
     }
 
@@ -95,9 +96,7 @@ function BoardApiCompactTest() {
       const updatedPost = await updateBoardPost(selectedPostId, form)
 
       setPosts((currentPosts) =>
-        currentPosts.map((post) =>
-          post.id === updatedPost.id ? updatedPost : post,
-        ),
+        currentPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post)),
       )
       setResultMessage('Updated.')
     } catch (error) {
@@ -146,7 +145,10 @@ function BoardApiCompactTest() {
         </button>
       </div>
 
-      <form className="board-api-test__form" onSubmit={handleCreate}>
+      <form
+        className="board-api-test__form"
+        onSubmit={handleCreate}
+      >
         <div className="board-api-test__row">
           <label className="settings-field">
             <span>Title</span>
@@ -185,7 +187,11 @@ function BoardApiCompactTest() {
             />
             <span>Pinned</span>
           </label>
-          <button className="settings-option" type="submit" disabled={isLoading}>
+          <button
+            className="settings-option"
+            type="submit"
+            disabled={isLoading}
+          >
             생성
           </button>
           <button
@@ -199,24 +205,24 @@ function BoardApiCompactTest() {
         </div>
       </form>
 
-      {resultMessage ? (
-        <p className="board-api-test__status">{resultMessage}</p>
-      ) : null}
+      {resultMessage ? <p className="board-api-test__status">{resultMessage}</p> : null}
 
-      {errorMessage ? (
-        <p className="board-api-test__error">{errorMessage}</p>
-      ) : null}
+      {errorMessage ? <p className="board-api-test__error">{errorMessage}</p> : null}
 
-      <div className="board-api-test__list" aria-label="Board API posts">
+      <div
+        className="board-api-test__list"
+        aria-label="Board API posts"
+      >
         {posts.length > 0 ? (
           posts.map((post) => (
             <article
-              className={`board-api-test__item ${
-                selectedPostId === post.id ? 'is-selected' : ''
-              }`}
+              className={`board-api-test__item ${selectedPostId === post.id ? 'is-selected' : ''}`}
               key={post.id}
             >
-              <button type="button" onClick={() => handleSelectPost(post)}>
+              <button
+                type="button"
+                onClick={() => handleSelectPost(post)}
+              >
                 <strong>{post.title}</strong>
                 <span>{post.categoryId || '-'}</span>
               </button>

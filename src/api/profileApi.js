@@ -4,8 +4,7 @@ export const PROFILE_API_PATH = '/api/profile'
 export const PROFILE_IMAGES_API_PATH = '/api/profile/images'
 
 // Profile API URL 결합
-export const getProfileUrl = (baseUrl = API_BASE_URL) =>
-  joinApiPath(baseUrl, PROFILE_API_PATH)
+export const getProfileUrl = (baseUrl = API_BASE_URL) => joinApiPath(baseUrl, PROFILE_API_PATH)
 
 // 프로필 이미지 목록 URL 결합
 export const getProfileImagesUrl = (baseUrl = API_BASE_URL) =>
@@ -33,25 +32,18 @@ const requestProfileApi = async (url, options = {}, fetcher = fetch) => {
     // 백엔드 오류 메시지 우선 사용
     const errorData = await response.json().catch(() => null)
 
-    throw new Error(
-      errorData?.message ?? `Profile API request failed with ${response.status}`,
-    )
+    throw new Error(errorData?.message ?? `Profile API request failed with ${response.status}`)
   }
 
   return readJsonResponse(response)
 }
 
 // 프로필 조회
-export const fetchRemoteProfile = ({
-  baseUrl = API_BASE_URL,
-  fetcher = fetch,
-} = {}) => requestProfileApi(getProfileUrl(baseUrl), {}, fetcher)
+export const fetchRemoteProfile = ({ baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestProfileApi(getProfileUrl(baseUrl), {}, fetcher)
 
 // 프로필 저장
-export const saveRemoteProfile = (
-  payload,
-  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
-) =>
+export const saveRemoteProfile = (payload, { baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
   requestProfileApi(
     getProfileUrl(baseUrl),
     {
@@ -63,16 +55,12 @@ export const saveRemoteProfile = (
   )
 
 // 프로필 이미지 목록 조회
-export const fetchProfileImages = ({
-  baseUrl = API_BASE_URL,
-  fetcher = fetch,
-} = {}) => requestProfileApi(getProfileImagesUrl(baseUrl), {}, fetcher)
+export const fetchProfileImages = ({ baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestProfileApi(getProfileImagesUrl(baseUrl), {}, fetcher)
 
 // 프로필 이미지 단건 조회
-export const fetchProfileImage = (
-  id,
-  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
-) => requestProfileApi(getProfileImageUrl(id, baseUrl), {}, fetcher)
+export const fetchProfileImage = (id, { baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestProfileApi(getProfileImageUrl(id, baseUrl), {}, fetcher)
 
 // 프로필 이미지 생성
 export const createRemoteProfileImage = (
@@ -90,7 +78,5 @@ export const createRemoteProfileImage = (
   )
 
 // 프로필 이미지 삭제
-export const deleteRemoteProfileImage = (
-  id,
-  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
-) => requestProfileApi(getProfileImageUrl(id, baseUrl), { method: 'DELETE' }, fetcher)
+export const deleteRemoteProfileImage = (id, { baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestProfileApi(getProfileImageUrl(id, baseUrl), { method: 'DELETE' }, fetcher)

@@ -134,39 +134,28 @@ describe('settingsBackup validateBackupPayload', () => {
     expect(validateBackupPayload([])).toBe(null)
     expect(validateBackupPayload('not-json')).toBe(null)
     expect(validateBackupPayload({ ...createValidBackup(), data: null })).toBe(null)
-    expect(validateBackupPayload({ ...createValidBackup(), app: 'OTHER' })).toBe(
-      null,
-    )
-    expect(validateBackupPayload({ ...createValidBackup(), type: 'unknown' })).toBe(
-      null,
-    )
-    expect(validateBackupPayload({ ...createValidBackup(), version: 999 })).toBe(
-      null,
-    )
+    expect(validateBackupPayload({ ...createValidBackup(), app: 'OTHER' })).toBe(null)
+
+    expect(validateBackupPayload({ ...createValidBackup(), type: 'unknown' })).toBe(null)
+
+    expect(validateBackupPayload({ ...createValidBackup(), version: 999 })).toBe(null)
   })
 
   it('rejects payloads with invalid data shapes', () => {
     expect(validateBackupPayload(createValidBackup({ boardPosts: {} }))).toBe(null)
-    expect(validateBackupPayload(createValidBackup({ calendarEvents: {} }))).toBe(
-      null,
-    )
-    expect(validateBackupPayload(createValidBackup({ mapPhotoRecords: {} }))).toBe(
-      null,
-    )
-    expect(
-      validateBackupPayload(createValidBackup({ mapPhotoCollections: {} })),
-    ).toBe(null)
+    expect(validateBackupPayload(createValidBackup({ calendarEvents: {} }))).toBe(null)
+
+    expect(validateBackupPayload(createValidBackup({ mapPhotoRecords: {} }))).toBe(null)
+
+    expect(validateBackupPayload(createValidBackup({ mapPhotoCollections: {} }))).toBe(null)
     expect(validateBackupPayload(createValidBackup({ userProfile: [] }))).toBe(null)
   })
 
   it('rejects values outside supported app settings', () => {
     expect(validateBackupPayload(createValidBackup({ language: 'jp' }))).toBe(null)
-    expect(validateBackupPayload(createValidBackup({ hudEffect: 'max' }))).toBe(
-      null,
-    )
-    expect(validateBackupPayload(createValidBackup({ theme: 'retro' }))).toBe(
-      null,
-    )
+    expect(validateBackupPayload(createValidBackup({ hudEffect: 'max' }))).toBe(null)
+
+    expect(validateBackupPayload(createValidBackup({ theme: 'retro' }))).toBe(null)
   })
 
   it('falls back to Dashboard for an unavailable saved module', () => {

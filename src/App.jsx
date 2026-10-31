@@ -11,7 +11,9 @@ import './styles/experience.css'
 const THEMES = ['dark', 'standard']
 
 function App() {
-  const [settingsReady, setSettingsReady] = useState(() => readProfileSettingsStorageMode() !== 'remote')
+  const [settingsReady, setSettingsReady] = useState(
+    () => readProfileSettingsStorageMode() !== 'remote',
+  )
   const [startModule, setStartModule] = useState(() => {
     const savedStartModule = localStorage.getItem(STORAGE_KEYS.startModule)
 
@@ -22,7 +24,9 @@ function App() {
     const savedTheme = localStorage.getItem(STORAGE_KEYS.theme)
 
     // 이전 HUD 테마 값 마이그레이션
-    if (savedTheme === 'hud') return 'dark'
+    if (savedTheme === 'hud') {
+      return 'dark'
+    }
 
     return THEMES.includes(savedTheme) ? savedTheme : 'dark'
   })
@@ -50,9 +54,18 @@ function App() {
           return
         }
 
-        if (remoteSettings.language) setLanguage(remoteSettings.language)
-        if (remoteSettings.startModule) setStartModule(remoteSettings.startModule)
-        if (remoteSettings.theme) setTheme(remoteSettings.theme)
+        if (remoteSettings.language) {
+          setLanguage(remoteSettings.language)
+        }
+
+        if (remoteSettings.startModule) {
+          setStartModule(remoteSettings.startModule)
+        }
+
+        if (remoteSettings.theme) {
+          setTheme(remoteSettings.theme)
+        }
+
         if (remoteSettings.hudEffect) {
           localStorage.setItem(STORAGE_KEYS.hudEffect, remoteSettings.hudEffect)
         }
@@ -60,7 +73,11 @@ function App() {
       .catch(() => {
         // REMOTE 서버가 없으면 기존 LOCAL 설정으로 기동
       })
-      .finally(() => { if (isMounted) setSettingsReady(true) })
+      .finally(() => {
+        if (isMounted) {
+          setSettingsReady(true)
+        }
+      })
 
     return () => {
       isMounted = false
@@ -95,8 +112,13 @@ function App() {
   )
 
   if (!settingsReady) {
-    return <main className={`tenvi-dashboard theme-${theme}`}><p role="status">{t.common.loadingSettings}</p></main>
+    return (
+      <main className={`tenvi-dashboard theme-${theme}`}>
+        <p role="status">{t.common.loadingSettings}</p>
+      </main>
+    )
   }
+
   return <AppRouter appContext={appContext} />
 }
 

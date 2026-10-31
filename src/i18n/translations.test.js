@@ -14,7 +14,6 @@ const requiredTopLevelKeys = [
   'settings',
 ]
 
-
 // Calendar 번역 key 동기화 목록
 const requiredCalendarKeys = [
   'label',
@@ -93,7 +92,6 @@ const requiredDashboardKeys = [
   'storageOverview',
   'totalSchedules',
 ]
-
 
 // Map 번역 key 동기화 목록
 const requiredMapKeys = [
@@ -258,7 +256,6 @@ describe('translations', () => {
     })
   })
 
-
   it.each(['ko', 'en'])('has required calendar keys for %s', (language) => {
     requiredCalendarKeys.forEach((key) => {
       expect(translations[language].calendar).toHaveProperty(key)
@@ -270,7 +267,6 @@ describe('translations', () => {
       expect(translations[language].dashboard).toHaveProperty(key)
     })
   })
-
 
   it.each(['ko', 'en'])('has required map keys for %s', (language) => {
     requiredMapKeys.forEach((key) => {

@@ -5,16 +5,47 @@ import ModuleIcon from './ModuleIcon.jsx'
 export default function MoreActions({ label, children }) {
   const ref = useRef(null)
   useEffect(() => {
-    const closeOutside = (event) => { if (!ref.current?.contains(event.target) && ref.current) ref.current.open = false }
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape' && ref.current?.open) { ref.current.open = false; ref.current.querySelector('summary')?.focus() }
+    const closeOutside = (event) => {
+      if (!ref.current?.contains(event.target) && ref.current) {
+        ref.current.open = false
+      }
     }
+
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape' && ref.current?.open) {
+        ref.current.open = false
+        ref.current.querySelector('summary')?.focus()
+      }
+    }
+
     document.addEventListener('pointerdown', closeOutside)
     document.addEventListener('keydown', closeOnEscape)
-    return () => { document.removeEventListener('pointerdown', closeOutside); document.removeEventListener('keydown', closeOnEscape) }
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
   }, [])
-  return <details className="more-actions" ref={ref}>
-    <summary><ModuleIcon name="more" /><span>{label}</span></summary>
-    <div className="more-actions-content" onClick={(event) => { if (event.target.closest('button, a')) ref.current.open = false }}>{children}</div>
-  </details>
+
+  return (
+    <details
+      className="more-actions"
+      ref={ref}
+    >
+      <summary>
+        <ModuleIcon name="more" />
+        <span>{label}</span>
+      </summary>
+      <div
+        className="more-actions-content"
+        onClick={(event) => {
+          if (event.target.closest('button, a')) {
+            ref.current.open = false
+          }
+        }}
+      >
+        {children}
+      </div>
+    </details>
+  )
 }

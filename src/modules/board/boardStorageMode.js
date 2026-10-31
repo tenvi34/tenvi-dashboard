@@ -18,10 +18,9 @@ export const readBoardStorageMode = (storage = globalThis.localStorage) => {
 
 export const saveBoardStorageMode = (mode, storage = globalThis.localStorage) => {
   const nextMode =
-    mode === BOARD_STORAGE_MODES.remote
-      ? BOARD_STORAGE_MODES.remote
-      : BOARD_STORAGE_MODES.local
+    mode === BOARD_STORAGE_MODES.remote ? BOARD_STORAGE_MODES.remote : BOARD_STORAGE_MODES.local
 
   storage?.setItem(STORAGE_KEYS.boardStorageMode, nextMode)
+
   return nextMode
 }

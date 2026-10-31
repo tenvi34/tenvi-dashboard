@@ -10,16 +10,21 @@ export const MODULE_PATHS = {
 
 // URL에서 활성 모듈 계산
 export const getModuleFromPathname = (pathname) => {
-  if (pathname === '/travel' || pathname.startsWith('/travel/')) return 'travel'
-  if (pathname.startsWith('/board')) return 'board'
-  if (pathname.startsWith('/settings')) return 'settings'
+  if (pathname === '/travel' || pathname.startsWith('/travel/')) {
+    return 'travel'
+  }
 
-  const pathModule = Object.entries(MODULE_PATHS).find(
-    ([, modulePath]) => pathname === modulePath,
-  )
+  if (pathname.startsWith('/board')) {
+    return 'board'
+  }
+
+  if (pathname.startsWith('/settings')) {
+    return 'settings'
+  }
+
+  const pathModule = Object.entries(MODULE_PATHS).find(([, modulePath]) => pathname === modulePath)
 
   return pathModule?.[0] ?? 'dashboard'
 }
 
-export const getModulePath = (moduleId) =>
-  MODULE_PATHS[moduleId] ?? MODULE_PATHS.dashboard
+export const getModulePath = (moduleId) => MODULE_PATHS[moduleId] ?? MODULE_PATHS.dashboard

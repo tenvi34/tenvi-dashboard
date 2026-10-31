@@ -21,10 +21,7 @@ const MOBILE_TAB_MODULES = [
   { id: 'map' },
 ]
 
-const MOBILE_MORE_MODULES = [
-  { id: 'board' },
-  { id: 'settings' },
-]
+const MOBILE_MORE_MODULES = [{ id: 'board' }, { id: 'settings' }]
 
 function AppLayout({ appContext }) {
   const navigate = useNavigate()
@@ -40,15 +37,49 @@ function AppLayout({ appContext }) {
 
   return (
     <main className={`tenvi-dashboard tenvi-app theme-${theme}`}>
-      <a className="skip-link" href="#module-content">{t.app.skipToContent}</a>
+      <a
+        className="skip-link"
+        href="#module-content"
+      >
+        {t.app.skipToContent}
+      </a>
 
-      <section className="tenvi-shell" aria-labelledby="tenvi-title">
+      <section
+        className="tenvi-shell"
+        aria-labelledby="tenvi-title"
+      >
         <header className="tenvi-header">
-          <div className="app-brand"><span className="brand-mark" aria-hidden="true">T</span><div><h1 id="tenvi-title">TENVI</h1><span>{t.app.personalSpace}</span></div></div>
-          <div className="app-location"><ModuleIcon name={activeModule} /><span>{activeModuleLabel}</span></div>
-          <label className="app-language"><span>{t.app.languageLabel}</span>
-            <select aria-label={t.app.languageLabel} value={language} onChange={(event) => setLanguage(event.target.value)}>
-              {Object.keys(translations).map((id) => <option key={id} value={id}>{t.languages[id]}</option>)}
+          <div className="app-brand">
+            <span
+              className="brand-mark"
+              aria-hidden="true"
+            >
+              T
+            </span>
+            <div>
+              <h1 id="tenvi-title">TENVI</h1>
+              <span>{t.app.personalSpace}</span>
+            </div>
+          </div>
+          <div className="app-location">
+            <ModuleIcon name={activeModule} />
+            <span>{activeModuleLabel}</span>
+          </div>
+          <label className="app-language">
+            <span>{t.app.languageLabel}</span>
+            <select
+              aria-label={t.app.languageLabel}
+              value={language}
+              onChange={(event) => setLanguage(event.target.value)}
+            >
+              {Object.keys(translations).map((id) => (
+                <option
+                  key={id}
+                  value={id}
+                >
+                  {t.languages[id]}
+                </option>
+              ))}
             </select>
           </label>
         </header>

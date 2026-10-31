@@ -20,11 +20,7 @@ import {
   copyLocalBoardImagesToRemote,
   copyLocalBoardPostsToRemote,
 } from './board/boardRemoteCopy.js'
-import {
-  MAP_STORAGE_MODES,
-  readMapStorageMode,
-  saveMapStorageMode,
-} from './mapStorageMode.js'
+import { MAP_STORAGE_MODES, readMapStorageMode, saveMapStorageMode } from './mapStorageMode.js'
 import { copyLocalMapDataToRemote } from './map/mapRemoteCopy.js'
 import {
   CALENDAR_STORAGE_MODES,
@@ -45,24 +41,14 @@ import {
 import './Settings.css'
 import { getPhotoRecordCount } from '../services/photoArchiveRepository.js'
 import { getAllBoardImages } from './boardImageStore.js'
-import {
-  deleteProfileImage,
-  saveProfileImage,
-} from './profileImageStore.js'
-import {
-  LANGUAGES,
-  START_MODULES,
-  THEMES,
-} from './settingsBackup.js'
-import {
-  parseUserProfile,
-  resetUserProfile,
-  updateUserProfile,
-} from './userProfileLogic.js'
+import { deleteProfileImage, saveProfileImage } from './profileImageStore.js'
+import { LANGUAGES, START_MODULES, THEMES } from './settingsBackup.js'
+import { parseUserProfile, resetUserProfile, updateUserProfile } from './userProfileLogic.js'
 
 // 배포 번들에는 데이터 변경용 개발 도구를 포함하지 않음
 const DeveloperTools = import.meta.env.DEV
-  ? lazy(() => import('./settings/SettingsDeveloperTools.jsx')) : null
+  ? lazy(() => import('./settings/SettingsDeveloperTools.jsx'))
+  : null
 
 // Settings 저장 key
 const BOARD_POSTS_STORAGE_KEY = STORAGE_KEYS.boardPosts
@@ -82,6 +68,7 @@ const readStoredCount = (storageKey) => {
 
   try {
     const parsedValue = JSON.parse(savedValue)
+
     // 저장 배열 개수 fallback
     return Array.isArray(parsedValue) ? parsedValue.length : 0
   } catch {
@@ -126,34 +113,24 @@ function Settings({
   theme,
 }) {
   const [activeSettingsTab, setActiveSettingsTab] = useState(activeTab)
-  const [boardStorageMode, setBoardStorageMode] = useState(() =>
-    readBoardStorageMode(),
-  )
-  const [mapStorageMode, setMapStorageMode] = useState(() =>
-    readMapStorageMode(),
-  )
-  const [calendarStorageMode, setCalendarStorageMode] = useState(() =>
-    readCalendarStorageMode(),
-  )
-  const [profileSettingsStorageMode, setProfileSettingsStorageMode] = useState(
-    () => readProfileSettingsStorageMode(),
+  const [boardStorageMode, setBoardStorageMode] = useState(() => readBoardStorageMode())
+  const [mapStorageMode, setMapStorageMode] = useState(() => readMapStorageMode())
+  const [calendarStorageMode, setCalendarStorageMode] = useState(() => readCalendarStorageMode())
+  const [profileSettingsStorageMode, setProfileSettingsStorageMode] = useState(() =>
+    readProfileSettingsStorageMode(),
   )
   // 백업 복원과 프로필 변경 후 저장소 요약 갱신
   const [dataVersion, setDataVersion] = useState(0)
   const [boardRemoteCopyStatus, setBoardRemoteCopyStatus] = useState(null)
-  const [boardCategoriesRemoteCopyStatus, setBoardCategoriesRemoteCopyStatus] =
-    useState(null)
-  const [boardImagesRemoteCopyStatus, setBoardImagesRemoteCopyStatus] =
-    useState(null)
+  const [boardCategoriesRemoteCopyStatus, setBoardCategoriesRemoteCopyStatus] = useState(null)
+  const [boardImagesRemoteCopyStatus, setBoardImagesRemoteCopyStatus] = useState(null)
   const [mapRemoteCopyStatus, setMapRemoteCopyStatus] = useState(null)
   const [calendarRemoteCopyStatus, setCalendarRemoteCopyStatus] = useState(null)
   const [profileRemoteCopyStatus, setProfileRemoteCopyStatus] = useState(null)
   const [settingsRemoteCopyStatus, setSettingsRemoteCopyStatus] = useState(null)
   const [isBoardRemoteCopying, setIsBoardRemoteCopying] = useState(false)
-  const [isBoardCategoriesRemoteCopying, setIsBoardCategoriesRemoteCopying] =
-    useState(false)
-  const [isBoardImagesRemoteCopying, setIsBoardImagesRemoteCopying] =
-    useState(false)
+  const [isBoardCategoriesRemoteCopying, setIsBoardCategoriesRemoteCopying] = useState(false)
+  const [isBoardImagesRemoteCopying, setIsBoardImagesRemoteCopying] = useState(false)
   const [isMapRemoteCopying, setIsMapRemoteCopying] = useState(false)
   const [isCalendarRemoteCopying, setIsCalendarRemoteCopying] = useState(false)
   const [isProfileRemoteCopying, setIsProfileRemoteCopying] = useState(false)
@@ -169,18 +146,13 @@ function Settings({
   const calendarEventCount = readStoredCount(CALENDAR_EVENTS_STORAGE_KEY)
   const isProfileSettingsRemote =
     profileSettingsStorageMode === PROFILE_SETTINGS_STORAGE_MODES.remote
-  const calendarStorageModeLabel =
-    t.settings.calendarStorageModeLabel ?? 'Calendar storage mode'
+  const calendarStorageModeLabel = t.settings.calendarStorageModeLabel ?? 'Calendar storage mode'
   const calendarStorageDescription =
-    t.settings.calendarStorageDescription ??
-    'Stores calendar event dates, ranges, and memos.'
-  const calendarRemoteCopy =
-    t.settings.calendarRemoteCopy ?? 'Copy LOCAL Calendar to REMOTE'
-  const calendarRemoteCopying =
-    t.settings.calendarRemoteCopying ?? 'Copying Calendar to REMOTE...'
+    t.settings.calendarStorageDescription ?? 'Stores calendar event dates, ranges, and memos.'
+  const calendarRemoteCopy = t.settings.calendarRemoteCopy ?? 'Copy LOCAL Calendar to REMOTE'
+  const calendarRemoteCopying = t.settings.calendarRemoteCopying ?? 'Copying Calendar to REMOTE...'
   const calendarRemoteCopyEmpty =
-    t.settings.calendarRemoteCopyEmpty ??
-    'There are no LOCAL Calendar events to copy.'
+    t.settings.calendarRemoteCopyEmpty ?? 'There are no LOCAL Calendar events to copy.'
   const calendarRemoteCopyConnectionError =
     t.settings.calendarRemoteCopyConnectionError ??
     'Calendar copy failed because the REMOTE API is unavailable.'
@@ -265,16 +237,13 @@ function Settings({
 
       if (result.total === 0) {
         setBoardRemoteCopyStatus({ type: 'info', message: t.settings.boardRemoteCopyEmpty })
+
         return
       }
 
       setBoardRemoteCopyStatus({
         type: result.failed > 0 ? 'error' : 'success',
-        message: t.settings.boardRemoteCopyResult(
-          result.copied,
-          result.skipped,
-          result.failed,
-        ),
+        message: t.settings.boardRemoteCopyResult(result.copied, result.skipped, result.failed),
       })
     } catch {
       setBoardRemoteCopyStatus({
@@ -299,6 +268,7 @@ function Settings({
           type: 'info',
           message: t.settings.boardCategoriesRemoteCopyEmpty,
         })
+
         return
       }
 
@@ -333,6 +303,7 @@ function Settings({
           type: 'info',
           message: t.settings.boardImagesRemoteCopyEmpty,
         })
+
         return
       }
 
@@ -365,14 +336,12 @@ function Settings({
 
       if (total === 0) {
         setMapRemoteCopyStatus({ type: 'info', message: t.settings.mapRemoteCopyEmpty })
+
         return
       }
 
       setMapRemoteCopyStatus({
-        type:
-          result.collections.failed > 0 || result.records.failed > 0
-            ? 'error'
-            : 'success',
+        type: result.collections.failed > 0 || result.records.failed > 0 ? 'error' : 'success',
         message: t.settings.mapRemoteCopyResult(result.collections, result.records),
       })
     } catch {
@@ -398,16 +367,13 @@ function Settings({
           type: 'info',
           message: calendarRemoteCopyEmpty,
         })
+
         return
       }
 
       setCalendarRemoteCopyStatus({
         type: result.failed > 0 ? 'error' : 'success',
-        message: calendarRemoteCopyResult(
-          result.copied,
-          result.skipped,
-          result.failed,
-        ),
+        message: calendarRemoteCopyResult(result.copied, result.skipped, result.failed),
       })
     } catch {
       setCalendarRemoteCopyStatus({
@@ -563,9 +529,7 @@ function Settings({
     }
 
     try {
-      const currentProfile = parseUserProfile(
-        localStorage.getItem(USER_PROFILE_STORAGE_KEY),
-      )
+      const currentProfile = parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY))
       const nextImage = isProfileSettingsRemote
         ? await createRemoteProfileImage({
             id: createProfileImageId(),
@@ -589,9 +553,7 @@ function Settings({
       setProfileStatus({ type: 'success', message: t.settings.profileImageSaved })
 
       if (currentProfile.avatarImageId) {
-        const deleteImage = isProfileSettingsRemote
-          ? deleteRemoteProfileImage
-          : deleteProfileImage
+        const deleteImage = isProfileSettingsRemote ? deleteRemoteProfileImage : deleteProfileImage
 
         deleteImage(currentProfile.avatarImageId).catch(() => {
           // 이전 프로필 이미지 정리 실패 무시
@@ -606,9 +568,7 @@ function Settings({
 
   // 프로필 이미지 연결 해제
   const handleRemoveProfileImage = async () => {
-    const currentProfile = parseUserProfile(
-      localStorage.getItem(USER_PROFILE_STORAGE_KEY),
-    )
+    const currentProfile = parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY))
     const nextProfile = updateUserProfile(currentProfile, {
       ...profileForm,
       avatarImageId: '',
@@ -627,25 +587,22 @@ function Settings({
         type: 'error',
         message: t.settings.profileRemoteSaveError,
       })
+
       return
     }
 
     if (currentProfile.avatarImageId) {
-      const deleteImage = isProfileSettingsRemote
-        ? deleteRemoteProfileImage
-        : deleteProfileImage
+      const deleteImage = isProfileSettingsRemote ? deleteRemoteProfileImage : deleteProfileImage
 
       deleteImage(currentProfile.avatarImageId).catch(() => {
-            // 이전 프로필 이미지 정리 실패 무시
-          })
+        // 이전 프로필 이미지 정리 실패 무시
+      })
     }
   }
 
   // 프로필 기본값 초기화
   const handleResetProfile = async () => {
-    const currentProfile = parseUserProfile(
-      localStorage.getItem(USER_PROFILE_STORAGE_KEY),
-    )
+    const currentProfile = parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY))
     const nextProfile = resetUserProfile()
 
     try {
@@ -662,22 +619,30 @@ function Settings({
         type: 'error',
         message: t.settings.profileRemoteSaveError,
       })
+
       return
     }
 
     if (currentProfile.avatarImageId) {
-      const deleteImage = isProfileSettingsRemote
-        ? deleteRemoteProfileImage
-        : deleteProfileImage
+      const deleteImage = isProfileSettingsRemote ? deleteRemoteProfileImage : deleteProfileImage
 
       deleteImage(currentProfile.avatarImageId).catch(() => {
-            // 이전 프로필 이미지 정리 실패 무시
-          })
+        // 이전 프로필 이미지 정리 실패 무시
+      })
     }
   }
 
-  const backup = useSettingsBackup({ language, startModule, theme, t,
-    onLanguageChange, onStartModuleChange, onThemeChange, setProfileForm, setDataVersion })
+  const backup = useSettingsBackup({
+    language,
+    startModule,
+    theme,
+    t,
+    onLanguageChange,
+    onStartModuleChange,
+    onThemeChange,
+    setProfileForm,
+    setDataVersion,
+  })
 
   return (
     <section
@@ -693,12 +658,13 @@ function Settings({
       </div>
 
       {/* Settings 탭 */}
-      <div className="settings-tabs" aria-label="Settings tabs">
+      <div
+        className="settings-tabs"
+        aria-label="Settings tabs"
+      >
         {SETTINGS_TABS.map((tab) => (
           <button
-            className={`settings-tab ${
-                  activeSettingsTab === tab.id ? 'is-active' : ''
-            }`}
+            className={`settings-tab ${activeSettingsTab === tab.id ? 'is-active' : ''}`}
             key={tab.id}
             type="button"
             onClick={() => handleSettingsTabChange(tab.id)}
@@ -712,15 +678,18 @@ function Settings({
         {/* 인터페이스 설정 패널 */}
         <section className="settings-panel settings-preference-panel settings-interface-panel">
           <div className="settings-panel-header">
-            <p className="module-label">{t.settings.language} / {t.settings.theme}</p>
+            <p className="module-label">
+              {t.settings.language} / {t.settings.theme}
+            </p>
             <h3>{t.settings.interface}</h3>
           </div>
-          <div className="settings-options" aria-label={t.settings.language}>
+          <div
+            className="settings-options"
+            aria-label={t.settings.language}
+          >
             {LANGUAGES.map((languageId) => (
               <button
-                className={`settings-option ${
-                  language === languageId ? 'is-active' : ''
-                }`}
+                className={`settings-option ${language === languageId ? 'is-active' : ''}`}
                 key={languageId}
                 type="button"
                 onClick={() => handleLanguageChange(languageId)}
@@ -731,12 +700,13 @@ function Settings({
           </div>
           <div className="settings-combined-group">
             <p className="settings-group-label">{t.settings.theme}</p>
-            <div className="settings-options" aria-label={t.settings.theme}>
+            <div
+              className="settings-options"
+              aria-label={t.settings.theme}
+            >
               {THEMES.map((themeId) => (
                 <button
-                  className={`settings-option ${
-                    theme === themeId ? 'is-active' : ''
-                  }`}
+                  className={`settings-option ${theme === themeId ? 'is-active' : ''}`}
                   key={themeId}
                   type="button"
                   onClick={() => handleThemeChange(themeId)}
@@ -760,9 +730,7 @@ function Settings({
           >
             {START_MODULES.map((moduleId) => (
               <button
-                className={`settings-option ${
-                  startModule === moduleId ? 'is-active' : ''
-                }`}
+                className={`settings-option ${startModule === moduleId ? 'is-active' : ''}`}
                 key={moduleId}
                 type="button"
                 onClick={() => handleStartModuleChange(moduleId)}
@@ -889,9 +857,7 @@ function Settings({
           </div>
           <p className="settings-note">{t.settings.profileNote}</p>
           {profileStatus ? (
-            <p className={`backup-status is-${profileStatus.type}`}>
-              {profileStatus.message}
-            </p>
+            <p className={`backup-status is-${profileStatus.type}`}>{profileStatus.message}</p>
           ) : null}
         </section>
 
@@ -971,17 +937,23 @@ function Settings({
                 </button>
               </div>
               {boardRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${boardRemoteCopyStatus.type}`}>
+                <p
+                  className={`backup-status settings-board-copy-status is-${boardRemoteCopyStatus.type}`}
+                >
                   {boardRemoteCopyStatus.message}
                 </p>
               ) : null}
               {boardCategoriesRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${boardCategoriesRemoteCopyStatus.type}`}>
+                <p
+                  className={`backup-status settings-board-copy-status is-${boardCategoriesRemoteCopyStatus.type}`}
+                >
                   {boardCategoriesRemoteCopyStatus.message}
                 </p>
               ) : null}
               {boardImagesRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${boardImagesRemoteCopyStatus.type}`}>
+                <p
+                  className={`backup-status settings-board-copy-status is-${boardImagesRemoteCopyStatus.type}`}
+                >
                   {boardImagesRemoteCopyStatus.message}
                 </p>
               ) : null}
@@ -1021,13 +993,13 @@ function Settings({
                   disabled={isMapRemoteCopying}
                   onClick={handleCopyMapToRemote}
                 >
-                  {isMapRemoteCopying
-                    ? t.settings.mapRemoteCopying
-                    : t.settings.mapRemoteCopy}
+                  {isMapRemoteCopying ? t.settings.mapRemoteCopying : t.settings.mapRemoteCopy}
                 </button>
               </div>
               {mapRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${mapRemoteCopyStatus.type}`}>
+                <p
+                  className={`backup-status settings-board-copy-status is-${mapRemoteCopyStatus.type}`}
+                >
                   {mapRemoteCopyStatus.message}
                 </p>
               ) : null}
@@ -1067,13 +1039,13 @@ function Settings({
                   disabled={isCalendarRemoteCopying}
                   onClick={handleCopyCalendarToRemote}
                 >
-                  {isCalendarRemoteCopying
-                    ? calendarRemoteCopying
-                    : calendarRemoteCopy}
+                  {isCalendarRemoteCopying ? calendarRemoteCopying : calendarRemoteCopy}
                 </button>
               </div>
               {calendarRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${calendarRemoteCopyStatus.type}`}>
+                <p
+                  className={`backup-status settings-board-copy-status is-${calendarRemoteCopyStatus.type}`}
+                >
                   {calendarRemoteCopyStatus.message}
                 </p>
               ) : null}
@@ -1098,9 +1070,7 @@ function Settings({
                       type="button"
                       onClick={() => handleProfileSettingsModeChange(mode)}
                     >
-                      {mode === PROFILE_SETTINGS_STORAGE_MODES.local
-                        ? 'Local'
-                        : 'Remote'}
+                      {mode === PROFILE_SETTINGS_STORAGE_MODES.local ? 'Local' : 'Remote'}
                     </button>
                   ))}
                 </div>
@@ -1131,21 +1101,32 @@ function Settings({
                 </button>
               </div>
               {profileRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${profileRemoteCopyStatus.type}`}>
+                <p
+                  className={`backup-status settings-board-copy-status is-${profileRemoteCopyStatus.type}`}
+                >
                   {profileRemoteCopyStatus.message}
                 </p>
               ) : null}
               {settingsRemoteCopyStatus ? (
-                <p className={`backup-status settings-board-copy-status is-${settingsRemoteCopyStatus.type}`}>
+                <p
+                  className={`backup-status settings-board-copy-status is-${settingsRemoteCopyStatus.type}`}
+                >
                   {settingsRemoteCopyStatus.message}
                 </p>
               ) : null}
             </div>
           </div>
         </section>
-        {DeveloperTools && activeSettingsTab === 'server' && <Suspense fallback={null}><DeveloperTools t={t} /></Suspense>}
+        {DeveloperTools && activeSettingsTab === 'server' && (
+          <Suspense fallback={null}>
+            <DeveloperTools t={t} />
+          </Suspense>
+        )}
 
-        <SettingsBackupPanels t={t} {...backup} />
+        <SettingsBackupPanels
+          t={t}
+          {...backup}
+        />
       </div>
     </section>
   )

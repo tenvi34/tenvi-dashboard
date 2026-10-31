@@ -173,10 +173,7 @@ describe('mapLogic', () => {
 
   it('treats records with missing collections as unassigned', () => {
     expect(
-      normalizePhotoRecordCollectionId(
-        { collectionId: 'missing-collection' },
-        [{ id: 'trip-1' }],
-      ),
+      normalizePhotoRecordCollectionId({ collectionId: 'missing-collection' }, [{ id: 'trip-1' }]),
     ).toBeNull()
   })
 
@@ -191,17 +188,15 @@ describe('mapLogic', () => {
     expect(
       filterPhotoRecordsByCollection(records, collections, COLLECTION_FILTER_ALL),
     ).toHaveLength(3)
+
     expect(
-      filterPhotoRecordsByCollection(
-        records,
-        collections,
-        COLLECTION_FILTER_UNASSIGNED,
-      ).map((record) => record.id),
-    ).toEqual(['photo-2', 'photo-3'])
-    expect(
-      filterPhotoRecordsByCollection(records, collections, 'trip-1').map(
+      filterPhotoRecordsByCollection(records, collections, COLLECTION_FILTER_UNASSIGNED).map(
         (record) => record.id,
       ),
+    ).toEqual(['photo-2', 'photo-3'])
+
+    expect(
+      filterPhotoRecordsByCollection(records, collections, 'trip-1').map((record) => record.id),
     ).toEqual(['photo-1'])
   })
 
@@ -232,11 +227,13 @@ describe('mapLogic', () => {
         searchQuery: ' fukuoka ',
       }).map((record) => record.id),
     ).toEqual(['title'])
+
     expect(
       filterPhotoRecordsBySearchAndLocation(records, {
         searchQuery: 'DEKU',
       }).map((record) => record.id),
     ).toEqual(['memo'])
+
     expect(
       filterPhotoRecordsBySearchAndLocation(records, {
         searchQuery: 'canal',
@@ -247,9 +244,7 @@ describe('mapLogic', () => {
   it('does not apply search filtering when query is blank', () => {
     const records = [{ id: 'first' }, { id: 'second' }]
 
-    expect(
-      filterPhotoRecordsBySearchAndLocation(records, { searchQuery: '   ' }),
-    ).toEqual(records)
+    expect(filterPhotoRecordsBySearchAndLocation(records, { searchQuery: '   ' })).toEqual(records)
   })
 
   it('filters photo records by location source including unknown fallback', () => {
@@ -266,6 +261,7 @@ describe('mapLogic', () => {
         locationSourceFilter: 'manual',
       }).map((record) => record.id),
     ).toEqual(['manual'])
+
     expect(
       filterPhotoRecordsBySearchAndLocation(records, {
         locationSourceFilter: LOCATION_SOURCE_FILTER_UNKNOWN,
@@ -295,11 +291,7 @@ describe('mapLogic', () => {
         title: 'Deku market',
       },
     ]
-    const collectionFiltered = filterPhotoRecordsByCollection(
-      records,
-      collections,
-      'trip',
-    )
+    const collectionFiltered = filterPhotoRecordsByCollection(records, collections, 'trip')
 
     expect(
       filterPhotoRecordsBySearchAndLocation(collectionFiltered, {

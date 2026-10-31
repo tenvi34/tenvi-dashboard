@@ -56,9 +56,7 @@ const runCollectionTransaction = async (mode, action) => {
 
 // Map 컬렉션 조회
 export const getPhotoCollections = async () => {
-  const collections = await runCollectionTransaction('readonly', (store) =>
-    store.getAll(),
-  )
+  const collections = await runCollectionTransaction('readonly', (store) => store.getAll())
 
   return [...collections]
     .map(normalizeCollection)
@@ -82,9 +80,7 @@ export const createPhotoCollection = async (collectionInput) => {
 
 // Map 컬렉션 수정
 export const updatePhotoCollection = async (id, patch) => {
-  const currentCollection = await runCollectionTransaction('readonly', (store) =>
-    store.get(id),
-  )
+  const currentCollection = await runCollectionTransaction('readonly', (store) => store.get(id))
 
   if (!currentCollection) {
     return null
@@ -97,9 +93,7 @@ export const updatePhotoCollection = async (id, patch) => {
     updatedAt: new Date().toISOString(),
   })
 
-  await runCollectionTransaction('readwrite', (store) =>
-    store.put(nextCollection),
-  )
+  await runCollectionTransaction('readwrite', (store) => store.put(nextCollection))
 
   return nextCollection
 }

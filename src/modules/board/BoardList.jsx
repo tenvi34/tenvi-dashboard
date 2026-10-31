@@ -2,11 +2,7 @@ import MoreActions from '../../components/MoreActions.jsx'
 import UserAvatar from '../../components/UserAvatar.jsx'
 import BoardCategoryManager from './BoardCategoryManager.jsx'
 import BoardTrash from './BoardTrash.jsx'
-import {
-  BOARD_SORT_OPTIONS,
-  getBoardCategoryName,
-  getPostCategoryId,
-} from '../boardLogic.js'
+import { BOARD_SORT_OPTIONS, getBoardCategoryName, getPostCategoryId } from '../boardLogic.js'
 
 // Board 목록/검색/분류 컨트롤
 function BoardList({
@@ -52,10 +48,28 @@ function BoardList({
     <>
       <div className="board-toolbar">
         <div className="board-toolbar-actions">
-          <button type="button" className="board-primary-button board-write-button" onClick={onOpenWrite}>{t.board.write}</button>
+          <button
+            type="button"
+            className="board-primary-button board-write-button"
+            onClick={onOpenWrite}
+          >
+            {t.board.write}
+          </button>
           <MoreActions label={t.app.moreActions}>
-            <button type="button" className="board-secondary-button" onClick={onCategoryManagerToggle}>{t.board.categoryManage}</button>
-            <button type="button" className="board-secondary-button" onClick={onTrashToggle}>{t.board.trash} {trashedPosts.length}</button>
+            <button
+              type="button"
+              className="board-secondary-button"
+              onClick={onCategoryManagerToggle}
+            >
+              {t.board.categoryManage}
+            </button>
+            <button
+              type="button"
+              className="board-secondary-button"
+              onClick={onTrashToggle}
+            >
+              {t.board.trash} {trashedPosts.length}
+            </button>
           </MoreActions>
         </div>
       </div>
@@ -70,9 +84,15 @@ function BoardList({
         />
       ) : null}
 
-      <section className="board-section board-list-panel" aria-label={t.board.listTitle}>
+      <section
+        className="board-section board-list-panel"
+        aria-label={t.board.listTitle}
+      >
         <div className="board-list-controls">
-          <div className="board-category-filter" aria-label={t.board.categoryFilterLabel}>
+          <div
+            className="board-category-filter"
+            aria-label={t.board.categoryFilterLabel}
+          >
             <button
               type="button"
               className={`board-category-chip ${
@@ -96,7 +116,6 @@ function BoardList({
             ))}
           </div>
 
-
           <div className="board-list-summary">
             <span className="board-count">
               {hasSearchQuery || categoryFilter !== categoryFilterAll
@@ -110,7 +129,10 @@ function BoardList({
                 onChange={(event) => onSortModeChange(event.target.value)}
               >
                 {BOARD_SORT_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
+                  <option
+                    key={option.id}
+                    value={option.id}
+                  >
                     {t.board.sortOptions[option.id]}
                   </option>
                 ))}
@@ -137,7 +159,10 @@ function BoardList({
           />
         ) : null}
 
-        <div className="board-search-panel board-search-panel-bottom" role="search">
+        <div
+          className="board-search-panel board-search-panel-bottom"
+          role="search"
+        >
           <label className="board-search-field">
             <span>{t.board.searchLabel}</span>
             <input
@@ -155,9 +180,7 @@ function BoardList({
             {searchScopes.map((scope) => (
               <button
                 type="button"
-                className={`board-scope-button ${
-                  searchScope === scope ? 'is-active' : ''
-                }`}
+                className={`board-scope-button ${searchScope === scope ? 'is-active' : ''}`}
                 key={scope}
                 onClick={() => onSearchScopeChange(scope)}
               >
@@ -190,9 +213,7 @@ function BoardList({
                   key={post.id}
                   onClick={() => onOpenDetail(post.id)}
                 >
-                  <span className="board-post-number">
-                    {sortedPosts.length - index}
-                  </span>
+                  <span className="board-post-number">{sortedPosts.length - index}</span>
                   <span className="board-author">
                     <UserAvatar
                       avatarImageId={avatarImageId}
@@ -212,10 +233,11 @@ function BoardList({
                   <span className="board-category-badge">
                     {getBoardCategoryName(postCategoryId, categories)}
                   </span>
-                  <span className="board-title-views">
-                    {t.board.views(post.views ?? 0)}
-                  </span>
-                  <time className="board-title-date" dateTime={post.createdAt}>
+                  <span className="board-title-views">{t.board.views(post.views ?? 0)}</span>
+                  <time
+                    className="board-title-date"
+                    dateTime={post.createdAt}
+                  >
                     {formatPostDate(post.createdAt, {
                       dateStyle: 'medium',
                     })}
@@ -225,7 +247,10 @@ function BoardList({
             })}
           </div>
         ) : (
-          <div className="empty-state" role="status">
+          <div
+            className="empty-state"
+            role="status"
+          >
             <span>{t.common.systemMessage}</span>
             <p>
               {activePosts.length > 0 && (hasSearchQuery || categoryFilter !== categoryFilterAll)
@@ -234,8 +259,6 @@ function BoardList({
             </p>
           </div>
         )}
-
-
       </section>
     </>
   )

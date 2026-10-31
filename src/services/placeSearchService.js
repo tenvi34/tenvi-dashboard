@@ -26,12 +26,7 @@ export const getCountryCodeForSearchScope = (scope) =>
 
 // Nominatim 주소 요약
 export const createAddressSummary = (address = {}) =>
-  [
-    address.suburb,
-    address.city || address.town || address.village,
-    address.state,
-    address.country,
-  ]
+  [address.suburb, address.city || address.town || address.village, address.state, address.country]
     .filter(Boolean)
     .join(', ')
 
@@ -41,7 +36,13 @@ export const normalizePlaceSearchResult = (result) => {
   const longitude = Number(result?.lon)
   const displayName = String(result?.display_name ?? '').trim()
 
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180 || !displayName) {
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    Math.abs(latitude) > 90 ||
+    Math.abs(longitude) > 180 ||
+    !displayName
+  ) {
     return null
   }
 
@@ -103,6 +104,7 @@ const executePlaceSearch = async (
   if (countryCode) {
     searchParams.set('countrycodes', countryCode)
   }
+
   // 실패한 요청도 제한에 포함되도록 시작 시각 기록
   lastRequestTime = Date.now()
   const response = await fetcher(`${NOMINATIM_SEARCH_URL}?${searchParams}`, {
@@ -131,5 +133,6 @@ export const searchPlaces = (query, options) => {
   const request = searchQueue.then(() => executePlaceSearch(query, options))
   // 실패한 요청이 다음 검색을 막지 않도록 큐 복구
   searchQueue = request.catch(() => {})
+
   return request
 }

@@ -83,6 +83,7 @@ function BoardApiTest() {
   const handleUpdate = async () => {
     if (!selectedPostId) {
       setErrorMessage('수정할 게시글을 선택해주세요.')
+
       return
     }
 
@@ -93,9 +94,7 @@ function BoardApiTest() {
       const updatedPost = await updateBoardPost(selectedPostId, form)
 
       setPosts((currentPosts) =>
-        currentPosts.map((post) =>
-          post.id === updatedPost.id ? updatedPost : post,
-        ),
+        currentPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post)),
       )
       setResultMessage('게시글을 수정했습니다.')
     } catch (error) {
@@ -144,7 +143,10 @@ function BoardApiTest() {
         </button>
       </div>
 
-      <form className="board-api-test__form" onSubmit={handleCreate}>
+      <form
+        className="board-api-test__form"
+        onSubmit={handleCreate}
+      >
         <label className="settings-field">
           <span>Title</span>
           <input
@@ -183,7 +185,11 @@ function BoardApiTest() {
           </label>
         </div>
         <div className="board-api-test__actions">
-          <button className="settings-option" type="submit" disabled={isLoading}>
+          <button
+            className="settings-option"
+            type="submit"
+            disabled={isLoading}
+          >
             생성
           </button>
           <button
@@ -197,24 +203,24 @@ function BoardApiTest() {
         </div>
       </form>
 
-      {resultMessage ? (
-        <p className="board-api-test__status">{resultMessage}</p>
-      ) : null}
+      {resultMessage ? <p className="board-api-test__status">{resultMessage}</p> : null}
 
-      {errorMessage ? (
-        <p className="board-api-test__error">{errorMessage}</p>
-      ) : null}
+      {errorMessage ? <p className="board-api-test__error">{errorMessage}</p> : null}
 
-      <div className="board-api-test__list" aria-label="Board API posts">
+      <div
+        className="board-api-test__list"
+        aria-label="Board API posts"
+      >
         {posts.length > 0 ? (
           posts.map((post) => (
             <article
-              className={`board-api-test__item ${
-                selectedPostId === post.id ? 'is-selected' : ''
-              }`}
+              className={`board-api-test__item ${selectedPostId === post.id ? 'is-selected' : ''}`}
               key={post.id}
             >
-              <button type="button" onClick={() => handleSelectPost(post)}>
+              <button
+                type="button"
+                onClick={() => handleSelectPost(post)}
+              >
                 <strong>{post.title}</strong>
                 <span>{post.categoryId || '-'}</span>
               </button>

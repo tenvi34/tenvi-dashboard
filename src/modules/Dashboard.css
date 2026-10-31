@@ -296,8 +296,7 @@
   padding: 14px;
   border-color: rgba(90, 212, 255, 0.2);
   background:
-    linear-gradient(135deg, rgba(90, 212, 255, 0.08), rgba(5, 16, 31, 0.5)),
-    rgba(5, 16, 31, 0.38);
+    linear-gradient(135deg, rgba(90, 212, 255, 0.08), rgba(5, 16, 31, 0.5)), rgba(5, 16, 31, 0.38);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
@@ -328,8 +327,7 @@
   padding: 7px 9px;
   border-left: 2px solid rgba(90, 212, 255, 0.46);
   background:
-    linear-gradient(90deg, rgba(90, 212, 255, 0.1), rgba(90, 212, 255, 0.03)),
-    rgba(5, 16, 31, 0.3);
+    linear-gradient(90deg, rgba(90, 212, 255, 0.1), rgba(90, 212, 255, 0.03)), rgba(5, 16, 31, 0.3);
 }
 
 .dashboard-system-list dt {
@@ -449,24 +447,24 @@
 
 @media (max-width: 1180px) {
   .dashboard-tab-grid,
-    .dashboard-overview-grid {
-      grid-template-columns: 1fr;
-    }
+  .dashboard-overview-grid {
+    grid-template-columns: 1fr;
+  }
 
   .dashboard-archive-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
   .summary-panel:nth-child(1),
-    .summary-panel:nth-child(2),
-    .summary-panel:nth-child(3),
-    .summary-panel:nth-child(4) {
-      grid-column: auto;
-    }
+  .summary-panel:nth-child(2),
+  .summary-panel:nth-child(3),
+  .summary-panel:nth-child(4) {
+    grid-column: auto;
+  }
 
   .map-source-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .tenvi-dashboard.theme-standard .map-source-grid div,

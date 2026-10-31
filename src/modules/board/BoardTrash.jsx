@@ -1,27 +1,25 @@
 // Board 휴지통 목록
-function BoardTrash({
-  formatPostDate,
-  onPermanentDeletePost,
-  onRestorePost,
-  posts,
-  t,
-}) {
+function BoardTrash({ formatPostDate, onPermanentDeletePost, onRestorePost, posts, t }) {
   return (
-    <section className="board-trash-panel" aria-label={t.board.trash}>
+    <section
+      className="board-trash-panel"
+      aria-label={t.board.trash}
+    >
       <div className="board-trash-header">
         <div>
           <p className="module-label">{t.board.trash}</p>
           <h3>{t.board.trashTitle}</h3>
         </div>
-        <span className="board-count">
-          {t.board.trashCount(posts.length)}
-        </span>
+        <span className="board-count">{t.board.trashCount(posts.length)}</span>
       </div>
 
       {posts.length > 0 ? (
         <div className="board-trash-list">
           {posts.map((post) => (
-            <div className="board-trash-item" key={post.id}>
+            <div
+              className="board-trash-item"
+              key={post.id}
+            >
               <div>
                 <strong>{post.title}</strong>
                 <small>

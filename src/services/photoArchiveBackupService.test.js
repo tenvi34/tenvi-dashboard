@@ -72,9 +72,7 @@ describe('photoArchiveBackupService', () => {
         },
       ])
 
-      expect(serializedRecord.previewImageDataUrl).toBe(
-        'data:image/jpeg;base64,cHJldmlldw==',
-      )
+      expect(serializedRecord.previewImageDataUrl).toBe('data:image/jpeg;base64,cHJldmlldw==')
       expect(serializedRecord.locationSource).toBe('exif')
       expect(serializedRecord.collectionId).toBe('trip-1')
     } finally {
@@ -84,48 +82,41 @@ describe('photoArchiveBackupService', () => {
 
   it('rejects damaged image data URL records', () => {
     expect(
-      validateMapBackupRecordShape(
-        createMapBackupRecord({ previewImageDataUrl: 'not-image' }),
-      ),
+      validateMapBackupRecordShape(createMapBackupRecord({ previewImageDataUrl: 'not-image' })),
     ).toBeNull()
   })
 
   it('keeps exif, manual, and search location sources', () => {
     expect(
-      validateMapBackupRecordShape(
-        createMapBackupRecord({ locationSource: 'exif' }),
-      ).locationSource,
+      validateMapBackupRecordShape(createMapBackupRecord({ locationSource: 'exif' }))
+        .locationSource,
     ).toBe('exif')
+
     expect(
-      validateMapBackupRecordShape(
-        createMapBackupRecord({ locationSource: 'manual' }),
-      ).locationSource,
+      validateMapBackupRecordShape(createMapBackupRecord({ locationSource: 'manual' }))
+        .locationSource,
     ).toBe('manual')
+
     expect(
-      validateMapBackupRecordShape(
-        createMapBackupRecord({ locationSource: 'search' }),
-      ).locationSource,
+      validateMapBackupRecordShape(createMapBackupRecord({ locationSource: 'search' }))
+        .locationSource,
     ).toBe('search')
   })
 
   it('falls back unknown location sources to manual', () => {
     expect(
-      validateMapBackupRecordShape(
-        createMapBackupRecord({ locationSource: 'legacy' }),
-      ).locationSource,
+      validateMapBackupRecordShape(createMapBackupRecord({ locationSource: 'legacy' }))
+        .locationSource,
     ).toBe('manual')
   })
 
   it('restores missing collection links as null when collection backup is absent', () => {
-    expect(
-      validateMapBackupRecordShape(createMapBackupRecord(), null).collectionId,
-    ).toBeNull()
+    expect(validateMapBackupRecordShape(createMapBackupRecord(), null).collectionId).toBeNull()
   })
 
   it('keeps collection links that exist in restored collections', () => {
     expect(
-      validateMapBackupRecordShape(createMapBackupRecord(), [{ id: 'trip-1' }])
-        .collectionId,
+      validateMapBackupRecordShape(createMapBackupRecord(), [{ id: 'trip-1' }]).collectionId,
     ).toBe('trip-1')
   })
 
@@ -146,6 +137,7 @@ describe('photoArchiveBackupService', () => {
       id: 'trip-1',
       name: 'Fukuoka 2026',
     })
+
     expect(validateMapCollectionBackupRecordShape(collection)).toMatchObject({
       id: 'trip-1',
     })

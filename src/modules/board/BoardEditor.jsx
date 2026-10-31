@@ -22,8 +22,7 @@ const createTextBlock = () => ({
 
 // 텍스트 내용 길이에 따른 textarea 높이
 // 텍스트 줄 수 기반 높이 계산
-const getTextBlockRows = (content = '') =>
-  Math.max(String(content).split('\n').length, 2)
+const getTextBlockRows = (content = '') => Math.max(String(content).split('\n').length, 2)
 
 // Board 블록 에디터
 function BoardEditor({ blocks, onChange, t }) {
@@ -111,11 +110,7 @@ function BoardEditor({ blocks, onChange, t }) {
   // 블록 배열 삽입
   const insertBlocks = (newBlocks, targetBlockId) => {
     const insertIndex = getInsertIndex(targetBlockId)
-    onChange([
-      ...blocks.slice(0, insertIndex),
-      ...newBlocks,
-      ...blocks.slice(insertIndex),
-    ])
+    onChange([...blocks.slice(0, insertIndex), ...newBlocks, ...blocks.slice(insertIndex)])
   }
 
   // 단일 블록 내용 갱신
@@ -144,10 +139,7 @@ function BoardEditor({ blocks, onChange, t }) {
 
   // 이미지 선택 위치 예약
   // 이미지 삽입 위치 예약
-  const openImagePicker = (
-    targetBlockId = activeBlockIdRef.current,
-    appendTextBlock = false,
-  ) => {
+  const openImagePicker = (targetBlockId = activeBlockIdRef.current, appendTextBlock = false) => {
     pendingImageInsertRef.current = {
       appendTextBlock,
       targetBlockId,
@@ -232,10 +224,8 @@ function BoardEditor({ blocks, onChange, t }) {
 
     const nextBlocks = [...blocks]
     const [draggedBlock] = nextBlocks.splice(draggedIndex, 1)
-    const adjustedTargetIndex =
-      draggedIndex < targetIndex ? targetIndex - 1 : targetIndex
-    const insertIndex =
-      position === 'after' ? adjustedTargetIndex + 1 : adjustedTargetIndex
+    const adjustedTargetIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex
+    const insertIndex = position === 'after' ? adjustedTargetIndex + 1 : adjustedTargetIndex
 
     nextBlocks.splice(insertIndex, 0, draggedBlock)
     onChange(nextBlocks)
@@ -299,9 +289,7 @@ function BoardEditor({ blocks, onChange, t }) {
       <div className="board-editor-canvas">
         {blocks.map((block, index) => {
           const imageSource =
-            block.type === 'image'
-              ? block.src || imagePreviews[block.imageId] || ''
-              : ''
+            block.type === 'image' ? block.src || imagePreviews[block.imageId] || '' : ''
           const dropClass =
             dragState.targetId === block.id && dragState.position
               ? ` is-drop-${dragState.position}`
@@ -343,15 +331,13 @@ function BoardEditor({ blocks, onChange, t }) {
 
                     const dropTarget = getPointerDropTarget(event)
 
-                    if (
-                      !dropTarget.targetId ||
-                      dropTarget.targetId === currentDragState.blockId
-                    ) {
+                    if (!dropTarget.targetId || dropTarget.targetId === currentDragState.blockId) {
                       updateDragState({
                         ...currentDragState,
                         position: '',
                         targetId: '',
                       })
+
                       return
                     }
 
@@ -419,9 +405,7 @@ function BoardEditor({ blocks, onChange, t }) {
                 <textarea
                   className="board-editor-textarea"
                   value={block.content}
-                  onChange={(event) =>
-                    updateBlock(block.id, { content: event.target.value })
-                  }
+                  onChange={(event) => updateBlock(block.id, { content: event.target.value })}
                   placeholder={t.board.contentPlaceholder}
                   rows={getTextBlockRows(block.content)}
                 />

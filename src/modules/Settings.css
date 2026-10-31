@@ -337,16 +337,14 @@
   border-color: rgba(101, 255, 188, 0.22);
   border-left-width: 3px;
   background:
-    linear-gradient(135deg, rgba(101, 255, 188, 0.06), rgba(2, 9, 18, 0.4)),
-    rgba(2, 9, 18, 0.42);
+    linear-gradient(135deg, rgba(101, 255, 188, 0.06), rgba(2, 9, 18, 0.4)), rgba(2, 9, 18, 0.42);
 }
 
 .settings-board-backup-panel {
   border-color: rgba(90, 212, 255, 0.24);
   border-left-width: 3px;
   background:
-    linear-gradient(135deg, rgba(90, 212, 255, 0.06), rgba(2, 9, 18, 0.4)),
-    rgba(2, 9, 18, 0.42);
+    linear-gradient(135deg, rgba(90, 212, 255, 0.06), rgba(2, 9, 18, 0.4)), rgba(2, 9, 18, 0.42);
 }
 
 .settings-backup-panel .backup-actions,
@@ -399,8 +397,7 @@
   border-color: var(--border-default);
   border-left-width: 3px;
   background:
-    linear-gradient(135deg, rgba(90, 212, 255, 0.08), rgba(2, 9, 18, 0.42)),
-    rgba(2, 9, 18, 0.42);
+    linear-gradient(135deg, rgba(90, 212, 255, 0.08), rgba(2, 9, 18, 0.42)), rgba(2, 9, 18, 0.42);
 }
 
 .backend-status__card {
@@ -487,37 +484,37 @@
 /* PC/모바일 분기 */
 @media (max-width: 860px) {
   .settings-grid {
-      grid-template-areas:
-        'interface'
-        'startup'
-        'profile'
-        'data'
-        'actions';
-    }
+    grid-template-areas:
+      'interface'
+      'startup'
+      'profile'
+      'data'
+      'actions';
+  }
 
   .settings-data-panel,
-    .settings-backup-panel {
-      grid-column: auto;
-    }
+  .settings-backup-panel {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 560px) {
   .settings-options,
-    .settings-options-grid,
-    .data-metrics,
-    .settings-data-panel .data-metrics,
-    .backup-actions,
-    .backend-status__details div,
-    .board-api-test__row,
-    .board-api-test__compact-actions,
-    .board-api-test__columns,
-    .board-api-test__response {
-      grid-template-columns: 1fr;
-    }
+  .settings-options-grid,
+  .data-metrics,
+  .settings-data-panel .data-metrics,
+  .backup-actions,
+  .backend-status__details div,
+  .board-api-test__row,
+  .board-api-test__compact-actions,
+  .board-api-test__columns,
+  .board-api-test__response {
+    grid-template-columns: 1fr;
+  }
 
   .settings-data-panel {
-      grid-column: auto;
-    }
+    grid-column: auto;
+  }
 }
 
 .tenvi-dashboard.theme-standard .backup-status {

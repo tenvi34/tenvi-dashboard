@@ -51,18 +51,12 @@ export const validateBackupPayload = (backupPayload) => {
     backupPayload.data,
     'mapPhotoCollections',
   )
-  const hasBoardPosts = Object.prototype.hasOwnProperty.call(
-    backupPayload.data,
-    'boardPosts',
-  )
+  const hasBoardPosts = Object.prototype.hasOwnProperty.call(backupPayload.data, 'boardPosts')
   const hasCalendarEvents = Object.prototype.hasOwnProperty.call(
     backupPayload.data,
     'calendarEvents',
   )
-  const hasUserProfile = Object.prototype.hasOwnProperty.call(
-    backupPayload.data,
-    'userProfile',
-  )
+  const hasUserProfile = Object.prototype.hasOwnProperty.call(backupPayload.data, 'userProfile')
 
   // hudEffect: 구 백업 호환을 위해 존재하면 검증, 없으면 허용
   const isHudEffectValid = hudEffect === undefined || HUD_EFFECTS.includes(hudEffect)
@@ -90,10 +84,7 @@ export const validateBackupPayload = (backupPayload) => {
     return null
   }
 
-  if (
-    hasMapPhotoCollections &&
-    !Array.isArray(backupPayload.data.mapPhotoCollections)
-  ) {
+  if (hasMapPhotoCollections && !Array.isArray(backupPayload.data.mapPhotoCollections)) {
     return null
   }
 
@@ -102,7 +93,12 @@ export const validateBackupPayload = (backupPayload) => {
   }
 
   let extras
-  try { extras = validateBackupExtras(backupPayload.data) } catch { return null }
+
+  try {
+    extras = validateBackupExtras(backupPayload.data)
+  } catch {
+    return null
+  }
 
   return {
     ...extras,
@@ -117,9 +113,7 @@ export const validateBackupPayload = (backupPayload) => {
     mapPhotoCollections: hasMapPhotoCollections
       ? backupPayload.data.mapPhotoCollections
       : undefined,
-    mapPhotoRecords: hasMapPhotoRecords
-      ? backupPayload.data.mapPhotoRecords
-      : undefined,
+    mapPhotoRecords: hasMapPhotoRecords ? backupPayload.data.mapPhotoRecords : undefined,
     // 종료된 모듈을 지정한 구 백업의 시작 화면 보정
     startModule: START_MODULES.includes(startModule) ? startModule : 'dashboard',
     theme: normalizedTheme,

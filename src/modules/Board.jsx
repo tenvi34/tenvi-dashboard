@@ -39,8 +39,7 @@ const createEmptyTextBlock = () => ({
   content: '',
 })
 
-const getEditableBlocks = (blocks) =>
-  blocks.length > 0 ? blocks : [createEmptyTextBlock()]
+const getEditableBlocks = (blocks) => (blocks.length > 0 ? blocks : [createEmptyTextBlock()])
 
 // legacy content-only 게시글도 에디터 blocks로 변환
 const createEditableBlocks = (post) => {
@@ -123,8 +122,7 @@ function Board({ routeView = 'list', t }) {
   const userProfile = parseUserProfile(localStorage.getItem(STORAGE_KEYS.userProfile))
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
   const hasSearchQuery = normalizedSearchQuery.length > 0
-  const { detailImagePreviews, imageViewer, setImageViewer } =
-    useBoardDetailImages(selectedPost)
+  const { detailImagePreviews, imageViewer, setImageViewer } = useBoardDetailImages(selectedPost)
 
   const filteredPosts = activePosts.filter((post) => {
     const postCategoryId = getPostCategoryId(post, categories)
@@ -249,6 +247,7 @@ function Board({ routeView = 'list', t }) {
 
     if (!trimmedTitle || !hasWritableBody(blocks)) {
       setFormError(t.board.formRequiredMessage)
+
       return
     }
 
@@ -263,6 +262,7 @@ function Board({ routeView = 'list', t }) {
       await createPost(payload)
     } catch {
       setFormError(t.board.formRequiredMessage)
+
       return
     }
 
@@ -323,6 +323,7 @@ function Board({ routeView = 'list', t }) {
 
     if (!trimmedTitle || !hasWritableBody(blocks)) {
       setFormError(t.board.formRequiredMessage)
+
       return
     }
 
@@ -338,6 +339,7 @@ function Board({ routeView = 'list', t }) {
       await updatePost(selectedPost.id, payload)
     } catch {
       setFormError(t.board.formRequiredMessage)
+
       return
     }
 
@@ -414,6 +416,7 @@ function Board({ routeView = 'list', t }) {
 
     if (nextCategories.length === categories.length) {
       setCategoryError(t.board.categoryInvalidMessage)
+
       return
     }
 
@@ -424,14 +427,11 @@ function Board({ routeView = 'list', t }) {
 
   // 카테고리 수정
   const handleUpdateCategory = (targetCategoryId) => {
-    const nextCategories = updateBoardCategory(
-      categories,
-      targetCategoryId,
-      editingCategoryName,
-    )
+    const nextCategories = updateBoardCategory(categories, targetCategoryId, editingCategoryName)
 
     if (nextCategories === categories || nextCategories.length !== categories.length) {
       setCategoryError(t.board.categoryInvalidMessage)
+
       return
     }
 
@@ -481,6 +481,7 @@ function Board({ routeView = 'list', t }) {
   useEffect(() => {
     if (routeView !== 'write') {
       writeRouteInitializedRef.current = false
+
       return
     }
 
@@ -533,7 +534,10 @@ function Board({ routeView = 'list', t }) {
   }, [increasePostViews, routeView, selectedPost, selectedPostId])
 
   return (
-    <section className="module-panel board-module" aria-labelledby="board-title">
+    <section
+      className="module-panel board-module"
+      aria-labelledby="board-title"
+    >
       <div className="module-header">
         <div>
           <p className="module-label">{t.board.label}</p>
@@ -546,7 +550,12 @@ function Board({ routeView = 'list', t }) {
         <p className="board-storage-status">원격 Board 게시글을 불러오는 중입니다.</p>
       ) : null}
       {postsError ? (
-        <p className="board-storage-status is-error" role="alert">{postsError}</p>
+        <p
+          className="board-storage-status is-error"
+          role="alert"
+        >
+          {postsError}
+        </p>
       ) : null}
 
       {routeView === 'write' ? (

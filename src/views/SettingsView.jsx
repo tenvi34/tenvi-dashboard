@@ -13,7 +13,9 @@ function SettingsView() {
       language={language}
       onLanguageChange={setLanguage}
       onSettingsTabChange={(tabId) => {
-        if (tabId === 'server') navigate('/settings/storage')
+        if (tabId === 'server') {
+          navigate('/settings/storage')
+        }
       }}
       onStartModuleChange={setStartModule}
       onThemeChange={setTheme}

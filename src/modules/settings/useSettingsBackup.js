@@ -1,14 +1,35 @@
 import { useRef, useState } from 'react'
 import { STORAGE_KEYS } from '../../constants/storageKeys.js'
-import { getPhotoRecords, replacePhotoArchiveData, replacePhotoRecords } from '../../services/photoArchiveRepository.js'
+import {
+  getPhotoRecords,
+  replacePhotoArchiveData,
+  replacePhotoRecords,
+} from '../../services/photoArchiveRepository.js'
 import { getPhotoCollections } from '../../services/photoCollectionRepository.js'
-import { preparePhotoCollectionsForRestore, preparePhotoRecordsForRestore, serializePhotoCollectionsForBackup, serializePhotoRecordsForBackup } from '../../services/photoArchiveBackupService.js'
-import { collectBoardBackupData, downloadBoardBackupFile, parseBoardBackupFile, restoreBoardBackupData } from '../boardBackupLogic.js'
-import { BACKUP_APP, BACKUP_TYPE, BACKUP_VERSION, createBackupFileName, validateBackupPayload } from '../settingsBackup.js'
+import {
+  preparePhotoCollectionsForRestore,
+  preparePhotoRecordsForRestore,
+  serializePhotoCollectionsForBackup,
+  serializePhotoRecordsForBackup,
+} from '../../services/photoArchiveBackupService.js'
+import {
+  collectBoardBackupData,
+  downloadBoardBackupFile,
+  parseBoardBackupFile,
+  restoreBoardBackupData,
+} from '../boardBackupLogic.js'
+import {
+  BACKUP_APP,
+  BACKUP_TYPE,
+  BACKUP_VERSION,
+  createBackupFileName,
+  validateBackupPayload,
+} from '../settingsBackup.js'
 import { parseUserProfile } from '../userProfileLogic.js'
 import { captureBackupExtras, collectBackupExtras, restoreBackupExtras } from './backupExtras.js'
 
 const USER_PROFILE_STORAGE_KEY = STORAGE_KEYS.userProfile
+
 // 백업 대상 목록 읽기
 const readStoredList = (storageKey) => {
   const savedValue = localStorage.getItem(storageKey)
@@ -26,31 +47,46 @@ const readStoredList = (storageKey) => {
   }
 }
 
-
 // 백업 UI와 저장소 복원 흐름을 Settings의 프로필/서버 관리에서 분리
-export default function useSettingsBackup({ language, startModule, theme, t,
-  onLanguageChange, onStartModuleChange, onThemeChange, setProfileForm, setDataVersion }) {
+export default function useSettingsBackup({
+  language,
+  startModule,
+  theme,
+  t,
+  onLanguageChange,
+  onStartModuleChange,
+  onThemeChange,
+  setProfileForm,
+  setDataVersion,
+}) {
   const [backupStatus, setBackupStatus] = useState(null)
   const [boardBackupStatus, setBoardBackupStatus] = useState(null)
   const [busy, setBusy] = useState(false)
   const lock = useRef(false)
   const backupFileInputRef = useRef(null)
   const boardBackupFileInputRef = useRef(null)
+
   const runExclusive = async (action) => {
-    if (lock.current) return
+    if (lock.current) {
+      return
+    }
+
     lock.current = true
     setBusy(true)
-    try { await action() } finally { lock.current = false; setBusy(false) }
+
+    try {
+      await action()
+    } finally {
+      lock.current = false
+      setBusy(false)
+    }
   }
+
   // 전체 백업 JSON 내보내기
   const handleExportBackupAction = async () => {
     try {
-      const mapPhotoRecords = await serializePhotoRecordsForBackup(
-        await getPhotoRecords(),
-      )
-      const mapPhotoCollections = serializePhotoCollectionsForBackup(
-        await getPhotoCollections(),
-      )
+      const mapPhotoRecords = await serializePhotoRecordsForBackup(await getPhotoRecords())
+      const mapPhotoCollections = serializePhotoCollectionsForBackup(await getPhotoCollections())
       const backupPayload = {
         app: BACKUP_APP,
         type: BACKUP_TYPE,
@@ -65,9 +101,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
           theme,
           mapPhotoCollections,
           mapPhotoRecords,
-          userProfile: parseUserProfile(
-            localStorage.getItem(USER_PROFILE_STORAGE_KEY),
-          ),
+          userProfile: parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)),
         },
       }
       const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
@@ -120,6 +154,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
           type: 'error',
           message: t.settings.boardBackupInvalid,
         })
+
         return
       }
 
@@ -128,6 +163,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
           type: 'info',
           message: t.settings.restoreCancelled,
         })
+
         return
       }
 
@@ -152,23 +188,27 @@ export default function useSettingsBackup({ language, startModule, theme, t,
   const restoreLocalStorageData = (validatedBackup) => {
     // 기존 localStorage key 유지
     if (validatedBackup.hasBoardPosts) {
-      localStorage.setItem(
-        STORAGE_KEYS.boardPosts,
-        JSON.stringify(validatedBackup.boardPosts),
-      )
+      localStorage.setItem(STORAGE_KEYS.boardPosts, JSON.stringify(validatedBackup.boardPosts))
     }
+
     if (validatedBackup.hasCalendarEvents) {
       localStorage.setItem(
         STORAGE_KEYS.calendarEvents,
         JSON.stringify(validatedBackup.calendarEvents),
       )
     }
+
     if (validatedBackup.timerCompletedSessions !== undefined) {
-      localStorage.setItem(STORAGE_KEYS.timerCompletedSessions, String(validatedBackup.timerCompletedSessions))
+      localStorage.setItem(
+        STORAGE_KEYS.timerCompletedSessions,
+        String(validatedBackup.timerCompletedSessions),
+      )
     }
+
     localStorage.setItem(STORAGE_KEYS.language, validatedBackup.language)
     localStorage.setItem(STORAGE_KEYS.startModule, validatedBackup.startModule)
     localStorage.setItem(STORAGE_KEYS.theme, validatedBackup.theme)
+
     if (validatedBackup.hasUserProfile) {
       localStorage.setItem(
         STORAGE_KEYS.userProfile,
@@ -191,6 +231,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
 
       if (!validatedBackup) {
         setBackupStatus({ type: 'error', message: t.settings.backupInvalid })
+
         return
       }
 
@@ -206,6 +247,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
 
       if (!window.confirm(t.settings.restoreConfirmMessage)) {
         setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+
         return
       }
 
@@ -220,6 +262,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
 
         if (!shouldContinueWithValidMapRecords) {
           setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+
           return
         }
       }
@@ -235,13 +278,13 @@ export default function useSettingsBackup({ language, startModule, theme, t,
 
         if (!shouldContinueWithValidCollections) {
           setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+
           return
         }
       }
 
       if (
-        (validatedBackup.hasMapPhotoRecords ||
-          validatedBackup.hasMapPhotoCollections) &&
+        (validatedBackup.hasMapPhotoRecords || validatedBackup.hasMapPhotoCollections) &&
         !window.confirm(
           t.settings.restoreMapReplaceConfirm(
             mapRestorePlan?.totalCount ?? 0,
@@ -251,6 +294,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
         )
       ) {
         setBackupStatus({ type: 'info', message: t.settings.restoreCancelled })
+
         return
       }
 
@@ -266,20 +310,13 @@ export default function useSettingsBackup({ language, startModule, theme, t,
       }
       const shouldTouchMapArchive =
         validatedBackup.hasMapPhotoRecords || validatedBackup.hasMapPhotoCollections
-      const previousMapRecords = shouldTouchMapArchive
-        ? await getPhotoRecords()
-        : null
-      const previousCollections = shouldTouchMapArchive
-        ? await getPhotoCollections()
-        : null
+      const previousMapRecords = shouldTouchMapArchive ? await getPhotoRecords() : null
+      const previousCollections = shouldTouchMapArchive ? await getPhotoCollections() : null
 
       const previousExtras = await captureBackupExtras(validatedBackup)
 
       try {
-        if (
-          validatedBackup.hasMapPhotoRecords &&
-          validatedBackup.hasMapPhotoCollections
-        ) {
+        if (validatedBackup.hasMapPhotoRecords && validatedBackup.hasMapPhotoCollections) {
           await replacePhotoArchiveData({
             records: mapRestorePlan.restoredRecords,
             collections: collectionRestorePlan.restoredCollections,
@@ -288,9 +325,7 @@ export default function useSettingsBackup({ language, startModule, theme, t,
           await replacePhotoRecords(mapRestorePlan.restoredRecords)
         } else if (validatedBackup.hasMapPhotoCollections) {
           const restoredCollectionIds = new Set(
-            collectionRestorePlan.restoredCollections.map(
-              (collection) => collection.id,
-            ),
+            collectionRestorePlan.restoredCollections.map((collection) => collection.id),
           )
 
           await replacePhotoArchiveData({
@@ -310,28 +345,41 @@ export default function useSettingsBackup({ language, startModule, theme, t,
         // 저장소별 복구는 독립 실행하여 한 곳 실패가 나머지 복구를 막지 않도록 처리
         await Promise.allSettled([
           restoreBackupExtras(previousExtras),
-          ...(shouldTouchMapArchive ? [replacePhotoArchiveData({
-            records: previousMapRecords, collections: previousCollections,
-          })] : []),
-          ...Object.entries(previousLocalStorageData).map(([key, value]) => Promise.resolve().then(() => {
-            if (value === null) localStorage.removeItem(STORAGE_KEYS[key])
-            else localStorage.setItem(STORAGE_KEYS[key], value)
-          })),
+          ...(shouldTouchMapArchive
+            ? [
+                replacePhotoArchiveData({
+                  records: previousMapRecords,
+                  collections: previousCollections,
+                }),
+              ]
+            : []),
+          ...Object.entries(previousLocalStorageData).map(([key, value]) =>
+            Promise.resolve().then(() => {
+              if (value === null) {
+                localStorage.removeItem(STORAGE_KEYS[key])
+              } else {
+                localStorage.setItem(STORAGE_KEYS[key], value)
+              }
+            }),
+          ),
         ])
 
         setBackupStatus({
           type: 'error',
           message: t.settings.restoreRollbackError,
         })
+
         return
       }
 
       onLanguageChange(validatedBackup.language)
       onStartModuleChange(validatedBackup.startModule)
       onThemeChange(validatedBackup.theme)
+
       if (validatedBackup.hasUserProfile) {
         setProfileForm(parseUserProfile(localStorage.getItem(USER_PROFILE_STORAGE_KEY)))
       }
+
       setDataVersion((currentVersion) => currentVersion + 1)
 
       if (!validatedBackup.hasMapPhotoRecords) {
@@ -373,9 +421,24 @@ export default function useSettingsBackup({ language, startModule, theme, t,
   }
 
   const handleExportBackup = (event) => runExclusive(() => handleExportBackupAction(event))
-  const handleExportBoardBackup = (event) => runExclusive(() => handleExportBoardBackupAction(event))
-  const handleRestoreBoardBackup = (event) => runExclusive(() => handleRestoreBoardBackupAction(event))
+
+  const handleExportBoardBackup = (event) =>
+    runExclusive(() => handleExportBoardBackupAction(event))
+
+  const handleRestoreBoardBackup = (event) =>
+    runExclusive(() => handleRestoreBoardBackupAction(event))
+
   const handleRestoreBackup = (event) => runExclusive(() => handleRestoreBackupAction(event))
-  return { backupStatus, boardBackupStatus, busy, backupFileInputRef, boardBackupFileInputRef,
-    handleExportBackup, handleExportBoardBackup, handleRestoreBackup, handleRestoreBoardBackup }
+
+  return {
+    backupStatus,
+    boardBackupStatus,
+    busy,
+    backupFileInputRef,
+    boardBackupFileInputRef,
+    handleExportBackup,
+    handleExportBoardBackup,
+    handleRestoreBackup,
+    handleRestoreBoardBackup,
+  }
 }

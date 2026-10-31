@@ -3,7 +3,11 @@ import { PhotoPreview } from './MapPhotoPreview.jsx'
 // Map 상위 모드 전환 탭
 function MapModeTabs({ activeMode, onChangeMode, t }) {
   return (
-    <div className="map-mode-tabs" role="tablist" aria-label={t.map.modeTabs}>
+    <div
+      className="map-mode-tabs"
+      role="tablist"
+      aria-label={t.map.modeTabs}
+    >
       <button
         className={`map-mode-tab${activeMode === 'explore' ? ' is-active' : ''}`}
         role="tab"
@@ -51,9 +55,7 @@ function MobileMapViewTabs({ activeView, onChangeView, t }) {
     >
       {views.map((view) => (
         <button
-          className={`mobile-map-view-tab ${
-            activeView === view.id ? 'is-active' : ''
-          }`}
+          className={`mobile-map-view-tab ${activeView === view.id ? 'is-active' : ''}`}
           key={view.id}
           type="button"
           role="tab"
@@ -74,7 +76,11 @@ function MobileMapPreviewCard({ collectionName, onOpenDetail, record, t }) {
   }
 
   return (
-    <button className="mobile-map-preview-card" type="button" onClick={onOpenDetail}>
+    <button
+      className="mobile-map-preview-card"
+      type="button"
+      onClick={onOpenDetail}
+    >
       <PhotoPreview
         alt={record.title}
         blob={record.previewImageBlob}
@@ -92,19 +98,21 @@ function MobileMapPreviewCard({ collectionName, onOpenDetail, record, t }) {
 // 모바일 지도 빈 상태 안내
 function MobileMapEmptyCard({ onOpenList, t }) {
   return (
-    <div className="mobile-map-empty-card" role="note">
+    <div
+      className="mobile-map-empty-card"
+      role="note"
+    >
       <strong>{t.map.mobileMapEmptyTitle}</strong>
       <p>{t.map.mobileMapEmptyDescription}</p>
-      <button className="map-secondary-button" type="button" onClick={onOpenList}>
+      <button
+        className="map-secondary-button"
+        type="button"
+        onClick={onOpenList}
+      >
         {t.map.backToList}
       </button>
     </div>
   )
 }
 
-export {
-  MapModeTabs,
-  MobileMapEmptyCard,
-  MobileMapPreviewCard,
-  MobileMapViewTabs,
-}
+export { MapModeTabs, MobileMapEmptyCard, MobileMapPreviewCard, MobileMapViewTabs }

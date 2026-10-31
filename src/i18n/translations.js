@@ -42,7 +42,12 @@ export const translations = {
       homeDescription: '오늘의 일정을 확인하고, 다음 계획을 시작하세요.',
       viewAll: '전체 보기',
       quickLaunch: '바로 시작하기',
-      shortcuts: { travel: '여행 계획하기', map: '사진 기록 보기', calendar: '일정 확인하기', board: '생각 기록하기' },
+      shortcuts: {
+        travel: '여행 계획하기',
+        map: '사진 기록 보기',
+        calendar: '일정 확인하기',
+        board: '생각 기록하기',
+      },
       summaryLoading: '요약 데이터를 불러오는 중…',
       summaryLoadError: (modules) => `요약 데이터를 불러오지 못했습니다: ${modules}`,
       label: '대시보드',
@@ -68,8 +73,7 @@ export const translations = {
       noMapRecords: '아직 저장된 사진 기록이 없습니다.',
       noRepresentativeCollection: '연결된 사진이 있는 컬렉션이 없습니다.',
       untitledMapRecord: '제목 없는 사진 기록',
-      mapBriefing: (count) =>
-        `지도 아카이브에 사진 기록 ${count}개가 저장되어 있습니다.`,
+      mapBriefing: (count) => `지도 아카이브에 사진 기록 ${count}개가 저장되어 있습니다.`,
       mapBriefingEmpty: '지도 아카이브에 아직 저장된 사진 기록이 없습니다.',
       mapLocationSourceValue: (source) =>
         ({
@@ -147,7 +151,8 @@ export const translations = {
       title: '앨범',
       expandMap: '지도 펼치기',
       collapseMap: '지도 접기',
-      albumMapHint: '사진을 선택해 크게 확인하세요. 위치를 보거나 지정할 때 지도를 펼칠 수 있습니다.',
+      albumMapHint:
+        '사진을 선택해 크게 확인하세요. 위치를 보거나 지정할 때 지도를 펼칠 수 있습니다.',
       pocBadge: 'PoC',
       archiveBadge: '로컬 아카이브',
       uploadLabel: '사진 업로드',
@@ -195,7 +200,8 @@ export const translations = {
       backToMap: '지도에서 보기',
       backToList: '목록 보기',
       mobileMapEmptyTitle: '표시할 사진 기록이 없습니다.',
-      mobileMapEmptyDescription: '목록에서 필터를 조정하거나 사진 업로드 탭에서 새 기록을 추가하세요.',
+      mobileMapEmptyDescription:
+        '목록에서 필터를 조정하거나 사진 업로드 탭에서 새 기록을 추가하세요.',
       openPhotoPreview: '사진 전체 보기',
       photoPreviewLabel: '사진 전체 보기',
       closePhotoPreview: '닫기',
@@ -275,8 +281,7 @@ export const translations = {
       fitAllMarkers: '전체 위치 보기',
       bulkUploadLabel: '대량 업로드',
       bulkUploadTitle: '여행 사진 일괄 분석',
-      bulkAnalyzingProgress: (processed, total) =>
-        `${processed} / ${total} 처리 완료`,
+      bulkAnalyzingProgress: (processed, total) => `${processed} / ${total} 처리 완료`,
       bulkCancelAnalysis: '분석 취소',
       bulkAnalysisCancelled: '대량 업로드 분석이 취소되었습니다.',
       bulkTotalFiles: '전체 사진',
@@ -288,8 +293,7 @@ export const translations = {
       bulkSaveLocated: (count) => `위치정보 있는 사진 ${count}장 저장`,
       bulkSaving: '일괄 저장 중',
       bulkClearResults: '결과 정리',
-      bulkSaveComplete: (success, failed) =>
-        `일괄 저장 완료: 성공 ${success}장, 실패 ${failed}장`,
+      bulkSaveComplete: (success, failed) => `일괄 저장 완료: 성공 ${success}장, 실패 ${failed}장`,
       bulkSaveError: '일괄 저장 중 오류가 발생했습니다.',
       bulkNoSaveCandidates: '저장 가능한 위치정보 있는 사진이 없습니다.',
       bulkSaveCandidates: '저장 후보',
@@ -320,8 +324,7 @@ export const translations = {
       modeExplore: '사진 목록',
       modeUpload: '사진 업로드',
       modeCollections: '컬렉션 관리',
-      collectionDeletePolicy:
-        '컬렉션을 삭제해도 연결된 사진은 삭제되지 않고 미분류로 이동합니다.',
+      collectionDeletePolicy: '컬렉션을 삭제해도 연결된 사진은 삭제되지 않고 미분류로 이동합니다.',
     },
     board: {
       label: '게시판 모듈',
@@ -341,8 +344,7 @@ export const translations = {
       draftCount: (count) => `임시글 ${count}개`,
       clearDrafts: '전체 삭제',
       clearDraftsConfirm: '저장된 임시글을 모두 삭제할까요?',
-      loadDraftConfirm:
-        '현재 작성 중인 내용을 임시저장한 뒤 선택한 글을 불러올까요?',
+      loadDraftConfirm: '현재 작성 중인 내용을 임시저장한 뒤 선택한 글을 불러올까요?',
       draftSavedAt: (savedAt) => `마지막 저장 ${savedAt}`,
       draftPreview: (preview) => preview,
       emptyDraftPreview: '본문 없이 저장된 임시글입니다.',
@@ -469,8 +471,7 @@ export const translations = {
       boardBackupTitle: 'Board 전용 백업',
       storageModeLabel: 'REMOTE STORAGE',
       storageModeTitle: '저장소 모드',
-      storageModeNote:
-        '기본값은 Local이며, Remote 선택 시 해당 모듈은 SQLite API를 사용합니다.',
+      storageModeNote: '기본값은 Local이며, Remote 선택 시 해당 모듈은 SQLite API를 사용합니다.',
       storageCopyNote: 'LOCAL 데이터는 삭제하지 않고 REMOTE에 없는 항목만 복사합니다.',
       storageModeLocal: '기본값 · Local',
       storageModeRemote: '선택 중 · Remote',
@@ -501,8 +502,7 @@ export const translations = {
       mapRemoteCopy: 'LOCAL Map 데이터를 REMOTE로 복사',
       mapRemoteCopying: 'Map 데이터를 REMOTE로 복사 중...',
       mapRemoteCopyEmpty: '복사할 LOCAL Map 데이터가 없습니다.',
-      mapRemoteCopyConnectionError:
-        'REMOTE API에 연결하지 못해 Map 복사에 실패했습니다.',
+      mapRemoteCopyConnectionError: 'REMOTE API에 연결하지 못해 Map 복사에 실패했습니다.',
       mapRemoteCopyResult: (collections, records) =>
         `Map 복사 완료: 컬렉션 성공 ${collections.copied}개, 건너뜀 ${collections.skipped}개, 실패 ${collections.failed}개 / 기록 성공 ${records.copied}개, 건너뜀 ${records.skipped}개, 실패 ${records.failed}개`,
       exportBoardBackup: 'Board 전용 백업 내보내기',
@@ -534,8 +534,7 @@ export const translations = {
       appSettingsRemoteCopyResult: (copied, updated, skipped, failed) =>
         `Settings copy complete: ${copied} created, ${updated} updated, ${skipped} skipped, ${failed} failed`,
       appSettingsRemoteSaveError: 'Could not save REMOTE Settings.',
-      profileRemoteLoadError:
-        'Could not load REMOTE Profile, so LOCAL values are kept.',
+      profileRemoteLoadError: 'Could not load REMOTE Profile, so LOCAL values are kept.',
       profileRemoteSaveError: 'Could not save REMOTE Profile.',
       backupNote:
         '이 브라우저의 Board 게시글, Calendar 일정, 여행, 타이머 완료 횟수, 프로필·이미지, 언어·테마·시작 설정, Map 사진 기록을 백업합니다. Remote 서버 데이터는 포함하지 않습니다. Board 이미지·카테고리·임시저장은 Board 전용 백업을 사용하세요.',
@@ -554,16 +553,14 @@ export const translations = {
         `백업 파일에는 Map 컬렉션 ${total}개가 포함되어 있습니다. ${valid}개는 복원 가능하고 ${damaged}개는 손상되어 복원할 수 없습니다. 정상 컬렉션만 복원하면 기존 Map 컬렉션이 교체됩니다. 계속 진행하시겠습니까?`,
       restoreCancelled: '복원을 취소했습니다.',
       restoreComplete: '백업 데이터를 복원했습니다.',
-      restoreCompleteWithMap: (count) =>
-        `백업 데이터와 Map 사진 기록 ${count}개를 복원했습니다.`,
+      restoreCompleteWithMap: (count) => `백업 데이터와 Map 사진 기록 ${count}개를 복원했습니다.`,
       restoreCompleteWithDamagedMap: (valid, damaged) =>
         `백업 데이터와 Map 사진 기록 ${valid}개를 복원했습니다. 손상된 Map 기록 ${damaged}개는 제외했습니다.`,
       restoreDamagedMapCollectionsSkipped: (valid, damaged) =>
         `Map 컬렉션 ${valid}개를 복원했고 손상된 컬렉션 ${damaged}개는 제외했습니다.`,
       restoreMapKept:
         '이 백업 파일에는 Map 사진 기록이 포함되어 있지 않아 현재 Map 기록은 유지되었습니다.',
-      restoreRollbackError:
-        '복원 중 오류가 발생해 가능한 범위에서 이전 데이터를 복구했습니다.',
+      restoreRollbackError: '복원 중 오류가 발생해 가능한 범위에서 이전 데이터를 복구했습니다.',
     },
   },
   en: {
@@ -605,7 +602,12 @@ export const translations = {
       homeDescription: 'Check your day and make room for your next plan.',
       viewAll: 'View all',
       quickLaunch: 'Get started',
-      shortcuts: { travel: 'Plan your next trip', map: 'Explore your photos', calendar: 'See your schedule', board: 'Write something new' },
+      shortcuts: {
+        travel: 'Plan your next trip',
+        map: 'Explore your photos',
+        calendar: 'See your schedule',
+        board: 'Write something new',
+      },
       summaryLoading: 'Loading summary data…',
       summaryLoadError: (modules) => `Could not load summary data: ${modules}`,
       label: 'Dashboard',
@@ -631,8 +633,7 @@ export const translations = {
       noMapRecords: 'No photo records archived yet.',
       noRepresentativeCollection: 'No collection has linked photos yet.',
       untitledMapRecord: 'Untitled photo record',
-      mapBriefing: (count) =>
-        `${count} photo records are stored in the map archive.`,
+      mapBriefing: (count) => `${count} photo records are stored in the map archive.`,
       mapBriefingEmpty: 'No photo records are stored in the map archive yet.',
       mapLocationSourceValue: (source) =>
         ({
@@ -641,8 +642,7 @@ export const translations = {
           search: 'Place search',
           unknown: 'Unknown',
         })[source] ?? 'Unknown',
-      collectionPhotoCount: (count) =>
-        `${count} ${count === 1 ? 'photo' : 'photos'}`,
+      collectionPhotoCount: (count) => `${count} ${count === 1 ? 'photo' : 'photos'}`,
       noBoardPosts: 'No board posts yet.',
       todayEvents: "Today's Events",
       nextEvent: 'Next Event',
@@ -690,9 +690,10 @@ export const translations = {
       nextMonth: 'Next',
       year: 'Year',
       month: 'Month',
-      monthValue: (month) => new Date(2026, month - 1, 1).toLocaleString('en', {
-        month: 'short',
-      }),
+      monthValue: (month) =>
+        new Date(2026, month - 1, 1).toLocaleString('en', {
+          month: 'short',
+        }),
       weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       eventCount: (count) => `${count} item${count === 1 ? '' : 's'}`,
       fullMoon: 'Full moon',
@@ -728,10 +729,8 @@ export const translations = {
       deleteError: 'Could not delete this photo record.',
       noLocation: 'This photo does not contain location information.',
       manualPrompt: 'Select a location directly on the map.',
-      clickToSetLocation:
-        'Click the map to set or revise the marker location for this photo.',
-      selectPhotoPrompt:
-        'Select a photo to detect its location and save it as a record.',
+      clickToSetLocation: 'Click the map to set or revise the marker location for this photo.',
+      selectPhotoPrompt: 'Select a photo to detect its location and save it as a record.',
       draftLabel: 'New photo record',
       titleField: 'Title',
       titlePlaceholder: 'Photo record title',
@@ -763,7 +762,8 @@ export const translations = {
       backToMap: 'View on Map',
       backToList: 'List View',
       mobileMapEmptyTitle: 'No photo records to show.',
-      mobileMapEmptyDescription: 'Adjust filters in the list or add a new record from Photo Upload.',
+      mobileMapEmptyDescription:
+        'Adjust filters in the list or add a new record from Photo Upload.',
       openPhotoPreview: 'View full photo',
       photoPreviewLabel: 'Full photo preview',
       closePhotoPreview: 'Close',
@@ -822,8 +822,7 @@ export const translations = {
       collectionNameRequired: 'Enter a collection name.',
       collectionCreated: 'Collection created.',
       collectionUpdated: 'Collection updated.',
-      collectionDeleted:
-        'Collection deleted. Linked photos were moved to Uncategorized.',
+      collectionDeleted: 'Collection deleted. Linked photos were moved to Uncategorized.',
       collectionSaveError: 'Could not save the collection.',
       collectionDeleteError: 'Could not delete the collection.',
       deleteCollectionConfirm: (name, count) =>
@@ -844,8 +843,7 @@ export const translations = {
       fitAllMarkers: 'Fit All',
       bulkUploadLabel: 'Bulk upload',
       bulkUploadTitle: 'Batch travel photo analysis',
-      bulkAnalyzingProgress: (processed, total) =>
-        `${processed} / ${total} processed`,
+      bulkAnalyzingProgress: (processed, total) => `${processed} / ${total} processed`,
       bulkCancelAnalysis: 'Cancel Analysis',
       bulkAnalysisCancelled: 'Bulk upload analysis was cancelled.',
       bulkTotalFiles: 'Total Photos',
@@ -878,16 +876,13 @@ export const translations = {
       bulkMapClickReady:
         'Click the map or choose a place search result to apply the same location to selected photos. Existing EXIF coordinates are replaced when selected.',
       bulkSelectMissingFirst: 'Select photos before applying a location.',
-      bulkSelectLocationTargetsFirst:
-        'Select photos before applying a shared location.',
+      bulkSelectLocationTargetsFirst: 'Select photos before applying a shared location.',
       bulkSameLocationTargets: 'Shared location targets',
       bulkLastAssignedLocation: (source) =>
         `Last assigned location: ${source === 'search' ? 'Place search' : 'Map click'}`,
-      bulkPreviewCreateError:
-        'Could not create a preview image, so the location was not applied.',
+      bulkPreviewCreateError: 'Could not create a preview image, so the location was not applied.',
       bulkPendingLocation: 'Pending save location',
-      bulkAssignedPhotoCount: (count) =>
-        `${count} ${count === 1 ? 'photo' : 'photos'} assigned`,
+      bulkAssignedPhotoCount: (count) => `${count} ${count === 1 ? 'photo' : 'photos'} assigned`,
       modeTabs: 'Album mode',
       modeExplore: 'Photos',
       modeUpload: 'Upload Photos',
@@ -913,8 +908,7 @@ export const translations = {
       draftCount: (count) => `${count} ${count === 1 ? 'draft' : 'drafts'}`,
       clearDrafts: 'Delete All',
       clearDraftsConfirm: 'Delete all saved drafts?',
-      loadDraftConfirm:
-        'Save the current writing as a draft before loading the selected draft?',
+      loadDraftConfirm: 'Save the current writing as a draft before loading the selected draft?',
       draftSavedAt: (savedAt) => `Last saved ${savedAt}`,
       draftPreview: (preview) => preview,
       emptyDraftPreview: 'Draft saved without body text.',
@@ -982,8 +976,7 @@ export const translations = {
         views: 'Most viewed',
         title: 'Title',
       },
-      searchResultCount: (count) =>
-        `${count} ${count === 1 ? 'result' : 'results'}`,
+      searchResultCount: (count) => `${count} ${count === 1 ? 'result' : 'results'}`,
       noSearchResults: 'No matching posts found.',
       clearSearch: 'Clear',
       backToList: 'Back to List',
@@ -1044,8 +1037,7 @@ export const translations = {
       storageModeTitle: 'Storage Mode',
       storageModeNote:
         'Local is the default. Remote mode stores the selected module through the SQLite API.',
-      storageCopyNote:
-        'LOCAL data is preserved and only missing REMOTE items are copied.',
+      storageCopyNote: 'LOCAL data is preserved and only missing REMOTE items are copied.',
       storageModeLocal: 'Default · Local',
       storageModeRemote: 'Selected · Remote',
       boardStorageModeLabel: 'Board storage mode',
@@ -1060,8 +1052,7 @@ export const translations = {
         `Copy complete: ${copied} copied, ${skipped} skipped, ${failed} failed`,
       boardCategoriesRemoteCopy: 'Copy LOCAL Board categories to REMOTE',
       boardCategoriesRemoteCopying: 'Copying Board categories to REMOTE...',
-      boardCategoriesRemoteCopyEmpty:
-        'There are no LOCAL Board categories to copy.',
+      boardCategoriesRemoteCopyEmpty: 'There are no LOCAL Board categories to copy.',
       boardCategoriesRemoteCopyConnectionError:
         'Board category copy failed because the REMOTE API is unavailable.',
       boardCategoriesRemoteCopyResult: (copied, skipped, failed) =>
@@ -1076,8 +1067,7 @@ export const translations = {
       mapRemoteCopy: 'Copy LOCAL Map data to REMOTE',
       mapRemoteCopying: 'Copying Map data to REMOTE...',
       mapRemoteCopyEmpty: 'There is no LOCAL Map data to copy.',
-      mapRemoteCopyConnectionError:
-        'Map copy failed because the REMOTE API is unavailable.',
+      mapRemoteCopyConnectionError: 'Map copy failed because the REMOTE API is unavailable.',
       mapRemoteCopyResult: (collections, records) =>
         `Map copy complete: collections ${collections.copied} copied, ${collections.skipped} skipped, ${collections.failed} failed / records ${records.copied} copied, ${records.skipped} skipped, ${records.failed} failed`,
       exportBoardBackup: 'Export Board Dedicated Backup',
@@ -1108,8 +1098,7 @@ export const translations = {
       appSettingsRemoteCopyResult: (copied, updated, skipped, failed) =>
         `Settings copy complete: ${copied} created, ${updated} updated, ${skipped} skipped, ${failed} failed`,
       appSettingsRemoteSaveError: 'Could not save REMOTE Settings.',
-      profileRemoteLoadError:
-        'Could not load REMOTE Profile, so LOCAL values are kept.',
+      profileRemoteLoadError: 'Could not load REMOTE Profile, so LOCAL values are kept.',
       profileRemoteSaveError: 'Could not save REMOTE Profile.',
       backendStatus: {
         label: 'Backend',
@@ -1147,8 +1136,7 @@ export const translations = {
         `${valid} Map collections were restored and ${damaged} damaged collections were skipped.`,
       restoreMapKept:
         'This backup file does not include Map photo records, so current Map records were kept.',
-      restoreRollbackError:
-        'Restore failed. Previous data was restored where possible.',
+      restoreRollbackError: 'Restore failed. Previous data was restored where possible.',
     },
   },
 }

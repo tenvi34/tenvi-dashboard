@@ -126,8 +126,8 @@ body.tenvi-modal-open .tenvi-dashboard {
 /* PC/모바일 분기 */
 @media (max-width: 860px) {
   .tenvi-dashboard {
-      min-height: 100dvh;
-      /* iPhone safe-area 여백 */
-      padding: 18px 12px calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom) + 18px);
-    }
+    min-height: 100dvh;
+    /* iPhone safe-area 여백 */
+    padding: 18px 12px calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom) + 18px);
+  }
 }

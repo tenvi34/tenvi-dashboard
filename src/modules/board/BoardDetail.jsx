@@ -1,8 +1,5 @@
 import UserAvatar from '../../components/UserAvatar.jsx'
-import {
-  getBoardCategoryName,
-  getPostCategoryId,
-} from '../boardLogic.js'
+import { getBoardCategoryName, getPostCategoryId } from '../boardLogic.js'
 
 // Board 게시글 상세 화면
 function BoardDetail({
@@ -20,8 +17,7 @@ function BoardDetail({
   t,
 }) {
   // 생성 시각과 다른 저장 데이터의 수정 시각만 노출
-  const hasUpdatedAt =
-    post?.updatedAt && post.updatedAt !== post.createdAt
+  const hasUpdatedAt = post?.updatedAt && post.updatedAt !== post.createdAt
 
   return (
     <section className="board-cafe-panel board-screen">
@@ -110,12 +106,13 @@ function BoardDetail({
             {postBlocks.map((block) => {
               // legacy src와 IndexedDB preview를 모두 허용
               const imageSource =
-                block.type === 'image'
-                  ? block.src || detailImagePreviews[block.imageId] || ''
-                  : ''
+                block.type === 'image' ? block.src || detailImagePreviews[block.imageId] || '' : ''
 
               return block.type === 'image' ? (
-                <figure className="board-cafe-image-block" key={block.id}>
+                <figure
+                  className="board-cafe-image-block"
+                  key={block.id}
+                >
                   {imageSource ? (
                     <button
                       type="button"
@@ -128,12 +125,18 @@ function BoardDetail({
                         })
                       }
                     >
-                      <img src={imageSource} alt={block.name} />
+                      <img
+                        src={imageSource}
+                        alt={block.name}
+                      />
                     </button>
                   ) : null}
                 </figure>
               ) : (
-                <p className="board-cafe-text-block" key={block.id}>
+                <p
+                  className="board-cafe-text-block"
+                  key={block.id}
+                >
                   {block.content}
                 </p>
               )
@@ -141,7 +144,10 @@ function BoardDetail({
           </div>
         </article>
       ) : (
-        <div className="empty-state" role="status">
+        <div
+          className="empty-state"
+          role="status"
+        >
           <span>{t.common.systemMessage}</span>
           <p>{t.board.missingPostMessage}</p>
         </div>

@@ -28,13 +28,9 @@ function Timer({ t }) {
   const [mode, setMode] = useState('focus')
   const [focusMinutes, setFocusMinutes] = useState(DEFAULT_FOCUS_MINUTES)
   const [breakMinutes, setBreakMinutes] = useState(DEFAULT_BREAK_MINUTES)
-  const [secondsLeft, setSecondsLeft] = useState(
-    minutesToSeconds(DEFAULT_FOCUS_MINUTES),
-  )
+  const [secondsLeft, setSecondsLeft] = useState(minutesToSeconds(DEFAULT_FOCUS_MINUTES))
   const [isRunning, setIsRunning] = useState(false)
-  const [completedSessions, setCompletedSessions] = useState(
-    readCompletedSessions,
-  )
+  const [completedSessions, setCompletedSessions] = useState(readCompletedSessions)
   const [stopwatchMilliseconds, setStopwatchMilliseconds] = useState(0)
   const [isStopwatchRunning, setIsStopwatchRunning] = useState(false)
   const [laps, setLaps] = useState([])
@@ -42,17 +38,12 @@ function Timer({ t }) {
   // 카운트다운 초 계산
   const getModeSeconds = useCallback(
     (timerMode) =>
-      timerMode === 'focus'
-        ? minutesToSeconds(focusMinutes)
-        : minutesToSeconds(breakMinutes),
+      timerMode === 'focus' ? minutesToSeconds(focusMinutes) : minutesToSeconds(breakMinutes),
     [breakMinutes, focusMinutes],
   )
 
   useEffect(() => {
-    localStorage.setItem(
-      TIMER_SESSIONS_STORAGE_KEY,
-      String(completedSessions),
-    )
+    localStorage.setItem(TIMER_SESSIONS_STORAGE_KEY, String(completedSessions))
   }, [completedSessions])
 
   useEffect(() => {
@@ -75,6 +66,7 @@ function Timer({ t }) {
         }
 
         setMode(nextMode)
+
         return getModeSeconds(nextMode)
       })
     }, 1000)
@@ -97,10 +89,7 @@ function Timer({ t }) {
 
   // Focus 시간 변경
   const handleFocusMinutesChange = (event) => {
-    const nextFocusMinutes = normalizeMinutes(
-      event.target.value,
-      DEFAULT_FOCUS_MINUTES,
-    )
+    const nextFocusMinutes = normalizeMinutes(event.target.value, DEFAULT_FOCUS_MINUTES)
 
     setFocusMinutes(nextFocusMinutes)
 
@@ -112,10 +101,7 @@ function Timer({ t }) {
 
   // Break 시간 변경
   const handleBreakMinutesChange = (event) => {
-    const nextBreakMinutes = normalizeMinutes(
-      event.target.value,
-      DEFAULT_BREAK_MINUTES,
-    )
+    const nextBreakMinutes = normalizeMinutes(event.target.value, DEFAULT_BREAK_MINUTES)
 
     setBreakMinutes(nextBreakMinutes)
 
@@ -158,7 +144,10 @@ function Timer({ t }) {
   }
 
   return (
-    <section className="module-panel timer-module" aria-labelledby="timer-title">
+    <section
+      className="module-panel timer-module"
+      aria-labelledby="timer-title"
+    >
       {/* Timer 헤더 */}
       <div className="module-header">
         <div>
@@ -171,7 +160,11 @@ function Timer({ t }) {
       </div>
 
       {/* Timer 탭 */}
-      <div className="timer-tabs" role="tablist" aria-label={t.timer.tabsLabel}>
+      <div
+        className="timer-tabs"
+        role="tablist"
+        aria-label={t.timer.tabsLabel}
+      >
         <button
           className={`timer-tab ${activeTab === 'timer' ? 'is-active' : ''}`}
           type="button"
@@ -220,18 +213,32 @@ function Timer({ t }) {
 
           {/* 남은 시간 표시 */}
           <div className="timer-display-panel">
-            <p className="timer-time" aria-label={t.timer.timeRemaining}>
+            <p
+              className="timer-time"
+              aria-label={t.timer.timeRemaining}
+            >
               {formatTime(secondsLeft)}
             </p>
             <p className="timer-caption">{t.timer.timeRemaining}</p>
           </div>
 
           {/* Timer 조작 버튼 */}
-          <div className="timer-controls" aria-label={t.timer.controlsLabel}>
-            <button className="timer-button" type="button" onClick={handleStart}>
+          <div
+            className="timer-controls"
+            aria-label={t.timer.controlsLabel}
+          >
+            <button
+              className="timer-button"
+              type="button"
+              onClick={handleStart}
+            >
               {t.timer.start}
             </button>
-            <button className="timer-button" type="button" onClick={handlePause}>
+            <button
+              className="timer-button"
+              type="button"
+              onClick={handlePause}
+            >
               {t.timer.pause}
             </button>
             <button
@@ -263,14 +270,20 @@ function Timer({ t }) {
         <>
           {/* Stopwatch 시간 표시 */}
           <div className="timer-display-panel stopwatch-panel">
-            <p className="timer-time" aria-label={t.timer.elapsedTime}>
+            <p
+              className="timer-time"
+              aria-label={t.timer.elapsedTime}
+            >
               {formatStopwatchTime(stopwatchMilliseconds)}
             </p>
             <p className="timer-caption">{t.timer.elapsedTime}</p>
           </div>
 
           {/* Stopwatch 조작 버튼 */}
-          <div className="timer-controls" aria-label={t.timer.stopwatchControls}>
+          <div
+            className="timer-controls"
+            aria-label={t.timer.stopwatchControls}
+          >
             <button
               className="timer-button"
               type="button"
@@ -302,7 +315,10 @@ function Timer({ t }) {
           </div>
 
           {/* Stopwatch lap 기록 */}
-          <section className="lap-panel" aria-label={t.timer.lapRecords}>
+          <section
+            className="lap-panel"
+            aria-label={t.timer.lapRecords}
+          >
             <p className="summary-list-title">{t.timer.lapRecords}</p>
             {laps.length > 0 ? (
               <ol>

@@ -28,26 +28,19 @@ const requestCalendarApi = async (url, options = {}, fetcher = fetch) => {
     // 백엔드 오류 메시지 우선 사용
     const errorData = await response.json().catch(() => null)
 
-    throw new Error(
-      errorData?.message ??
-        `Calendar API request failed with ${response.status}`,
-    )
+    throw new Error(errorData?.message ?? `Calendar API request failed with ${response.status}`)
   }
 
   return readJsonResponse(response)
 }
 
 // Calendar 이벤트 목록 조회
-export const fetchCalendarEvents = ({
-  baseUrl = API_BASE_URL,
-  fetcher = fetch,
-} = {}) => requestCalendarApi(getCalendarEventsUrl(baseUrl), {}, fetcher)
+export const fetchCalendarEvents = ({ baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestCalendarApi(getCalendarEventsUrl(baseUrl), {}, fetcher)
 
 // Calendar 이벤트 단건 조회
-export const fetchCalendarEvent = (
-  id,
-  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
-) => requestCalendarApi(getCalendarEventUrl(id, baseUrl), {}, fetcher)
+export const fetchCalendarEvent = (id, { baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestCalendarApi(getCalendarEventUrl(id, baseUrl), {}, fetcher)
 
 // Calendar 이벤트 원격 생성
 export const createRemoteCalendarEvent = (
@@ -81,7 +74,5 @@ export const updateRemoteCalendarEvent = (
   )
 
 // Calendar 이벤트 원격 삭제
-export const deleteRemoteCalendarEvent = (
-  id,
-  { baseUrl = API_BASE_URL, fetcher = fetch } = {},
-) => requestCalendarApi(getCalendarEventUrl(id, baseUrl), { method: 'DELETE' }, fetcher)
+export const deleteRemoteCalendarEvent = (id, { baseUrl = API_BASE_URL, fetcher = fetch } = {}) =>
+  requestCalendarApi(getCalendarEventUrl(id, baseUrl), { method: 'DELETE' }, fetcher)

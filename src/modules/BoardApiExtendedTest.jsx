@@ -70,6 +70,7 @@ function BoardApiExtendedTest() {
       return await action()
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Board API failed.')
+
       return null
     } finally {
       setIsLoading(false)
@@ -82,6 +83,7 @@ function BoardApiExtendedTest() {
       const posts = await fetchBoardPosts()
 
       setActivePosts(posts)
+
       return posts
     })
 
@@ -91,6 +93,7 @@ function BoardApiExtendedTest() {
       const posts = await fetchTrashBoardPosts()
 
       setTrashPosts(posts)
+
       return posts
     })
 
@@ -111,6 +114,7 @@ function BoardApiExtendedTest() {
   const handleUpdate = async () => {
     if (!selectedPost) {
       setErrorMessage('Select a post to update.')
+
       return
     }
 
@@ -181,25 +185,23 @@ function BoardApiExtendedTest() {
   const handleIncreaseViews = async () => {
     if (!selectedPost) {
       setErrorMessage('Select an active post first.')
+
       return
     }
 
     if (selectedPost.deletedAt) {
       setErrorMessage('Deleted posts cannot increase views.')
+
       return
     }
 
-    const viewedPost = await runBoardAction(() =>
-      increaseBoardPostViews(selectedPost.id),
-    )
+    const viewedPost = await runBoardAction(() => increaseBoardPostViews(selectedPost.id))
 
     if (!viewedPost) {
       return
     }
 
-    setActivePosts((posts) =>
-      posts.map((post) => (post.id === viewedPost.id ? viewedPost : post)),
-    )
+    setActivePosts((posts) => posts.map((post) => (post.id === viewedPost.id ? viewedPost : post)))
     setSelectedPost(viewedPost)
     setLastResponse(viewedPost)
   }
@@ -237,7 +239,10 @@ function BoardApiExtendedTest() {
         </button>
       </div>
 
-      <form className="board-api-test__form" onSubmit={handleCreate}>
+      <form
+        className="board-api-test__form"
+        onSubmit={handleCreate}
+      >
         <div className="board-api-test__row">
           <label className="settings-field">
             <span>Title</span>
@@ -287,7 +292,11 @@ function BoardApiExtendedTest() {
             />
             <span>Pinned</span>
           </label>
-          <button className="settings-option" type="submit" disabled={isLoading}>
+          <button
+            className="settings-option"
+            type="submit"
+            disabled={isLoading}
+          >
             생성
           </button>
           <button
@@ -309,9 +318,7 @@ function BoardApiExtendedTest() {
         </div>
       </form>
 
-      {errorMessage ? (
-        <p className="board-api-test__error">{errorMessage}</p>
-      ) : null}
+      {errorMessage ? <p className="board-api-test__error">{errorMessage}</p> : null}
 
       {lastResponse ? (
         <dl className="board-api-test__response">
@@ -365,9 +372,14 @@ function BoardApiExtendedTest() {
                 }`}
                 key={post.id}
               >
-                <button type="button" onClick={() => handleSelectPost(post)}>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPost(post)}
+                >
                   <strong>{post.title}</strong>
-                  <span>{post.author || 'TENVI'} · {post.views ?? 0} views</span>
+                  <span>
+                    {post.author || 'TENVI'} · {post.views ?? 0} views
+                  </span>
                 </button>
                 <button
                   className="board-api-test__delete"
@@ -389,8 +401,14 @@ function BoardApiExtendedTest() {
           <p className="settings-group-label">Trash</p>
           <div className="board-api-test__list">
             {trashPosts.map((post) => (
-              <article className="board-api-test__item" key={post.id}>
-                <button type="button" onClick={() => handleSelectPost(post)}>
+              <article
+                className="board-api-test__item"
+                key={post.id}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleSelectPost(post)}
+                >
                   <strong>{post.title}</strong>
                   <span>{formatDateTime(post.deletedAt)}</span>
                 </button>

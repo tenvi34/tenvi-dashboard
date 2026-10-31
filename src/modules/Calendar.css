@@ -99,8 +99,7 @@
 
 .calendar-event-item-range {
   border-left-color: rgba(101, 255, 188, 0.58);
-  background:
-    linear-gradient(90deg, rgba(101, 255, 188, 0.1), rgba(5, 16, 31, 0.72));
+  background: linear-gradient(90deg, rgba(101, 255, 188, 0.1), rgba(5, 16, 31, 0.72));
 }
 
 .calendar-form button {
@@ -355,8 +354,7 @@
 
 .calendar-day.has-range-events {
   border-color: rgba(101, 255, 188, 0.26);
-  background:
-    linear-gradient(180deg, rgba(101, 255, 188, 0.06), rgba(5, 16, 31, 0.46));
+  background: linear-gradient(180deg, rgba(101, 255, 188, 0.06), rgba(5, 16, 31, 0.46));
 }
 
 .calendar-day.is-selected.has-range-events {
@@ -476,8 +474,7 @@
   border: 1px solid rgba(90, 212, 255, 0.18);
   border-radius: var(--radius-control);
   background:
-    linear-gradient(135deg, rgba(90, 212, 255, 0.08), rgba(5, 16, 31, 0.58)),
-    rgba(2, 9, 18, 0.34);
+    linear-gradient(135deg, rgba(90, 212, 255, 0.08), rgba(5, 16, 31, 0.58)), rgba(2, 9, 18, 0.34);
 }
 
 .calendar-events-header strong {
@@ -532,8 +529,7 @@
 
 .calendar-day.is-today {
   border-color: rgba(101, 255, 188, 0.52);
-  background:
-    linear-gradient(135deg, rgba(101, 255, 188, 0.1), rgba(5, 16, 31, 0.46));
+  background: linear-gradient(135deg, rgba(101, 255, 188, 0.1), rgba(5, 16, 31, 0.46));
 }
 
 .calendar-day.is-selected {
@@ -550,138 +546,138 @@
 
 @media (max-width: 1180px) {
   .calendar-layout {
-      grid-template-columns: 1fr;
-    }
+    grid-template-columns: 1fr;
+  }
 }
 
 /* PC/모바일 분기 */
 @media (max-width: 860px) {
   .calendar-month-grid {
-      gap: 5px;
-    }
+    gap: 5px;
+  }
 
   /* 모바일 Calendar 순서 */
   .calendar-month-panel {
-      order: 1;
-    }
+    order: 1;
+  }
 
   .calendar-events-panel {
-      order: 2;
-      gap: 12px;
-      padding-bottom: calc(env(safe-area-inset-bottom) + 28px);
-    }
+    order: 2;
+    gap: 12px;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 28px);
+  }
 
   .calendar-events-header {
-      padding: 12px;
-    }
+    padding: 12px;
+  }
 
   .calendar-events-header h3 {
-      font-size: 18px;
-    }
+    font-size: 18px;
+  }
 
   .calendar-events-header strong {
-      min-width: 40px;
-      min-height: 40px;
-      font-size: 22px;
-    }
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 22px;
+  }
 
   .calendar-event-list {
-      max-height: none;
-      padding-right: 0;
-      overflow: visible;
-    }
+    max-height: none;
+    padding-right: 0;
+    overflow: visible;
+  }
 
   .calendar-event-item {
-      gap: 10px;
-      padding: 12px;
-    }
+    gap: 10px;
+    padding: 12px;
+  }
 
   .calendar-event-item h3 {
-      font-size: 16px;
-    }
+    font-size: 16px;
+  }
 
   .calendar-event-title-row {
-      align-items: flex-start;
-      flex-direction: column;
-    }
+    align-items: flex-start;
+    flex-direction: column;
+  }
 
   .calendar-form-actions {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
   .calendar-form-cancel {
-      display: inline-flex;
-    }
+    display: inline-flex;
+  }
 
   .calendar-day,
-    .calendar-day.is-empty {
-      min-height: 72px;
-    }
+  .calendar-day.is-empty {
+    min-height: 72px;
+  }
 
   .calendar-day > span:first-child {
-      font-size: 14px;
-    }
+    font-size: 14px;
+  }
 
   .calendar-day strong {
-      top: 4px;
-      right: 4px;
-      min-width: 16px;
-      min-height: 16px;
-      padding: 0 4px;
-      font-size: 10px;
-    }
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    min-height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+  }
 
   /* 모바일 기간 표시 압축 */
   .calendar-range-indicator {
-      left: 7px;
-      right: 7px;
-      bottom: 22px;
-      height: 4px;
-    }
+    left: 7px;
+    right: 7px;
+    bottom: 22px;
+    height: 4px;
+  }
 
   .calendar-day.period-start .calendar-range-indicator {
-      left: 10px;
-    }
+    left: 10px;
+  }
 
   .calendar-day.period-middle .calendar-range-indicator {
-      left: 3px;
-      right: 3px;
-    }
+    left: 3px;
+    right: 3px;
+  }
 
   .calendar-day.period-end .calendar-range-indicator {
-      right: 10px;
-    }
+    right: 10px;
+  }
 
   .calendar-day.has-events::after {
-      bottom: 9px;
-      width: 6px;
-      height: 6px;
-    }
+    bottom: 9px;
+    width: 6px;
+    height: 6px;
+  }
 
   .calendar-moon {
-      left: 4px;
-      bottom: 3px;
-      font-size: 11px;
-    }
+    left: 4px;
+    bottom: 3px;
+    font-size: 11px;
+  }
 
   .calendar-day.has-events .calendar-moon {
-      left: 4px;
-    }
+    left: 4px;
+  }
 }
 
 @media (max-width: 560px) {
   .calendar-legend {
-      align-items: center;
-      flex-direction: row;
-    }
+    align-items: center;
+    flex-direction: row;
+  }
 
   .calendar-month-toolbar {
-      grid-template-columns: auto minmax(0, 1fr) auto;
-    }
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
 
   .calendar-month-selectors {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .tenvi-dashboard.theme-standard .calendar-form-cancel {

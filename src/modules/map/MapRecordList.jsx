@@ -3,15 +3,16 @@ import { PhotoPreview } from './MapPhotoPreview.jsx'
 // Map 사진 기록 목록
 function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records, t }) {
   return (
-    <section className="map-list-panel" aria-label={t.map.recordListLabel}>
+    <section
+      className="map-list-panel"
+      aria-label={t.map.recordListLabel}
+    >
       {records.length > 0 ? (
         <ul className="map-record-list">
           {records.map((record) => (
             <li key={record.id}>
               <button
-                className={`map-record-button ${
-                  activeRecordId === record.id ? 'is-active' : ''
-                }`}
+                className={`map-record-button ${activeRecordId === record.id ? 'is-active' : ''}`}
                 type="button"
                 onClick={() => onSelectRecord(record.id)}
               >
@@ -31,7 +32,10 @@ function PhotoRecordList({ activeRecordId, emptyMessage, onSelectRecord, records
           ))}
         </ul>
       ) : (
-        <div className="empty-state compact-empty" role="status">
+        <div
+          className="empty-state compact-empty"
+          role="status"
+        >
           <span>{t.common.systemMessage}</span>
           <p>{emptyMessage}</p>
         </div>

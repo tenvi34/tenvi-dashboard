@@ -1,12 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMap,
-  useMapEvents,
-} from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './Map.css'
@@ -45,15 +38,9 @@ import {
   MobileMapPreviewCard,
   MobileMapViewTabs,
 } from './map/MapNavigation.jsx'
-import {
-  PhotoLightbox,
-  PhotoPreviewButton,
-} from './map/MapPhotoPreview.jsx'
+import { PhotoLightbox, PhotoPreviewButton } from './map/MapPhotoPreview.jsx'
 import PhotoRecordList from './map/MapRecordList.jsx'
-import {
-  localMapRepository,
-  remoteMapRepository,
-} from './map/repositories/index.js'
+import { localMapRepository, remoteMapRepository } from './map/repositories/index.js'
 import useMapBulkUploadController from './map/useMapBulkUploadController.js'
 import useMapCollectionController from './map/useMapCollectionController.js'
 
@@ -129,7 +116,7 @@ const createMapFilterSummary = (records, selectedFilter, collections, t) => {
       ? t.map.allCollections
       : selectedFilter === COLLECTION_FILTER_UNASSIGNED
         ? t.map.unassignedCollection
-        : collection?.name ?? t.map.unassignedCollection
+        : (collection?.name ?? t.map.unassignedCollection)
   const sourceCounts = records.reduce(
     (counts, record) => {
       const source = getMapSummaryLocationSource(record.locationSource)
@@ -155,13 +142,7 @@ const createMapFilterSummary = (records, selectedFilter, collections, t) => {
 }
 
 // 지도 화면 제어
-function MapViewportController({
-  layoutKey,
-  records,
-  request,
-  shouldFitBounds,
-  target,
-}) {
+function MapViewportController({ layoutKey, records, request, shouldFitBounds, target }) {
   const map = useMap()
   const handledNavigationRequestIdRef = useRef('')
 
@@ -170,10 +151,8 @@ function MapViewportController({
     const requestLongitude = Number(request?.longitude)
     const targetLatitude = Number(target?.latitude)
     const targetLongitude = Number(target?.longitude)
-    const hasRequestLocation =
-      Number.isFinite(requestLatitude) && Number.isFinite(requestLongitude)
-    const hasTargetLocation =
-      Number.isFinite(targetLatitude) && Number.isFinite(targetLongitude)
+    const hasRequestLocation = Number.isFinite(requestLatitude) && Number.isFinite(requestLongitude)
+    const hasTargetLocation = Number.isFinite(targetLatitude) && Number.isFinite(targetLongitude)
     const requestType = request?.type
     const isNavigationRequest = MAP_NAVIGATION_REQUEST_TYPES.has(requestType)
     const isFitAllAuto = requestType === 'fit-all' && shouldFitBounds
@@ -182,10 +161,7 @@ function MapViewportController({
     const container = map.getContainer()
     const mapSize = map.getSize()
     const canMeasureMap =
-      container.offsetWidth > 0 &&
-      container.offsetHeight > 0 &&
-      mapSize.x > 0 &&
-      mapSize.y > 0
+      container.offsetWidth > 0 && container.offsetHeight > 0 && mapSize.x > 0 && mapSize.y > 0
 
     // 숨김 지도 방어
     if (!canMeasureMap) {
@@ -209,10 +185,7 @@ function MapViewportController({
         )
         map.fitBounds(bounds, { maxZoom: FIT_BOUNDS_MAX_ZOOM, padding: [36, 36] })
       } else if (visibleRecords.length === 1) {
-        map.setView(
-          [visibleRecords[0].latitude, visibleRecords[0].longitude],
-          RECORD_FOCUS_ZOOM,
-        )
+        map.setView([visibleRecords[0].latitude, visibleRecords[0].longitude], RECORD_FOCUS_ZOOM)
       }
 
       return
@@ -243,6 +216,7 @@ function MapViewportController({
       // 요청 유형별 줌 정책
       if (requestType === 'manual-click') {
         map.setView(nextCenter, map.getZoom())
+
         return
       }
 
@@ -250,6 +224,7 @@ function MapViewportController({
         map.flyTo(nextCenter, Math.max(map.getZoom(), MARKER_MIN_ZOOM), {
           duration: 0.65,
         })
+
         return
       }
 
@@ -261,6 +236,7 @@ function MapViewportController({
             : RECORD_FOCUS_ZOOM
 
       map.flyTo(nextCenter, focusZoom, { duration: 0.65 })
+
       return
     }
   }, [layoutKey, map, records, request, shouldFitBounds, target])
@@ -365,9 +341,18 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
   }
 
   return (
-    <section className="map-search-panel" aria-label={t.map.placeSearchLabel}>
-      <form className="map-search-form" onSubmit={handleSubmit}>
-        <label className="sr-only" htmlFor="map-place-search">
+    <section
+      className="map-search-panel"
+      aria-label={t.map.placeSearchLabel}
+    >
+      <form
+        className="map-search-form"
+        onSubmit={handleSubmit}
+      >
+        <label
+          className="sr-only"
+          htmlFor="map-place-search"
+        >
           {t.map.placeSearchLabel}
         </label>
         <input
@@ -388,7 +373,10 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
           <option value="japan">{t.map.searchScopeJapan}</option>
           <option value="korea">{t.map.searchScopeKorea}</option>
         </select>
-        <button type="submit" disabled={disabled || isSearching}>
+        <button
+          type="submit"
+          disabled={disabled || isSearching}
+        >
           {isSearching ? t.map.searching : t.map.searchPlace}
         </button>
       </form>
@@ -396,7 +384,10 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
       <p className="map-search-attribution">{t.map.searchAttribution}</p>
 
       {searchError ? (
-        <div className="map-status is-error" role="alert">
+        <div
+          className="map-status is-error"
+          role="alert"
+        >
           {searchError}
         </div>
       ) : null}
@@ -405,12 +396,13 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
         <ul className="map-search-results">
           {results.map((result) => (
             <li key={result.id}>
-              <button type="button" onClick={() => onSelectPlace(result)}>
+              <button
+                type="button"
+                onClick={() => onSelectPlace(result)}
+              >
                 <strong>{result.name}</strong>
                 {result.category || result.type ? (
-                  <small>
-                    {[result.category, result.type].filter(Boolean).join(' / ')}
-                  </small>
+                  <small>{[result.category, result.type].filter(Boolean).join(' / ')}</small>
                 ) : null}
                 {result.addressSummary ? <em>{result.addressSummary}</em> : null}
                 <span>{result.displayName}</span>
@@ -421,7 +413,10 @@ function PlaceSearchPanel({ disabled, language, onSelectPlace, t }) {
       ) : null}
 
       {hasSearched && !isSearching && !searchError && results.length === 0 ? (
-        <div className="empty-state compact-empty" role="status">
+        <div
+          className="empty-state compact-empty"
+          role="status"
+        >
           <span>{t.common.systemMessage}</span>
           <p>{t.map.searchNoResults}</p>
           <p>{t.map.searchRetryHint}</p>
@@ -446,16 +441,17 @@ function PhotoCollectionPanel({
   const isEditing = Boolean(editingCollectionId)
 
   return (
-    <section className="map-collection-panel" aria-label={t.map.collectionsLabel}>
+    <section
+      className="map-collection-panel"
+      aria-label={t.map.collectionsLabel}
+    >
       <div className="map-collection-form">
         <label className="map-field">
           <span>{t.map.collectionName}</span>
           <input
             type="text"
             value={collectionDraft.name}
-            onChange={(event) =>
-              onChangeCollectionDraft({ name: event.target.value })
-            }
+            onChange={(event) => onChangeCollectionDraft({ name: event.target.value })}
             placeholder={t.map.collectionNamePlaceholder}
           />
         </label>
@@ -464,9 +460,7 @@ function PhotoCollectionPanel({
           <textarea
             rows="3"
             value={collectionDraft.description}
-            onChange={(event) =>
-              onChangeCollectionDraft({ description: event.target.value })
-            }
+            onChange={(event) => onChangeCollectionDraft({ description: event.target.value })}
             placeholder={t.map.collectionDescriptionPlaceholder}
           />
         </label>
@@ -476,9 +470,7 @@ function PhotoCollectionPanel({
             <input
               type="date"
               value={collectionDraft.startDate}
-              onChange={(event) =>
-                onChangeCollectionDraft({ startDate: event.target.value })
-              }
+              onChange={(event) => onChangeCollectionDraft({ startDate: event.target.value })}
             />
           </label>
           <label className="map-field">
@@ -486,9 +478,7 @@ function PhotoCollectionPanel({
             <input
               type="date"
               value={collectionDraft.endDate}
-              onChange={(event) =>
-                onChangeCollectionDraft({ endDate: event.target.value })
-              }
+              onChange={(event) => onChangeCollectionDraft({ endDate: event.target.value })}
             />
           </label>
         </div>
@@ -519,8 +509,7 @@ function PhotoCollectionPanel({
               <div className="map-collection-item">
                 <strong>{collection.name}</strong>
                 <span>
-                  {getCollectionRecordCount(collection.id)}{' '}
-                  {t.map.collectionRecordCount}
+                  {getCollectionRecordCount(collection.id)} {t.map.collectionRecordCount}
                 </span>
                 {collection.description ? <p>{collection.description}</p> : null}
                 <div className="map-collection-actions">
@@ -589,7 +578,10 @@ function BulkUploadList({
           ))}
         </ul>
       ) : (
-        <div className="empty-state compact-empty" role="status">
+        <div
+          className="empty-state compact-empty"
+          role="status"
+        >
           <span>{t.common.systemMessage}</span>
           <p>{emptyMessage}</p>
         </div>
@@ -623,12 +615,13 @@ function BulkUploadPanel({
   const assignableItems = getBulkLocationAssignableItems(bulkUpload.items)
   const failedItems = bulkUpload.items.filter((item) => item.status === 'failed')
   const progressValue =
-    bulkUpload.total > 0
-      ? Math.round((bulkUpload.processed / bulkUpload.total) * 100)
-      : 0
+    bulkUpload.total > 0 ? Math.round((bulkUpload.processed / bulkUpload.total) * 100) : 0
 
   return (
-    <section className="map-bulk-panel" aria-label={t.map.bulkUploadTitle}>
+    <section
+      className="map-bulk-panel"
+      aria-label={t.map.bulkUploadTitle}
+    >
       <div className="map-section-header">
         <div>
           <p className="module-label">{t.map.bulkUploadLabel}</p>
@@ -647,17 +640,26 @@ function BulkUploadPanel({
 
       {bulkUpload.status === 'analyzing' ? (
         <>
-          <div className="map-status" role="status">
+          <div
+            className="map-status"
+            role="status"
+          >
             {t.map.bulkAnalyzingProgress(bulkUpload.processed, bulkUpload.total)}
           </div>
-          <div className="map-bulk-progress" aria-hidden="true">
+          <div
+            className="map-bulk-progress"
+            aria-hidden="true"
+          >
             <span style={{ width: `${progressValue}%` }} />
           </div>
         </>
       ) : null}
 
       {bulkUpload.status === 'cancelled' ? (
-        <div className="map-status" role="status">
+        <div
+          className="map-status"
+          role="status"
+        >
           {t.map.bulkAnalysisCancelled}
         </div>
       ) : null}
@@ -683,7 +685,10 @@ function BulkUploadPanel({
             </div>
           </div>
 
-          <div className="map-status" role="status">
+          <div
+            className="map-status"
+            role="status"
+          >
             {t.map.bulkMissingLocationPolicy}
           </div>
 
@@ -692,11 +697,7 @@ function BulkUploadPanel({
               <div className="map-section-header">
                 <div>
                   <p className="module-label">{t.map.bulkSharedLocationAssignment}</p>
-                  <strong>
-                    {t.map.bulkSelectedCount(
-                      selectedMissingLocationItemIds.length,
-                    )}
-                  </strong>
+                  <strong>{t.map.bulkSelectedCount(selectedMissingLocationItemIds.length)}</strong>
                 </div>
               </div>
               <div className="map-bulk-actions">
@@ -715,16 +716,20 @@ function BulkUploadPanel({
                   {t.map.bulkClearSelection}
                 </button>
               </div>
-              <div className="map-status" role="status">
+              <div
+                className="map-status"
+                role="status"
+              >
                 {selectedMissingLocationItemIds.length > 0
                   ? t.map.bulkMapClickReady
                   : t.map.bulkSelectLocationTargetsFirst}
               </div>
               {bulkAssignedLocation ? (
-                <div className="map-status" role="status">
-                  {t.map.bulkLastAssignedLocation(
-                    bulkAssignedLocation.locationSource,
-                  )}
+                <div
+                  className="map-status"
+                  role="status"
+                >
+                  {t.map.bulkLastAssignedLocation(bulkAssignedLocation.locationSource)}
                 </div>
               ) : null}
               <PlaceSearchPanel
@@ -765,7 +770,10 @@ function BulkUploadPanel({
           </div>
 
           {bulkUpload.saveResult ? (
-            <div className="map-status" role="status">
+            <div
+              className="map-status"
+              role="status"
+            >
               {t.map.bulkSaveComplete(
                 bulkUpload.saveResult.successCount,
                 bulkUpload.saveResult.failedCount,
@@ -819,7 +827,10 @@ function PhotoDraftPanel({
 }) {
   if (!draft) {
     return (
-      <div className="empty-state compact-empty" role="status">
+      <div
+        className="empty-state compact-empty"
+        role="status"
+      >
         <span>{t.common.systemMessage}</span>
         <p>{t.map.selectPhotoPrompt}</p>
       </div>
@@ -827,7 +838,10 @@ function PhotoDraftPanel({
   }
 
   return (
-    <section className="map-draft-panel" aria-label={t.map.draftLabel}>
+    <section
+      className="map-draft-panel"
+      aria-label={t.map.draftLabel}
+    >
       <PhotoPreviewButton
         alt={draft.title || draft.originalFileName}
         blob={draft.previewImageBlob}
@@ -837,7 +851,10 @@ function PhotoDraftPanel({
       />
 
       {draft.status === 'missing-location' ? (
-        <div className="empty-state compact-empty" role="status">
+        <div
+          className="empty-state compact-empty"
+          role="status"
+        >
           <span>{t.common.systemMessage}</span>
           <p>{t.map.noLocation}</p>
           <p>{t.map.manualPrompt}</p>
@@ -894,7 +911,6 @@ function PhotoDraftPanel({
           </div>
         </dl>
       ) : null}
-
     </section>
   )
 }
@@ -916,7 +932,10 @@ function PhotoEditPanel({
   const isReadyToSave = isEditDraftReadyToSave(editDraft)
 
   return (
-    <section className="map-detail-panel" aria-label={t.map.editLabel}>
+    <section
+      className="map-detail-panel"
+      aria-label={t.map.editLabel}
+    >
       <PhotoPreviewButton
         alt={record.title}
         blob={record.previewImageBlob}
@@ -1042,7 +1061,10 @@ function PhotoRecordDetail({
   }
 
   return (
-    <section className="map-detail-panel" aria-label={t.map.detailLabel}>
+    <section
+      className="map-detail-panel"
+      aria-label={t.map.detailLabel}
+    >
       <PhotoPreviewButton
         alt={record.title}
         blob={record.previewImageBlob}
@@ -1089,7 +1111,11 @@ function PhotoRecordDetail({
       </dl>
 
       <div className="map-edit-actions">
-        <button className="map-primary-button" type="button" onClick={onStartEdit}>
+        <button
+          className="map-primary-button"
+          type="button"
+          onClick={onStartEdit}
+        >
           {t.map.editRecord}
         </button>
         <button
@@ -1120,8 +1146,7 @@ function MapExplorePanel({
 }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const hasSearchFilter = mapSearchQuery.trim().length > 0
-  const hasLocationSourceFilter =
-    selectedLocationSourceFilter !== LOCATION_SOURCE_FILTER_ALL
+  const hasLocationSourceFilter = selectedLocationSourceFilter !== LOCATION_SOURCE_FILTER_ALL
   const hasActiveFilter = hasSearchFilter || hasLocationSourceFilter
 
   const handleResetFilters = () => {
@@ -1140,11 +1165,12 @@ function MapExplorePanel({
             onChange={(event) => onSetCollectionFilter(event.target.value)}
           >
             <option value={COLLECTION_FILTER_ALL}>{t.map.allCollections}</option>
-            <option value={COLLECTION_FILTER_UNASSIGNED}>
-              {t.map.unassignedCollection}
-            </option>
+            <option value={COLLECTION_FILTER_UNASSIGNED}>{t.map.unassignedCollection}</option>
             {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>
+              <option
+                key={collection.id}
+                value={collection.id}
+              >
                 {collection.name}
               </option>
             ))}
@@ -1200,7 +1226,10 @@ function MapExplorePanel({
                   onChange={(event) => onSetLocationSourceFilter(event.target.value)}
                 >
                   {LOCATION_SOURCE_FILTER_OPTIONS.map((sourceFilter) => (
-                    <option key={sourceFilter} value={sourceFilter}>
+                    <option
+                      key={sourceFilter}
+                      value={sourceFilter}
+                    >
                       {t.map.locationSourceFilterOptions[sourceFilter]}
                     </option>
                   ))}
@@ -1276,9 +1305,7 @@ function MapUploadPanel({
         <button
           className={`map-add-toggle-button${isAddingPhoto ? ' is-open' : ''}`}
           type="button"
-          disabled={
-            bulkUpload.status === 'analyzing' || bulkUpload.status === 'saving'
-          }
+          disabled={bulkUpload.status === 'analyzing' || bulkUpload.status === 'saving'}
           onClick={onToggleAddPhoto}
         >
           {isAddingPhoto ? t.map.cancelAddPhoto : t.map.addPhotoRecord}
@@ -1295,7 +1322,10 @@ function MapUploadPanel({
 
         {/* bulk 저장 실패 */}
         {bulkSaveReport?.failedItems.length > 0 ? (
-          <div className="map-status is-error" role="alert">
+          <div
+            className="map-status is-error"
+            role="alert"
+          >
             <strong>{t.map.bulkFailedList}</strong>
             <ul className="map-bulk-failed-report">
               {bulkSaveReport.failedItems.map((item, index) => (
@@ -1309,7 +1339,10 @@ function MapUploadPanel({
         {isAddingPhoto && !isBulkActive ? (
           <>
             {draft ? (
-              <div className="map-status" role="status">
+              <div
+                className="map-status"
+                role="status"
+              >
                 {t.map.clickToSetLocation}
               </div>
             ) : null}
@@ -1326,11 +1359,11 @@ function MapUploadPanel({
             <PhotoDraftPanel
               collections={collections}
               draft={draft}
-                language={t.map.searchLanguage}
-                onChangeDraft={onChangeDraft}
-                onOpenPhoto={onOpenPhoto}
-                onSelectPlace={onSelectPlace}
-                t={t}
+              language={t.map.searchLanguage}
+              onChangeDraft={onChangeDraft}
+              onOpenPhoto={onOpenPhoto}
+              onSelectPlace={onSelectPlace}
+              t={t}
             />
           </>
         ) : null}
@@ -1343,17 +1376,17 @@ function MapUploadPanel({
             bulkAssignedLocation={bulkAssignedLocation}
             bulkUpload={bulkUpload}
             collections={collections}
-              onCancelAnalysis={onCancelBulkAnalysis}
-              onChangeCollection={onChangeBulkCollection}
-              onClearSelection={onClearMissingLocationSelection}
-              onSelectAllLocationTargets={onSelectAllBulkLocationTargets}
-              onSelectBulkPlace={onSelectBulkPlace}
-              onReset={onResetBulkUpload}
-              onSave={onSaveBulkLocatedPhotos}
-              onToggleLocationTarget={onToggleBulkLocationTarget}
-              selectedMissingLocationItemIds={selectedMissingLocationItemIds}
-              t={t}
-            />
+            onCancelAnalysis={onCancelBulkAnalysis}
+            onChangeCollection={onChangeBulkCollection}
+            onClearSelection={onClearMissingLocationSelection}
+            onSelectAllLocationTargets={onSelectAllBulkLocationTargets}
+            onSelectBulkPlace={onSelectBulkPlace}
+            onReset={onResetBulkUpload}
+            onSave={onSaveBulkLocatedPhotos}
+            onToggleLocationTarget={onToggleBulkLocationTarget}
+            selectedMissingLocationItemIds={selectedMissingLocationItemIds}
+            t={t}
+          />
         </div>
       ) : null}
     </>
@@ -1377,7 +1410,10 @@ function MapCollectionManagerPanel({
     <>
       <div className="map-left-fixed">
         {/* 컬렉션 삭제 정책 */}
-        <div className="map-status" role="note">
+        <div
+          className="map-status"
+          role="note"
+        >
           {t.map.collectionDeletePolicy}
         </div>
       </div>
@@ -1405,18 +1441,16 @@ function Map({ t }) {
   const photoInputRef = useRef(null)
   const [mapStorageMode] = useState(() => readMapStorageMode())
   const mapRepository = useMemo(
-    () =>
-      mapStorageMode === 'remote' ? remoteMapRepository : localMapRepository,
+    () => (mapStorageMode === 'remote' ? remoteMapRepository : localMapRepository),
     [mapStorageMode],
   )
   const [records, setRecords] = useState([])
   const [collections, setCollections] = useState([])
-  const [selectedCollectionFilter, setSelectedCollectionFilter] = useState(
-    COLLECTION_FILTER_ALL,
-  )
+  const [selectedCollectionFilter, setSelectedCollectionFilter] = useState(COLLECTION_FILTER_ALL)
   const [mapSearchQuery, setMapSearchQuery] = useState('')
-  const [selectedLocationSourceFilter, setSelectedLocationSourceFilter] =
-    useState(LOCATION_SOURCE_FILTER_ALL)
+  const [selectedLocationSourceFilter, setSelectedLocationSourceFilter] = useState(
+    LOCATION_SOURCE_FILTER_ALL,
+  )
   const [draft, setDraft] = useState(null)
   const [editDraft, setEditDraft] = useState(null)
   const [activeRecordId, setActiveRecordId] = useState('')
@@ -1427,9 +1461,7 @@ function Map({ t }) {
   const [isReading, setIsReading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
-  const [viewportRequest, setViewportRequest] = useState(() =>
-    createViewportRequest('fit-all'),
-  )
+  const [viewportRequest, setViewportRequest] = useState(() => createViewportRequest('fit-all'))
   const [statusMessage, setStatusMessage] = useState('')
   const [error, setError] = useState('')
   const [photoViewer, setPhotoViewer] = useState(null)
@@ -1475,12 +1507,7 @@ function Map({ t }) {
     [collections, records],
   )
   const collectionFilteredRecords = useMemo(
-    () =>
-      filterPhotoRecordsByCollection(
-        normalizedRecords,
-        collections,
-        selectedCollectionFilter,
-      ),
+    () => filterPhotoRecordsByCollection(normalizedRecords, collections, selectedCollectionFilter),
     [collections, normalizedRecords, selectedCollectionFilter],
   )
   const filteredRecords = useMemo(
@@ -1495,12 +1522,7 @@ function Map({ t }) {
   const filterSummary = useMemo(
     () =>
       // 필터 결과 집계
-      createMapFilterSummary(
-        filteredRecords,
-        selectedCollectionFilter,
-        collections,
-        t,
-      ),
+      createMapFilterSummary(filteredRecords, selectedCollectionFilter, collections, t),
     [collections, filteredRecords, selectedCollectionFilter, t],
   )
   const visibleActiveRecordId =
@@ -1519,16 +1541,18 @@ function Map({ t }) {
   const focusTarget =
     editDraft?.status === 'located'
       ? editDraft
-      : activeRecord ?? (draft?.status === 'located' ? draft : null)
+      : (activeRecord ?? (draft?.status === 'located' ? draft : null))
   const canPickLocation = Boolean(
     draft ||
-      editDraft ||
-      (['completed', 'cancelled'].includes(bulkUpload.status) &&
-        selectedMissingLocationItemIds.length > 0),
+    editDraft ||
+    (['completed', 'cancelled'].includes(bulkUpload.status) &&
+      selectedMissingLocationItemIds.length > 0),
   )
   const shouldFitBounds = !visibleActiveRecordId && !draft && !editDraft && !isLoading
+
   const getCollectionRecordCount = (collectionId) =>
     normalizedRecords.filter((record) => record.collectionId === collectionId).length
+
   const {
     collectionDraft,
     editingCollectionId,
@@ -1559,8 +1583,7 @@ function Map({ t }) {
     [],
   )
   const filteredEmptyMessage =
-    mapSearchQuery.trim() ||
-    selectedLocationSourceFilter !== LOCATION_SOURCE_FILTER_ALL
+    mapSearchQuery.trim() || selectedLocationSourceFilter !== LOCATION_SOURCE_FILTER_ALL
       ? t.map.noMatchingRecords
       : selectedCollectionFilter === COLLECTION_FILTER_ALL
         ? t.map.noRecords
@@ -1616,10 +1639,7 @@ function Map({ t }) {
     let isMounted = true
 
     // 선택 저장소 초기 조회
-    Promise.all([
-      mapRepository.fetchRecords(),
-      mapRepository.fetchCollections(),
-    ])
+    Promise.all([mapRepository.fetchRecords(), mapRepository.fetchCollections()])
       .then(([savedRecords, savedCollections]) => {
         if (isMounted) {
           setRecords(savedRecords)
@@ -1661,6 +1681,7 @@ function Map({ t }) {
       setActiveRecordId('')
       setIsAddingPhoto(false)
       await analyzeBulkPhotoFiles(files)
+
       return
     }
 
@@ -1679,10 +1700,7 @@ function Map({ t }) {
       setActiveRecordId('')
       setIsAddingPhoto(true)
       setViewportRequest(
-        createViewportRequest(
-          location.status === 'located' ? 'exif-detect' : 'fit-all',
-          location,
-        ),
+        createViewportRequest(location.status === 'located' ? 'exif-detect' : 'fit-all', location),
       )
     } catch {
       setDraft(null)
@@ -1695,15 +1713,15 @@ function Map({ t }) {
 
   const handlePickLocation = ({ lat, lng }) => {
     if (editDraft) {
-      setEditDraft((currentDraft) =>
-        applyManualLocationToDraft(currentDraft, lat, lng),
-      )
+      setEditDraft((currentDraft) => applyManualLocationToDraft(currentDraft, lat, lng))
+
       setViewportRequest(
         createViewportRequest('manual-click', {
           latitude: lat,
           longitude: lng,
         }),
       )
+
       return
     }
 
@@ -1716,6 +1734,7 @@ function Map({ t }) {
           longitude: lng,
         }),
       )
+
       return
     }
 
@@ -1737,9 +1756,11 @@ function Map({ t }) {
 
   const handleSelectPlace = (place) => {
     setIsMapExpanded(true)
+
     if (editDraft) {
       setEditDraft((currentDraft) => applySearchLocationToDraft(currentDraft, place))
       setViewportRequest(createViewportRequest('search-select', place))
+
       return
     }
 
@@ -1761,6 +1782,7 @@ function Map({ t }) {
 
     if (!recordInput) {
       setError(t.map.saveNeedsLocation)
+
       return
     }
 
@@ -1803,6 +1825,7 @@ function Map({ t }) {
 
     if (!updatePatch) {
       setError(t.map.saveNeedsLocation)
+
       return
     }
 
@@ -1811,19 +1834,14 @@ function Map({ t }) {
 
     try {
       // 저장 버튼 후 현재 저장소 업데이트
-      const updatedRecord = await mapRepository.updateRecord(
-        editDraft.id,
-        updatePatch,
-      )
+      const updatedRecord = await mapRepository.updateRecord(editDraft.id, updatePatch)
 
       if (!updatedRecord) {
         throw new Error('Missing photo record.')
       }
 
       setRecords((currentRecords) =>
-        currentRecords.map((record) =>
-          record.id === updatedRecord.id ? updatedRecord : record,
-        ),
+        currentRecords.map((record) => (record.id === updatedRecord.id ? updatedRecord : record)),
       )
       setEditDraft(null)
       setActiveRecordId(updatedRecord.id)
@@ -1854,7 +1872,10 @@ function Map({ t }) {
   const handleChangeMobileMapView = (nextView) => {
     setHasMobileMapViewInteraction(true)
     setActiveMobileMapView(nextView)
-    if (nextView === 'map') setIsMapExpanded(true)
+
+    if (nextView === 'map') {
+      setIsMapExpanded(true)
+    }
   }
 
   const handleSelectRecordFromList = (recordId) => {
@@ -1875,6 +1896,7 @@ function Map({ t }) {
   const handleSelectMobileMapView = (nextView) => {
     if (nextView === 'map' && activeRecord) {
       handleShowActiveRecordOnMap()
+
       return
     }
 
@@ -1891,16 +1913,14 @@ function Map({ t }) {
     try {
       // 현재 저장소 삭제 반영
       await mapRepository.deleteRecord(recordId)
-      setRecords((currentRecords) =>
-        currentRecords.filter((record) => record.id !== recordId),
-      )
+      setRecords((currentRecords) => currentRecords.filter((record) => record.id !== recordId))
       setActiveRecordId((currentId) => (currentId === recordId ? '' : currentId))
-      setEditDraft((currentDraft) =>
-        currentDraft?.id === recordId ? null : currentDraft,
-      )
+      setEditDraft((currentDraft) => (currentDraft?.id === recordId ? null : currentDraft))
+
       if (activeRecordId === recordId) {
         handleChangeMobileMapView('list')
       }
+
       setViewportRequest(createViewportRequest('fit-all'))
       setStatusMessage(t.map.deleteComplete)
     } catch {
@@ -1925,7 +1945,10 @@ function Map({ t }) {
   }
 
   return (
-    <section className="module-panel map-module album-module" aria-labelledby="map-title">
+    <section
+      className="module-panel map-module album-module"
+      aria-labelledby="map-title"
+    >
       <div className="module-header">
         <div>
           <p className="module-label">{t.map.label}</p>
@@ -1935,14 +1958,25 @@ function Map({ t }) {
       </div>
 
       {/* 모드 전환 탭 */}
-      <MapModeTabs activeMode={activeMapMode} onChangeMode={setActiveMapMode} t={t} />
+      <MapModeTabs
+        activeMode={activeMapMode}
+        onChangeMode={setActiveMapMode}
+        t={t}
+      />
       <div className="album-map-toolbar">
-        <button className="map-secondary-button" type="button" aria-expanded={isMapExpanded}
-          aria-controls="album-map-panel" onClick={() => {
+        <button
+          className="map-secondary-button"
+          type="button"
+          aria-expanded={isMapExpanded}
+          aria-controls="album-map-panel"
+          onClick={() => {
             const expanded = !isMapExpanded
             setIsMapExpanded(expanded)
             handleChangeMobileMapView(expanded ? 'map' : 'list')
-          }}>{isMapExpanded ? t.map.collapseMap : t.map.expandMap}</button>
+          }}
+        >
+          {isMapExpanded ? t.map.collapseMap : t.map.expandMap}
+        </button>
         <small>{t.map.albumMapHint}</small>
       </div>
       {activeMapMode === 'explore' ? (
@@ -1955,22 +1989,34 @@ function Map({ t }) {
 
       {/* 공통 상태 메시지 */}
       {isLoading ? (
-        <div className="map-status" role="status">
+        <div
+          className="map-status"
+          role="status"
+        >
           {t.map.loadingRecords}
         </div>
       ) : null}
       {isReading ? (
-        <div className="map-status" role="status">
+        <div
+          className="map-status"
+          role="status"
+        >
           {t.map.reading}
         </div>
       ) : null}
       {statusMessage ? (
-        <div className="map-status" role="status">
+        <div
+          className="map-status"
+          role="status"
+        >
           {statusMessage}
         </div>
       ) : null}
       {error ? (
-        <div className="map-status is-error" role="alert">
+        <div
+          className="map-status is-error"
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
@@ -1983,252 +2029,257 @@ function Map({ t }) {
           data-mode={activeMapMode}
           data-has-selection={Boolean(activeRecord)}
         >
-        {/* 사진 목록과 지도를 같은 열에 묶어 상세 높이에 따른 빈 공간 방지 */}
-        <div className="album-primary-column">
-        <aside className="map-control-panel">
-          {/* 탐색 모드 */}
-          {activeMapMode === 'explore' ? (
-            <MapExplorePanel
-              activeRecordId={visibleActiveRecordId}
-              collections={collections}
-              filteredEmptyMessage={filteredEmptyMessage}
-              filteredRecords={filteredRecords}
-              mapSearchQuery={mapSearchQuery}
-              onSelectRecord={handleSelectRecordFromList}
-              onSetCollectionFilter={setSelectedCollectionFilter}
-              onSetLocationSourceFilter={setSelectedLocationSourceFilter}
-              onSetSearchQuery={setMapSearchQuery}
-              selectedCollectionFilter={selectedCollectionFilter}
-              selectedLocationSourceFilter={selectedLocationSourceFilter}
-              t={t}
-            />
-          ) : null}
+          {/* 사진 목록과 지도를 같은 열에 묶어 상세 높이에 따른 빈 공간 방지 */}
+          <div className="album-primary-column">
+            <aside className="map-control-panel">
+              {/* 탐색 모드 */}
+              {activeMapMode === 'explore' ? (
+                <MapExplorePanel
+                  activeRecordId={visibleActiveRecordId}
+                  collections={collections}
+                  filteredEmptyMessage={filteredEmptyMessage}
+                  filteredRecords={filteredRecords}
+                  mapSearchQuery={mapSearchQuery}
+                  onSelectRecord={handleSelectRecordFromList}
+                  onSetCollectionFilter={setSelectedCollectionFilter}
+                  onSetLocationSourceFilter={setSelectedLocationSourceFilter}
+                  onSetSearchQuery={setMapSearchQuery}
+                  selectedCollectionFilter={selectedCollectionFilter}
+                  selectedLocationSourceFilter={selectedLocationSourceFilter}
+                  t={t}
+                />
+              ) : null}
 
-          {/* 업로드 모드 */}
-          {activeMapMode === 'upload' ? (
-            <MapUploadPanel
-              bulkAssignedLocation={bulkAssignedLocation}
-              bulkSaveReport={bulkSaveReport}
-              bulkUpload={bulkUpload}
-              collections={collections}
-              draft={draft}
-              isAddingPhoto={isAddingPhoto}
-              isSaving={isSaving}
-              onCancelBulkAnalysis={handleCancelBulkAnalysis}
-              onChangeBulkCollection={handleChangeBulkCollection}
-              onChangeDraft={handleChangeDraft}
-              onClearMissingLocationSelection={handleClearMissingLocationSelection}
-              onOpenPhoto={setPhotoViewer}
-              onPhotoChange={handlePhotoChange}
-              onResetBulkUpload={resetBulkUpload}
-              onSaveBulkLocatedPhotos={handleSaveBulkLocatedPhotos}
-              onSaveDraft={handleSaveDraft}
-              onSelectAllBulkLocationTargets={handleSelectAllBulkLocationTargets}
-              onSelectBulkPlace={handleSelectBulkPlace}
-              onSelectPlace={handleSelectPlace}
-              onToggleAddPhoto={handleToggleAddPhoto}
-              onToggleBulkLocationTarget={handleToggleBulkLocationTarget}
-              photoInputRef={photoInputRef}
-              selectedMissingLocationItemIds={selectedMissingLocationItemIds}
-              t={t}
-            />
-          ) : null}
+              {/* 업로드 모드 */}
+              {activeMapMode === 'upload' ? (
+                <MapUploadPanel
+                  bulkAssignedLocation={bulkAssignedLocation}
+                  bulkSaveReport={bulkSaveReport}
+                  bulkUpload={bulkUpload}
+                  collections={collections}
+                  draft={draft}
+                  isAddingPhoto={isAddingPhoto}
+                  isSaving={isSaving}
+                  onCancelBulkAnalysis={handleCancelBulkAnalysis}
+                  onChangeBulkCollection={handleChangeBulkCollection}
+                  onChangeDraft={handleChangeDraft}
+                  onClearMissingLocationSelection={handleClearMissingLocationSelection}
+                  onOpenPhoto={setPhotoViewer}
+                  onPhotoChange={handlePhotoChange}
+                  onResetBulkUpload={resetBulkUpload}
+                  onSaveBulkLocatedPhotos={handleSaveBulkLocatedPhotos}
+                  onSaveDraft={handleSaveDraft}
+                  onSelectAllBulkLocationTargets={handleSelectAllBulkLocationTargets}
+                  onSelectBulkPlace={handleSelectBulkPlace}
+                  onSelectPlace={handleSelectPlace}
+                  onToggleAddPhoto={handleToggleAddPhoto}
+                  onToggleBulkLocationTarget={handleToggleBulkLocationTarget}
+                  photoInputRef={photoInputRef}
+                  selectedMissingLocationItemIds={selectedMissingLocationItemIds}
+                  t={t}
+                />
+              ) : null}
 
-          {/* 컬렉션 관리 모드 */}
-          {activeMapMode === 'collections' ? (
-            <MapCollectionManagerPanel
-              collectionDraft={collectionDraft}
-              collections={collections}
-              editingCollectionId={editingCollectionId}
-              getCollectionRecordCount={getCollectionRecordCount}
-              onCancelCollectionEdit={resetCollectionDraft}
-              onChangeCollectionDraft={handleChangeCollectionDraft}
-              onDeleteCollection={handleDeleteCollection}
-              onSaveCollection={handleSaveCollection}
-              onStartCollectionEdit={handleStartCollectionEdit}
-              t={t}
-            />
-          ) : null}
-        </aside>
+              {/* 컬렉션 관리 모드 */}
+              {activeMapMode === 'collections' ? (
+                <MapCollectionManagerPanel
+                  collectionDraft={collectionDraft}
+                  collections={collections}
+                  editingCollectionId={editingCollectionId}
+                  getCollectionRecordCount={getCollectionRecordCount}
+                  onCancelCollectionEdit={resetCollectionDraft}
+                  onChangeCollectionDraft={handleChangeCollectionDraft}
+                  onDeleteCollection={handleDeleteCollection}
+                  onSaveCollection={handleSaveCollection}
+                  onStartCollectionEdit={handleStartCollectionEdit}
+                  t={t}
+                />
+              ) : null}
+            </aside>
 
-        <section
-          id="album-map-panel"
-          hidden={!isMapExpanded}
-          className={`map-view-panel ${
-            activeMapMode === 'explore' && activeRecord && !editDraft
-              ? 'has-mobile-preview'
-              : ''
-          }`}
-          aria-label={t.map.mapLabel}
-        >
-          {/* 전체 위치 보기 */}
-          {filteredRecords.length > 0 && !draft && !editDraft ? (
-            <button
-              className="map-fit-all-button"
-              type="button"
-              onClick={handleFitAllMarkers}
-            >
-              {t.map.fitAllMarkers}
-            </button>
-          ) : null}
-          {isMapExpanded && <MapContainer
-            center={DEFAULT_CENTER}
-            className="photo-map"
-            scrollWheelZoom
-            zoom={DEFAULT_ZOOM}
-          >
-            <TileLayer attribution={OSM_ATTRIBUTION} url={OSM_TILE_URL} />
-            <MapViewportController
-              layoutKey={mobileMapView}
-              request={viewportRequest}
-              records={filteredRecords}
-              shouldFitBounds={shouldFitBounds}
-              target={focusTarget}
-            />
-            <MapResizeController watchValue={`${activeMapMode}-${mobileMapView}-${Boolean(activeRecord)}`} />
-            <ManualLocationPicker
-              disabled={!canPickLocation}
-              onPickLocation={handlePickLocation}
-            />
-
-            {filteredRecords.map((record) => (
-              <PhotoRecordMarker
-                icon={markerIcon}
-                isActive={visibleActiveRecordId === record.id}
-                key={record.id}
-                onSelectRecord={handleSelectMarker}
-                record={record}
-                t={t}
-              />
-            ))}
-
-            {draft?.status === 'located' ? (
-              <Marker
-                icon={draftMarkerIcon}
-                position={[draft.latitude, draft.longitude]}
-              >
-                <Popup>
-                  <div className="map-popup">
-                    <strong>{draft.title || draft.originalFileName}</strong>
-                    <span>
-                      {t.map.locationSource}:{' '}
-                      {getLocationSourceLabel(draft.locationSource, t)}
-                    </span>
-                    <span>
-                      {draft.latitude.toFixed(6)}, {draft.longitude.toFixed(6)}
-                    </span>
-                  </div>
-                </Popup>
-              </Marker>
-            ) : null}
-
-            {editDraft?.status === 'located' ? (
-              <Marker
-                icon={draftMarkerIcon}
-                position={[editDraft.latitude, editDraft.longitude]}
-              >
-                <Popup>
-                  <div className="map-popup">
-                    <strong>{editDraft.title || editDraft.originalFileName}</strong>
-                    <span>
-                      {t.map.locationSource}:{' '}
-                      {getLocationSourceLabel(editDraft.locationSource, t)}
-                    </span>
-                    <span>
-                      {editDraft.latitude.toFixed(6)},{' '}
-                      {editDraft.longitude.toFixed(6)}
-                    </span>
-                  </div>
-                </Popup>
-              </Marker>
-            ) : null}
-
-            {hasBulkAssignedLocation ? (
-              // bulk 임시 위치
-              <Marker
-                icon={bulkMarkerIcon}
-                position={[
-                  Number(bulkAssignedLocation.latitude),
-                  Number(bulkAssignedLocation.longitude),
-                ]}
-              >
-                <Popup>
-                  <div className="map-popup">
-                    <strong>{t.map.bulkPendingLocation}</strong>
-                    <span>
-                      {t.map.bulkAssignedPhotoCount(
-                        bulkAssignedLocation.appliedCount ?? 0,
-                      )}
-                    </span>
-                    <span>
-                      {Number(bulkAssignedLocation.latitude).toFixed(6)},{' '}
-                      {Number(bulkAssignedLocation.longitude).toFixed(6)}
-                    </span>
-                  </div>
-                </Popup>
-              </Marker>
-            ) : null}
-          </MapContainer>}
-          {activeMapMode === 'explore' && !editDraft ? (
-            <MobileMapPreviewCard
-              collectionName={
-                activeRecord
-                  ? getCollectionName(activeRecord.collectionId, collections, t)
+            <section
+              id="album-map-panel"
+              hidden={!isMapExpanded}
+              className={`map-view-panel ${
+                activeMapMode === 'explore' && activeRecord && !editDraft
+                  ? 'has-mobile-preview'
                   : ''
-              }
-              onOpenDetail={() => handleChangeMobileMapView('detail')}
-              record={activeRecord}
-              t={t}
-            />
-          ) : null}
-          {activeMapMode === 'explore' &&
-          filteredRecords.length === 0 &&
-          !activeRecord &&
-          !draft &&
-          !editDraft ? (
-            <MobileMapEmptyCard
-              onOpenList={() => handleChangeMobileMapView('list')}
-              t={t}
-            />
-          ) : null}
-        </section>
+              }`}
+              aria-label={t.map.mapLabel}
+            >
+              {/* 전체 위치 보기 */}
+              {filteredRecords.length > 0 && !draft && !editDraft ? (
+                <button
+                  className="map-fit-all-button"
+                  type="button"
+                  onClick={handleFitAllMarkers}
+                >
+                  {t.map.fitAllMarkers}
+                </button>
+              ) : null}
+              {isMapExpanded && (
+                <MapContainer
+                  center={DEFAULT_CENTER}
+                  className="photo-map"
+                  scrollWheelZoom
+                  zoom={DEFAULT_ZOOM}
+                >
+                  <TileLayer
+                    attribution={OSM_ATTRIBUTION}
+                    url={OSM_TILE_URL}
+                  />
+                  <MapViewportController
+                    layoutKey={mobileMapView}
+                    request={viewportRequest}
+                    records={filteredRecords}
+                    shouldFitBounds={shouldFitBounds}
+                    target={focusTarget}
+                  />
+                  <MapResizeController
+                    watchValue={`${activeMapMode}-${mobileMapView}-${Boolean(activeRecord)}`}
+                  />
+                  <ManualLocationPicker
+                    disabled={!canPickLocation}
+                    onPickLocation={handlePickLocation}
+                  />
 
-        {/* 상세 패널 */}
-        </div>
-        {activeMapMode === 'explore' ? (
-          <aside className="map-detail-column">
-            {editDraft ? (
-              <div className="map-status" role="status">
-                {t.map.clickToSetLocation}
-              </div>
-            ) : null}
-            {editDraft && activeRecord ? (
-              <PhotoEditPanel
-                collections={collections}
-                editDraft={editDraft}
-                isUpdating={isUpdating}
-                language={t.map.searchLanguage}
-                onCancelEdit={handleCancelEdit}
-                onChangeEditDraft={handleChangeEditDraft}
-                onOpenPhoto={setPhotoViewer}
-                onSaveEdit={handleSaveEdit}
-                onSelectPlace={handleSelectPlace}
-                record={activeRecord}
-                t={t}
-              />
-            ) : (
-              <PhotoRecordDetail
-                collections={collections}
-                filterSummary={filterSummary}
-                onDeleteRecord={handleDeleteRecord}
-                onOpenPhoto={setPhotoViewer}
-                onStartEdit={handleStartEdit}
-                record={activeRecord}
-                t={t}
-              />
-            )}
-          </aside>
-        ) : null}
+                  {filteredRecords.map((record) => (
+                    <PhotoRecordMarker
+                      icon={markerIcon}
+                      isActive={visibleActiveRecordId === record.id}
+                      key={record.id}
+                      onSelectRecord={handleSelectMarker}
+                      record={record}
+                      t={t}
+                    />
+                  ))}
+
+                  {draft?.status === 'located' ? (
+                    <Marker
+                      icon={draftMarkerIcon}
+                      position={[draft.latitude, draft.longitude]}
+                    >
+                      <Popup>
+                        <div className="map-popup">
+                          <strong>{draft.title || draft.originalFileName}</strong>
+                          <span>
+                            {t.map.locationSource}:{' '}
+                            {getLocationSourceLabel(draft.locationSource, t)}
+                          </span>
+                          <span>
+                            {draft.latitude.toFixed(6)}, {draft.longitude.toFixed(6)}
+                          </span>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ) : null}
+
+                  {editDraft?.status === 'located' ? (
+                    <Marker
+                      icon={draftMarkerIcon}
+                      position={[editDraft.latitude, editDraft.longitude]}
+                    >
+                      <Popup>
+                        <div className="map-popup">
+                          <strong>{editDraft.title || editDraft.originalFileName}</strong>
+                          <span>
+                            {t.map.locationSource}:{' '}
+                            {getLocationSourceLabel(editDraft.locationSource, t)}
+                          </span>
+                          <span>
+                            {editDraft.latitude.toFixed(6)}, {editDraft.longitude.toFixed(6)}
+                          </span>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ) : null}
+
+                  {hasBulkAssignedLocation ? (
+                    // bulk 임시 위치
+                    <Marker
+                      icon={bulkMarkerIcon}
+                      position={[
+                        Number(bulkAssignedLocation.latitude),
+                        Number(bulkAssignedLocation.longitude),
+                      ]}
+                    >
+                      <Popup>
+                        <div className="map-popup">
+                          <strong>{t.map.bulkPendingLocation}</strong>
+                          <span>
+                            {t.map.bulkAssignedPhotoCount(bulkAssignedLocation.appliedCount ?? 0)}
+                          </span>
+                          <span>
+                            {Number(bulkAssignedLocation.latitude).toFixed(6)},{' '}
+                            {Number(bulkAssignedLocation.longitude).toFixed(6)}
+                          </span>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ) : null}
+                </MapContainer>
+              )}
+              {activeMapMode === 'explore' && !editDraft ? (
+                <MobileMapPreviewCard
+                  collectionName={
+                    activeRecord ? getCollectionName(activeRecord.collectionId, collections, t) : ''
+                  }
+                  onOpenDetail={() => handleChangeMobileMapView('detail')}
+                  record={activeRecord}
+                  t={t}
+                />
+              ) : null}
+              {activeMapMode === 'explore' &&
+              filteredRecords.length === 0 &&
+              !activeRecord &&
+              !draft &&
+              !editDraft ? (
+                <MobileMapEmptyCard
+                  onOpenList={() => handleChangeMobileMapView('list')}
+                  t={t}
+                />
+              ) : null}
+            </section>
+
+            {/* 상세 패널 */}
+          </div>
+          {activeMapMode === 'explore' ? (
+            <aside className="map-detail-column">
+              {editDraft ? (
+                <div
+                  className="map-status"
+                  role="status"
+                >
+                  {t.map.clickToSetLocation}
+                </div>
+              ) : null}
+              {editDraft && activeRecord ? (
+                <PhotoEditPanel
+                  collections={collections}
+                  editDraft={editDraft}
+                  isUpdating={isUpdating}
+                  language={t.map.searchLanguage}
+                  onCancelEdit={handleCancelEdit}
+                  onChangeEditDraft={handleChangeEditDraft}
+                  onOpenPhoto={setPhotoViewer}
+                  onSaveEdit={handleSaveEdit}
+                  onSelectPlace={handleSelectPlace}
+                  record={activeRecord}
+                  t={t}
+                />
+              ) : (
+                <PhotoRecordDetail
+                  collections={collections}
+                  filterSummary={filterSummary}
+                  onDeleteRecord={handleDeleteRecord}
+                  onOpenPhoto={setPhotoViewer}
+                  onStartEdit={handleStartEdit}
+                  record={activeRecord}
+                  t={t}
+                />
+              )}
+            </aside>
+          ) : null}
         </div>
       </div>
       <PhotoLightbox

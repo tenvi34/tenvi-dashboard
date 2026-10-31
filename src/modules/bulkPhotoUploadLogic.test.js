@@ -120,9 +120,7 @@ describe('bulkPhotoUploadLogic', () => {
     )
 
     expect(inputs).toHaveLength(2)
-    expect(inputs.every((input) => input.collectionId === 'fukuoka-2026')).toBe(
-      true,
-    )
+    expect(inputs.every((input) => input.collectionId === 'fukuoka-2026')).toBe(true)
   })
 
   it('summarizes partial save failures while keeping successful records', () => {
@@ -140,12 +138,11 @@ describe('bulkPhotoUploadLogic', () => {
   })
 
   it('toggles missing-location photo selection', () => {
-    expect(toggleBulkMissingLocationSelection([], 'missing-1')).toEqual([
-      'missing-1',
+    expect(toggleBulkMissingLocationSelection([], 'missing-1')).toEqual(['missing-1'])
+
+    expect(toggleBulkMissingLocationSelection(['missing-1', 'missing-2'], 'missing-1')).toEqual([
+      'missing-2',
     ])
-    expect(
-      toggleBulkMissingLocationSelection(['missing-1', 'missing-2'], 'missing-1'),
-    ).toEqual(['missing-2'])
   })
 
   it('selects all original missing-location items and clears selection', () => {
@@ -164,10 +161,7 @@ describe('bulkPhotoUploadLogic', () => {
       { id: 'failed', originalStatus: 'missing-location', status: 'failed' },
     ]
 
-    expect(selectAllBulkMissingLocationItems(items)).toEqual([
-      'missing',
-      'assigned',
-    ])
+    expect(selectAllBulkMissingLocationItems(items)).toEqual(['missing', 'assigned'])
     expect(clearBulkMissingLocationSelection()).toEqual([])
   })
 
@@ -182,10 +176,7 @@ describe('bulkPhotoUploadLogic', () => {
       { id: 'failed', originalStatus: 'missing-location', status: 'failed' },
     ]
 
-    expect(getBulkLocationAssignableItems(items).map((item) => item.id)).toEqual([
-      'gps',
-      'missing',
-    ])
+    expect(getBulkLocationAssignableItems(items).map((item) => item.id)).toEqual(['gps', 'missing'])
     expect(selectAllBulkLocationAssignableItems(items)).toEqual(['gps', 'missing'])
   })
 
@@ -245,6 +236,7 @@ describe('bulkPhotoUploadLogic', () => {
       longitude: 139.7671,
       status: 'located',
     })
+
     expect(getBulkPhotoSaveCandidates([assigned, missing]).map((item) => item.id)).toEqual([
       'assigned',
     ])

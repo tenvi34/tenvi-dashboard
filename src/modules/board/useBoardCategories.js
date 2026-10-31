@@ -9,10 +9,7 @@ import {
 function useBoardCategories() {
   const [storageMode] = useState(() => readBoardStorageMode())
   const repository = useMemo(
-    () =>
-      storageMode === 'remote'
-        ? remoteBoardCategoryRepository
-        : localBoardCategoryRepository,
+    () => (storageMode === 'remote' ? remoteBoardCategoryRepository : localBoardCategoryRepository),
     [storageMode],
   )
   // Board 화면 전체에서 공유하는 카테고리 기준 데이터
@@ -54,11 +51,11 @@ function useBoardCategories() {
     setCategoriesState((currentCategories) => {
       const normalizedCategories = normalizeBoardCategories(nextCategories)
 
-      Promise.resolve(
-        repository.replaceCategories(normalizedCategories, currentCategories),
-      ).catch(() => {
-        // REMOTE 실패가 Board 작성/조회 흐름을 막지 않도록 유지
-      })
+      Promise.resolve(repository.replaceCategories(normalizedCategories, currentCategories)).catch(
+        () => {
+          // REMOTE 실패가 Board 작성/조회 흐름을 막지 않도록 유지
+        },
+      )
 
       return normalizedCategories
     })

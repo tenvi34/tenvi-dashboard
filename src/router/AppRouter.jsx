@@ -18,19 +18,68 @@ function AppRouter({ appContext }) {
   return (
     <Routes>
       <Route element={<AppLayout appContext={appContext} />}>
-        <Route path="/" element={<Navigate to={defaultPath} replace />} />
-        <Route path="/dashboard" element={<DashboardView />} />
-        <Route path="/board" element={<BoardListView />} />
-        <Route path="/board/posts/new" element={<BoardWriteView />} />
-        <Route path="/board/posts/:postId" element={<BoardDetailView />} />
-        <Route path="/board/posts/:postId/edit" element={<BoardEditView />} />
-        <Route path="/calendar" element={<CalendarView />} />
-        <Route path="/map" element={<MapView />} />
-        <Route path="/travel" element={<TravelView />} />
-        <Route path="/travel/:tripId" element={<TravelView />} />
-        <Route path="/settings" element={<SettingsView />} />
-        <Route path="/settings/storage" element={<StorageSettingsView />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to={defaultPath}
+              replace
+            />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={<DashboardView />}
+        />
+        <Route
+          path="/board"
+          element={<BoardListView />}
+        />
+        <Route
+          path="/board/posts/new"
+          element={<BoardWriteView />}
+        />
+        <Route
+          path="/board/posts/:postId"
+          element={<BoardDetailView />}
+        />
+        <Route
+          path="/board/posts/:postId/edit"
+          element={<BoardEditView />}
+        />
+        <Route
+          path="/calendar"
+          element={<CalendarView />}
+        />
+        <Route
+          path="/map"
+          element={<MapView />}
+        />
+        <Route
+          path="/travel"
+          element={<TravelView />}
+        />
+        <Route
+          path="/travel/:tripId"
+          element={<TravelView />}
+        />
+        <Route
+          path="/settings"
+          element={<SettingsView />}
+        />
+        <Route
+          path="/settings/storage"
+          element={<StorageSettingsView />}
+        />
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          }
+        />
       </Route>
     </Routes>
   )

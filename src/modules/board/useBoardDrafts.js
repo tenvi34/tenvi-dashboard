@@ -1,10 +1,6 @@
 import { useState } from 'react'
 import { STORAGE_KEYS } from '../../constants/storageKeys.js'
-import {
-  createBoardDraft,
-  getBoardPostTextContent,
-  parseBoardDraft,
-} from '../boardLogic.js'
+import { createBoardDraft, getBoardPostTextContent, parseBoardDraft } from '../boardLogic.js'
 
 const DRAFT_STORAGE_KEY = STORAGE_KEYS.boardDraft
 const DRAFTS_STORAGE_KEY = STORAGE_KEYS.boardDrafts
@@ -16,7 +12,12 @@ export const getDraftPreviewText = (draft) => {
   const textContent = getBoardPostTextContent(draft?.blocks)
 
   if (textContent) {
-    return textContent.split('\n').find((line) => line.trim())?.trim() ?? ''
+    return (
+      textContent
+        .split('\n')
+        .find((line) => line.trim())
+        ?.trim() ?? ''
+    )
   }
 
   return ''
@@ -32,7 +33,9 @@ const getBoardDraftTime = (draft) => {
 const limitBoardDrafts = (drafts) =>
   drafts
     .filter(Boolean)
-    .sort((firstDraft, secondDraft) => getBoardDraftTime(secondDraft) - getBoardDraftTime(firstDraft))
+    .sort(
+      (firstDraft, secondDraft) => getBoardDraftTime(secondDraft) - getBoardDraftTime(firstDraft),
+    )
     .slice(0, MAX_BOARD_DRAFTS)
 
 // draft 목록 식별자 생성
@@ -168,10 +171,7 @@ function useBoardDrafts() {
   const saveCurrentDraft = (input) => {
     const nextDraftId = activeDraftId || createBoardDraftId()
     const nextDraft = saveBoardDraft(input, nextDraftId)
-    const nextDrafts = [
-      nextDraft,
-      ...draftList.filter((draft) => draft.id !== nextDraft.id),
-    ]
+    const nextDrafts = [nextDraft, ...draftList.filter((draft) => draft.id !== nextDraft.id)]
     const limitedDrafts = saveBoardDrafts(nextDrafts)
 
     // 저장한 draft를 즉시 active 상태로 전환
